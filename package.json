@@ -1,0 +1,17 @@
+{
+  "name": "anisuggest",
+  "version": "1.0.0",
+  "description": "A bot that goes through your anilist and recommends you anime and manga.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "anilist",
+    "manga",
+    "anime",
+    "suggest"
+  ],
+  "author": "Tibix & Sayykii",
+  "license": "MIT"
+}
