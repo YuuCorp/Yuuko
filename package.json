@@ -4,6 +4,7 @@
   "description": "A bot that goes through your anilist and recommends you anime and manga.",
   "main": "app.js",
   "scripts": {
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -13,5 +14,9 @@
     "suggest"
   ],
   "author": "Tibix & Sayykii",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@discordjs/builders": "^0.5.0",
+    "discord.js": "^13.0.1"
+  }
 }
