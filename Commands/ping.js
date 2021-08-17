@@ -5,6 +5,6 @@ module.exports = new Command({
     description: "Shows the ping of the bot!",
 
     async run(message, args, client) {
-        message.reply(`Ping: ${client.ws.ping} ms.`);
+        message.channel.send(`Ping: ${client.ws.ping} ms.`);
     }
 })

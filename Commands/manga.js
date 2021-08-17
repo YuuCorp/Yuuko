@@ -40,7 +40,8 @@ module.exports = new Command({
                 let data = response.data.data.Media;
                 console.log(data.description);
                 if (data) {
-                    let description = data.description.replace(/<br><br>/g, "\n").replace(/<br>/g, "\n").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ") || "No description available.";
+                    // Fix the description by replacing and converting HTML tags
+                    let description = data.description.replace(/<br><br>/g, "\n").replace(/<br>/g, "\n").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ")/*.replace(/\n\n/g, "\n")*/ || "No description available.";
                     const titleEmbed = new Discord.MessageEmbed()
                         .setThumbnail(data.coverImage.large)
                         .setTitle(data.title.english || data.title.romaji || data.title.native)

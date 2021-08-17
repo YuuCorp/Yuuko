@@ -38,8 +38,8 @@ module.exports = new Command({
                 //console.log(response.data.data.Media);
                 let data = response.data.data.Media;
                 if (data) {
-                    let description = data.description.replace(/<br><br>/g, "\n").replace(/<br>/g, "\n").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ") || "No description available.";
-
+                    // Fix the description by replacing and converting HTML tags, and replacing duplicate newlines
+                    let description = data.description.replace(/<br><br>/g, "\n").replace(/<br>/g, "\n").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/\n\n/g, "\n") || "No description available.";
                     const titleEmbed = new Discord.MessageEmbed()
                         .setThumbnail(data.coverImage.large)
                         .setTitle(data.title.english)
@@ -57,7 +57,7 @@ module.exports = new Command({
                             },
                             {
                                 name: "Mean Score",
-                                value: data.meanScore.toString() || "Unknown",
+                                value: (data.meanScore.toString() + "%") || "Unknown",
                                 inline: true
                             }
                         )

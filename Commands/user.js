@@ -6,7 +6,7 @@ const Discord = require("discord.js"),
 
 module.exports = new Command({
     name: "user",
-    description: "Gets an anime based on a search result.",
+    description: "Searches for an AniList user and displays information about it.",
 
     async run(message, args, run) {
         let query = 
