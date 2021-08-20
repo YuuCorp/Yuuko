@@ -2,12 +2,14 @@ const Discord = require("discord.js"),
     Command = require("../Structures/Command.js"),
     axios = require("axios"),
     EmbedError = require("../Utils/EmbedError.js"),
-    Footer = require("../Utils/Footer.js");
+    Footer = require("../Utils/Footer.js"),
+    CommandCategories = require('../Utils/CommandCategories');
 
 
 module.exports = new Command({
     name: "manga",
     description: "Gets a manga based on a search result.",
+    type: CommandCategories.AniList,
 
     async run(message, args, run) {
         let query = 

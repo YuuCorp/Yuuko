@@ -2,11 +2,13 @@ const Discord = require("discord.js"),
     Command = require("../Structures/Command.js"),
     axios = require("axios"),
     EmbedError = require("../Utils/EmbedError.js"),
-    Footer = require("../Utils/Footer.js");
+    Footer = require("../Utils/Footer.js"),
+    CommandCategories = require('../Utils/CommandCategories');
 
 module.exports = new Command({
     name: "user",
     description: "Searches for an AniList user and displays information about it.",
+    type: CommandCategories.AniList,
 
     async run(message, args, run) {
         let query = 
