@@ -14,7 +14,7 @@ class Client extends Discord.Client {
          */
         this.commands = new Discord.Collection();
 
-        this.prefix = config.prefix;
+        this.prefix = process.env.PREFIX || config.prefix;
     }
     start(token) {
         fs.readdirSync("./Commands")
