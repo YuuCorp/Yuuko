@@ -75,7 +75,7 @@ module.exports = new Command({
 
                     const text = data.name.toUpperCase();
                     const textWidth = ctx.measureText(text).width;
-                    const watched = data.statistics.anime.count.toString();
+                    const watched = `Watched: ${data.statistics.anime.count.toString()}`;
                     const watchedWidth = ctx.measureText(watched).width;
 
                     ctx.fillStyle = "rgba(255, 255, 255, 0.3);";

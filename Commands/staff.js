@@ -52,7 +52,7 @@ module.exports = new Command({
                         .setDescription(description || "No description available.")
                         .addFields(
                             //age
-                            { name: "Staff Info: \n", value: `**Age**: ${data.age || "No age specified"} **Gender**: ${data.gender || "No gender specified."}\n **Home Town**: ${data.homeTown || 'No home town specified.'}` }
+                            { name: "Staff Info: \n", value: `**Age**: ${data.age || "No age specified"} **Gender**: ${data.gender || "No gender specified."}\n **Home Town**: ${data.homeTown || "No home town specified."}` }
                             //gender
                             //{name: "Gender", value: `${data.gender || 'No gender specified'}`},
                             //Date of birth

@@ -19,6 +19,7 @@
     "@discordjs/builders": "^0.5.0",
     "axios": "^0.21.1",
     "canvas": "^2.8.0",
-    "discord.js": "^13.0.1"
+    "discord.js": "^13.0.1",
+    "dotenv-flow": "^3.2.0"
   }
 }

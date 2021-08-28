@@ -10,7 +10,7 @@ module.exports = new Command({
     description: "Gets an anime based on a search result.",
     type: CommandCategories.AniList,
 
-    async run(message, args, run) {
+    async run(message, args, run, hook = false, title = null) {
         let query = `query ($query: String) { # Define which variables will be used in the query (id)
                 Media (search: $query, type: ANIME) { # Insert our variables into the query arguments (id) (type: ANIME is hard-coded in the query)
                     id
@@ -30,17 +30,17 @@ module.exports = new Command({
                 }
             }`;
 
-        let vars = { query: args.slice(1).join(" ") };
+        let vars = { query: !hook ? args.slice(1).join(" ") : title };
         let url = "https://graphql.anilist.co";
 
-        // Make the HTTP Api request
+        //^ Make the HTTP Api request
         axios
             .post(url, { query: query, variables: vars })
             .then((response) => {
                 //console.log(response.data.data.Media);
                 let data = response.data.data.Media;
                 if (data) {
-                    // Fix the description by replacing and converting HTML tags, and replacing duplicate newlines
+                    //^ Fix the description by replacing and converting HTML tags, and replacing duplicate newlines
                     let description =
                         data.description
                             .replace(/<br><br>/g, "\n")
@@ -52,7 +52,7 @@ module.exports = new Command({
                         .setThumbnail(data.coverImage.large)
                         .setTitle(data.title.english)
                         .addFields(
-                            // add fields genres, format and mean score
+                            //^ Add fields genres, format and mean score
                             {
                                 name: "Genres",
                                 value: data.genres.join(", ") || "Unknown",
@@ -80,7 +80,7 @@ module.exports = new Command({
                 }
             })
             .catch((error) => {
-                // log axios request status code and error
+                //^ log axios request status code and error
                 if (error.response) {
                     console.log(error.response.data.errors);
                 } else {
