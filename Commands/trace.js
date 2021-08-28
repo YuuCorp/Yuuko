@@ -24,8 +24,8 @@ module.exports = new Command({
                         image: message.attachments.first().url,
                         fields: [
                             {name: "\u200B", value: "\u200B"},
-                            {name: "In Episode", value: `${match.episode} (${HumanizeDuration(match.from * 1000, { round: true }).toString()} in)`, inline: true},
-                            {name: "Similarity", value: match.similarity.toString(), inline: true},
+                            {name: "In Episode", value: `${match.episode || "Full"} (${HumanizeDuration(match.from * 1000, { round: true }).toString()} in)`, inline: true},
+                            {name: "Similarity", value: match.similarity.toFixed(2).toString(), inline: true},
                             {name: "Video", value: `[Link](${match.video})`, inline: true}
                         ]
                     }

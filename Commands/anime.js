@@ -41,7 +41,7 @@ module.exports = new Command({
         } else if (hook & hookdata?.id) {
             vars.query = hookdata.id;
         } else {
-            throw "AnimeCmd was hooked, yet no title or ID was provided in hookdata."
+            return message.channel.send({embeds: [EmbedError(`AnimeCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)]});
         }
 
         if (hookdata?.id) {
