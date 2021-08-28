@@ -11,8 +11,8 @@ module.exports = new Command({
     type: CommandCategories.AniList,
 
     async run(message, args, run, hook = false, title = null) {
-        let query = `query ($query: String) { # Define which variables will be used in the query (id)
-                Media (search: $query, type: MANGA) { # Insert our variables into the query arguments (id) (type: ANIME is hard-coded in the query)
+        let query = `query ($query: String) { 
+                Media (search: $query, type: MANGA) {
                     id
                     description
                     coverImage {
@@ -27,6 +27,7 @@ module.exports = new Command({
                     format
                     genres
                     meanScore
+                    source
                 }
             }`;
 
@@ -39,9 +40,9 @@ module.exports = new Command({
             .then((response) => {
                 //console.log(response.data.data.Media);
                 let data = response.data.data.Media;
-                console.log(data.description);
                 if (data) {
                     // Fix the description by replacing and converting HTML tags
+                    console.log(data.source)
                     let description =
                         data.description
                             .replace(/<br><br>/g, "\n")
@@ -54,8 +55,8 @@ module.exports = new Command({
                         .addFields(
                             // add fields genres, format and mean score
                             {
-                                name: "Genres",
-                                value: data.genres.join(", ") || "N/A",
+                                name: "Source",
+                                value: data.source || "N/A",
                                 inline: true,
                             },
                             {
@@ -67,7 +68,13 @@ module.exports = new Command({
                                 name: "Mean Score",
                                 value: data.meanScore.toString() || "N/A",
                                 inline: true,
-                            }
+                            },
+                            {
+
+                                name: "Genres",
+                                value: '``' +`${data.genres.join(", ") || "N/A"}` + '``',
+                                inline: true,
+                            },
                         )
                         .setDescription(description || "No description available.")
                         .setURL("https://anilist.co/anime/" + data.id)

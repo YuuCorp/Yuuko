@@ -19,24 +19,24 @@ module.exports = new Command({
                     id
                     name
                     avatar {
-                      large
-                      medium
+                        large
+                        medium
                     }
                     bannerImage
                     siteUrl
                     createdAt
                     statistics {
-                        anime {
-                          count
-                          meanScore
+                            anime {
+                                count
+                                meanScore
+                            }
+                            manga {
+                                count
+                                meanScore
+                            }
                         }
-                        manga {
-                          count
-                          meanScore
-                        }
-                      }
                     }
-              }`;
+                }`;
 
         let vars = { username: args.slice(1).join(" ") };
         let url = "https://graphql.anilist.co";
@@ -68,6 +68,7 @@ module.exports = new Command({
 
                     //^ Show the Profile Picture and Background images
                     //TODO Maybe people could select a custom background
+                    ctx.textAlign = "center"
                     ctx.drawImage(bg, 0, 0);
                     ctx.filter = "none";
                     ctx.drawImage(pfp, 50, 50);
