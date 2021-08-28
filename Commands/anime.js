@@ -10,7 +10,7 @@ module.exports = new Command({
     description: "Gets an anime based on a search result.",
     type: CommandCategories.AniList,
 
-    async run(message, args, run, hook = false, title = null) {
+    async run(message, args, run, hook = false, hookdata = null) {
         let query = `query ($query: String) { # Define which variables will be used in the query (id)
                 Media (search: $query, type: ANIME) { # Insert our variables into the query arguments (id) (type: ANIME is hard-coded in the query)
                     id
@@ -30,7 +30,25 @@ module.exports = new Command({
                 }
             }`;
 
-        let vars = { query: !hook ? args.slice(1).join(" ") : title };
+        let vars = { };
+        if (!hook) {
+            if (args.slice(1).join(" ").length < 3) {
+                return message.channel.send({embeds: [EmbedError(`Please enter a search query of at least 3 characters.`, null, false)]});
+            }
+            vars.query = args.slice(1).join(" ");
+        } else if (hook && hookdata?.title) {
+            vars.query = hookdata.title;
+        } else if (hook & hookdata?.id) {
+            vars.query = hookdata.id;
+        } else {
+            throw "AnimeCmd was hooked, yet no title or ID was provided in hookdata."
+        }
+
+        if (hookdata?.id) {
+            query = query.replace("$query: String", "$query: Int");
+            query = query.replace("search:", "id:");
+        }
+
         let url = "https://graphql.anilist.co";
 
         //^ Make the HTTP Api request
@@ -73,7 +91,17 @@ module.exports = new Command({
                         .setURL("https://anilist.co/anime/" + data.id)
                         .setColor("0x00ff00")
                         .setFooter(Footer(response));
-                    //data.description.split("<br>").forEach(line => titleEmbed.addField(line, "", true))
+                    
+                    if (hookdata?.image) {
+                        titleEmbed.setImage(hookdata.image);
+                    }
+
+                    if (hookdata?.fields) {
+                        for (const field of hookdata.fields) {
+                            titleEmbed.addField(field.name, field.value, field.inline || false)
+                        }
+                    }
+
                     message.channel.send({ embeds: [titleEmbed] });
                 } else {
                     message.channel.send("Could not find any data.");

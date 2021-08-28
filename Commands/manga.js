@@ -80,7 +80,6 @@ module.exports = new Command({
                         .setURL("https://anilist.co/anime/" + data.id)
                         .setColor("0x00ff00")
                         .setFooter(Footer(response));
-                    //data.description.split("<br>").forEach(line => titleEmbed.addField(line, "", true))
                     message.channel.send({ embeds: [titleEmbed] });
                 } else {
                     message.channel.send("Could not find any data.");

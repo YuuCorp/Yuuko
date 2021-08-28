@@ -97,7 +97,7 @@ module.exports = new Command({
                         let random = Math.floor(Math.random() * Math.floor(50));
                         switch (contentType) {
                             case "ANIME":
-                                AnimeCmd.run(message, args, run, true, recommendations[random].title.english);
+                                AnimeCmd.run(message, args, run, true, { title: recommendations[random].title.english });
                                 break;
                             case "MANGA":
                                 MangaCmd.run(message, args, run, true, recommendations[random].title.english);

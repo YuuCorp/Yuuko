@@ -3,7 +3,9 @@ const Discord = require("discord.js"),
     axios = require("axios"),
     EmbedError = require("../Utils/EmbedError.js"),
     Footer = require("../Utils/Footer.js"),
-    CommandCategories = require("../Utils/CommandCategories");
+    CommandCategories = require("../Utils/CommandCategories"),
+    AnimeCmd = require("../Commands/anime.js"),
+    HumanizeDuration = require("humanize-duration");
 
 module.exports = new Command({
     name: "trace",
@@ -14,17 +16,29 @@ module.exports = new Command({
         // Send and axios request to trace.moe with an image the user attached
         axios.get(`https://api.trace.moe/search?url=${message.attachments.first().url}`)
             .then(async res => {
-                console.log(res.data.result[0]);
                 // If the request was successful
-                const embed = new Discord.MessageEmbed()
-                    .setColor("#0099ff")
-                    .setTitle(`Trace result for ${message.attachments.first().filename}`)
-                    .setDescription(`[Link](${res.data.result[0].video})`)
-                    .setImage(res.data.result[0].image)
-                message.channel.send(embed);
+                const match = res.data.result[0];
+                AnimeCmd.run(message, args, run, true,
+                    {
+                        id: match.anilist,
+                        image: message.attachments.first().url,
+                        fields: [
+                            {name: "\u200B", value: "\u200B"},
+                            {name: "In Episode", value: `${match.episode} (${HumanizeDuration(match.from * 1000, { round: true }).toString()} in)`, inline: true},
+                            {name: "Similarity", value: match.similarity.toString(), inline: true},
+                            {name: "Video", value: `[Link](${match.video})`, inline: true}
+                        ]
+                    }
+                )
             })
-            .catch(err => {
-                console.log(err.response);
+            .catch(error => {
+                //^ log axios request status code and error
+                if (error.response) {
+                    console.log(error.response.data.errors);
+                } else {
+                    console.log(error);
+                }
+                message.channel.send({ embeds: [EmbedError(error, null, false)] });
             });
     }
 });
