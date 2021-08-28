@@ -31,6 +31,8 @@ module.exports = new Command({
             }`;
 
         let vars = { };
+        //*DEBUG: console.log(`Hook: ${hook}\nHookData:`, hookdata)
+
         if (!hook) {
             if (args.slice(1).join(" ").length < 3) {
                 return message.channel.send({embeds: [EmbedError(`Please enter a search query of at least 3 characters.`, null, false)]});

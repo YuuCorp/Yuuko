@@ -14,7 +14,7 @@ module.exports = new Command({
 
     async run(message, args, run) {
         // Send and axios request to trace.moe with an image the user attached
-        axios.get(`https://api.trace.moe/search?url=${message.attachments.first().url}`)
+        axios.get(`https://api.trace.moe/search?cutBorders&url=${message.attachments.first().url}`)
             .then(async res => {
                 // If the request was successful
                 const match = res.data.result[0];
