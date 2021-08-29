@@ -43,6 +43,8 @@ module.exports = new Command({
                 if (data) {
                     // Fix the description by replacing and converting HTML tags
                     console.log(data.source)
+
+                    const length = 400;
                     let description =
                         data.description
                             .replace(/<br><br>/g, "\n")
@@ -76,8 +78,8 @@ module.exports = new Command({
                                 inline: true,
                             },
                         )
-                        .setDescription(description || "No description available.")
-                        .setURL("https://anilist.co/anime/" + data.id)
+                        .setDescription(description.substr(0, length) + "..." || "No description available.")
+                        .setURL("https://anilist.co/manga/" + data.id)
                         .setColor("0x00ff00")
                         .setFooter(Footer(response));
                     message.channel.send({ embeds: [titleEmbed] });

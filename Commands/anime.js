@@ -3,7 +3,8 @@ const Discord = require("discord.js"),
     axios = require("axios"),
     EmbedError = require("../Utils/EmbedError.js"),
     Footer = require("../Utils/Footer.js"),
-    CommandCategories = require("../Utils/CommandCategories");
+    CommandCategories = require("../Utils/CommandCategories"),
+    reactionMenu = require('discordv13-pagination');
 
 module.exports = new Command({
     name: "anime",
@@ -25,8 +26,20 @@ module.exports = new Command({
                         native
                     }
                     format
+                    source
                     genres
                     meanScore
+                    startDate {
+                        year
+                        month
+                        day
+                    }
+                    endDate {
+                        year
+                        month
+                        day
+                    }
+                    bannerImage
                 }
             }`;
 
@@ -61,6 +74,8 @@ module.exports = new Command({
                 let data = response.data.data.Media;
                 if (data) {
                     //^ Fix the description by replacing and converting HTML tags, and replacing duplicate newlines
+                    const descLength = 350;
+                    console.log(data.source)
                     let description =
                         data.description
                             .replace(/<br><br>/g, "\n")
@@ -68,14 +83,16 @@ module.exports = new Command({
                             .replace(/<[^>]+>/g, "")
                             .replace(/&nbsp;/g, " ")
                             .replace(/\n\n/g, "\n") || "No description available.";
-                    const titleEmbed = new Discord.MessageEmbed()
+                            
+                    const firstPage = new Discord.MessageEmbed()
+                        .setImage(data.bannerImage)
                         .setThumbnail(data.coverImage.large)
                         .setTitle(data.title.english)
                         .addFields(
                             //^ Add fields genres, format and mean score
                             {
-                                name: "Genres",
-                                value: data.genres.join(", ") || "Unknown",
+                                name: "Source",
+                                value: data.source || "Unknown",
                                 inline: true,
                             },
                             {
@@ -87,24 +104,57 @@ module.exports = new Command({
                                 name: "Mean Score",
                                 value: data.meanScore.toString() + "%" || "Unknown",
                                 inline: true,
-                            }
+                            },
+                            {
+                                name: "Genres",
+                                value: '``' +`${data.genres.join(", ") || "N/A"}` + '``',
+                                inline: true,
+                            },
+
                         )
-                        .setDescription(description || "No description available.")
+                        //.addField('Start Date', `${data.startDate.day}-${data.startDate.month}-${data.startDate.year}`, 'End Date', `${data.endDate.day}-${data.endDate.month}-${data.endDate.year}`)
+                        //.addField('End Date', `${data.endDate.day}-${data.endDate.month}-${data.endDate.year}`)
+                        .setDescription(description.length > descLength ? description.substring(0, descLength) + "..." || "No description available." : description || "No description available.")
                         .setURL("https://anilist.co/anime/" + data.id)
                         .setColor("0x00ff00")
                         .setFooter(Footer(response));
                     
+                    const secondPage = new Discord.MessageEmbed()
+                        .setThumbnail(data.coverImage.large)
+                        .setTitle(data.title.english)
+                        
+                        .setDescription(`You can find some more info about ${data.title.english} below this text.`)
+                        .addFields(
+                        {
+                            name: "Start Date", 
+                            value: `${data.startDate.day}-${data.startDate.month}-${data.startDate.year}`,
+                            inline: true,
+                        },
+                        {
+                            name: "End Date", 
+                            value: `${data.endDate.day}-${data.endDate.month}-${data.endDate.year}`,
+                            inline: true,
+                        },
+                        )  
+                        
+                    const thirdPage = new Discord.MessageEmbed()
+                    .setTitle('Helol')
+
+                    const pages = [firstPage, secondPage, thirdPage]
+
+                    reactionMenu(message, pages)
+
                     if (hookdata?.image) {
-                        titleEmbed.setImage(hookdata.image);
+                        firstPage.setImage(hookdata.image);
                     }
 
                     if (hookdata?.fields) {
                         for (const field of hookdata.fields) {
-                            titleEmbed.addField(field.name, field.value, field.inline || false)
+                            firstPage.addField(field.name, field.value, field.inline || false)
                         }
                     }
 
-                    message.channel.send({ embeds: [titleEmbed] });
+                    //message.channel.send({ embeds: [firs] });
                 } else {
                     message.channel.send("Could not find any data.");
                 }
