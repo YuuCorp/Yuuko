@@ -2,7 +2,6 @@ const Discord = require("discord.js"),
     Command = require("../Structures/Command"),
     CommandCategories = require("../Utils/CommandCategories"),
     axios = require("axios"),
-    Footer = require("../Utils/Footer"),
     EmbedError = require("../Utils/EmbedError"),
     MangaCmd = require("../Commands/manga.js"),
     AnimeCmd = require("../Commands/anime.js");
@@ -90,10 +89,8 @@ module.exports = new Command({
                 .then((response) => {
                     let data = response.data.data.Page;
                     if (data) {
-                        //console.log(data)
                         //^ Filter out the Planning list
                         let recommendations = data.media.filter((Media) => Media.title.english != null);
-                        //console.log(recommendations);
                         let random = Math.floor(Math.random() * Math.floor(50));
                         switch (contentType) {
                             case "ANIME":

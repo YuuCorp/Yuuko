@@ -1,3 +1,4 @@
 {
-    "prefix": "t!"
+    "prefix": "t!",
+    "rsslimit": 5
 }

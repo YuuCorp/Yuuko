@@ -40,7 +40,7 @@ module.exports = new Command({
             vars.query = args.slice(1).join(" ");
         } else if (hook && hookdata?.title) {
             vars.query = hookdata.title;
-        } else if (hook & hookdata?.id) {
+        } else if (hook && hookdata?.id) {
             vars.query = hookdata.id;
         } else {
             return message.channel.send({embeds: [EmbedError(`AnimeCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)]});

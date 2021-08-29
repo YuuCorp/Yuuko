@@ -21,6 +21,7 @@
     "canvas": "^2.8.0",
     "discord.js": "^13.0.1",
     "dotenv-flow": "^3.2.0",
-    "humanize-duration": "^3.27.0"
+    "humanize-duration": "^3.27.0",
+    "turndown": "^7.1.1"
   }
 }
