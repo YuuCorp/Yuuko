@@ -22,3 +22,6 @@ pnpm-debug.log*
 *.sln
 *.sw?
 '+
+
+# Added by AniSuggest Devs
+/Local
