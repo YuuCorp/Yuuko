@@ -4,7 +4,7 @@ const Discord = require("discord.js"),
     EmbedError = require("../Utils/EmbedError.js"),
     Footer = require("../Utils/Footer.js"),
     CommandCategories = require("../Utils/CommandCategories"),
-    reactionMenu = require('discordv13-pagination');
+    reactionMenu = require('../Modules/discordv13-pagination');
 
 module.exports = new Command({
     name: "anime",

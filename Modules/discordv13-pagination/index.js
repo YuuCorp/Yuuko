@@ -1,4 +1,4 @@
-const reactionMenu = async (message, pages, emojis = [':rewind:', ':fast_forward:'], timeout = 60000) => {
+const reactionMenu = async (message, pages, emojis = ['⏪', '⏩'], timeout = 60000) => {
     let page = 0; 
     let msgChannel = message.channel
     if (!message && !message.channel) throw new Error('Channel is inaccessible.');
