@@ -87,7 +87,7 @@ module.exports = new Command({
                     const firstPage = new Discord.MessageEmbed()
                         .setImage(data.bannerImage)
                         .setThumbnail(data.coverImage.large)
-                        .setTitle(data.title.english)
+                        .setTitle(data.title.english || data.title.romaji || data.title.native)
                         .addFields(
                             //^ Add fields genres, format and mean score
                             {
