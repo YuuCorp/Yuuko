@@ -4,7 +4,7 @@ const Discord = require("discord.js"),
     EmbedError = require("../Utils/EmbedError.js"),
     Footer = require("../Utils/Footer.js"),
     CommandCategories = require("../Utils/CommandCategories"),
-    reactionMenu = require('../Modules/discordv13-pagination');
+    {pagination} = require('reconlx')
 
 module.exports = new Command({
     name: "anime",
@@ -75,7 +75,6 @@ module.exports = new Command({
                 if (data) {
                     //^ Fix the description by replacing and converting HTML tags, and replacing duplicate newlines
                     const descLength = 350;
-                    console.log(data.source)
                     let description =
                         data.description
                             .replace(/<br><br>/g, "\n")
@@ -112,8 +111,6 @@ module.exports = new Command({
                             },
 
                         )
-                        //.addField('Start Date', `${data.startDate.day}-${data.startDate.month}-${data.startDate.year}`, 'End Date', `${data.endDate.day}-${data.endDate.month}-${data.endDate.year}`)
-                        //.addField('End Date', `${data.endDate.day}-${data.endDate.month}-${data.endDate.year}`)
                         .setDescription(description.length > descLength ? description.substring(0, descLength) + "..." || "No description available." : description || "No description available.")
                         .setURL("https://anilist.co/anime/" + data.id)
                         .setColor("0x00ff00")
@@ -136,13 +133,20 @@ module.exports = new Command({
                             inline: true,
                         },
                         )  
+                        .setFooter(Footer(response))
                         
                     const thirdPage = new Discord.MessageEmbed()
                     .setTitle('Helol')
 
                     const pages = [firstPage, secondPage, thirdPage]
 
-                    reactionMenu(message, pages)
+                    pagination({
+                        embeds: pages,
+                        channel: message.channel,
+                        message: message,
+                        author: message.author,
+                        time: 20000
+                    })
 
                     if (hookdata?.image) {
                         firstPage.setImage(hookdata.image);
