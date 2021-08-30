@@ -3,7 +3,8 @@ const Discord = require("discord.js"),
     axios = require("axios"),
     EmbedError = require("../Utils/EmbedError.js"),
     Footer = require("../Utils/Footer.js"),
-    CommandCategories = require("../Utils/CommandCategories");
+    CommandCategories = require("../Utils/CommandCategories"),
+    { pagination } = require('reconlx');
 
 module.exports = new Command({
     name: "manga",
@@ -25,9 +26,20 @@ module.exports = new Command({
                         native
                     }
                     format
+                    source
                     genres
                     meanScore
-                    source
+                    startDate {
+                        year
+                        month
+                        day
+                    }
+                    endDate {
+                        year
+                        month
+                        day
+                    }
+                    bannerImage
                 }
             }`;
 
@@ -42,16 +54,14 @@ module.exports = new Command({
                 let data = response.data.data.Media;
                 if (data) {
                     // Fix the description by replacing and converting HTML tags
-                    console.log(data.source)
-
-                    const length = 400;
+                    const descLength = 350;
                     let description =
                         data.description
                             .replace(/<br><br>/g, "\n")
                             .replace(/<br>/g, "\n")
                             .replace(/<[^>]+>/g, "")
                             .replace(/&nbsp;/g, " ") /*.replace(/\n\n/g, "\n")*/ || "No description available.";
-                    const titleEmbed = new Discord.MessageEmbed()
+                    const firstPage = new Discord.MessageEmbed()
                         .setThumbnail(data.coverImage.large)
                         .setTitle(data.title.english || data.title.romaji || data.title.native)
                         .addFields(
@@ -78,11 +88,39 @@ module.exports = new Command({
                                 inline: true,
                             },
                         )
-                        .setDescription(description.substr(0, length) + "..." || "No description available.")
+                        .setDescription(description.length > descLength ? description.substring(0, descLength) + "..." || "No description available." : description || "No description available.")
                         .setURL("https://anilist.co/manga/" + data.id)
                         .setColor("0x00ff00")
                         .setFooter(Footer(response));
-                    message.channel.send({ embeds: [titleEmbed] });
+
+                        console.log(endingDate)
+                        const secondPage = new Discord.MessageEmbed()
+                        .setThumbnail(data.coverImage.large)
+                        .setTitle(data.title.english)
+                        .setDescription(`You can find some more info about ${data.title.english} below this text.`)
+                        .addFields(
+                        {
+                            name: "Start Date", 
+                            value: `hi`,
+                            inline: true,
+                        },
+                        {
+                            name: "End Date", 
+                            value: `${data.endDate.day}-${data.endDate.month}-${data.endDate.year}` || "Manga is still coming out",
+                            inline: true,
+                        },
+                        )  
+                        .setFooter(Footer(response))
+
+                        const pages = [firstPage, secondPage]
+
+                        pagination({
+                            embeds: pages,
+                            channel: message.channel,
+                            message: message,
+                            author: message.author,
+                            time: 20000
+                        })
                 } else {
                     message.channel.send("Could not find any data.");
                 }

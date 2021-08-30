@@ -3,7 +3,7 @@ const Discord = require("discord.js"),
     axios = require("axios"),
     EmbedError = require("../Utils/EmbedError.js"),
     Footer = require("../Utils/Footer.js"),
-    CommandCategories = require("../Utils/CommandCategories");
+    CommandCategories = require("../Utils/CommandCategories");  
 
 module.exports = new Command({
     name: "character",
