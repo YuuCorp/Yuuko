@@ -92,23 +92,22 @@ module.exports = new Command({
                         .setURL("https://anilist.co/manga/" + data.id)
                         .setColor("0x00ff00")
                         .setFooter(Footer(response));
-
-                        console.log(endingDate)
+                        console.log(data.endDate)
                         const secondPage = new Discord.MessageEmbed()
                         .setThumbnail(data.coverImage.large)
                         .setTitle(data.title.english)
                         .setDescription(`You can find some more info about ${data.title.english} below this text.`)
                         .addFields(
                         {
-                            name: "Start Date", 
-                            value: `hi`,
+                            name: "Published", 
+                            value: data.startDate.day ? `${data.startDate.day}/${data.startDate.month}/${data.startDate.year}` : "Not out.",
                             inline: true,
                         },
                         {
                             name: "End Date", 
-                            value: `${data.endDate.day}-${data.endDate.month}-${data.endDate.year}` || "Manga is still coming out",
+                            value: data.endDate.day ? `${data.endDate.day}/${data.endDate.month}/${data.endDate.year}` : "Airing",
                             inline: true,
-                        },
+                        },  
                         )  
                         .setFooter(Footer(response))
 
