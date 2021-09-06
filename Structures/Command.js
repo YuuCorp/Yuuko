@@ -14,6 +14,7 @@ class Command {
    * @param {CommandOptions} options
    */
   constructor(options) {
+    this.usage = options.usage;
     this.name = options.name;
     this.description = options.description;
     this.type = options.type;

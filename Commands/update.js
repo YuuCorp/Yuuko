@@ -6,7 +6,7 @@ const Command = require("../Structures/Command"),
 
 module.exports = new Command({
     name: "update",
-    description: "Checks for the latest update, and restarts the bot if any are found.",
+    description: "Checks for the latest update, and restarts the bot if any are found. (Trusted users only)",
     type: CommandCategories.Misc,
 
     async run(message, args, run) {

@@ -10,8 +10,9 @@ const Discord = require("discord.js"),
 
 module.exports = new Command({
     name: "usercard",
-    description: "Searches for an AniList user and displays a banner with the user's manga and anime statistics",
-    type: CommandCategories.AniList,
+    usage: 'usercard <anilist user>',
+    description: "Searches for an anilist user and displays a banner with the user's manga and anime statistics.",
+    type: CommandCategories.Misc,
 
     async run(message, args, run) {
         let query = `query ($username: String) {

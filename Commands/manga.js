@@ -8,8 +8,9 @@ const Discord = require("discord.js"),
 
 module.exports = new Command({
     name: "manga",
-    description: "Gets a manga based on a search result.",
-    type: CommandCategories.AniList,
+    usage: "manga <title>",
+    description: "Gets a manga from anilist based on a search result.",
+    type: CommandCategories.Anilist,
 
     async run(message, args, run, hook = false, title = null) {
         let query = `query ($query: String) { 

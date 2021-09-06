@@ -18,15 +18,15 @@ module.exports = new Command({
             if (!cmdGroups[cmdEntry.type]) {
                 cmdGroups[cmdEntry.type] = [];
             }
-            cmdGroups[cmdEntry.type].push({ name: cmdEntry.name, description: cmdEntry.description });
+            cmdGroups[cmdEntry.type].push({ usage: cmdEntry.usage, name: cmdEntry.name, description: cmdEntry.description });
         }
         // Send the description to the user
         const helpEmbed = new Discord.MessageEmbed();
         helpEmbed.setTitle(":grey_question: Help");
         helpEmbed.setDescription("Here is a list of every command and how to use it.");
-        helpEmbed.setColor(0xff8c61);
+        helpEmbed.setColor('BLUE');
         for (category of Object.keys(cmdGroups)) {
-            helpEmbed.addField(`**${category}**`, cmdGroups[category].map((x) => `\`${x.name}\` - ${x.description}`).join("\n"));
+            helpEmbed.addField(`**<${category}>**`, cmdGroups[category].map((x) => `**${x.name}** - \`${x.usage || 'No parameters required.'}\` \n ${x.description} \n`).join("\n"));
         }
         await message.channel.send({ embeds: [helpEmbed] });
         //!!recommend userName genre

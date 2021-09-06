@@ -9,8 +9,9 @@ const Discord = require("discord.js"),
 
 module.exports = new Command({
     name: "trace",
+    usage: 'trace <image link | image attachment>',
     description: "Gets an anime from an image.",
-    type: CommandCategories.AniList,
+    type: CommandCategories.Anilist,
 
     async run(message, args, run) {
         // Send and axios request to trace.moe with an image the user attached
