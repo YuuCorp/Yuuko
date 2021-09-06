@@ -158,8 +158,6 @@ module.exports = new Command({
                             firstPage.addField(field.name, field.value, field.inline || false)
                         }
                     }
-
-                    //message.channel.send({ embeds: [firs] });
                 } else {
                     message.channel.send("Could not find any data.");
                 }

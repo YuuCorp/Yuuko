@@ -48,18 +48,6 @@ module.exports = new Command({
             .then(async (response) => {
                 let data = response.data.data.User;
                 if (data) {
-                    //const titleEmbed = new Discord.MessageEmbed()
-                    //    .setAuthor(data.name, 'https://anilist.co/img/icons/android-chrome-512x512.png', data.siteUrl)
-                    //    .setImage(data.bannerImage)
-                    //    .setThumbnail(data.avatar.large)
-                    //    //.setTitle('Created At: ' + new Date(data.createdAt * 1000).toUTCString())
-                    //    .addFields(
-                    //        {name: "< Anime >\n\n", value: `**Watched:** ${data.statistics.anime.count.toString()}\n**Average score**: ${data.statistics.anime.meanScore.toString()}`, inline: true},
-                    //        {name: "< Manga >\n\n", value: `**Read:** ${data.statistics.manga.count.toString()}\n**Average score**: ${data.statistics.manga.meanScore.toString()}`, inline: true}
-                    //    )
-                    //    .setColor('0x00ff00')
-                    //    .setFooter(Footer(response))
-
                     //^ Create canvas
                     Canvas.registerFont(path.join(__dirname, "../Assets/OpenSans-SemiBold.ttf"), { family: "Open_Sans" });
                     const canvas = Canvas.createCanvas(1400, 330);
@@ -127,7 +115,6 @@ module.exports = new Command({
 
                     const attachment = new Discord.MessageAttachment(canvas.toBuffer(), "anilist_banner.png");
                     message.channel.send({ files: [attachment] });
-                    //message.channel.send({ embeds: [titleEmbed] });
                 } else {
                     message.channel.send("Could not find any data.");
                 }

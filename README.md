@@ -3,7 +3,7 @@
 <p align="center">
     <a href="https://www.codacy.com?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=TibixDev/AniSuggest&amp;utm_campaign=Badge_Grade" alt="Codacy Code Quality">
         <img src="https://app.codacy.com/project/badge/Grade/21b43885505b44a08784ad868babbd10" /></a>
-    <a href="https://opensource.org/licenses/MIT" alt="MIT License Badge">
+    <a href="https://github.com/TibixDev/AniSuggest/blob/main/LICENSE" alt="MIT License Badge">
         <img src="https://img.shields.io/badge/license-MIT-brightgreen" /></a>
     <a href="https://github.com/TibixDev/AniSuggest/">
         <img src="https://img.shields.io/github/commit-activity/m/TibixDev/AniSuggest" alt="Commit Activity"/></a>
