@@ -126,7 +126,7 @@ module.exports = new Command({
                 }
             })
             .catch((error) => {
-                // log axios request status code and error
+                //^ log axios request status code and error
                 if (error.response) {
                     console.log(error.response.data.errors);
                 } else {
