@@ -25,4 +25,5 @@ pnpm-debug.log*
 
 # Added by AniSuggest Devs
 /Local
+/temp
 commit.hash

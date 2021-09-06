@@ -21,27 +21,26 @@ AniSuggest is a free and open source Discord bot that integrates with the AniLis
 
 ## Installation
 ### Simple Installation
-1. Clone the repository
-2. Run `yarn`
-3. Edit the file called `.env.local` and change the `TOKEN` in it
-4. Run `yarn start`
+ 1. Clone the repository
+ 2. Run `yarn`
+ 3. Edit the file called `.env.local` and change the `TOKEN` in it
+ 4. Run `yarn start`
 
 ### PM2 Container Installation (Linux)
-1. Make sure `TRUSTED_USERS` includes your Discord ID in `.env`, so you can update the bot if needed.
-2. Do the same as in **Simple Installation**, except instead of running `yarn start`, run `sh start.sh`.
-3. You can update the bot by running the `update` command.  (Rebooting will be included in the future)
+ 1. Make sure `TRUSTED_USERS` includes your Discord ID in `.env`, so you can update the bot if needed.
+ 2. Do the same as in **Simple Installation**, except instead of running `yarn start`, run `sh start.sh`.
+ 3. You can update the bot by running the `update` command.  (Rebooting will be included in the future)  
 
 ## Configuration
-* You can change the default bot prefix (`!!`) by overriding the `PREFIX` parameter in `.env`, or by changing it in `config.json`.
-* You can disable certain commands by changing their `.js` prefix, or by deleting the command file entirely. Beware though, some commands like `anime` and `manga` are hooked into by other commands, so deleting hookable commands will also cause those to break.
-
+ * You can change the default bot prefix (`!!`) by overriding the `PREFIX` parameter in `.env`, or by changing it in `config.json`.
+ * You can disable certain commands by changing their `.js` prefix, or by deleting the command file entirely. Beware though, some commands like `anime` and `manga` are hooked into by other commands, so deleting hookable commands will also cause those to break.
 
 ## Contribution
 Feel free to create pull requests for any improvements you feel like making, but only do so if they have to do with the core idea of the bot, and they implement/fix actual functionality. In your pull request you should ideally describe what you changed, and why changed it.
 
 ## Legal
 Licensed under the MIT license:
-```
+```text
 Copyright 2021 AniSuggest Developers
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
