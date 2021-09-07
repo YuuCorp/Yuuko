@@ -133,13 +133,11 @@ module.exports = new Command({
                             value: `${data.endDate.day}-${data.endDate.month}-${data.endDate.year}`,
                             inline: true,
                         },
-                        )  
+                        )
+                        .addField('<Under construction>', 'This command is still work in progress.')
                         .setFooter(Footer(response))
-                        
-                    const thirdPage = new Discord.MessageEmbed()
-                    .setTitle('Helol')
 
-                    const pages = [firstPage, secondPage, thirdPage]
+                    const pages = [firstPage, secondPage]
 
                     pagination({
                         embeds: pages,

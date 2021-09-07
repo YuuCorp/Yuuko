@@ -93,7 +93,7 @@ module.exports = new Command({
                         .setURL("https://anilist.co/manga/" + data.id)
                         .setColor("0x00ff00")
                         .setFooter(Footer(response));
-                        console.log(data.endDate)
+
                         const secondPage = new Discord.MessageEmbed()
                         .setThumbnail(data.coverImage.large)
                         .setTitle(data.title.english)
@@ -110,6 +110,7 @@ module.exports = new Command({
                             inline: true,
                         },  
                         )  
+                        .addField('<Under construction>', 'This command is still work in progress.')
                         .setFooter(Footer(response))
 
                         const pages = [firstPage, secondPage]
