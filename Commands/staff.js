@@ -52,26 +52,19 @@ module.exports = new Command({
                         .setTitle(data.name.full)
                         .setDescription(description || "No description available.")
                         .addFields(
-                            //age
+
                             { name: "Staff Info: \n", value: `**Age**: ${data.age || "No age specified"} **Gender**: ${data.gender || "No gender specified."}\n **Home Town**: ${data.homeTown || "No home town specified."}` }
-                            //gender
-                            //{name: "Gender", value: `${data.gender || 'No gender specified'}`},
-                            //Date of birth
-                            //{name: "Date Of Birth", value: `${data.dateOfBirth.day || 'no' + data.dateOfBirth.month + data.dateOfBirth.year || 'No date of birth specified'}`},
-                            //BloodType
-                            //{name: "Blood Type", value: `${data.bloodType || 'No blood type specified'}`}
                         )
                         .setURL(data.siteUrl)
                         .setColor("0x00ff00")
                         .setFooter(Footer(response));
-                    //data.description.split("<br>").forEach(line => titleEmbed.addField(line, "", true))
                     message.channel.send({ embeds: [charEmbed] });
                 } else {
                     message.channel.send("Could not find any data.");
                 }
             })
             .catch((error) => {
-                // log axios request status code and error
+                //^ log axios request status code and error
                 if (error.response) {
                     console.log(error.response.data.errors);
                 } else {

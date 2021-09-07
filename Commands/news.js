@@ -47,13 +47,13 @@ module.exports = new Command({
                 //* (Analyze on disk) fs.writeFileSync(path.join(__dirname, "rss.json"), JSON.stringify(res.data));
             })
             .catch(error => {
-                //^ Log axios request status code and error
+                //^ log axios request status code and error
                 if (error.response) {
                     console.log(error.response.data.errors);
                 } else {
                     console.log(error);
                 }
-                message.channel.send({ embeds: [EmbedError(error, null, false)] });
+                message.channel.send({ embeds: [EmbedError(error, vars)] });
             })
     }
 });

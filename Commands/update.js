@@ -1,8 +1,7 @@
 const Command = require("../Structures/Command"),
     CommandCategories = require("../Utils/CommandCategories"),
-    Footer = require("../Utils/Footer"),
-    EmbedError = require("../Utils/EmbedError"),
-    { spawn, execSync } = require('child_process');
+    { spawn, execSync } = require('child_process'),
+    path = require('path');
 
 module.exports = new Command({
     name: "update",
@@ -34,6 +33,16 @@ module.exports = new Command({
                 updateLogs += `Procedures completed with code ${code}, restarting...  `;
                 clearInterval(updateInterval);
                 editMessage(updateLogs);
+                if (code === 0) {
+                    // Make a temporary file that stores the ID of the message sent, and the channel ID it was sent in
+                    // This is so that the bot can react to the message after restarting
+                    const tempFile = path.join(__dirname, "/temp/updatemsg.json");
+                    const tempFileData = {
+                        messageID: updateMessage.id,
+                        channelID: updateMessage.channel.id
+                    }
+                    fs.writeFileSync(tempFile, JSON.stringify(tempFileData));
+                }
                 execSync('git rev-parse --short HEAD > commit.hash', { encoding: 'utf-8' });
             });
         }

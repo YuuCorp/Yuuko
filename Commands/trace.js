@@ -39,7 +39,7 @@ module.exports = new Command({
                 } else {
                     console.log(error);
                 }
-                message.channel.send({ embeds: [EmbedError(error, null, false)] });
+                message.channel.send({ embeds: [EmbedError(error, vars)] });
             });
     }
 });
