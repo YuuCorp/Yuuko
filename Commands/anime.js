@@ -29,6 +29,9 @@ module.exports = new Command({
                     format
                     source
                     genres
+                    duration
+                    synonyms
+                    episodes
                     meanScore
                     startDate {
                         year
@@ -89,10 +92,9 @@ module.exports = new Command({
                         .setThumbnail(data.coverImage.large)
                         .setTitle(data.title.english || data.title.romaji || data.title.native)
                         .addFields(
-                            //^ Add fields genres, format and mean score
                             {
-                                name: "Source",
-                                value: data.source || "Unknown",
+                                name: "Episodes",
+                                value: `${data.episodes}`,
                                 inline: true,
                             },
                             {
@@ -106,47 +108,67 @@ module.exports = new Command({
                                 inline: true,
                             },
                             {
-                                name: "Genres",
+                                name: "Start Date", 
+                                value: `${data.startDate.day}-${data.startDate.month}-${data.startDate.year}`,
+                                inline: true,
+                            },
+                            {
+                                name: "End Date", 
+                                value: `${data.endDate.day}-${data.endDate.month}-${data.endDate.year}`,
+                                inline: true,
+                            },
+                            {
+                                name: '\u200B', 
+                                value: '\u200B',
+                                inline: true,
+                            },
+                            {
+                                name: 'Genres', 
                                 value: '``' +`${data.genres.join(", ") || "N/A"}` + '``',
                                 inline: true,
                             },
-
                         )
                         .setDescription(description.length > descLength ? description.substring(0, descLength) + "..." || "No description available." : description || "No description available.")
                         .setURL("https://anilist.co/anime/" + data.id)
                         .setColor("0x00ff00")
                         .setFooter(Footer(response));
-                    
-                    const secondPage = new Discord.MessageEmbed()
-                        .setThumbnail(data.coverImage.large)
-                        .setTitle(data.title.english)
                         
-                        .setDescription(`You can find some more info about ${data.title.english} below this text.`)
+                    const secondPage = new Discord.MessageEmbed()
+                        .setAuthor(`${data.title.english} | Additional info`)
+                        .setThumbnail(data.coverImage.large)
                         .addFields(
                         {
-                            name: "Start Date", 
-                            value: `${data.startDate.day}-${data.startDate.month}-${data.startDate.year}`,
+                            name: 'Source',
+                            value: data.source || "Unknown",
                             inline: true,
                         },
                         {
-                            name: "End Date", 
-                            value: `${data.endDate.day}-${data.endDate.month}-${data.endDate.year}`,
+                            name: 'Episode Duration',
+                            value: data.duration.toString(),
+                            inline: true
+                        },
+                        {
+                            name: '\u200B', 
+                            value: '\u200B',
                             inline: true,
                         },
-                        )  
+                        {
+                            name: 'Synonyms',
+                            value: '``' +`${data.synonyms.join(", ") || "N/A"}` + '``',
+                            inline: true,
+                        }
+                        )
+                        .setColor("0x00ff00")
                         .setFooter(Footer(response))
-                        
-                    const thirdPage = new Discord.MessageEmbed()
-                    .setTitle('Helol')
 
-                    const pages = [firstPage, secondPage, thirdPage]
+                    const pages = [firstPage, secondPage]
 
                     pagination({
                         embeds: pages,
                         channel: message.channel,
                         message: message,
                         author: message.author,
-                        time: 20000
+                        time: 100000
                     })
 
                     if (hookdata?.image) {
