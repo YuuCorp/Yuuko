@@ -27,7 +27,10 @@ module.exports = new Command({
                         native
                     }
                     format
+                    chapters
                     source
+                    synonyms
+                    volumes
                     genres
                     meanScore
                     startDate {
@@ -66,25 +69,38 @@ module.exports = new Command({
                         .setThumbnail(data.coverImage.large)
                         .setTitle(data.title.english || data.title.romaji || data.title.native)
                         .addFields(
-                            // add fields genres, format and mean score
                             {
-                                name: "Source",
-                                value: data.source || "N/A",
+                                name: 'Chapters',
+                                value: `${data.chapters}`,
                                 inline: true,
                             },
                             {
-                                name: "Format",
-                                value: data.format || "N/A",
+                                name: 'Format',
+                                value: data.format || "Unknown",
                                 inline: true,
                             },
                             {
-                                name: "Mean Score",
-                                value: data.meanScore.toString() || "N/A",
+                                name: 'Mean Score',
+                                value: data.meanScore.toString() + "%" || "Unknown",
                                 inline: true,
                             },
                             {
-
-                                name: "Genres",
+                                name: 'Start Date', 
+                                value: `${data.startDate.day}-${data.startDate.month}-${data.startDate.year}`,
+                                inline: true,
+                            },
+                            {
+                                name: 'End Date', 
+                                value: data.endDate.day ? `${data.endDate.day}/${data.endDate.month}/${data.endDate.year}` : 'Unknown' ,
+                                inline: true,
+                            },
+                            {
+                                name: '\u200B', 
+                                value: '\u200B',
+                                inline: true,
+                            },
+                            {
+                                name: 'Genres', 
                                 value: '``' +`${data.genres.join(", ") || "N/A"}` + '``',
                                 inline: true,
                             },
@@ -95,22 +111,31 @@ module.exports = new Command({
                         .setFooter(Footer(response));
 
                         const secondPage = new Discord.MessageEmbed()
+                        .setAuthor(`${data.title.english} | Additional info`)
                         .setThumbnail(data.coverImage.large)
-                        .setTitle(data.title.english)
-                        .setDescription(`You can find some more info about ${data.title.english} below this text.`)
                         .addFields(
-                        {
-                            name: "Published", 
-                            value: data.startDate.day ? `${data.startDate.day}/${data.startDate.month}/${data.startDate.year}` : "Not out.",
-                            inline: true,
-                        },
-                        {
-                            name: "End Date", 
-                            value: data.endDate.day ? `${data.endDate.day}/${data.endDate.month}/${data.endDate.year}` : "Airing",
-                            inline: true,
-                        },  
-                        )  
-                        .addField('<Under construction>', 'This command is still work in progress.')
+                            {
+                                name: 'Source',
+                                value: data.source || "Unknown",
+                                inline: true,
+                            },
+                            {
+                                name: 'Chapters',
+                                value: data.chapters ? data.chapters.toString() : 'N/A',
+                                inline: true,
+                            },
+                            {
+                                name: '\u200B', 
+                                value: '\u200B',
+                                inline: true,
+                            },
+                            {
+                                name: 'Synonyms',
+                                value: '``' +`${data.synonyms.join(", \n")|| "N/A"}` + '``',
+                                inline: true,
+                            }
+                            ) 
+                        .setColor("0x00ff00")
                         .setFooter(Footer(response))
 
                         const pages = [firstPage, secondPage]
@@ -120,7 +145,7 @@ module.exports = new Command({
                             channel: message.channel,
                             message: message,
                             author: message.author,
-                            time: 20000
+                            time: 100000
                         })
                 } else {
                     message.channel.send("Could not find any data.");
