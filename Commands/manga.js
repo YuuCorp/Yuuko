@@ -71,7 +71,7 @@ module.exports = new Command({
                         .addFields(
                             {
                                 name: 'Chapters',
-                                value: `${data.chapters}`,
+                                value: data.chapters ? data.chapters.toString() : 'N/A',
                                 inline: true,
                             },
                             {
@@ -117,11 +117,6 @@ module.exports = new Command({
                             {
                                 name: 'Source',
                                 value: data.source || "Unknown",
-                                inline: true,
-                            },
-                            {
-                                name: 'Chapters',
-                                value: data.chapters ? data.chapters.toString() : 'N/A',
                                 inline: true,
                             },
                             {
