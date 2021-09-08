@@ -47,6 +47,9 @@ module.exports = new Command({
 
                 // Make a temporary file that stores the ID of the message sent, and the channel ID it was sent in
                 // This is so that the bot can react to the message after restarting
+                if (!fs.existsSync(path.join(__dirname, "../Local"))) {
+                    fs.mkdirSync(path.join(__dirname, "../Local"));
+                } 
                 const tempFile = path.join(__dirname, "../Local/updatemsg.json");
                 const tempFileData = {
                     messageID: updateMessage.id,
