@@ -125,8 +125,13 @@ module.exports = new Command({
                                 inline: true,
                             },
                             {
+                                name: '\u200B', 
+                                value: '\u200B',
+                                inline: true,
+                            },
+                            {
                                 name: 'Synonyms',
-                                value: '``' +`${data.synonyms.join(", \n")|| "N/A"}` + '``',
+                                value: '``' +`${data.synonyms.join(", ")|| "N/A"}` + '``',
                                 inline: true,
                             }
                             ) 
