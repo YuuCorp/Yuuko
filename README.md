@@ -21,15 +21,15 @@ AniSuggest is a free and open source Discord bot that integrates with the AniLis
 
 ## Installation
 ### Simple Installation
-1.Clone the repository
-2.Run `yarn`
-3.Edit the file called `.env.local` and change the `TOKEN` in it
-4.Run `yarn start`
+1. Clone the repository
+2. Run `yarn`
+3. Edit the file called `.env.local` and change the `TOKEN` in it
+4. Run `yarn start`
 
 ### PM2 Container Installation (Linux)
-1.Make sure `TRUSTED_USERS` includes your Discord ID in `.env`, so you can update the bot if needed.
-2.Do the same as in **Simple Installation**, except instead of running `yarn start`, run `sh start.sh`.
-3.You can update the bot by running the `update` command.  (Rebooting will be included in the future)  
+1. Make sure `TRUSTED_USERS` includes your Discord ID in `.env`, so you can update the bot if needed.
+2. Do the same as in **Simple Installation**, except instead of running `yarn start`, run `sh start.sh`.
+3. You can update the bot by running the `update` command.  (Rebooting will be included in the future)  
 
 ## Configuration
 * You can change the default bot prefix (`!!`) by overriding the `PREFIX` parameter in `.env`, or by changing it in `config.json`.
