@@ -1,3 +1,4 @@
+#!/bin/sh
 echo "Starting AniList Update..."
 echo "Fetching repo changes..."
 git pull origin main
