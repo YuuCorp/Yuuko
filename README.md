@@ -6,11 +6,11 @@
     <a href="https://github.com/TibixDev/AniSuggest/blob/main/LICENSE" alt="MIT License Badge">
         <img src="https://img.shields.io/badge/license-MIT-brightgreen" /></a>
     <a href="https://github.com/TibixDev/AniSuggest/">
-        <img src="https://img.shields.io/github/commit-activity/m/TibixDev/AniSuggest" alt="Commit Activity"/></a>
+        <img src="https://img.shields.io/github/commit-activity/m/tibixdev/anisuggest" alt="Commit Activity"/></a>
     <a href="https://discord.gg/WK3C4a5P">
         <img src="https://img.shields.io/discord/884525603628388372?label=Discord"></a>
         <img src="https://img.shields.io/tokei/lines/github/TibixDev/AniSuggest" alt="Lines Of Code">
-       <img src="https://img.shields.io/david/TibixDev/AniSuggest" alt="Dependency Status">
+       <img src="https://img.shields.io/david/tibixdev/anisuggest" alt="Dependency Status">
 </p>
 
 <img src="https://i.imgur.com/FGkMOoa.png" align="right"
