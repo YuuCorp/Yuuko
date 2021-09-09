@@ -19,6 +19,9 @@
 
 AniSuggest is a free and open source Discord bot that integrates with the AniList API, providing the users with useful commands for viewing anime, manga, getting recommendations, viewing AniList users profiles without opening a browser tab, and many more.
 
+## Invite our bot
+[**Click here**](https://discord.com/api/oauth2/authorize?client_id=875171984953200641&permissions=8&scope=bot)
+
 ## Installation
 ### Simple Installation
 1. Clone the repository
@@ -30,9 +33,6 @@ AniSuggest is a free and open source Discord bot that integrates with the AniLis
 1. Make sure `TRUSTED_USERS` includes your Discord ID in `.env`, so you can update the bot if needed.
 2. Do the same as in **Simple Installation**, except instead of running `yarn start`, run `sh start.sh`.
 3. You can update the bot by running the `update` command.  (Rebooting will be included in the future)  
-
-## Invite our bot
-[**Click here**](https://discord.com/api/oauth2/authorize?client_id=875171984953200641&permissions=8&scope=bot)
 
 ## Configuration
 * You can change the default bot prefix (`!!`) by overriding the `PREFIX` parameter in `.env`, or by changing it in `config.json`.
