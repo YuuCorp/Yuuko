@@ -46,7 +46,6 @@ module.exports = new Command({
                             .replace(/<[^>]+>/g, "")
                             .replace(/&nbsp;/g, " ")
                             .replace(/~!|!~/g, "||") /*.replace(/\n\n/g, "\n")*/ || "No description available.";
-                    //console.log(data.dateOfBirth.day || 'no' + data.dateOfBirth.month + data.dateOfBirth.year)
                     const charEmbed = new Discord.MessageEmbed()
                         .setThumbnail(data.image.large)
                         .setTitle(data.name.full)

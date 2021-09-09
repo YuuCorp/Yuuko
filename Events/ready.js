@@ -12,7 +12,7 @@ module.exports = new Event("ready", (client) => {
         const statusActivity = statusArray[n];
         client.user.setPresence({activities: [{ type: 'PLAYING', name: statusActivity }], status: 'online' });
         n++;
-    }, 5000)
+    }, 10000)
     
     console.log("Bot is ready")
 

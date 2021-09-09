@@ -163,14 +163,6 @@ module.exports = new Command({
 
                     const pages = [firstPage, secondPage]
 
-                    pagination({
-                        embeds: pages,
-                        channel: message.channel,
-                        message: message,
-                        author: message.author,
-                        time: 100000
-                    })
-
                     if (hookdata?.image) {
                         firstPage.setImage(hookdata.image);
                     }
@@ -180,6 +172,13 @@ module.exports = new Command({
                             firstPage.addField(field.name, field.value, field.inline || false)
                         }
                     }
+                    pagination({
+                        embeds: pages,
+                        channel: message.channel,
+                        message: message,
+                        author: message.author, 
+                        time: 100000
+                    })
                 } else {
                     message.channel.send("Could not find any data.");
                 }
