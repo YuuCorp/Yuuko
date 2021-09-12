@@ -109,12 +109,12 @@ module.exports = new Command({
                             },
                             {
                                 name: "Start Date", 
-                                value: `${data.startDate.day}-${data.startDate.month}-${data.startDate.year}`,
+                                value: data.startDate.day ? `${data.startDate.day}-${data.startDate.month}-${data.startDate.year}`: 'Unknown',
                                 inline: true,
                             },
                             {
                                 name: "End Date", 
-                                value: `${data.endDate.day}-${data.endDate.month}-${data.endDate.year}`,
+                                value: data.endDate.day ? `${data.endDate.day}-${data.endDate.month}-${data.endDate.year}` : 'Unknown',
                                 inline: true,
                             },
                             {
