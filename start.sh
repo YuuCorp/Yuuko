@@ -1,3 +1,4 @@
+#!/bin/sh
 git pull origin main
 yarn
 git rev-parse --short HEAD > commit.hash
