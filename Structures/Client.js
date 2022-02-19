@@ -2,7 +2,6 @@ const Discord = require("discord.js");
 const fs = require("fs");
 const Command = require("./Command.js");
 const Event = require("./Event.js");
-const config = require("../config.json");
 const intents = new Discord.Intents(32767);
 require("dotenv-flow").config();
 class Client extends Discord.Client {
@@ -14,7 +13,7 @@ class Client extends Discord.Client {
          */
         this.commands = new Discord.Collection();
 
-        this.prefix = process.env.PREFIX || config.prefix;
+        this.prefix = process.env.PREFIX || "as!";
     }
     start(token) {
         console.log(`Starting AniSuggest in ${process.env.NODE_ENV} enviroment.`)

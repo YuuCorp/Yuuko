@@ -2,14 +2,14 @@ const Event = require("../Structures/Event.js");
 const fs = require("fs");
 
 module.exports = new Event("ready", (client) => {
-    n = 0;
+    let n = 0;
     statusArray = [
-        `${client.guilds.cache.size} Servers with ${client.users.cache.size} members.`,
+        () => `${client.guilds.cache.size} Servers with ${client.users.cache.size} members.`,
         '!!help'
     ]
     setInterval(() => {
         if (n === statusArray.length) n = 0;
-        const statusActivity = statusArray[n];
+        const statusActivity = typeof statusArray[n] === "function" ? statusArray[n]() : statusArray[n];
         client.user.setPresence({activities: [{ type: 'PLAYING', name: statusActivity }], status: 'online' });
         n++;
     }, 10000)

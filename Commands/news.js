@@ -6,8 +6,7 @@ const Discord = require("discord.js"),
     CommandCategories = require("../Utils/CommandCategories"),
     fs = require("fs"),
     path = require("path"),
-    TurndownService = require('turndown'),
-    Config = require("../config.json");
+    TurndownService = require('turndown');
 
 module.exports = new Command({
     name: "aninews",
@@ -26,7 +25,7 @@ module.exports = new Command({
                     .setFooter(Footer());
                 
 
-                for (let i = 0; i < Config.rsslimit; i++) {
+                for (let i = 0; i < process.env.RSS_LIMIT || 5; i++) {
                     //? We remove image tags since they don't work in embeds
                     //? And convert the HTML to markdown
                     let description = rss.items[i].description.replace(/<img .*?>/g,"").replace(/(<br\ ?\/?>)+/g, "\n");
@@ -36,7 +35,7 @@ module.exports = new Command({
                     }
 
                     //! BEWARE: There is an invisible character in the p tag as an embed spacer
-                    if (i != Config.rsslimit - 1) {
+                    if (i != (process.env.RSS_LIMIT || 5) - 1) {
                         description += "<p>‎</p>";
                     }
                                         

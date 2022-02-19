@@ -35,7 +35,7 @@ AniSuggest is a free and open source Discord bot that integrates with the AniLis
 3. You can update the bot by running the `update` command.  (Rebooting will be included in the future)  
 
 ## Configuration
-* You can change the default bot prefix (`!!`) by overriding the `PREFIX` parameter in `.env`, or by changing it in `config.json`.
+* You can change the default bot prefix (`!!`) by overriding the `PREFIX` parameter in `.env`.
 * You can disable certain commands by changing their `.js` prefix, or by deleting the command file entirely. Beware though, some commands like `anime` and `manga` are hooked into by other commands, so deleting hookable commands will also cause those to break.
 
 ## Contribution
