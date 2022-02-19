@@ -80,6 +80,9 @@ module.exports = new Command({
             }`;
 
         function ProcessRecommendations() {
+            if (!args.slice(3).length) {
+                return message.channel.send({ embeds: [EmbedError(`Please specify at least one genre.`, null, false)] });
+            }
             const genres = args.slice(3).join(" ").split(",").map(genre => genre.trim());
             axios
                 .post(url, 
@@ -93,10 +96,12 @@ module.exports = new Command({
                     if (data) {
                         //^ Filter out the Planning list
                         let recommendations = data.media.filter((Media) => Media.title.english != null);
-                        let random = Math.floor(Math.random() * Math.floor(50));
+                        let random = Math.floor(Math.random() * Math.floor(recommendations.length));
                         switch (contentType) {
                             case "ANIME":
-                                AnimeCmd.run(message, args, run, true, { title: recommendations[random].title.english });
+                                AnimeCmd.run(message, args, run, true, {
+                                    title: recommendations[random].title.english
+                                });
                                 break;
                             case "MANGA":
                                 MangaCmd.run(message, args, run, true, recommendations[random].title.english);
