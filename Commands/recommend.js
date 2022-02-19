@@ -80,11 +80,12 @@ module.exports = new Command({
             }`;
 
         function ProcessRecommendations() {
+            const genres = args.slice(3).join(" ").split(",").map(genre => genre.trim());
             axios
                 .post(url, 
                     {
                         query: recommendationquery, 
-                        variables: { type: contentType, exclude_ids: excludeIDs, genres: args.slice(3) } 
+                        variables: { type: contentType, exclude_ids: excludeIDs, genres: genres } 
                     }
                 )
                 .then((response) => {
