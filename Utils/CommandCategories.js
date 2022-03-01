@@ -2,5 +2,6 @@ module.exports = {
     User: "User",
     Anilist: "Anilist",
     Utils: "Utils",
-    Misc: "Misc"
+    Misc: "Misc",
+    Internal: "Internal",
 } 

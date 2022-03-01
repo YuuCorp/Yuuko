@@ -5,7 +5,6 @@ module.exports = new Event("messageCreate", (client, message) => {
     if (!message.content.startsWith(client.prefix) || message.author.bot) return;
     
     const args = message.content.substring((process.env.PREFIX || "as!").length).split(/ +/);
-    console.log(args);
     const command = client.commands.find(cmd => cmd.name == args[0]);
 
     args[0] = args[0].replaceAll("\\", "");

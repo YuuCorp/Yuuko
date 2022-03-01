@@ -16,6 +16,11 @@ module.exports = new Command({
         let query = `query ($query: String) { # Define which variables will be used in the query (id)
                 Media (search: $query, type: ANIME) { # Insert our variables into the query arguments (id) (type: ANIME is hard-coded in the query)
                     id
+                    nextAiringEpisode {
+                        timeUntilAiring
+                        airingAt
+                        episode
+                    }
                     description
                     coverImage {
                         large
@@ -118,10 +123,16 @@ module.exports = new Command({
                                 inline: true,
                             },
                             {
-                                name: '\u200B', 
-                                value: '\u200B',
+                                name: data?.nextAiringEpisode?.episode ? `Episode ${data.nextAiringEpisode.episode} airing in:` : 'Completed on:',
+                                value: data?.nextAiringEpisode?.airingAt ? `<t:${data.nextAiringEpisode.airingAt}:R>` : `${data.endDate.day}-${data.endDate.month}-${data.endDate.year}`, 
                                 inline: true,
+                                
                             },
+                            // {
+                            //     name: '\u200B', 
+                            //     value: '\u200B',
+                            //     inline: true,
+                            // },
                             {
                                 name: 'Genres', 
                                 value: '``' +`${data.genres.join(", ") || "N/A"}` + '``',
