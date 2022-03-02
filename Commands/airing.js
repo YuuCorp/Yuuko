@@ -9,11 +9,11 @@ const Discord = require("discord.js"),
 
 module.exports = new Command({
     name: "airing",
-    usage: "airing <day>",
-    description: "Gets the airing schedule for the specified day.",
+    usage: "airing <?in>",
+    description: "Gets the airing schedule for today or `in`. (e.g. `1 week` means today the next week.)",
     type: CommandCategories.Anilist,
 
-    async run(message, args, run, hook = false, hookdata = null) {
+    async run(message, args, run) {
         const query = `query($dateStart: Int, $nextDay: Int!) {
             Page{
               airingSchedules(sort: TIME, airingAt_greater: $dateStart, airingAt_lesser: $nextDay) {
@@ -37,32 +37,31 @@ module.exports = new Command({
           }`;
 
         let vars = {};
-        //*DEBUG: console.log(`Hook: ${hook}\nHookData:`, hookdata)
-        const [, ...rest] = args;
-        let diff = 0;
-        try {
-            diff = ms(rest.join(" "));
-        } catch (R) {}
-        console.log(rest.join(" "));
-        //rest ? ms(rest.join(' ')).catch(err => console.log("kur")) : 0
 
-        const _day = new Date(Date.now() + diff);
-        const day = new Date(Date.UTC(_day.getFullYear(), _day.getMonth(), _day.getDate()));
-
-        if (!hook) {
-            //vars.query = args.slice(1).join(" ");
-            const nextDay = new Date(day.getTime());
-            nextDay.setHours(23, 59, 59, 999);
-            vars.dateStart = Math.floor(day.getTime() / 1000);
-            vars.nextDay = Math.floor(nextDay.getTime() / 1000);
-        } else if (hook && hookdata?.title) vars.query = hookdata.title;
-        else if (hook && hookdata?.id) vars.query = hookdata.id;
-        else return message.channel.send({ embeds: [EmbedError(`AnimeCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)] });
-
-        if (hookdata?.id) {
-            query = query.replace("$query: String", "$query: Int");
-            query = query.replace("search:", "id:");
+        
+        let airingIn = 0;
+        if (args.length > 1) {
+            try {
+                airingIn = ms(args.slice(1).join(" "));
+                if (!airingIn) {
+                    throw new Error("Invalid time format.");
+                }
+            } catch (r) {
+                return message.channel.send({
+                    embeds: [
+                        EmbedError(`Invalid time format. See "${run.prefix}help airing" for more information.`, { airingWhen: args.slice(1).join(" ") }) 
+                    ]
+                });
+            }
         }
+
+
+        const _day = new Date(Date.now() + airingIn);
+        const day = new Date(Date.UTC(_day.getFullYear(), _day.getMonth(), _day.getDate()));
+        const nextDay = new Date(day.getTime());
+        nextDay.setHours(23, 59, 59, 999);
+        vars.dateStart = Math.floor(day.getTime() / 1000);
+        vars.nextDay = Math.floor(nextDay.getTime() / 1000);
 
         let url = "https://graphql.anilist.co";
 
@@ -75,12 +74,22 @@ module.exports = new Command({
                 //console.log(data);
 
                 if (data) {
-                    let i,
-                        j,
-                        chunk = 5,
-                        fields = [];
-                    for (i = 0, j = airingSchedules.length; i < j; i += chunk) {
-                        fields.push(airingSchedules.slice(i, i + chunk));
+                    const chunkSize = 5;
+                    const fields = [];
+                    
+                    // Sort the airing anime alphabetically by title
+                    airingSchedules.sort(function(a, b){
+                        a = a.media.title;
+                        b = b.media.title;
+                        const aTitle = (a.english || a.romaji || a.native).toLowerCase();
+                        const bTitle = (b.english || b.romaji || b.native).toLowerCase();
+                        if(aTitle < bTitle) { return -1; }
+                        if(aTitle > bTitle) { return 1; }
+                        return 0;
+                    })
+
+                    for (let i = 0; i < airingSchedules.length; i += chunkSize) {
+                        fields.push(airingSchedules.slice(i, i + chunkSize));
                     }
 
                     let pageList = [];
@@ -96,7 +105,7 @@ module.exports = new Command({
 
                             embed.addFields({
                                 name: `${title.english || title.romaji || title.native}`,
-                                value: ` - EP - ${episode} ${new Date(airingAt * 1000) > new Date() ? `Going to air <t:${airingAt}:R>` : `Aired <t:${airingAt}:R>`}`,
+                                value: `> **[EP - ${episode}]** :airplane: ${new Date(airingAt * 1000) > new Date() ? `Going to air <t:${airingAt}:R>` : `Aired <t:${airingAt}:R>`}`,
                                 inline: false,
                             });
                         });
@@ -110,37 +119,22 @@ module.exports = new Command({
                     ];
 
                     pagination({
-                        message, // Required
-                        pageList, // Required
+                        message,
+                        pageList,
                         buttonList,
-                        autoButton: true, // optional - if you do not want custom buttons remove the buttonList parameter
-                        // and replace it will autoButtons: true which will create buttons depending on
-                        // how many pages there are
-                        autoDelButton: true, // Optional - if you are using autoButton and would like delete buttons this
-                        // parameter adds delete buttons to the buttonList
-
-                        timeout: 20000, // Optional - if not provided it will default to 12000ms
-
-                        replyMessage: true, // Optional - An option to reply to the target message if you do not want
-                        // this option remove it from the function call
-
-                        autoDelete: true, // Optional - An option to have the pagination delete it's self when the timeout ends
-                        // if you do not want this option remove it from the function call
-
-                        authorIndependent: true, // Optional - An option to set pagination buttons only usable by the author
-                        // if you do not want this option remove it from the function call
+                        autoButton: true,
+                        autoDelButton: true,
+                        timeout: 20000,
+                        replyMessage: true,
+                        autoDelete: false,
+                        authorIndependent: true,
                     });
-                    if (hookdata?.image) {
-                        firstPage.setImage(hookdata.image);
-                    }
-
-                    if (hookdata?.fields) {
-                        for (const field of hookdata.fields) {
-                            firstPage.addField(field.name, field.value, field.inline || false);
-                        }
-                    }
                 } else {
-                    message.channel.send("Could not find any data.");
+                    message.channel.send({
+                        embeds: [
+                            EmbedError("No airing anime found.")
+                        ]
+                    });
                 }
             })
             .catch((error) => {
