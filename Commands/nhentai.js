@@ -4,7 +4,6 @@ const Discord = require("discord.js"),
     EmbedError = require("../Utils/EmbedError.js"),
     Footer = require("../Utils/Footer.js"),
     CommandCategories = require("../Utils/CommandCategories"),
-    {pagination} = require('reconlx')
 
 module.exports = new Command({
     name: "nhentai",
