@@ -168,12 +168,12 @@ module.exports = new Command({
                         .setColor("0x00ff00")
                         .setFooter(Footer(response));
 
-                    const buttonList = [
-                        new Discord.MessageButton().setCustomId("firstbtn").setLabel("First page").setStyle("DANGER"),
-                        new Discord.MessageButton().setCustomId("previousbtn").setLabel("Previous").setStyle("DANGER"),
-                        new Discord.MessageButton().setCustomId("nextbtn").setLabel("Next").setStyle("SUCCESS"),
-                        new Discord.MessageButton().setCustomId("lastbtn").setLabel("Last Page").setStyle("SUCCESS"),
-                    ];
+                        const buttonList = [
+                            new Discord.MessageButton().setCustomId("firstbtn").setLabel("First page").setStyle("DANGER"),
+                            new Discord.MessageButton().setCustomId("previousbtn").setLabel("Previous").setStyle("SUCCESS"),
+                            new Discord.MessageButton().setCustomId("nextbtn").setLabel("Next").setStyle("SUCCESS"),
+                            new Discord.MessageButton().setCustomId("lastbtn").setLabel("Last Page").setStyle("DANGER"),
+                        ];
                     const pageList = [firstPage, secondPage];
 
                     if (hookdata?.image) {
@@ -195,7 +195,7 @@ module.exports = new Command({
                         autoDelButton: true, // Optional - if you are using autoButton and would like delete buttons this
                         // parameter adds delete buttons to the buttonList
 
-                        timeout: 12000, // Optional - if not provided it will default to 12000ms
+                        timeout: 20000, // Optional - if not provided it will default to 12000ms
 
                         replyMessage: true, // Optional - An option to reply to the target message if you do not want
                         // this option remove it from the function call
