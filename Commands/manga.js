@@ -4,7 +4,7 @@ const Discord = require("discord.js"),
     EmbedError = require("../Utils/EmbedError.js"),
     Footer = require("../Utils/Footer.js"),
     CommandCategories = require("../Utils/CommandCategories"),
-    { pagination } = require('reconlx');
+    pagination = require("@acegoal07/discordjs-pagination");
 
 module.exports = new Command({
     name: "manga",
@@ -137,16 +137,36 @@ module.exports = new Command({
                             ) 
                         .setColor("0x00ff00")
                         .setFooter(Footer(response))
-
-                        const pages = [firstPage, secondPage]
+                        
+                        const buttonList = [
+                            new Discord.MessageButton().setCustomId("firstbtn").setLabel("First page").setStyle("DANGER"),
+                            new Discord.MessageButton().setCustomId("previousbtn").setLabel("Previous").setStyle("DANGER"),
+                            new Discord.MessageButton().setCustomId("nextbtn").setLabel("Next").setStyle("SUCCESS"),
+                            new Discord.MessageButton().setCustomId("lastbtn").setLabel("Last Page").setStyle("SUCCESS"),
+                        ];
+                        const pageList = [firstPage, secondPage];
 
                         pagination({
-                            embeds: pages,
-                            channel: message.channel,
-                            message: message,
-                            author: message.author,
-                            time: 100000
-                        })
+                            message, // Required
+                            pageList, // Required
+                            buttonList,
+                            autoButton: true, // optional - if you do not want custom buttons remove the buttonList parameter
+                            // and replace it will autoButtons: true which will create buttons depending on
+                            // how many pages there are
+                            autoDelButton: true, // Optional - if you are using autoButton and would like delete buttons this
+                            // parameter adds delete buttons to the buttonList
+    
+                            timeout:10000, // Optional - if not provided it will default to 12000ms
+    
+                            replyMessage: true, // Optional - An option to reply to the target message if you do not want
+                            // this option remove it from the function call
+    
+                            autoDelete: true, // Optional - An option to have the pagination delete it's self when the timeout ends
+                            // if you do not want this option remove it from the function call
+    
+                            authorIndependent: true, // Optional - An option to set pagination buttons only usable by the author
+                            // if you do not want this option remove it from the function call
+                        });
                 } else {
                     message.channel.send("Could not find any data.");
                 }
