@@ -23,12 +23,11 @@ module.exports = new Command({
         // Send the description to the user
         const helpEmbed = new Discord.MessageEmbed();
         helpEmbed.setTitle(":grey_question: Help");
-        helpEmbed.setDescription("Here is a list of every command and how to use it.");
+        helpEmbed.setDescription("Here is a list of every command and how to use it. Parameters starting with \`?\` are optional. If you need more information about a command, use `" + run.prefix + "help <command>`.");
         helpEmbed.setColor('BLUE');
         for (category of Object.keys(cmdGroups)) {
-            helpEmbed.addField(`<**${category}**>`, cmdGroups[category].map((x) => `**${x.name}** - \`${x.usage || 'No parameters required.'}\` \n ${x.description} \n`).join("\n"));
+            helpEmbed.addField(`**[ :ledger: ${category}** ]`, cmdGroups[category].map((x) => `\`$\` **${x.name}** - \`${x.usage || 'No parameters required.'}\` \n ${x.description} \n`).join("\n"));
         }
         await message.channel.send({ embeds: [helpEmbed] });
-        //!!recommend userName genre
     },
 });
