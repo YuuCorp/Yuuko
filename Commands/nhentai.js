@@ -1,8 +1,4 @@
-const Discord = require("discord.js"),
-    Command = require("../Structures/Command.js"),
-    axios = require("axios"),
-    EmbedError = require("../Utils/EmbedError.js"),
-    Footer = require("../Utils/Footer.js"),
+const Command = require("../Structures/Command.js"),
     CommandCategories = require("../Utils/CommandCategories");
 
 module.exports = new Command({

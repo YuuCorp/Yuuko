@@ -1,12 +1,12 @@
 const Discord = require("discord.js"),
     Command = require("../Structures/Command.js"),
-    axios = require("axios"),
     EmbedError = require("../Utils/EmbedError.js"),
     Footer = require("../Utils/Footer.js"),
     Canvas = require("canvas"),
     path = require("path"),
     { roundRect } = require("../Utils/CanvasHelper.js"),
-    CommandCategories = require("../Utils/CommandCategories");
+    CommandCategories = require("../Utils/CommandCategories"),
+    GraphQLRequest = require("../Utils/GraphQLRequest.js");
 
 module.exports = new Command({
     name: "usercard",
@@ -40,13 +40,11 @@ module.exports = new Command({
                 }`;
 
         let vars = { username: args.slice(1).join(" ") };
-        let url = "https://graphql.anilist.co";
 
         // Make the HTTP Api request
-        axios
-            .post(url, { query: query, variables: vars })
+        GraphQLRequest(query, vars)
             .then(async (response) => {
-                let data = response.data.data.User;
+                let data = response.User;
                 if (data) {
                     //^ Create canvas
                     Canvas.registerFont(path.join(__dirname, "../Assets/OpenSans-SemiBold.ttf"), { family: "Open_Sans" });
@@ -116,16 +114,11 @@ module.exports = new Command({
                     const attachment = new Discord.MessageAttachment(canvas.toBuffer(), "anilist_banner.png");
                     message.channel.send({ files: [attachment] });
                 } else {
-                    message.channel.send("Could not find any data.");
+                    return message.channel.send({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
                 }
             })
             .catch((error) => {
-                //^ log axios request status code and error
-                if (error.response) {
-                    console.log(error.response.data.errors);
-                } else {
-                    console.log(error);
-                }
+                console.error(error);
                 message.channel.send({ embeds: [EmbedError(error, vars)] });
             });
     },

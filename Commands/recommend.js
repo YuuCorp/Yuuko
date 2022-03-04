@@ -1,10 +1,10 @@
 const Discord = require("discord.js"),
     Command = require("../Structures/Command"),
     CommandCategories = require("../Utils/CommandCategories"),
-    axios = require("axios"),
     EmbedError = require("../Utils/EmbedError"),
     MangaCmd = require("../Commands/manga.js"),
-    AnimeCmd = require("../Commands/anime.js");
+    AnimeCmd = require("../Commands/anime.js"),
+    GraphQLRequest = require("../Utils/GraphQLRequest.js");
 
 module.exports = new Command({
     name: "recommend",
@@ -12,8 +12,7 @@ module.exports = new Command({
     description: "Recommends unwatched anime/manga based on the requested genre(s).",
     type: CommandCategories.Anilist,
     async run(message, args, run) {
-        //& USER QUERY
-        let userquery = `query ($type: MediaType, $userName: String) {
+        let query = `query ($type: MediaType, $userName: String) {
                 MediaListCollection(userName: $userName, type: $type) {
                     lists {
                         entries {
@@ -37,14 +36,12 @@ module.exports = new Command({
             return message.channel.send({ embeds: [EmbedError(`Please specify either manga, or anime as your content type. (Yours was "${contentType}")`, null, false)] });
         }
 
-        let url = "https://graphql.anilist.co";
         let excludeIDs = [];
 
         //^ First we query the user to find what ID-s we should exclude from the search pool.
-        axios
-            .post(url, { query: userquery, variables: vars })
-            .then((response) => {
-                let data = response.data.data.MediaListCollection;
+        GraphQLRequest(query, vars)
+            .then((response, headers) => {
+                let data = response.MediaListCollection;
                 if (data) {
                     //^ We filter out the Planning list
                     for (let MediaList of data.lists.filter((MediaList) => MediaList.name != "Planning")) {
@@ -56,18 +53,11 @@ module.exports = new Command({
                 }
             })
             .catch((error) => {
-                //^ Log Axios request status code and error
-                if (error.response) {
-                    console.log(error.response.data.errors);
-                    return message.channel.send({ embeds: [EmbedError(error.response.data.errors.map(e => e.message).join("\n"), vars)] });
-                } else {
-                    console.log(error);
-                }
+                console.error(error);
                 message.channel.send({ embeds: [EmbedError(error, vars)] });
             });
 
-        //& RECOMMENDATION QUERY
-        let recommendationquery = `
+        let recommendationQuery = `
             query ($type: MediaType, $exclude_ids: [Int], $genres: [String]) {
                 Page (perPage: 50) {
                     media (genre_in: $genres, id_not_in: $exclude_ids, type: $type, sort: SCORE_DESC, averageScore_greater: 6) {
@@ -83,16 +73,13 @@ module.exports = new Command({
             if (!args.slice(3).length) {
                 return message.channel.send({ embeds: [EmbedError(`Please specify at least one genre.`, null, false)] });
             }
+
             const genres = args.slice(3).join(" ").split(",").map(genre => genre.trim());
-            axios
-                .post(url, 
-                    {
-                        query: recommendationquery, 
-                        variables: { type: contentType, exclude_ids: excludeIDs, genres: genres } 
-                    }
-                )
+            const recommendationVars = { type: contentType, exclude_ids: excludeIDs, genres };
+
+            GraphQLRequest(recommendationQuery, recommendationVars)
                 .then((response) => {
-                    let data = response.data.data.Page;
+                    let data = response.Page;
                     if (data) {
                         //^ Filter out the Planning list
                         let recommendations = data.media.filter((Media) => Media.title.english != null);
@@ -108,16 +95,11 @@ module.exports = new Command({
                                 break;
                         }                        
                     } else {
-                        message.channel.send("Could not find any data.");
+                        return message.channel.send({ embeds: [EmbedError(`Couldn't find any data.`, recommendationVars)] });
                     }
                 })
                 .catch((error) => {
-                    //^ log axios request status code and error
-                    if (error.response) {
-                        console.log(error.response.data.errors);
-                    } else {
-                        console.log(error);
-                    }
+                    console.error(error);
                     message.channel.send({ embeds: [EmbedError(error, vars)] });
                 });
         }

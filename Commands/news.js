@@ -24,11 +24,16 @@ module.exports = new Command({
                     .setColor(0x00AE86)
                     .setFooter(Footer());
                 
-
-                for (let i = 0; i < process.env.RSS_LIMIT || 5; i++) {
+                    // console.log(rss.items);
+                const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+                for (let i = 0; i < clamp(process.env.RSS_LIMIT || 5, 0, rss.items.length); i++) {
+                    console.log("Processing " + i + "...")
                     //? We remove image tags since they don't work in embeds
                     //? And convert the HTML to markdown
-                    let description = rss.items[i].description.replace(/<img .*?>/g,"").replace(/(<br\ ?\/?>)+/g, "\n");
+                    
+                    let description = rss.items[i].description
+                                        .replace(/<img .*?>/g,"") // Remove image tags
+                                        .replace(/(<br\ ?\/?>)+/g, "\n") // Replace line breaks with newlines
                     
                     if (description.length > 1024) {
                         description = description.substring(0, 1024) + "...";
@@ -43,16 +48,15 @@ module.exports = new Command({
                 }
 
                 message.channel.send({embeds: [embed]});
-                //* (Analyze on disk) fs.writeFileSync(path.join(__dirname, "rss.json"), JSON.stringify(res.data));
             })
             .catch(error => {
-                //^ log axios request status code and error
+                //^ Log Axios request status code and error
                 if (error.response) {
                     console.log(error.response.data.errors);
                 } else {
                     console.log(error);
                 }
-                message.channel.send({ embeds: [EmbedError(error, vars)] });
+                message.channel.send({ embeds: [EmbedError(error)] });
             })
     }
 });

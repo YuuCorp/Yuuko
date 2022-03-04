@@ -1,10 +1,10 @@
 const Discord = require("discord.js"),
     Command = require("../Structures/Command.js"),
-    axios = require("axios"),
     EmbedError = require("../Utils/EmbedError.js"),
     Footer = require("../Utils/Footer.js"),
     CommandCategories = require("../Utils/CommandCategories"),
-    pagination = require("@acegoal07/discordjs-pagination");
+    pagination = require("@acegoal07/discordjs-pagination"),
+    GraphQLRequest = require("../Utils/GraphQLRequest.js");
 
 module.exports = new Command({
     name: "anime",
@@ -69,14 +69,10 @@ module.exports = new Command({
             query = query.replace("search:", "id:");
         }
 
-        let url = "https://graphql.anilist.co";
-
         //^ Make the HTTP Api request
-        axios
-            .post(url, { query: query, variables: vars })
-            .then((response) => {
-                //console.log(response.data.data.Media);
-                let data = response.data.data.Media;
+        GraphQLRequest(query, vars)
+            .then((response, headers) => {
+                let data = response.Media;
                 if (data) {
                     //^ Fix the description by replacing and converting HTML tags, and replacing duplicate newlines
                     const descLength = 350;
@@ -87,7 +83,6 @@ module.exports = new Command({
                             .replace(/<[^>]+>/g, "")
                             .replace(/&nbsp;/g, " ")
                             .replace(/\n\n/g, "\n") || "No description available.";
-                    //console.log(data.episodes);
 
                     const firstPage = new Discord.MessageEmbed()
                         .setImage(data.bannerImage)
@@ -138,7 +133,7 @@ module.exports = new Command({
                         .setDescription(description.length > descLength ? description.substring(0, descLength) + "..." || "No description available." : description || "No description available.")
                         .setURL("https://anilist.co/anime/" + data.id)
                         .setColor("0x00ff00")
-                        .setFooter(Footer(response));
+                        .setFooter(Footer(headers));
 
                     const secondPage = new Discord.MessageEmbed()
                         .setAuthor(`${data.title.english} | Additional info`)
@@ -166,7 +161,7 @@ module.exports = new Command({
                             }
                         )
                         .setColor("0x00ff00")
-                        .setFooter(Footer(response));
+                        .setFooter(Footer(headers));
 
                     const buttonList = [
                         new Discord.MessageButton().setCustomId("firstbtn").setLabel("First page").setStyle("DANGER"),
@@ -197,16 +192,11 @@ module.exports = new Command({
                         authorIndependent: true,
                     });
                 } else {
-                    message.channel.send("Could not find any data.");
+                    return message.channel.send({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
                 }
             })
             .catch((error) => {
-                //^ log axios request status code and error
-                if (error.response) {
-                    console.log(error.response.data.errors);
-                } else {
-                    console.log(error);
-                }
+                console.log(error);
                 message.channel.send({ embeds: [EmbedError(error, vars)] });
             });
     },

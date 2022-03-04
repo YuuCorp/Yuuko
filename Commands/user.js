@@ -1,9 +1,9 @@
 const Discord = require("discord.js"),
     Command = require("../Structures/Command.js"),
-    axios = require("axios"),
     EmbedError = require("../Utils/EmbedError.js"),
     Footer = require("../Utils/Footer.js"),
-    CommandCategories = require("../Utils/CommandCategories");
+    CommandCategories = require("../Utils/CommandCategories"),
+    GraphQLRequest = require("../Utils/GraphQLRequest.js");
 
 module.exports = new Command({
     name: "user",
@@ -38,13 +38,10 @@ module.exports = new Command({
 
         let vars = { username: args.slice(1).join(" ") };
 
-        let url = "https://graphql.anilist.co";
-
         // Make the HTTP Api request
-        axios
-            .post(url, { query: query, variables: vars })
-            .then((response) => {
-                let data = response.data.data.User;
+        GraphQLRequest(query, vars)
+            .then((response, headers) => {
+                let data = response.User;
                 if (data) {
                     const titleEmbed = new Discord.MessageEmbed()
                         .setAuthor(data.name, "https://anilist.co/img/icons/android-chrome-512x512.png", data.siteUrl)
@@ -55,19 +52,14 @@ module.exports = new Command({
                             { name: "< Manga >\n\n", value: `**Read:** ${data.statistics.manga.count.toString()}\n**Average score**: ${data.statistics.manga.meanScore.toString()}`, inline: true }
                         )
                         .setColor("0x00ff00")
-                        .setFooter(Footer(response));
+                        .setFooter(Footer(headers));
                     message.channel.send({ embeds: [titleEmbed] });
                 } else {
-                    message.channel.send("Could not find any data.");
+                    return message.channel.send({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
                 }
             })
             .catch((error) => {
-                //^ log axios request status code and error
-                if (error.response) {
-                    console.log(error.response.data.errors);
-                } else {
-                    console.log(error);
-                }
+                console.error(error);
                 message.channel.send({ embeds: [EmbedError(error, vars)] });
             });
     },

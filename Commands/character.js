@@ -1,9 +1,9 @@
 const Discord = require("discord.js"),
     Command = require("../Structures/Command.js"),
-    axios = require("axios"),
     EmbedError = require("../Utils/EmbedError.js"),
     Footer = require("../Utils/Footer.js"),
-    CommandCategories = require("../Utils/CommandCategories");  
+    CommandCategories = require("../Utils/CommandCategories"),
+    GraphQLRequest = require("../Utils/GraphQLRequest.js");
 
 module.exports = new Command({
     name: "character",
@@ -34,15 +34,10 @@ module.exports = new Command({
         }`;
         let vars = { charName: args.slice(1).join(" ") };
 
-        let url = "https://graphql.anilist.co";
-
-        axios
-            .post(url, { query: query, variables: vars })
-            .then((response) => {
-                //console.log(response.data.data.Media);
-                let data = response.data.data.Character;
+        GraphQLRequest(query, vars)
+            .then((response, headers) => {
+                let data = response.Character;
                 if (data) {
-                    //console.log(data);
                     //^ Fix the description by replacing and converting HTML tags
                     let description =
                         data.description
@@ -71,20 +66,15 @@ module.exports = new Command({
                         )
                         .setURL(data.siteUrl)
                         .setColor("0x00ff00")
-                        .setFooter(Footer(response));
+                        .setFooter(Footer(headers));
                     //data.description.split("<br>").forEach(line => titleEmbed.addField(line, "", true))
                     message.channel.send({ embeds: [charEmbed] });
                 } else {
-                    message.channel.send("Could not find any data.");
+                    return message.channel.send({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
                 }
             })
             .catch((error) => {
-                //^ log axios request status code and error
-                if (error.response) {
-                    console.log(error.response.data.errors);
-                } else {
-                    console.log(error);
-                }
+                console.log(error)
                 message.channel.send({ embeds: [EmbedError(error, vars)] });
             });
     },

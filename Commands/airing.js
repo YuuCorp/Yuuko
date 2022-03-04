@@ -1,7 +1,7 @@
 const Discord = require("discord.js"),
     Command = require("../Structures/Command.js"),
-    axios = require("axios"),
     EmbedError = require("../Utils/EmbedError.js"),
+    GraphQLRequest = require("../Utils/GraphQLRequest.js"),
     Footer = require("../Utils/Footer.js"),
     CommandCategories = require("../Utils/CommandCategories"),
     pagination = require("@acegoal07/discordjs-pagination"),
@@ -34,11 +34,10 @@ module.exports = new Command({
                 timeUntilAiring
               }
             }
-          }`;
+        }`;
 
         let vars = {};
 
-        
         let airingIn = 0;
         if (args.length > 1) {
             try {
@@ -63,13 +62,10 @@ module.exports = new Command({
         vars.dateStart = Math.floor(day.getTime() / 1000);
         vars.nextDay = Math.floor(nextDay.getTime() / 1000);
 
-        let url = "https://graphql.anilist.co";
-
         //^ Make the HTTP Api request
-        axios
-            .post(url, { query: query, variables: vars })
-            .then((response) => {
-                const data = response.data.data.Page;
+        GraphQLRequest(query, vars)
+            .then((response, headers) => {
+                const data = response.Page;
                 const { airingSchedules } = data;
                 //console.log(data);
 
@@ -97,7 +93,7 @@ module.exports = new Command({
                         let embed = new Discord.MessageEmbed();
                         embed.setTitle(`Airing on ${day.toDateString()}`);
                         embed.setColor(0x00ff00);
-                        embed.setFooter(Footer(response));
+                        embed.setFooter(Footer(headers));
 
                         fieldSet.forEach((field) => {
                             const { media, episode, airingAt } = field;
@@ -138,12 +134,7 @@ module.exports = new Command({
                 }
             })
             .catch((error) => {
-                //^ log axios request status code and error
-                if (error.response) {
-                    console.log(error.response.data.errors);
-                } else {
-                    console.log(error);
-                }
+                console.log(error);
                 message.channel.send({ embeds: [EmbedError(error, vars)] });
             });
     },
