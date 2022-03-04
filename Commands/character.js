@@ -29,6 +29,7 @@ module.exports = new Command({
                 month
                 day
             }
+            gender
           }
         }`;
         let vars = { charName: args.slice(1).join(" ") };
