@@ -9,7 +9,7 @@ const Discord = require("discord.js"),
 module.exports = new Command({
     name: "recommend",
     usage: "recommend <anime | manga> <anilist user> <genre1 - genreN>",
-    description: "Recommends unwatched anime/manga besed on the requested genre(s).",
+    description: "Recommends unwatched anime/manga based on the requested genre(s).",
     type: CommandCategories.Anilist,
     async run(message, args, run) {
         //& USER QUERY
