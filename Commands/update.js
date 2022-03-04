@@ -1,5 +1,5 @@
-const Command = require("../Structures/Command"),
-    CommandCategories = require("../Utils/CommandCategories"),
+const Command = require("#Structures/Command.js"),
+    CommandCategories = require("#Utils/CommandCategories.js"),
     { spawn, execSync } = require('child_process'),
     path = require('path'),
     fs = require('fs');

@@ -1,9 +1,9 @@
 const Discord = require("discord.js"),
-    Command = require("../Structures/Command.js"),
-    EmbedError = require("../Utils/EmbedError.js"),
-    GraphQLRequest = require("../Utils/GraphQLRequest.js"),
-    Footer = require("../Utils/Footer.js"),
-    CommandCategories = require("../Utils/CommandCategories"),
+    Command = require("#Structures/Command.js"),
+    EmbedError = require("#Utils/EmbedError.js"),
+    GraphQLRequest = require("#Utils/GraphQLRequest.js"),
+    Footer = require("#Utils/Footer.js"),
+    CommandCategories = require("#Utils/CommandCategories.js"),
     pagination = require("@acegoal07/discordjs-pagination"),
     ms = require("ms");
 

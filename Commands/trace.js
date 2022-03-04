@@ -1,10 +1,10 @@
 const Discord = require("discord.js"),
-    Command = require("../Structures/Command.js"),
+    Command = require("#Structures/Command.js"),
     axios = require("axios"),
-    EmbedError = require("../Utils/EmbedError.js"),
-    Footer = require("../Utils/Footer.js"),
-    CommandCategories = require("../Utils/CommandCategories"),
-    AnimeCmd = require("../Commands/anime.js"),
+    EmbedError = require("#Utils/EmbedError.js"),
+    Footer = require("#Utils/Footer.js"),
+    CommandCategories = require("#Utils/CommandCategories.js"),
+    AnimeCmd = require("#Commands/anime.js"),
     HumanizeDuration = require("humanize-duration");
 
 module.exports = new Command({

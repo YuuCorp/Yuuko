@@ -1,5 +1,5 @@
-const Command = require("../Structures/Command.js"),
-    CommandCategories = require("../Utils/CommandCategories");
+const Command = require("#Structures/Command.js"),
+    CommandCategories = require("#Utils/CommandCategories.js");
 
 module.exports = new Command({
     name: "nhentai",

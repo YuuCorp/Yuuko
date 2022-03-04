@@ -1,4 +1,4 @@
-const Event = require("../Structures/Event.js");
+const Event = require("#Structures/Event.js");
 
 module.exports = new Event("messageCreate", (client, message) => {
     // If it's not the prefix, or the author is the bot itself then reject

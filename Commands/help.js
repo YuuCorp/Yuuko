@@ -1,8 +1,7 @@
 const Discord = require("discord.js"),
-    Command = require("../Structures/Command"),
+    Command = require("#Structures/Command.js"),
     fs = require("fs"),
-    path = require("path"),
-    CommandCategories = require("../Utils/CommandCategories");
+    path = require("path");
 
 module.exports = new Command({
     name: "help",

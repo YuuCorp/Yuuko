@@ -1,9 +1,9 @@
 const Discord = require("discord.js"),
-    Command = require("../Structures/Command.js"),
-    EmbedError = require("../Utils/EmbedError.js"),
-    Footer = require("../Utils/Footer.js"),
-    CommandCategories = require("../Utils/CommandCategories"),
-    GraphQLRequest = require("../Utils/GraphQLRequest.js");
+    Command = require("#Structures/Command.js"),
+    EmbedError = require("#Utils/EmbedError.js"),
+    Footer = require("#Utils/Footer.js"),
+    CommandCategories = require("#Utils/CommandCategories.js"),
+    GraphQLRequest = require("#Utils/GraphQLRequest.js");
 
 module.exports = new Command({
     name: "character",

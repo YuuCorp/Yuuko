@@ -1,10 +1,10 @@
 const Discord = require("discord.js"),
-    Command = require("../Structures/Command.js"),
-    EmbedError = require("../Utils/EmbedError.js"),
-    Footer = require("../Utils/Footer.js"),
-    CommandCategories = require("../Utils/CommandCategories"),
+    Command = require("#Structures/Command.js"),
+    EmbedError = require("#Utils/EmbedError.js"),
+    Footer = require("#Utils/Footer.js"),
+    CommandCategories = require("#Utils/CommandCategories.js"),
     pagination = require("@acegoal07/discordjs-pagination"),
-    GraphQLRequest = require("../Utils/GraphQLRequest.js");
+    GraphQLRequest = require("#Utils/GraphQLRequest.js");
 
 module.exports = new Command({
     name: "anime",

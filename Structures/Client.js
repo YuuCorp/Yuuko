@@ -29,7 +29,7 @@ class Client extends Discord.Client {
                  * @type {Command}
                  * Legacy commands with prefix
                  */
-                const command = require(`../Commands/${file}`);
+                const command = require(`#Commands/${file}`);
                 console.log(`Command ${command.name} loaded`);
                 this.commands.set(command.name, command);
 

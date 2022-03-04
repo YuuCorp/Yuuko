@@ -1,10 +1,10 @@
 const Discord = require("discord.js"),
-    Command = require("../Structures/Command"),
-    CommandCategories = require("../Utils/CommandCategories"),
-    EmbedError = require("../Utils/EmbedError"),
-    MangaCmd = require("../Commands/manga.js"),
-    AnimeCmd = require("../Commands/anime.js"),
-    GraphQLRequest = require("../Utils/GraphQLRequest.js");
+    Command = require("#Structures/Command.js"),
+    CommandCategories = require("#Utils/CommandCategories.js"),
+    EmbedError = require("#Utils/EmbedError.js"),
+    MangaCmd = require("#Commands/manga.js"),
+    AnimeCmd = require("#Commands/anime.js"),
+    GraphQLRequest = require("#Utils/GraphQLRequest.js");
 
 module.exports = new Command({
     name: "recommend",

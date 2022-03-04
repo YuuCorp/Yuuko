@@ -1,9 +1,9 @@
 const Discord = require("discord.js"),
-    Command = require("../Structures/Command.js"),
+    Command = require("#Structures/Command.js"),
     axios = require("axios"),
-    EmbedError = require("../Utils/EmbedError.js"),
-    Footer = require("../Utils/Footer.js"),
-    CommandCategories = require("../Utils/CommandCategories"),
+    EmbedError = require("#Utils/EmbedError.js"),
+    Footer = require("#Utils/Footer.js"),
+    CommandCategories = require("#Utils/CommandCategories.js"),
     fs = require("fs"),
     path = require("path"),
     TurndownService = require('turndown');

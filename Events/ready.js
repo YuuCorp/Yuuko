@@ -1,4 +1,4 @@
-const Event = require("../Structures/Event.js");
+const Event = require("#Structures/Event.js");
 const fs = require("fs");
 
 module.exports = new Event("ready", (client) => {
