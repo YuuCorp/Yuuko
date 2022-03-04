@@ -61,7 +61,7 @@ module.exports = new Command({
                     const descLength = 350;
                     let description =
                         data.description
-                            .replace(/<br><br>/g, "\n")
+                            ?.replace(/<br><br>/g, "\n")
                             .replace(/<br>/g, "\n")
                             .replace(/<[^>]+>/g, "")
                             .replace(/&nbsp;/g, " ") /*.replace(/\n\n/g, "\n")*/ || "No description available.";
@@ -70,103 +70,93 @@ module.exports = new Command({
                         .setTitle(data.title.english || data.title.romaji || data.title.native)
                         .addFields(
                             {
-                                name: 'Chapters',
-                                value: data.chapters ? data.chapters.toString() : 'N/A',
+                                name: "Chapters",
+                                value: data.chapters ? data.chapters.toString() : "N/A",
                                 inline: true,
                             },
                             {
-                                name: 'Format',
+                                name: "Format",
                                 value: data.format || "Unknown",
                                 inline: true,
                             },
                             {
-                                name: 'Mean Score',
+                                name: "Mean Score",
                                 value: data.meanScore.toString() + "%" || "Unknown",
                                 inline: true,
                             },
                             {
-                                name: 'Start Date', 
-                                value: data.startDate.day ? `${data.startDate.day}-${data.startDate.month}-${data.startDate.year}` : 'Unknown',
+                                name: "Start Date",
+                                value: data.startDate.day ? `${data.startDate.day}-${data.startDate.month}-${data.startDate.year}` : "Unknown",
                                 inline: true,
                             },
                             {
-                                name: 'End Date', 
-                                value: data.endDate.day ? `${data.endDate.day}/${data.endDate.month}/${data.endDate.year}` : 'Unknown' ,
+                                name: "End Date",
+                                value: data.endDate.day ? `${data.endDate.day}/${data.endDate.month}/${data.endDate.year}` : "Unknown",
                                 inline: true,
                             },
                             {
-                                name: '\u200B', 
-                                value: '\u200B',
+                                name: "\u200B",
+                                value: "\u200B",
                                 inline: true,
                             },
                             {
-                                name: 'Genres', 
-                                value: '``' +`${data.genres.join(", ") || "N/A"}` + '``',
+                                name: "Genres",
+                                value: "``" + `${data.genres.join(", ") || "N/A"}` + "``",
                                 inline: true,
-                            },
+                            }
                         )
                         .setDescription(description.length > descLength ? description.substring(0, descLength) + "..." || "No description available." : description || "No description available.")
                         .setURL("https://anilist.co/manga/" + data.id)
                         .setColor("0x00ff00")
                         .setFooter(Footer(response));
 
-                        const secondPage = new Discord.MessageEmbed()
+                    const secondPage = new Discord.MessageEmbed()
                         .setAuthor(`${data.title.english} | Additional info`)
                         .setThumbnail(data.coverImage.large)
                         .addFields(
                             {
-                                name: 'Source',
+                                name: "Source",
                                 value: data.source || "Unknown",
                                 inline: true,
                             },
                             {
-                                name: '\u200B', 
-                                value: '\u200B',
+                                name: "\u200B",
+                                value: "\u200B",
                                 inline: true,
                             },
                             {
-                                name: '\u200B', 
-                                value: '\u200B',
+                                name: "\u200B",
+                                value: "\u200B",
                                 inline: true,
                             },
                             {
-                                name: 'Synonyms',
-                                value: '``' +`${data.synonyms.join(", ")|| "N/A"}` + '``',
+                                name: "Synonyms",
+                                value: "``" + `${data.synonyms.join(", ") || "N/A"}` + "``",
                                 inline: true,
                             }
-                            ) 
+                        )
                         .setColor("0x00ff00")
-                        .setFooter(Footer(response))
-                        
-                        const buttonList = [
-                            new Discord.MessageButton().setCustomId("firstbtn").setLabel("First page").setStyle("DANGER"),
-                            new Discord.MessageButton().setCustomId("previousbtn").setLabel("Previous").setStyle("SUCCESS"),
-                            new Discord.MessageButton().setCustomId("nextbtn").setLabel("Next").setStyle("SUCCESS"),
-                            new Discord.MessageButton().setCustomId("lastbtn").setLabel("Last Page").setStyle("DANGER"),
-                        ];
-                        const pageList = [firstPage, secondPage];
+                        .setFooter(Footer(response));
 
-                        pagination({
-                            message, // Required
-                            pageList, // Required
-                            buttonList,
-                            autoButton: true, // optional - if you do not want custom buttons remove the buttonList parameter
-                            // and replace it will autoButtons: true which will create buttons depending on
-                            // how many pages there are
-                            autoDelButton: true, // Optional - if you are using autoButton and would like delete buttons this
-                            // parameter adds delete buttons to the buttonList
-    
-                            timeout:20000, // Optional - if not provided it will default to 12000ms
-    
-                            replyMessage: true, // Optional - An option to reply to the target message if you do not want
-                            // this option remove it from the function call
-    
-                            autoDelete: true, // Optional - An option to have the pagination delete it's self when the timeout ends
-                            // if you do not want this option remove it from the function call
-    
-                            authorIndependent: true, // Optional - An option to set pagination buttons only usable by the author
-                            // if you do not want this option remove it from the function call
-                        });
+                    const buttonList = [
+                        new Discord.MessageButton().setCustomId("firstbtn").setLabel("First page").setStyle("DANGER"),
+                        new Discord.MessageButton().setCustomId("previousbtn").setLabel("Previous").setStyle("SUCCESS"),
+                        new Discord.MessageButton().setCustomId("nextbtn").setLabel("Next").setStyle("SUCCESS"),
+                        new Discord.MessageButton().setCustomId("lastbtn").setLabel("Last Page").setStyle("DANGER"),
+                    ];
+                    const pageList = [firstPage, secondPage];
+
+                    pagination({
+                        message,
+                        pageList,
+                        buttonList,
+                        autoButton: true,
+                        autoDelButton: true,
+                        timeout: 20000,
+                        replyMessage: true,
+                        autoDelete: false,
+                        authorIndependent: true,
+                    });
                 } else {
                     message.channel.send("Could not find any data.");
                 }
