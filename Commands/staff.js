@@ -22,6 +22,7 @@ module.exports = new Command({
                 let data = response.Staff;
                 if (data) {
                     // Fix the description by replacing and converting HTML tags
+                    const descLength = 1000;
                     let description =
                         data.description
                             ?.replace(/<br><br>/g, "\n")
@@ -32,9 +33,8 @@ module.exports = new Command({
                     const charEmbed = new Discord.MessageEmbed()
                         .setThumbnail(data.image.large)
                         .setTitle(data.name.full)
-                        .setDescription(description || "No description available.")
+                        .setDescription(description.length > descLength ? description.substring(0, descLength) + "..." || "No description available." : description || "No description available.")
                         .addFields(
-
                             { name: "Staff Info: \n", value: `**Age**: ${data.age || "No age specified"} **Gender**: ${data.gender || "No gender specified."}\n **Home Town**: ${data.homeTown || "No home town specified."}` }
                         )
                         .setURL(data.siteUrl)
