@@ -6,7 +6,8 @@ const Discord = require("discord.js"),
     path = require("path"),
     { roundRect } = require("#Utils/CanvasHelper.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
-    GraphQLRequest = require("#Utils/GraphQLRequest.js");
+    GraphQLRequest = require("#Utils/GraphQLRequest.js"),
+    GraphQLQueries = require("#Utils/GraphQLQueries.js");
 
 module.exports = new Command({
     name: "usercard",
@@ -15,34 +16,10 @@ module.exports = new Command({
     type: CommandCategories.Misc,
 
     async run(message, args, run) {
-        let query = `query ($username: String) {
-                User(name:$username) {
-                    id
-                    name
-                    avatar {
-                        large
-                        medium
-                    }
-                    bannerImage
-                    siteUrl
-                    createdAt
-                    statistics {
-                            anime {
-                                count
-                                meanScore
-                            }
-                            manga {
-                                count
-                                meanScore
-                            }
-                        }
-                    }
-                }`;
-
         let vars = { username: args.slice(1).join(" ") };
 
         // Make the HTTP Api request
-        GraphQLRequest(query, vars)
+        GraphQLRequest(GraphQLQueries.UserCard, vars)
             .then(async (response) => {
                 let data = response.User;
                 if (data) {
@@ -54,7 +31,7 @@ module.exports = new Command({
                     const pfp = await Canvas.loadImage(data.avatar.large);
 
                     //^ Show the Profile Picture and Background images
-                    //TODO Maybe people could select a custom background
+                    // TODO: Maybe people could select a custom background
                     ctx.textAlign = "center"
                     ctx.drawImage(bg, 0, 0);
                     ctx.filter = "none";

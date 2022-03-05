@@ -5,6 +5,7 @@
             "#Utils/*": ["./Utils/*"],
             "#Commands/*": ["./Commands/*"],
             "#Structures/*": ["./Structures/*"],
+            "#GraphQL/*": ["./GraphQL/*"]
         }
     }
 }

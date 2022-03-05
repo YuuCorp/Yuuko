@@ -4,7 +4,8 @@ const Discord = require("discord.js"),
     EmbedError = require("#Utils/EmbedError.js"),
     MangaCmd = require("#Commands/manga.js"),
     AnimeCmd = require("#Commands/anime.js"),
-    GraphQLRequest = require("#Utils/GraphQLRequest.js");
+    GraphQLRequest = require("#Utils/GraphQLRequest.js"),
+    GraphQLQueries = require("#Utils/GraphQLQueries.js");
 
 module.exports = new Command({
     name: "recommend",
@@ -12,23 +13,6 @@ module.exports = new Command({
     description: "Recommends unwatched anime/manga based on the requested genre(s).",
     type: CommandCategories.Anilist,
     async run(message, args, run) {
-        let query = `query ($type: MediaType, $userName: String) {
-                MediaListCollection(userName: $userName, type: $type) {
-                    lists {
-                        entries {
-                            media {
-                                id
-                                title {
-                                    english
-                                }
-                                genres
-                            }
-                            score
-                        }
-                        name
-                    }
-                }
-            }`;
         const contentType = args[1].toUpperCase();
         let vars = { type: contentType, userName: args[2] };
 
@@ -39,7 +23,7 @@ module.exports = new Command({
         let excludeIDs = [];
 
         //^ First we query the user to find what ID-s we should exclude from the search pool.
-        GraphQLRequest(query, vars)
+        GraphQLRequest(GraphQLQueries.GetMediaCollection, vars)
             .then((response, headers) => {
                 let data = response.MediaListCollection;
                 if (data) {
@@ -57,18 +41,6 @@ module.exports = new Command({
                 message.channel.send({ embeds: [EmbedError(error, vars)] });
             });
 
-        let recommendationQuery = `
-            query ($type: MediaType, $exclude_ids: [Int], $genres: [String]) {
-                Page (perPage: 50) {
-                    media (genre_in: $genres, id_not_in: $exclude_ids, type: $type, sort: SCORE_DESC, averageScore_greater: 6) {
-                        title {
-                            english
-                        }
-                        genres
-                    }
-                }
-            }`;
-
         function ProcessRecommendations() {
             if (!args.slice(3).length) {
                 return message.channel.send({ embeds: [EmbedError(`Please specify at least one genre.`, null, false)] });
@@ -77,7 +49,7 @@ module.exports = new Command({
             const genres = args.slice(3).join(" ").split(",").map(genre => genre.trim());
             const recommendationVars = { type: contentType, exclude_ids: excludeIDs, genres };
 
-            GraphQLRequest(recommendationQuery, recommendationVars)
+            GraphQLRequest(GraphQLQueries.Recommendations, recommendationVars)
                 .then((response) => {
                     let data = response.Page;
                     if (data) {
@@ -93,7 +65,7 @@ module.exports = new Command({
                             case "MANGA":
                                 MangaCmd.run(message, args, run, true, recommendations[random].title.english);
                                 break;
-                        }                        
+                        }
                     } else {
                         return message.channel.send({ embeds: [EmbedError(`Couldn't find any data.`, recommendationVars)] });
                     }
@@ -103,6 +75,6 @@ module.exports = new Command({
                     message.channel.send({ embeds: [EmbedError(error, vars)] });
                 });
         }
-        
+
     },
 });

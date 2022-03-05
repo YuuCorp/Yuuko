@@ -3,7 +3,8 @@ const Discord = require("discord.js"),
     EmbedError = require("#Utils/EmbedError.js"),
     Footer = require("#Utils/Footer.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
-    GraphQLRequest = require("#Utils/GraphQLRequest.js");
+    GraphQLRequest = require("#Utils/GraphQLRequest.js"),
+    GraphQLQueries = require("#Utils/GraphQLQueries.js");
 
 module.exports = new Command({
     name: "user",
@@ -39,11 +40,12 @@ module.exports = new Command({
         let vars = { username: args.slice(1).join(" ") };
 
         // Make the HTTP Api request
-        GraphQLRequest(query, vars)
+        GraphQLRequest(GraphQLQueries.User, vars)
             .then((response, headers) => {
                 let data = response.User;
                 if (data) {
                     const titleEmbed = new Discord.MessageEmbed()
+                        // TODO: Fix depricated function calls 101
                         .setAuthor(data.name, "https://anilist.co/img/icons/android-chrome-512x512.png", data.siteUrl)
                         .setImage(data.bannerImage)
                         .setThumbnail(data.avatar.large)

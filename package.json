@@ -33,6 +33,7 @@
   "imports": {
     "#Utils/*": ["./Utils/*"],
     "#Commands/*": ["./Commands/*"],
-    "#Structures/*": ["./Structures/*"]
+    "#Structures/*": ["./Structures/*"],
+    "#GraphQL/*": ["./GraphQL/*"]
   }
 }

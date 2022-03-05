@@ -1,0 +1,20 @@
+query ($charName: String) {
+    Character (search: $charName) {
+        name{
+          full
+            }
+        age
+        description
+        siteUrl
+        image {
+          large
+        }
+        bloodType
+        dateOfBirth {
+            year
+            month
+            day
+        }
+        gender
+    }
+}

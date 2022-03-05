@@ -3,7 +3,8 @@ const Discord = require("discord.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
     Footer = require("#Utils/Footer.js"),
     EmbedError = require("#Utils/EmbedError.js"),
-    GraphQLRequest = require("#Utils/GraphQLRequest.js");
+    GraphQLRequest = require("#Utils/GraphQLRequest.js"),
+    GraphQLQueries = require("#Utils/GraphQLQueries.js");
 
 module.exports = new Command({
     name: "staff",
@@ -12,24 +13,11 @@ module.exports = new Command({
     type: CommandCategories.Anilist,
 
     async run(message, args, run) {
-        let query = `query($staffName: String) {
-        Staff(search: $staffName) {
-            name{
-                full
-                }
-            age
-            image{
-                large
-            }
-            description
-            gender
-            homeTown
-            siteUrl
-                }
-          }`;
         let vars = { staffName: args.slice(1).join(" ") };
 
-        GraphQLRequest(query, vars)
+        // TODO: Fixme description length, it crashes the bot.
+        
+        GraphQLRequest(GraphQLQueries.Staff, vars)
             .then((response, headers) => {
                 let data = response.Staff;
                 if (data) {

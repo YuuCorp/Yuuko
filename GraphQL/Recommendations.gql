@@ -1,0 +1,10 @@
+query ($type: MediaType, $exclude_ids: [Int], $genres: [String]) {
+    Page (perPage: 50) {
+        media (genre_in: $genres, id_not_in: $exclude_ids, type: $type, sort: SCORE_DESC, averageScore_greater: 6) {
+            title {
+                english
+            }
+            genres
+        }
+    }
+}

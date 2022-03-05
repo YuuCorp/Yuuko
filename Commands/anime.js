@@ -4,7 +4,8 @@ const Discord = require("discord.js"),
     Footer = require("#Utils/Footer.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
     pagination = require("@acegoal07/discordjs-pagination"),
-    GraphQLRequest = require("#Utils/GraphQLRequest.js");
+    GraphQLRequest = require("#Utils/GraphQLRequest.js"),
+    GraphQLQueries = require("#Utils/GraphQLQueries.js");
 
 module.exports = new Command({
     name: "anime",
@@ -13,47 +14,7 @@ module.exports = new Command({
     type: CommandCategories.Anilist,
 
     async run(message, args, run, hook = false, hookdata = null) {
-        let query = `query ($query: String) { # Define which variables will be used in the query (id)
-                Media (search: $query, type: ANIME) { # Insert our variables into the query arguments (id) (type: ANIME is hard-coded in the query)
-                    id
-                    nextAiringEpisode {
-                        timeUntilAiring
-                        airingAt
-                        episode
-                    }
-                    description
-                    coverImage {
-                        large
-                        medium
-                    }
-                    title {
-                        romaji
-                        english
-                        native
-                    }
-                    format
-                    source
-                    genres
-                    duration
-                    synonyms
-                    episodes
-                    meanScore
-                    startDate {
-                        year
-                        month
-                        day
-                    }
-                    endDate {
-                        year
-                        month
-                        day
-                    }
-                    bannerImage
-                }
-            }`;
-
         let vars = {};
-        //*DEBUG: console.log(`Hook: ${hook}\nHookData:`, hookdata)
 
         if (!hook) {
             if (args.slice(1).join(" ").length < 3) {
@@ -70,7 +31,7 @@ module.exports = new Command({
         }
 
         //^ Make the HTTP Api request
-        GraphQLRequest(query, vars)
+        GraphQLRequest(GraphQLQueries.Anime, vars)
             .then((response, headers) => {
                 let data = response.Media;
                 if (data) {

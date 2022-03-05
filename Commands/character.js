@@ -3,7 +3,8 @@ const Discord = require("discord.js"),
     EmbedError = require("#Utils/EmbedError.js"),
     Footer = require("#Utils/Footer.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
-    GraphQLRequest = require("#Utils/GraphQLRequest.js");
+    GraphQLRequest = require("#Utils/GraphQLRequest.js"),
+    GraphQLQueries = require("#Utils/GraphQLQueries.js");
 
 module.exports = new Command({
     name: "character",
@@ -12,29 +13,9 @@ module.exports = new Command({
     type: CommandCategories.Anilist,
 
     async run(message, args, run) {
-        let query = `query ($charName: String) {
-        Character (search:$charName) {
-            name{
-              full
-                }
-            age
-            description
-            siteUrl
-            image {
-              large
-            }
-            bloodType
-            dateOfBirth {
-                year
-                month
-                day
-            }
-            gender
-          }
-        }`;
         let vars = { charName: args.slice(1).join(" ") };
 
-        GraphQLRequest(query, vars)
+        GraphQLRequest(GraphQLQueries.Character, vars)
             .then((response, headers) => {
                 let data = response.Character;
                 if (data) {

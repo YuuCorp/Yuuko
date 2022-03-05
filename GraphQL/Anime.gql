@@ -1,0 +1,38 @@
+query ($query: String) { # Define which variables will be used in the query (id)
+    Media (search: $query, type: ANIME) { # Insert our variables into the query arguments (id) (type: ANIME is hard-coded in the query)
+        id
+        nextAiringEpisode {
+            timeUntilAiring
+            airingAt
+            episode
+        }
+        description
+        coverImage {
+            large
+            medium
+        }
+        title {
+            romaji
+            english
+            native
+        }
+        format
+        source
+        genres
+        duration
+        synonyms
+        episodes
+        meanScore
+        startDate {
+            year
+            month
+            day
+        }
+        endDate {
+            year
+            month
+            day
+        }
+        bannerImage
+    }
+}

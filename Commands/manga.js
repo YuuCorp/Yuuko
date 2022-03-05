@@ -4,7 +4,8 @@ const Discord = require("discord.js"),
     Footer = require("#Utils/Footer.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
     pagination = require("@acegoal07/discordjs-pagination"),
-    GraphQLRequest = require("#Utils/GraphQLRequest.js");
+    GraphQLRequest = require("#Utils/GraphQLRequest.js"),
+    GraphQLQueries = require("#Utils/GraphQLQueries.js");
 
 module.exports = new Command({
     name: "manga",
@@ -13,44 +14,10 @@ module.exports = new Command({
     type: CommandCategories.Anilist,
 
     async run(message, args, run, hook = false, title = null) {
-        let query = `query ($query: String) { 
-                Media (search: $query, type: MANGA) {
-                    id
-                    description
-                    coverImage {
-                        large
-                        medium
-                    }
-                    title {
-                        romaji
-                        english
-                        native
-                    }
-                    format
-                    chapters
-                    source
-                    synonyms
-                    volumes
-                    genres
-                    meanScore
-                    startDate {
-                        year
-                        month
-                        day
-                    }
-                    endDate {
-                        year
-                        month
-                        day
-                    }
-                    bannerImage
-                }
-            }`;
-
         let vars = { query: !hook ? args.slice(1).join(" ") : title };
 
         //^ Make the HTTP Api request
-        GraphQLRequest(query, vars)
+        GraphQLRequest(GraphQLQueries.Manga, vars)
             .then((response, headers) => {
                 let data = response.Media;
                 if (data) {
