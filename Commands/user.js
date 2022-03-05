@@ -13,32 +13,7 @@ module.exports = new Command({
     type: CommandCategories.Anilist,
 
     async run(message, args, run) {
-        let query = `query ($username: String) {
-                User(name:$username) {
-                    id
-                    name
-                    avatar {
-                      large
-                      medium
-                    }
-                    bannerImage
-                    siteUrl
-                    createdAt
-                    statistics {
-                        anime {
-                          count
-                          meanScore
-                        }
-                        manga {
-                          count
-                          meanScore
-                        }
-                      }
-                    }
-              }`;
-
         let vars = { username: args.slice(1).join(" ") };
-
         // Make the HTTP Api request
         GraphQLRequest(GraphQLQueries.User, vars)
             .then((response, headers) => {
