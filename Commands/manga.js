@@ -30,6 +30,7 @@ module.exports = new Command({
                             .replace(/<br>/g, "\n")
                             .replace(/<[^>]+>/g, "")
                             .replace(/&nbsp;/g, " ") /*.replace(/\n\n/g, "\n")*/ || "No description available.";
+
                     const firstPage = new Discord.MessageEmbed()
                         .setThumbnail(data.coverImage.large)
                         .setTitle(data.title.english || data.title.romaji || data.title.native)
@@ -105,7 +106,7 @@ module.exports = new Command({
 
                     // Paginate the embeds
                     const pageList = [firstPage, secondPage];
-                    pagination(DefaultPaginationOpts(message, pageList))
+                    pagination(DefaultPaginationOpts(message, pageList));
                 } else {
                     return message.channel.send({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
                 }
