@@ -1,5 +1,5 @@
 /**
- * Returns the fotter string.
+ * Returns the footer string.
  * @param [headers=null] Optional HTTP headers to get the ratelimit values.
  * @returns {Object} The footer object.
  */
