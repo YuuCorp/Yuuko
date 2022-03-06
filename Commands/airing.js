@@ -2,6 +2,7 @@ const Discord = require("discord.js"),
     Command = require("#Structures/Command.js"),
     EmbedError = require("#Utils/EmbedError.js"),
     GraphQLRequest = require("#Utils/GraphQLRequest.js"),
+    GraphQLQueries = require("#Utils/GraphQLQueries.js"),
     Footer = require("#Utils/Footer.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
     pagination = require("@acegoal07/discordjs-pagination"),
@@ -15,30 +16,9 @@ module.exports = new Command({
     type: CommandCategories.Anilist,
 
     async run(message, args, run) {
-        const query = `query($dateStart: Int, $nextDay: Int!) {
-            Page{
-              airingSchedules(sort: TIME, airingAt_greater: $dateStart, airingAt_lesser: $nextDay) {
-                media {
-                  siteUrl
-                  format
-                  duration
-                  episodes
-                  title {
-                    english
-                    romaji
-                    native
-                  }
-                }
-                id
-                episode
-                airingAt
-                timeUntilAiring
-              }
-            }
-        }`;
-
         let vars = {};
 
+        //^ Check if the user wants to search for a specific day
         let airingIn = 0;
         if (args.length > 1) {
             try {
@@ -55,7 +35,6 @@ module.exports = new Command({
             }
         }
 
-
         const _day = new Date(Date.now() + airingIn);
         const day = new Date(Date.UTC(_day.getFullYear(), _day.getMonth(), _day.getDate()));
         const nextDay = new Date(day.getTime());
@@ -64,11 +43,10 @@ module.exports = new Command({
         vars.nextDay = Math.floor(nextDay.getTime() / 1000);
 
         //^ Make the HTTP Api request
-        GraphQLRequest(query, vars)
+        GraphQLRequest(GraphQLQueries.Airing, vars)
             .then((response, headers) => {
                 const data = response.Page;
                 const { airingSchedules } = data;
-                //console.log(data);
 
                 if (data) {
                     const chunkSize = 5;

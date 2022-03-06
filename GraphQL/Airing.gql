@@ -1,0 +1,21 @@
+query ($dateStart: Int, $nextDay: Int!) {
+    Page {
+        airingSchedules(sort: TIME, airingAt_greater: $dateStart, airingAt_lesser: $nextDay) {
+            media {
+                siteUrl
+                format
+                duration
+                episodes
+                title {
+                    english
+                    romaji
+                    native
+                }
+            }
+            id
+            episode
+            airingAt
+            timeUntilAiring
+        }
+    }
+}
