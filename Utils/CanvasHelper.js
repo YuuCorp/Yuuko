@@ -51,4 +51,4 @@
   
   }
 
-module.exports = { roundRect: roundRect }
+module.exports = { roundRect }
