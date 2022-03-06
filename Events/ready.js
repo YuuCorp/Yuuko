@@ -5,7 +5,7 @@ module.exports = new Event("ready", (client) => {
     let n = 0;
     statusArray = [
         () => `${client.guilds.cache.size} Servers with ${client.users.cache.size} members.`,
-        '!!help'
+        'as!help'
     ]
     setInterval(() => {
         if (n === statusArray.length) n = 0;
