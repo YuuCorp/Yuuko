@@ -5,7 +5,8 @@ const Discord = require("discord.js"),
     Footer = require("#Utils/Footer.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
     pagination = require("@acegoal07/discordjs-pagination"),
-    ms = require("ms");
+    ms = require("ms"),
+    DefaultPaginationOpts = require("#Utils/DefaultPaginationOpts.js");
 
 module.exports = new Command({
     name: "airing",
@@ -107,24 +108,9 @@ module.exports = new Command({
                         });
                         pageList.push(embed);
                     });
-                    const buttonList = [
-                        new Discord.MessageButton().setCustomId("firstbtn").setLabel("First page").setStyle("DANGER"),
-                        new Discord.MessageButton().setCustomId("previousbtn").setLabel("Previous").setStyle("SUCCESS"),
-                        new Discord.MessageButton().setCustomId("nextbtn").setLabel("Next").setStyle("SUCCESS"),
-                        new Discord.MessageButton().setCustomId("lastbtn").setLabel("Last Page").setStyle("DANGER"),
-                    ];
 
-                    pagination({
-                        message,
-                        pageList,
-                        buttonList,
-                        autoButton: true,
-                        autoDelButton: true,
-                        timeout: 20000,
-                        replyMessage: true,
-                        autoDelete: false,
-                        authorIndependent: true,
-                    });
+                    
+                    pagination(DefaultPaginationOpts(message, pageList));
                 } else {
                     message.channel.send({
                         embeds: [

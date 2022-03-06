@@ -3,6 +3,7 @@ const Discord = require("discord.js"),
     EmbedError = require("#Utils/EmbedError.js"),
     Footer = require("#Utils/Footer.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
+    DefaultPaginationOpts = require("#Utils/DefaultPaginationOpts.js"),
     pagination = require("@acegoal07/discordjs-pagination"),
     GraphQLRequest = require("#Utils/GraphQLRequest.js"),
     GraphQLQueries = require("#Utils/GraphQLQueries.js");
@@ -102,25 +103,9 @@ module.exports = new Command({
                         .setColor("0x00ff00")
                         .setFooter(Footer(headers));
 
-                    const buttonList = [
-                        new Discord.MessageButton().setCustomId("firstbtn").setLabel("First page").setStyle("DANGER"),
-                        new Discord.MessageButton().setCustomId("previousbtn").setLabel("Previous").setStyle("SUCCESS"),
-                        new Discord.MessageButton().setCustomId("nextbtn").setLabel("Next").setStyle("SUCCESS"),
-                        new Discord.MessageButton().setCustomId("lastbtn").setLabel("Last Page").setStyle("DANGER"),
-                    ];
+                    // Paginate the embeds
                     const pageList = [firstPage, secondPage];
-
-                    pagination({
-                        message,
-                        pageList,
-                        buttonList,
-                        autoButton: true,
-                        autoDelButton: true,
-                        timeout: 20000,
-                        replyMessage: true,
-                        autoDelete: false,
-                        authorIndependent: true,
-                    });
+                    pagination(DefaultPaginationOpts(message, pageList))
                 } else {
                     return message.channel.send({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
                 }
