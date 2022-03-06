@@ -42,7 +42,7 @@ module.exports = new Command({
                         .setFooter(Footer(headers));
                     message.channel.send({ embeds: [charEmbed] });
                 } else {
-                    message.channel.send("Could not find any data.");
+                    return message.channel.send({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
                 }
             })
             .catch((error) => {
