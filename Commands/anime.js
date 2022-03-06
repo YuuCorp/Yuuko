@@ -16,7 +16,7 @@ module.exports = new Command({
 
     async run(message, args, run, hook = false, hookdata = null) {
         let vars = {};
-
+        //^ Hook data is passed in if this command is called from another command
         if (!hook) {
             if (args.slice(1).join(" ").length < 3) {
                 return message.channel.send({ embeds: [EmbedError(`Please enter a search query of at least 3 characters.`, null, false)] });
@@ -30,7 +30,6 @@ module.exports = new Command({
             query = query.replace("$query: String", "$query: Int");
             query = query.replace("search:", "id:");
         }
-
         //^ Make the HTTP Api request
         GraphQLRequest(GraphQLQueries.Anime, vars)
             .then((response, headers) => {
@@ -53,7 +52,7 @@ module.exports = new Command({
                         .addFields(
                             {
                                 name: "Episodes",
-                                value: `${data.episodes}`,
+                                value: data.episodes || "Unknown",
                                 inline: true,
                             },
                             {
@@ -63,7 +62,7 @@ module.exports = new Command({
                             },
                             {
                                 name: "Mean Score",
-                                value: data.meanScore.toString() + "%" || "Unknown",
+                                value: data?.meanScore?.toString() == "undefined" ? data?.meanScore?.toString() : "Unknown",
                                 inline: true,
                             },
                             {
@@ -77,6 +76,7 @@ module.exports = new Command({
                                 inline: true,
                             },
                             {
+                                //^ Check if the anime has finished airing
                                 name: data?.nextAiringEpisode?.episode ? `Episode ${data.nextAiringEpisode.episode} airing in:` : "Completed on:",
                                 value: data?.nextAiringEpisode?.airingAt ? `<t:${data.nextAiringEpisode.airingAt}:R>` : `${data.endDate.day}-${data.endDate.month}-${data.endDate.year}`,
                                 inline: true,
@@ -108,7 +108,7 @@ module.exports = new Command({
                             },
                             {
                                 name: "Episode Duration",
-                                value: data.duration.toString(),
+                                value: data?.duration?.toString() || "Unknown",
                                 inline: true,
                             },
                             {
@@ -125,8 +125,6 @@ module.exports = new Command({
                         .setColor("0x00ff00")
                         .setFooter(Footer(headers));
 
-                    const pageList = [firstPage, secondPage];
-
                     if (hookdata?.image) {
                         firstPage.setImage(hookdata.image);
                     }
@@ -136,6 +134,8 @@ module.exports = new Command({
                             firstPage.addField(field.name, field.value, field.inline || false);
                         }
                     }
+
+                    const pageList = [firstPage, secondPage];
                     pagination(DefaultPaginationOpts(message, pageList));
                 } else {
                     return message.channel.send({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
