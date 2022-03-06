@@ -17,7 +17,6 @@ module.exports = new Command({
 
     async run(message, args, run) {
         let vars = {};
-
         //^ Check if the user wants to search for a specific day
         let airingIn = 0;
         if (args.length > 1) {
@@ -41,7 +40,6 @@ module.exports = new Command({
         nextDay.setHours(23, 59, 59, 999);
         vars.dateStart = Math.floor(day.getTime() / 1000);
         vars.nextDay = Math.floor(nextDay.getTime() / 1000);
-
         //^ Make the HTTP Api request
         GraphQLRequest(GraphQLQueries.Airing, vars)
             .then((response, headers) => {
@@ -86,7 +84,6 @@ module.exports = new Command({
                         });
                         pageList.push(embed);
                     });
-
                     
                     pagination(DefaultPaginationOpts(message, pageList));
                 } else {
