@@ -44,7 +44,6 @@ module.exports = new Command({
                             .replace(/<[^>]+>/g, "")
                             .replace(/&nbsp;/g, " ")
                             .replace(/\n\n/g, "\n") || "No description available.";
-
                     const firstPage = new Discord.MessageEmbed()
                         .setImage(data.bannerImage)
                         .setThumbnail(data.coverImage.large)
@@ -52,7 +51,7 @@ module.exports = new Command({
                         .addFields(
                             {
                                 name: "Episodes",
-                                value: data.episodes || "Unknown",
+                                value: data?.episodes.toString() || "Unknown",
                                 inline: true,
                             },
                             {
