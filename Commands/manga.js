@@ -25,7 +25,7 @@ module.exports = new Command({
                     // Fix the description by replacing and converting HTML tags
                     const descLength = 350;
                     let description =
-                        data.description
+                        data?.description
                             ?.replace(/<br><br>/g, "\n")
                             .replace(/<br>/g, "\n")
                             .replace(/<[^>]+>/g, "")
@@ -47,7 +47,7 @@ module.exports = new Command({
                             },
                             {
                                 name: "Mean Score",
-                                value: data.meanScore.toString() + "%" || "Unknown",
+                                value: data?.meanScore?.toString() == "undefined" ? data?.meanScore?.toString() : "Unknown",
                                 inline: true,
                             },
                             {
