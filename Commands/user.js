@@ -4,7 +4,8 @@ const Discord = require("discord.js"),
     Footer = require("#Utils/Footer.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
     GraphQLRequest = require("#Utils/GraphQLRequest.js"),
-    GraphQLQueries = require("#Utils/GraphQLQueries.js");
+    GraphQLQueries = require("#Utils/GraphQLQueries.js"),
+    AnilistUser = require("#Models/AnilistUser.js");
 
 module.exports = new Command({
     name: "user",
@@ -13,7 +14,23 @@ module.exports = new Command({
     type: CommandCategories.Anilist,
 
     async run(message, args, run) {
-        let vars = { username: args.slice(1).join(" ") };
+        let anilistUser = args.slice(1).join(" ");
+
+        // If the user hasn't provided a user
+        if (!anilistUser) {
+            // We try to use the one the user set
+            try {
+                const user = await AnilistUser.findOne({ where: { discord_id: message.author.id } });
+                if (!user) {
+                    return message.channel.send({ embeds: [EmbedError(`You haven't bound your AniList username to your Discord account.`)] });
+                }
+                anilistUser = user.anilist_id;
+            } catch {
+                return message.channel.send({ embeds: [EmbedError(`Please provide a valid AniList username.`)] });
+            }
+        }
+
+        let vars = { username: anilistUser };
         // Make the HTTP Api request
         GraphQLRequest(GraphQLQueries.User, vars)
             .then((response, headers) => {
