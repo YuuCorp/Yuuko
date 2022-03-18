@@ -17,7 +17,6 @@ module.exports = new Command({
 
     async run(message, args, run) {
         let vars = {};
-
         //^ Check if the user wants to search for a specific day
         let airingIn = 0;
         if (args.length > 1) {
@@ -28,20 +27,17 @@ module.exports = new Command({
                 }
             } catch (r) {
                 return message.channel.send({
-                    embeds: [
-                        EmbedError(`Invalid time format. See "${run.prefix}help airing" for more information.`, { airingWhen: args.slice(1).join(" ") }) 
-                    ]
+                    embeds: [EmbedError(`Invalid time format. See "${run.prefix}help airing" for more information.`, { airingWhen: args.slice(1).join(" ") })],
                 });
             }
         }
-
+        //^ Get current day and time in UTC
         const _day = new Date(Date.now() + airingIn);
         const day = new Date(Date.UTC(_day.getFullYear(), _day.getMonth(), _day.getDate()));
         const nextDay = new Date(day.getTime());
         nextDay.setHours(23, 59, 59, 999);
         vars.dateStart = Math.floor(day.getTime() / 1000);
         vars.nextDay = Math.floor(nextDay.getTime() / 1000);
-
         //^ Make the HTTP Api request
         GraphQLRequest(GraphQLQueries.Airing, vars)
             .then((response, headers) => {
@@ -51,22 +47,26 @@ module.exports = new Command({
                 if (data) {
                     const chunkSize = 5;
                     const fields = [];
-                    
                     // Sort the airing anime alphabetically by title
-                    airingSchedules.sort(function(a, b){
+                    airingSchedules.sort(function (a, b) {
                         a = a.media.title;
                         b = b.media.title;
                         const aTitle = (a.english || a.romaji || a.native).toLowerCase();
                         const bTitle = (b.english || b.romaji || b.native).toLowerCase();
-                        if(aTitle < bTitle) { return -1; }
-                        if(aTitle > bTitle) { return 1; }
+                        if (aTitle < bTitle) {
+                            return -1;
+                        }
+                        if (aTitle > bTitle) {
+                            return 1;
+                        }
                         return 0;
-                    })
+                    });
 
                     for (let i = 0; i < airingSchedules.length; i += chunkSize) {
                         fields.push(airingSchedules.slice(i, i + chunkSize));
                     }
 
+                    //^ Create pages with 5 airing anime per page and then make them into embeds
                     let pageList = [];
                     fields.forEach((fieldSet, index) => {
                         let embed = new Discord.MessageEmbed();
@@ -86,14 +86,11 @@ module.exports = new Command({
                         });
                         pageList.push(embed);
                     });
-
                     
                     pagination(DefaultPaginationOpts(message, pageList));
                 } else {
                     message.channel.send({
-                        embeds: [
-                            EmbedError("No airing anime found.")
-                        ]
+                        embeds: [EmbedError("No airing anime found.")],
                     });
                 }
             })

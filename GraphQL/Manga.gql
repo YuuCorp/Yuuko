@@ -1,5 +1,5 @@
 query ($query: String) { 
-    Media (search: $query, type: MANGA) {
+    Media (search: $query, type: MANGA, sort: POPULARITY_DESC) {
         id
         description
         coverImage {
