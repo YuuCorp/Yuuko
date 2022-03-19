@@ -33,20 +33,11 @@
     "yarn": "^1.22.11"
   },
   "imports": {
-    "#Utils/*": [
-      "./Utils/*"
-    ],
-    "#Commands/*": [
-      "./Commands/*"
-    ],
-    "#Structures/*": [
-      "./Structures/*"
-    ],
-    "#GraphQL/*": [
-      "./GraphQL/*"
-    ],
-    "#Models/*": [
-      "./Database/Models/*"
-    ]
+    "#Utils/*": ["./Utils/*"],
+    "#Commands/*": ["./Commands/*"],
+    "#Structures/*": ["./Structures/*"],
+    "#GraphQL/*": ["./GraphQL/*"],
+    "#Models/*": ["./Database/Models/*"],
+    "#Caching/*": ["./Caching/*"]
   }
 }

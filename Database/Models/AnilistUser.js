@@ -1,7 +1,7 @@
 const { Sequelize, Model, DataTypes } = require("sequelize");
-const sequelize = require("../db");
+const db = require("../db");
 
-const AnilistUser = sequelize.define("anilistuser", {
+const AnilistUser = db.define("anilistuser", {
     discord_id: {
         type: DataTypes.STRING(18),
         allowNull: false,
