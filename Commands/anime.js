@@ -51,7 +51,7 @@ module.exports = new Command({
                         .addFields(
                             {
                                 name: "Episodes",
-                                value: data?.episodes.toString() || "Unknown",
+                                value: data?.episodes?.toString() || "Unknown",
                                 inline: true,
                             },
                             {
