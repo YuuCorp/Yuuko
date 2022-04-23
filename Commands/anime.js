@@ -27,8 +27,8 @@ module.exports = new Command({
         else return message.channel.send({ embeds: [EmbedError(`AnimeCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)] });
 
         if (hookdata?.id) {
-            query = query.replace("$query: String", "$query: Int");
-            query = query.replace("search:", "id:");
+            GraphQLQueries.Anime = GraphQLQueries.Anime.replace("$query: String", "$query: Int");
+            GraphQLQueries.Anime = GraphQLQueries.Anime.replace("search:", "id:");
         }
         //^ Make the HTTP Api request
         GraphQLRequest(GraphQLQueries.Anime, vars)
