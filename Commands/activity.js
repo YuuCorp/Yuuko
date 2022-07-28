@@ -5,7 +5,8 @@ const Discord = require("discord.js"),
     Footer = require("#Utils/Footer.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
     GraphQLRequest = require("#Utils/GraphQLRequest.js"),
-    GraphQLQueries = require("#Utils/GraphQLQueries.js");
+    GraphQLQueries = require("#Utils/GraphQLQueries.js"),
+    AnilistUser = require("#Models/AnilistUser.js");
 
 const name = "activity";
 const usage = "activity <user>";
@@ -22,12 +23,15 @@ module.exports = new Command({
         .addStringOption(option =>
             option.setName('user')
                 .setDescription('The user to search for')
-                .setRequired(true)),
+                .setRequired(false)),
 
     async run(interaction, args, run) {
-        const user = interaction.options.getString('user')
 
-        let vars;
+        const userName = interaction.options.getString('user')
+
+        let vars = {
+            username: userName
+        };
 
         if (!interaction.options.getString('user')) {
             // We try to use the one the user set
@@ -37,21 +41,22 @@ module.exports = new Command({
                     return interaction.reply({ embeds: [EmbedError(`You haven't bound your AniList username to your Discord account.`)] });
                 }
                 vars = { username: user.anilist_id }
-            } catch {
-                return interaction.reply({ embeds: [EmbedError(`Please provide a valid AniList username.`)] });
-            }
-        } else {
-
-            try {
-                let uData = (await GraphQLRequest(GraphQLQueries.User, vars))?.User;
-                vars = {
-                    userid: uData?.id || "Unable to find ID"
-                }
             } catch (error) {
                 console.log(error);
-                interaction.reply({ embeds: [EmbedError(error, vars)] });
+                return interaction.reply({ embeds: [EmbedError(`Please provide a valid AniList username.`)] });
             }
         }
+
+        try {
+            let uData = (await GraphQLRequest(GraphQLQueries.User, vars))?.User;
+            vars = {
+                userid: uData?.id || "Unable to find ID"
+            }
+        } catch (error) {
+            console.log(error);
+            interaction.reply({ embeds: [EmbedError(error, vars)] });
+        }
+
 
         GraphQLRequest(GraphQLQueries.Activity, vars)
             .then((response, headers) => {
