@@ -1,5 +1,5 @@
 FROM node:16
-WORKDIR /usr/src/anisuggest
+WORKDIR /usr/src/Yuuko
 COPY package*.json ./
 RUN yarn install --frozen-lockfile
 COPY . .

@@ -39,7 +39,7 @@ module.exports = new Command({
                     Canvas.registerFont(path.join(__dirname, "../Assets/OpenSans-SemiBold.ttf"), { family: "Open_Sans" });
                     const canvas = Canvas.createCanvas(1400, 330);
                     const ctx = canvas.getContext("2d");
-                    const bg = await Canvas.loadImage("https://cdn.discordapp.com/attachments/875693863484932106/877230763261710397/anisuggest.png");
+                    const bg = await Canvas.loadImage("https://cdn.discordapp.com/attachments/875693863484932106/877230763261710397/Yuuko.png");
                     const pfp = await Canvas.loadImage(data.avatar.large);
 
                     //^ Show the Profile Picture and Background images

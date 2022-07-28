@@ -25,7 +25,7 @@ class Client extends Discord.Client {
         this.prefix = process.env.PREFIX || "as!";
     }
     start(token) {
-        console.log(`Starting AniSuggest in ${process.env.NODE_ENV} enviroment.`);
+        console.log(`Starting Yuuko in ${process.env.NODE_ENV} enviroment.`);
         const slashCommands = [];
         fs.readdirSync("./Commands")
             .filter((file) => file.endsWith(".js"))

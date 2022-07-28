@@ -1,6 +1,6 @@
 module.exports = {
     apps : [{
-        name   : "AniSuggest Production",
+        name   : "Yuuko Production",
         script : "app.js",
         max_memory_restart: "500M",
         watch: ["commit.hash"],

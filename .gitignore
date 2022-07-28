@@ -126,7 +126,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# Added by AniSuggest Devs
+# Added by Yuuko Devs
 /Local
 /temp
 commit.hash
