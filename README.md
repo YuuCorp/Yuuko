@@ -13,8 +13,8 @@
        <img src="https://img.shields.io/david/YuuCorp/Yuuko" alt="Dependency Status">
 </p>
 
-<img src="https://i.imgur.com/FGkMOoa.png" align="right"
-     alt="AniList Logo" width="120" height="120">
+<img src="https://i.imgur.com/8fFCTX1.png" align="right"
+     alt="Yuuko Logo" width="120" height="120">
     
 
 Yuuko is a free and open source Discord bot that integrates with the AniList API, providing the users with useful commands for viewing anime, manga, getting recommendations, viewing AniList users profiles without opening a browser tab, and many more. Yuuko is the product of two bots being merged together (AniSuggest by [TibixDev](https://github.com/TibixDev) and TheCultureMan  by [crackheadakira](https://github.com/crackheadakira)). It is actively maintained.
