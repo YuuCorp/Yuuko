@@ -1,20 +1,28 @@
+// TODO: Fix
 const Command = require("#Structures/Command.js"),
+    { EmbedBuilder, SlashCommandBuilder } = require('discord.js'),
     CommandCategories = require("#Utils/CommandCategories.js"),
     { spawn, execSync } = require('child_process'),
     path = require('path'),
     fs = require('fs');
 
+const name = "update";
+const description = "Checks for the latest update, and restarts the bot if any are found. (Trusted users only)";
+
 module.exports = new Command({
-    name: "update",
-    description: "Checks for the latest update, and restarts the bot if any are found. (Trusted users only)",
+    name,
+    description,
     type: CommandCategories.Misc,
+    slash: new SlashCommandBuilder()
+        .setName(name)
+        .setDescription(description),
 
-    async run(message, args, run) {
+    async run(interaction, args, run) {
 
-        if (JSON.parse(process.env.TRUSTED_USERS).includes(message.author.id)/* && process.env.NODE_ENV === "production"*/) {
-            let updateMessage = await message.channel.send("Updating...");
+        if (JSON.parse(process.env.TRUSTED_USERS).includes(interaction.user.id)/* && process.env.NODE_ENV === "production"*/) {
+            let updateMessage = await interaction.reply("Updating...");
             const editMessage = async content => {
-                await updateMessage.edit("```sh\n" + content + "```");
+                await interaction.editReply("```sh\n" + content + "```");
             }
 
             const update = spawn('sh', ['update.sh']);
@@ -44,18 +52,22 @@ module.exports = new Command({
                 updateLogs += `Procedures completed with code ${code}, restarting...  `;
                 if (updateInterval) clearInterval(updateInterval);
                 await editMessage(updateLogs);
+                //await interaction.deferEdit();
 
                 // Make a temporary file that stores the ID of the message sent, and the channel ID it was sent in
                 // This is so that the bot can react to the message after restarting
                 if (!fs.existsSync(path.join(__dirname, "../Local"))) {
                     fs.mkdirSync(path.join(__dirname, "../Local"));
-                } 
-                const tempFile = path.join(__dirname, "../Local/updatemsg.json");
-                const tempFileData = {
-                    messageID: updateMessage.id,
-                    channelID: updateMessage.channel.id
                 }
-                fs.writeFileSync(tempFile, JSON.stringify(tempFileData));
+
+                let reply = await interaction.fetchReply();
+                const tempFile = path.join(__dirname, "../Local/updatemsg.json");
+                console.log(reply)
+                const tempFileData = {
+                    messageID: reply.id,
+                    channelID: reply.channelId
+                }
+                //fs.writeFileSync(tempFile, JSON.stringify(tempFileData));
                 execSync('git rev-parse --short HEAD > commit.hash', { encoding: 'utf-8' });
             });
         }

@@ -1,30 +1,42 @@
 const Discord = require("discord.js"),
+    { EmbedBuilder, SlashCommandBuilder } = require('discord.js'),
     Command = require("#Structures/Command.js"),
     EmbedError = require("#Utils/EmbedError.js"),
     Footer = require("#Utils/Footer.js"),
-    DefaultPaginationOpts = require("#Utils/DefaultPaginationOpts.js"),
+    BuildPagination = require("#Utils/BuildPagination.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
-    pagination = require("@acegoal07/discordjs-pagination"),
     GraphQLRequest = require("#Utils/GraphQLRequest.js"),
     GraphQLQueries = require("#Utils/GraphQLQueries.js");
 
-module.exports = new Command({
-    name: "anime",
-    usage: "anime <title>",
-    description: "Gets an anime from anilist based on a search result.",
-    type: CommandCategories.Anilist,
+const name = "anime";
+const usage = "anime <title>";
+const description = "Gets an anime from anilist based on a search result.";
 
-    async run(message, args, run, hook = false, hookdata = null) {
+module.exports = new Command({
+    name,
+    usage,
+    description,
+    type: CommandCategories.Anilist,
+    slash: new SlashCommandBuilder()
+        .setName(name)
+        .setDescription(description)
+        .addStringOption(option =>
+            option.setName('query')
+                .setDescription('The query to search for')
+                .setRequired(true)),
+
+    async run(interaction, args, run, hook = false, hookdata = null) {
+        let anime = interaction.options.getString('query');
         let vars = {};
         //^ Hook data is passed in if this command is called from another command
         if (!hook) {
-            if (args.slice(1).join(" ").length < 3) {
-                return message.channel.send({ embeds: [EmbedError(`Please enter a search query of at least 3 characters.`, null, false)] });
+            if (anime.length < 3) {
+                return interaction.reply({ embeds: [EmbedError(`Please enter a search query of at least 3 characters.`, null, false)] });
             }
-            vars.query = args.slice(1).join(" ");
+            vars.query = anime;
         } else if (hook && hookdata?.title) vars.query = hookdata.title;
         else if (hook && hookdata?.id) vars.query = hookdata.id;
-        else return message.channel.send({ embeds: [EmbedError(`AnimeCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)] });
+        else return interaction.reply({ embeds: [EmbedError(`AnimeCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)] });
 
         if (hookdata?.id) {
             GraphQLQueries.Anime = GraphQLQueries.Anime.replace("$query: String", "$query: Int");
@@ -44,7 +56,7 @@ module.exports = new Command({
                             .replace(/<[^>]+>/g, "")
                             .replace(/&nbsp;/g, " ")
                             .replace(/\n\n/g, "\n") || "No description available.";
-                    const firstPage = new Discord.MessageEmbed()
+                    const firstPage = new EmbedBuilder()
                         .setImage(data.bannerImage)
                         .setThumbnail(data.coverImage.large)
                         .setTitle(data.title.english || data.title.romaji || data.title.native)
@@ -96,8 +108,8 @@ module.exports = new Command({
                         .setColor("0x00ff00")
                         .setFooter(Footer(headers));
 
-                    const secondPage = new Discord.MessageEmbed()
-                        .setAuthor(`${data.title.english} | Additional info`)
+                    const secondPage = new EmbedBuilder()
+                        .setAuthor({ name: `${data.title.english} | Additional info` })
                         .setThumbnail(data.coverImage.large)
                         .addFields(
                             {
@@ -130,19 +142,19 @@ module.exports = new Command({
 
                     if (hookdata?.fields) {
                         for (const field of hookdata.fields) {
-                            firstPage.addField(field.name, field.value, field.inline || false);
+                            firstPage.addFields({ name: field.name, value: field.value, inline: field.inline || false });
                         }
                     }
 
                     const pageList = [firstPage, secondPage];
-                    pagination(DefaultPaginationOpts(message, pageList));
+                    BuildPagination(interaction, pageList).paginate();
                 } else {
-                    return message.channel.send({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
+                    return interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
                 }
             })
             .catch((error) => {
                 console.log(error);
-                message.channel.send({ embeds: [EmbedError(error, vars)] });
+                interaction.reply({ embeds: [EmbedError(error, vars)] });
             });
     },
 });

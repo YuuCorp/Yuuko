@@ -1,5 +1,6 @@
 const Discord = require("discord.js"),
     Command = require("#Structures/Command.js"),
+    { EmbedBuilder, SlashCommandBuilder } = require('discord.js'),
     EmbedError = require("#Utils/EmbedError.js"),
     Footer = require("#Utils/Footer.js"),
     Canvas = require("canvas"),
@@ -9,14 +10,25 @@ const Discord = require("discord.js"),
     GraphQLRequest = require("#Utils/GraphQLRequest.js"),
     GraphQLQueries = require("#Utils/GraphQLQueries.js");
 
-module.exports = new Command({
-    name: "usercard",
-    usage: 'usercard <anilist user>',
-    description: "Searches for an anilist user and displays a banner with the user's manga and anime statistics.",
-    type: CommandCategories.Misc,
+const name = "usercard";
+const usage = 'usercard <anilist user>';
+const description = "Searches for an anilist user and displays a banner with the user's manga and anime statistics.";
 
-    async run(message, args, run) {
-        let vars = { username: args.slice(1).join(" ") };
+module.exports = new Command({
+    name,
+    usage,
+    description,
+    type: CommandCategories.Misc,
+    slash: new SlashCommandBuilder()
+        .setName(name)
+        .setDescription(description)
+        .addStringOption(option =>
+            option.setName('query')
+                .setDescription('The query to search for')
+                .setRequired(true)),
+
+    async run(interaction, args, run) {
+        let vars = { username: interaction.options.getString('query') };
 
         // Make the HTTP Api request
         GraphQLRequest(GraphQLQueries.UserCard, vars)
@@ -65,7 +77,7 @@ module.exports = new Command({
                     ctx.fillRect(750, 5, 700, 320);
 
                     //^ Display all of the text 
-                    
+
                     //^ Name text
                     ctx.fillStyle = "#fff";
                     ctx.font = "35pt Open_Sans";
@@ -89,14 +101,14 @@ module.exports = new Command({
                     ctx.fillText(mMeanScore, 1250, 250)
 
                     const attachment = new Discord.MessageAttachment(canvas.toBuffer(), "anilist_banner.png");
-                    message.channel.send({ files: [attachment] });
+                    interaction.reply({ files: [attachment] });
                 } else {
-                    return message.channel.send({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
+                    return interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
                 }
             })
             .catch((error) => {
                 console.error(error);
-                message.channel.send({ embeds: [EmbedError(error, vars)] });
+                interaction.reply({ embeds: [EmbedError(error, vars)] });
             });
     },
 });

@@ -1,5 +1,6 @@
 const Discord = require("discord.js"),
     Command = require("#Structures/Command.js"),
+    { EmbedBuilder, SlashCommandBuilder } = require('discord.js'),
     EmbedError = require("#Utils/EmbedError.js"),
     Footer = require("#Utils/Footer.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
@@ -7,26 +8,38 @@ const Discord = require("discord.js"),
     GraphQLQueries = require("#Utils/GraphQLQueries.js"),
     AnilistUser = require("#Models/AnilistUser.js");
 
-module.exports = new Command({
-    name: "user",
-    usage: 'user <anilist name>',
-    description: "Searches for an anilist user and displays information about them.",
-    type: CommandCategories.Anilist,
+const name = "user";
+const usage = 'user <anilist name>';
+const description = "Searches for an anilist user and displays information about them.";
 
-    async run(message, args, run) {
-        let anilistUser = args.slice(1).join(" ");
+module.exports = new Command({
+    name,
+    usage,
+    description,
+    type: CommandCategories.Anilist,
+    slash: new SlashCommandBuilder()
+        .setName(name)
+        .setDescription(description)
+        .addStringOption(option =>
+            option.setName('query')
+                .setDescription('The query to search for')),
+    //.setRequired(true)),
+
+
+    async run(interaction, args, run) {
+        let anilistUser = interaction.options.getString('query');
 
         // If the user hasn't provided a user
         if (!anilistUser) {
             // We try to use the one the user set
             try {
-                const user = await AnilistUser.findOne({ where: { discord_id: message.author.id } });
+                const user = await AnilistUser.findOne({ where: { discord_id: interaction.user.id } });
                 if (!user) {
-                    return message.channel.send({ embeds: [EmbedError(`You haven't bound your AniList username to your Discord account.`)] });
+                    return interaction.reply({ embeds: [EmbedError(`You haven't bound your AniList username to your Discord account.`)] });
                 }
                 anilistUser = user.anilist_id;
             } catch {
-                return message.channel.send({ embeds: [EmbedError(`Please provide a valid AniList username.`)] });
+                return interaction.reply({ embeds: [EmbedError(`Please provide a valid AniList username.`)] });
             }
         }
 
@@ -36,9 +49,9 @@ module.exports = new Command({
             .then((response, headers) => {
                 let data = response.User;
                 if (data) {
-                    const titleEmbed = new Discord.MessageEmbed()
+                    const titleEmbed = new EmbedBuilder()
                         // TODO: Fix depricated function calls 101
-                        .setAuthor(data.name, "https://anilist.co/img/icons/android-chrome-512x512.png", data.siteUrl)
+                        .setAuthor({ name: data.name, iconURL: "https://anilist.co/img/icons/android-chrome-512x512.png", url: data.siteUrl })
                         .setImage(data.bannerImage)
                         .setThumbnail(data.avatar.large)
                         .addFields(
@@ -47,14 +60,14 @@ module.exports = new Command({
                         )
                         .setColor("0x00ff00")
                         .setFooter(Footer(headers));
-                    message.channel.send({ embeds: [titleEmbed] });
+                    interaction.reply({ embeds: [titleEmbed] });
                 } else {
-                    return message.channel.send({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
+                    return interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
                 }
             })
             .catch((error) => {
                 console.error(error);
-                message.channel.send({ embeds: [EmbedError(error, vars)] });
+                interaction.reply({ embeds: [EmbedError(error, vars)] });
             });
     },
 });

@@ -1,4 +1,5 @@
 const Discord = require("discord.js"),
+    { EmbedBuilder, SlashCommandBuilder } = require('discord.js'),
     Command = require("#Structures/Command.js"),
     EmbedError = require("#Utils/EmbedError.js"),
     GraphQLRequest = require("#Utils/GraphQLRequest.js"),
@@ -7,27 +8,40 @@ const Discord = require("discord.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
     pagination = require("@acegoal07/discordjs-pagination"),
     ms = require("ms"),
-    DefaultPaginationOpts = require("#Utils/DefaultPaginationOpts.js");
+    BuildPagination = require("#Utils/BuildPagination.js");
+
+const name = "airing";
+const usage = "airing <?in>";
+const description = "Gets the airing schedule for today or `period`. (e.g. `1 week` means today the next week.)";
 
 module.exports = new Command({
-    name: "airing",
-    usage: "airing <?in>",
-    description: "Gets the airing schedule for today or `in`. (e.g. `1 week` means today the next week.)",
+    name,
+    usage,
+    description,
     type: CommandCategories.Anilist,
+    slash: new SlashCommandBuilder()
+        .setName(name)
+        .setDescription(description)
+        .addStringOption(option =>
+            option.setName('in')
+                .setDescription('Airing *in* (e.g. "1 week")')),
 
-    async run(message, args, run) {
+    async run(interaction, args, run) {
         let vars = {};
         //^ Check if the user wants to search for a specific day
         let airingIn = 0;
-        if (args.length > 1) {
+
+        let period = interaction.options.getString('in');
+
+        if (period) {
             try {
-                airingIn = ms(args.slice(1).join(" "));
+                airingIn = ms(period);
                 if (!airingIn) {
                     throw new Error("Invalid time format.");
                 }
             } catch (r) {
-                return message.channel.send({
-                    embeds: [EmbedError(`Invalid time format. See "${run.prefix}help airing" for more information.`, { airingWhen: args.slice(1).join(" ") })],
+                return interaction.reply({
+                    embeds: [EmbedError(`Invalid time format. See \`/help\` for more information.`, { period })],
                 });
             }
         }
@@ -69,7 +83,7 @@ module.exports = new Command({
                     //^ Create pages with 5 airing anime per page and then make them into embeds
                     let pageList = [];
                     fields.forEach((fieldSet, index) => {
-                        let embed = new Discord.MessageEmbed();
+                        let embed = new EmbedBuilder();
                         embed.setTitle(`Airing on ${day.toDateString()}`);
                         embed.setColor(0x00ff00);
                         embed.setFooter(Footer(headers));
@@ -86,17 +100,17 @@ module.exports = new Command({
                         });
                         pageList.push(embed);
                     });
-                    
-                    pagination(DefaultPaginationOpts(message, pageList));
+
+                    BuildPagination(interaction, pageList).paginate();
                 } else {
-                    message.channel.send({
+                    interaction.reply({
                         embeds: [EmbedError("No airing anime found.")],
                     });
                 }
             })
             .catch((error) => {
                 console.log(error);
-                message.channel.send({ embeds: [EmbedError(error, vars)] });
+                interaction.reply({ embeds: [EmbedError(error, vars)] });
             });
     },
 });

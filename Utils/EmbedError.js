@@ -1,4 +1,5 @@
-const Discord = require('discord.js');
+const Discord = require('discord.js'),
+    { EmbedBuilder } = require('discord.js');
 
 /**
  * Returns a Discord embed with the error message.
@@ -6,16 +7,16 @@ const Discord = require('discord.js');
  * @param {Object} params The parameters the user specified that might
  *                        have caused this error.
  * @param {Boolean} [showParams=true] Whether or not to show the parameters.
- * @returns {Discord.MessageEmbed} The embed.
+ * @returns {EmbedBuilder} The embed.
  */
 module.exports = (err, params = null, showparams = true) => {
-    const embed = new Discord.MessageEmbed()
+    const embed = new EmbedBuilder()
         .setTitle("Error")
-        .addField(`Tracelog / Message `,"```" + `${err.toString()}` + "```")
+        .addFields({ name: `Tracelog / Message `, value: "```" + `${err.toString()}` + "```" })
         .setColor('0xff0000')
     if (showparams) {
-        embed.addField(`Params `, params ? "```json\n" + JSON.stringify(params) + "```" : "No parameters provided")
+        embed.addFields({ name: `Params `, value: params ? "```json\n" + JSON.stringify(params) + "```" : "No parameters provided" })
     }
-    
+
     return embed;
 }

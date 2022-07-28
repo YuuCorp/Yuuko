@@ -10,8 +10,7 @@ function RunFunction(message, args, client) {}
 
 class Command {
   /**
-   * @typedef {{name: string, description: string, run: RunFunction}} CommandOptions
-   * @param {CommandOptions} options
+   * @param {objects} options
    */
   constructor(options) {
     this.usage = options.usage;
@@ -19,6 +18,9 @@ class Command {
     this.description = options.description;
     this.type = options.type;
     this.run = options.run;
+    if (options.slash) {
+      this.slash = options.slash;
+    }
   }
 }
 

@@ -1,14 +1,22 @@
 const Command = require("#Structures/Command.js"),
+    { SlashCommandBuilder } = require('discord.js'),
     CommandCategories = require("#Utils/CommandCategories.js");
 
-module.exports = new Command({
-    name: "nhentai",
-    usage: "nhentai <id>",
-    description: "Gets a hentai from nhetai based on a search result.",
-    type: CommandCategories.Anilist,
+const name = "nhentai";
+const usage = "nhentai <id>";
+const description = "Gets a hentai from nhentai based on a search result.";
 
-    async run(message, args, run, hook = false, hookdata = null) {
-        message.reply('This command is currently under development.')
+module.exports = new Command({
+    name,
+    usage,
+    description,
+    type: CommandCategories.Anilist,
+    slash: new SlashCommandBuilder()
+        .setName(name)
+        .setDescription(description),
+
+    async run(interaction, args) {
+        interaction.reply('This command is currently under development.')
     },
 });
 
