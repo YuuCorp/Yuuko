@@ -9,7 +9,7 @@ const Discord = require("discord.js"),
     AnilistUser = require("#Models/AnilistUser.js");
 
 const name = "user";
-const usage = 'user <anilist name>';
+const usage = 'user <?anilist name>';
 const description = "Searches for an anilist user and displays information about them.";
 
 module.exports = new Command({
@@ -22,6 +22,7 @@ module.exports = new Command({
         .setDescription(description)
         .addStringOption(option =>
             option.setName('query')
+                .setRequired(false)
                 .setDescription('The query to search for')),
     //.setRequired(true)),
 

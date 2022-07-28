@@ -54,7 +54,7 @@ module.exports = new Command({
 
         // Create new user
         try {
-            await AnilistUser.create({ discord_id: interaction.author.id, anilist_id: username });
+            await AnilistUser.create({ discord_id: interaction.user.id, anilist_id: username });
             return interaction.reply({
                 embeds: [{
                     title: `Successfully bound your AniList username to your Discord account.`,
