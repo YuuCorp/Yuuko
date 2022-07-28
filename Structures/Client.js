@@ -2,15 +2,20 @@ const Discord = require("discord.js");
 const fs = require("fs");
 const Command = require("./Command.js");
 const Event = require("./Event.js");
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const { SlashCommandBuilder, GatewayIntentBits } = require("discord.js");
 const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v9");
-const intents = new Discord.Intents(32767);
 
 require("dotenv-flow").config();
 class Client extends Discord.Client {
     constructor() {
-        super({ intents, allowedMentions: { repliedUser: false } });
+        super({
+            intents: [
+                GatewayIntentBits.GuildMessageReactions,
+                GatewayIntentBits.GuildEmojisAndStickers,
+                GatewayIntentBits.DirectMessages,
+            ],
+            allowedMentions: { repliedUser: false } });
 
         /**
          * @type {Discord.Collection<string, Command>}
@@ -33,28 +38,43 @@ class Client extends Discord.Client {
                 console.log(`Command ${command.name} loaded`);
                 this.commands.set(command.name, command);
 
-                slashCommands.push(new SlashCommandBuilder().setName(command.name).setDescription(command.description));
+                if (command.slash) {
+                    slashCommands.push(command.slash);
+                }
             });
-        
+
         //^ Register Slash Commands
-        const rest = new REST({ version: "9" }).setToken(process.env.TOKEN);
-
-        rest.put(Routes.applicationGuildCommands("940695004458909776", "910072889812844604"), { body: slashCommands })
-            .then(() => console.log("Successfully registered application commands."))
-            .catch(console.error);
-
-        fs.readdirSync("./Events")
-            .filter((file) => file.endsWith(".js"))
-            .forEach((file) => {
-                /**
-                 * @type {Event}
-                 */
-                const event = require(`../Events/${file}`);
-                console.log(`Event ${event.event} loaded`);
-                this.on(event.event, event.run.bind(null, this));
-            });
-
-        this.login(process.env.TOKEN);
+        (async() => {
+            const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
+            const clientId = '881173250091126845';
+            const guildId = '843208877326860299';
+    
+            try {
+                console.log(`Started refreshing ${slashCommands.length} slash (/) commands.`);
+    
+                await rest.put(
+                    Routes.applicationGuildCommands(clientId, guildId),
+                    { body: slashCommands },
+                );
+    
+                console.log(`Refreshed ${slashCommands.length} slash (/) commands.`);
+            } catch (error) {
+                console.error(error);
+            }
+    
+            fs.readdirSync("./Events")
+                .filter((file) => file.endsWith(".js"))
+                .forEach((file) => {
+                    /**
+                     * @type {Event}
+                     */
+                    const event = require(`../Events/${file}`);
+                    console.log(`Event ${event.event} loaded`);
+                    this.on(event.event, event.run.bind(null, this));
+                });
+    
+            this.login(process.env.TOKEN);
+        })();
     }
 }
 

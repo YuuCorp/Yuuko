@@ -1,23 +1,31 @@
-const { TimestampStyles } = require("@discordjs/builders");
 const Discord = require("discord.js"),
+    { EmbedBuilder, SlashCommandBuilder } = require('discord.js'),
     Command = require("#Structures/Command.js"),
     EmbedError = require("#Utils/EmbedError.js"),
     Footer = require("#Utils/Footer.js"),
-    DefaultPaginationOpts = require("#Utils/DefaultPaginationOpts.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
-    pagination = require("@acegoal07/discordjs-pagination"),
     GraphQLRequest = require("#Utils/GraphQLRequest.js"),
     GraphQLQueries = require("#Utils/GraphQLQueries.js");
-const anime = require("./anime");
+
+const name = "studio";
+const usage = "studio <?>";
+const description = "Searches for an studio and displays a list of their anime";
 
 module.exports = new Command({
-    name: "studio",
-    usage: "studio <?>",
-    description: "Searches for an studio and displays a list of their anime",
-    type: CommandCategories.Internal,
+    name,
+    usage,
+    description,
+    type: CommandCategories.Anilist,
+    slash: new SlashCommandBuilder()
+        .setName(name)
+        .setDescription(description)
+        .addStringOption(option =>
+            option.setName('query')
+                .setDescription('The query to search for')
+                .setRequired(true)),
 
-    async run(message, args, run, hook = false, hookdata = null) {
-        let vars = { query: args.slice(1).join(" ") };
+    async run(interaction, args, run) {
+        let vars = { query: interaction.options.getString('query') };
 
         GraphQLRequest(GraphQLQueries.Studio, vars)
             .then((response, headers) => {
@@ -30,7 +38,7 @@ module.exports = new Command({
                     }
                     animes = animes.toString().replaceAll(",", "\n");
 
-                    const studioEmbed = new Discord.MessageEmbed()
+                    const studioEmbed = new EmbedBuilder()
                         // .setThumbnail(data.image.large)
                         .setTitle(`${data.name} | ${data.favourites} favourites`)
                         .setDescription(`\n${animes}`)
@@ -39,14 +47,14 @@ module.exports = new Command({
                         .setFooter(Footer(headers));
 
                     //data.description.split("<br>").forEach(line => titleEmbed.addField(line, "", true))
-                    message.channel.send({ embeds: [studioEmbed] });
+                    interaction.reply({ embeds: [studioEmbed] });
                 } else {
-                    return message.channel.send({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
+                    return interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
                 }
             })
             .catch((error) => {
                 console.log(error);
-                message.channel.send({ embeds: [EmbedError(error, vars)] });
+                interaction.reply({ embeds: [EmbedError(error, vars)] });
             });
     },
 });

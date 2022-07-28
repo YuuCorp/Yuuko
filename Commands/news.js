@@ -1,4 +1,5 @@
 const Discord = require("discord.js"),
+    { EmbedBuilder, SlashCommandBuilder } = require("discord.js"),
     Command = require("#Structures/Command.js"),
     axios = require("axios"),
     EmbedError = require("#Utils/EmbedError.js"),
@@ -8,33 +9,39 @@ const Discord = require("discord.js"),
     path = require("path"),
     TurndownService = require('turndown');
 
+const name = "aninews";
+const description = "Gets the latest anime news from RSS.";
+
 module.exports = new Command({
-    name: "aninews",
-    description: "Gets the latest anime news from RSS.",
+    name,
+    description,
     type: CommandCategories.Misc,
-    
-    async run(message, args, run) {
+    slash: new SlashCommandBuilder()
+        .setName(name)
+        .setDescription(description),
+
+    async run(interaction, args, run) {
         const rss_feed = "https://api.rss2json.com/v1/api.json?rss_url=http%3A%2F%2Ffeeds.feedburner.com%2Fcrunchyroll%2Fanimenews";
         axios.get(rss_feed)
             .then(res => {
                 const rss = res.data;
                 const turndownService = new TurndownService();
-                const embed = new Discord.MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setTitle(rss.feed.title)
                     .setColor(0x00AE86)
                     .setFooter(Footer());
-                
-                    // console.log(rss.items);
+
+                // console.log(rss.items);
                 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
                 for (let i = 0; i < clamp(process.env.RSS_LIMIT || 5, 0, rss.items.length); i++) {
                     console.log("Processing " + i + "...")
                     //? We remove image tags since they don't work in embeds
                     //? And convert the HTML to markdown
-                    
+
                     let description = rss.items[i].description
-                                        .replace(/<img .*?>/g,"") // Remove image tags
-                                        .replace(/(<br\ ?\/?>)+/g, "\n") // Replace line breaks with newlines
-                    
+                        .replace(/<img .*?>/g, "") // Remove image tags
+                        .replace(/(<br\ ?\/?>)+/g, "\n") // Replace line breaks with newlines
+
                     if (description.length > 1024) {
                         description = description.substring(0, 1024) + "...";
                     }
@@ -43,11 +50,13 @@ module.exports = new Command({
                     if (i != (process.env.RSS_LIMIT || 5) - 1) {
                         description += "<p>‎</p>";
                     }
-                                        
-                    embed.addField(":newspaper:  " + rss.items[i].title, turndownService.turndown(description));
+
+                    const news = turndownService.turndown(description);
+
+                    embed.addFields({ name: ":newspaper:  " + rss.items[i].title, value: news });
                 }
 
-                message.channel.send({embeds: [embed]});
+                interaction.reply({ embeds: [embed] });
             })
             .catch(error => {
                 //^ Log Axios request status code and error
@@ -56,7 +65,7 @@ module.exports = new Command({
                 } else {
                     console.log(error);
                 }
-                message.channel.send({ embeds: [EmbedError(error)] });
+                interaction.reply({ embeds: [EmbedError(error)] });
             })
     }
 });

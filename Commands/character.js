@@ -1,4 +1,5 @@
 const Discord = require("discord.js"),
+    { EmbedBuilder, SlashCommandBuilder } = require('discord.js'),
     Command = require("#Structures/Command.js"),
     EmbedError = require("#Utils/EmbedError.js"),
     Footer = require("#Utils/Footer.js"),
@@ -6,14 +7,25 @@ const Discord = require("discord.js"),
     GraphQLRequest = require("#Utils/GraphQLRequest.js"),
     GraphQLQueries = require("#Utils/GraphQLQueries.js");
 
-module.exports = new Command({
-    name: "character",
-    usage: "character <name>",
-    description: "Gets a character from anilist's DB based on a search result.",
-    type: CommandCategories.Anilist,
+const name = "character";
+const usage = "character <name>";
+const description = "Gets a character from anilist's DB based on a search result.";
 
-    async run(message, args, run) {
-        let vars = { charName: args.slice(1).join(" ") };
+module.exports = new Command({
+    name,
+    usage,
+    description,
+    type: CommandCategories.Anilist,
+    slash: new SlashCommandBuilder()
+        .setName(name)
+        .setDescription(description)
+        .addStringOption(option =>
+            option.setName('query')
+                .setDescription('The query to search for')
+                .setRequired(true)),
+
+    async run(interaction, args, run) {
+        let vars = { charName: interaction.options.getString('query') };
 
         GraphQLRequest(GraphQLQueries.Character, vars)
             .then((response, headers) => {
@@ -28,7 +40,7 @@ module.exports = new Command({
                             .replace(/&nbsp;/g, " ")
                             .replace(/~!|!~/g, "||") /*.replace(/\n\n/g, "\n")*/ || "No description available.";
                     //console.log(data.dateOfBirth.day || 'no' + data.dateOfBirth.month + data.dateOfBirth.year)
-                    const charEmbed = new Discord.MessageEmbed()
+                    const charEmbed = new EmbedBuilder()
                         .setThumbnail(data.image.large)
                         .setTitle(data.name.full)
                         .setDescription(description || "No description available.")
@@ -49,14 +61,14 @@ module.exports = new Command({
                         .setColor("0x00ff00")
                         .setFooter(Footer(headers));
                     //data.description.split("<br>").forEach(line => titleEmbed.addField(line, "", true))
-                    message.channel.send({ embeds: [charEmbed] });
+                    interaction.reply({ embeds: [charEmbed] });
                 } else {
-                    return message.channel.send({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
+                    return interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
                 }
             })
             .catch((error) => {
                 console.log(error)
-                message.channel.send({ embeds: [EmbedError(error, vars)] });
+                interaction.reply({ embeds: [EmbedError(error, vars)] });
             });
     },
 });

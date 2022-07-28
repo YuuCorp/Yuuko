@@ -1,45 +1,59 @@
 const Discord = require("discord.js"),
+    { EmbedBuilder, SlashCommandBuilder } = require('discord.js'),
     Command = require("#Structures/Command.js"),
     fs = require("fs"),
     path = require("path"),
-    DefaultPaginationOpts = require("#Utils/DefaultPaginationOpts.js"),
-    CommandCategories = require("#Utils/CommandCategories.js"),
-    pagination = require("@acegoal07/discordjs-pagination");
+    BuildPagination = require("#Utils/BuildPagination.js");
 
 function generateHelpEmbeds(cmdsArr, category) {
     let embeds = [];
     let iterations = Math.ceil(cmdsArr.join("").length / 1024);
-    
+
     let rowIndex = 0;
     for (let i = 0; i < iterations; i++) {
         let cmdStr = "";
         let charCount = 0;
-        //let shouldIncrement = true;
         while (true) {
             if (!cmdsArr[rowIndex]) {
                 break;
             }
-            if (charCount + cmdsArr[rowIndex].length < 1024) {
+            // For some reason if this is left at 1024, it overflows to 1030+
+            // in some rare cases.
+            if (charCount + cmdsArr[rowIndex].length < 1000) {
                 cmdStr += cmdsArr[rowIndex] + "\n";
                 charCount = charCount + cmdsArr[rowIndex].length;
                 rowIndex++;
             } else {
-                break;;
+                break;
             }
         }
-        let embed = new Discord.MessageEmbed();
-        embed.setColor('BLUE');
-        embed.addField(`**:ledger: ${category}**${iterations > 1 ? ` (${i+1} / ${iterations})` : ''}`, cmdStr);
+
+        let name = `**:ledger: ${category}**${iterations > 1 ? ` (${i + 1} / ${iterations})` : ''}`;
+        //console.log(name, cmdStr)
+
+        let embed = new EmbedBuilder();
+        embed.setColor('#1873bf');
+        try {
+            embed.addFields({ name, value: cmdStr });
+        } catch(err) {
+            console.error(err)
+        }
         embeds.push(embed);
     }
     return embeds;
 }
 
-module.exports = new Command({
-    name: "help",
-    description: "Gives you the description of every command and how to use it.",
+const name = "help";
+const description = "Gives you the description of every command and how to use it.";
 
-    async run(message, args, run) {
+module.exports = new Command({
+    name,
+    description,
+    slash: new SlashCommandBuilder()
+        .setName(name)
+        .setDescription(description),
+
+    async run(interaction, args, run) {
         // Require all files from the commands folder and fetch description
         let cmds = fs.readdirSync(__dirname).filter((x) => x.endsWith(".js") && x != "help.js");
         let cmdsDesc = [];
@@ -52,11 +66,11 @@ module.exports = new Command({
             cmdGroups[cmdEntry.type].push({ usage: cmdEntry.usage, name: cmdEntry.name, description: cmdEntry.description });
         }
         // Send the description to the user
-        const helpInfoEmbed = new Discord.MessageEmbed();
+        const helpInfoEmbed = new EmbedBuilder();
         helpInfoEmbed.setTitle(":grey_question: Help");
         helpInfoEmbed.setDescription("Here is a list of every command and how to use it. Parameters starting with \`?\` are optional. If you need more information about a command, use `" + run.prefix + "help <command>`.");
-        helpInfoEmbed.addField("Usage", "Use the buttons below to navigate the help pages. Note that a category might have more than one page.");
-        helpInfoEmbed.setColor('BLUE');
+        helpInfoEmbed.addFields({ name: "Usage", value: "Use the buttons below to navigate the help pages. Note that a category might have more than one page." });
+        helpInfoEmbed.setColor('#1873bf');
 
         let pageList = [helpInfoEmbed];
         for (category of Object.keys(cmdGroups)) {
@@ -64,6 +78,6 @@ module.exports = new Command({
             pageList.push(...generateHelpEmbeds(cmdHelpArr, category));
         }
 
-        pagination(DefaultPaginationOpts(message, pageList));
+        BuildPagination(interaction, pageList).paginate()
     },
 });

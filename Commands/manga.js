@@ -1,43 +1,69 @@
 const Discord = require("discord.js"),
+    { EmbedBuilder, SlashCommandBuilder } = require('discord.js'),
     Command = require("#Structures/Command.js"),
     EmbedError = require("#Utils/EmbedError.js"),
     Footer = require("#Utils/Footer.js"),
+    BuildPagination = require("#Utils/BuildPagination.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
-    DefaultPaginationOpts = require("#Utils/DefaultPaginationOpts.js"),
-    pagination = require("@acegoal07/discordjs-pagination"),
     GraphQLRequest = require("#Utils/GraphQLRequest.js"),
     GraphQLQueries = require("#Utils/GraphQLQueries.js");
 
+const name = "manga";
+const usage = "manga <title>";
+const description = "Gets an manga from anilist based on a search result.";
+
 module.exports = new Command({
-    name: "manga",
-    usage: "manga <title>",
-    description: "Gets a manga from anilist based on a search result.",
+    name,
+    usage,
+    description,
     type: CommandCategories.Anilist,
+    slash: new SlashCommandBuilder()
+        .setName(name)
+        .setDescription(description)
+        .addStringOption(option =>
+            option.setName('query')
+                .setDescription('The query to search for')
+                .setRequired(true)),
 
-    async run(message, args, run, hook = false, title = null) {
-        let vars = { query: !hook ? args.slice(1).join(" ") : title };
+    async run(interaction, args, run, hook = false, hookdata = null) {
+        let manga = interaction.options.getString('query');
+        let vars = {};
+        //^ Hook data is passed in if this command is called from another command
+        if (!hook) {
+            if (manga.length < 3) {
+                return interaction.reply({ embeds: [EmbedError(`Please enter a search query of at least 3 characters.`, null, false)] });
+            }
+            vars.query = manga;
+        } else if (hook && hookdata?.title) vars.query = hookdata.title;
+        else if (hook && hookdata?.id) vars.query = hookdata.id;
+        else return interaction.reply({ embeds: [EmbedError(`MangaCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)] });
 
+        if (hookdata?.id) {
+            GraphQLQueries.Anime = GraphQLQueries.Anime.replace("$query: String", "$query: Int");
+            GraphQLQueries.Anime = GraphQLQueries.Anime.replace("search:", "id:");
+        }
         //^ Make the HTTP Api request
         GraphQLRequest(GraphQLQueries.Manga, vars)
             .then((response, headers) => {
                 let data = response.Media;
                 if (data) {
-                    // Fix the description by replacing and converting HTML tags
+                    //^ Fix the description by replacing and converting HTML tags, and replacing duplicate newlines
                     const descLength = 350;
                     let description =
                         data?.description
                             ?.replace(/<br><br>/g, "\n")
                             .replace(/<br>/g, "\n")
                             .replace(/<[^>]+>/g, "")
-                            .replace(/&nbsp;/g, " ") /*.replace(/\n\n/g, "\n")*/ || "No description available.";
-
-                    const firstPage = new Discord.MessageEmbed()
+                            .replace(/&nbsp;/g, " ")
+                            .replace(/\n\n/g, "\n") || "No description available.";
+                    const firstPage = new EmbedBuilder()
+                        .setImage(data.bannerImage)
                         .setThumbnail(data.coverImage.large)
                         .setTitle(data.title.english || data.title.romaji || data.title.native)
                         .addFields(
                             {
                                 name: "Chapters",
-                                value: data.chapters ? data.chapters.toString() : "N/A",
+                                value: data?.chapters?.toString() || "Unknown",
                                 inline: true,
                             },
                             {
@@ -57,12 +83,12 @@ module.exports = new Command({
                             },
                             {
                                 name: "End Date",
-                                value: data.endDate.day ? `${data.endDate.day}/${data.endDate.month}/${data.endDate.year}` : "Unknown",
+                                value: data.endDate.day ? `${data.endDate.day}-${data.endDate.month}-${data.endDate.year}` : "Unknown",
                                 inline: true,
                             },
                             {
-                                name: "\u200B",
-                                value: "\u200B",
+                                name: '\u200B',
+                                value: '\u200B',
                                 inline: true,
                             },
                             {
@@ -72,12 +98,12 @@ module.exports = new Command({
                             }
                         )
                         .setDescription(description.length > descLength ? description.substring(0, descLength) + "..." || "No description available." : description || "No description available.")
-                        .setURL("https://anilist.co/manga/" + data.id)
+                        .setURL("https://anilist.co/anime/" + data.id)
                         .setColor("0x00ff00")
                         .setFooter(Footer(headers));
 
-                    const secondPage = new Discord.MessageEmbed()
-                        .setAuthor(`${data.title.english} | Additional info`)
+                    const secondPage = new EmbedBuilder()
+                        .setAuthor({ name: `${data.title.english} | Additional info` })
                         .setThumbnail(data.coverImage.large)
                         .addFields(
                             {
@@ -86,8 +112,8 @@ module.exports = new Command({
                                 inline: true,
                             },
                             {
-                                name: "\u200B",
-                                value: "\u200B",
+                                name: "Episode Duration",
+                                value: data?.duration?.toString() || "Unknown",
                                 inline: true,
                             },
                             {
@@ -104,16 +130,25 @@ module.exports = new Command({
                         .setColor("0x00ff00")
                         .setFooter(Footer(headers));
 
-                    // Paginate the embeds
+                    if (hookdata?.image) {
+                        firstPage.setImage(hookdata.image);
+                    }
+
+                    if (hookdata?.fields) {
+                        for (const field of hookdata.fields) {
+                            firstPage.addFields({ name: field.name, value: field.value, inline: field.inline || false });
+                        }
+                    }
+
                     const pageList = [firstPage, secondPage];
-                    pagination(DefaultPaginationOpts(message, pageList));
+                    BuildPagination(interaction, pageList).paginate();
                 } else {
-                    return message.channel.send({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
+                    return interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
                 }
             })
             .catch((error) => {
                 console.log(error);
-                message.channel.send({ embeds: [EmbedError(error, vars)] });
+                interaction.reply({ embeds: [EmbedError(error, vars)] });
             });
     },
 });

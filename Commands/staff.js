@@ -1,4 +1,5 @@
 const Discord = require("discord.js"),
+    { EmbedBuilder, SlashCommandBuilder } = require('discord.js'),
     Command = require("#Structures/Command.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
     Footer = require("#Utils/Footer.js"),
@@ -6,17 +7,28 @@ const Discord = require("discord.js"),
     GraphQLRequest = require("#Utils/GraphQLRequest.js"),
     GraphQLQueries = require("#Utils/GraphQLQueries.js");
 
-module.exports = new Command({
-    name: "staff",
-    usage: 'staff <name>',
-    description: "Gives you info about a staff member from anilist's DB.",
-    type: CommandCategories.Anilist,
+const name = "staff";
+const usage = 'staff <name>';
+const description = "Gives you info about a staff member from anilist's DB.";
 
-    async run(message, args, run) {
-        let vars = { staffName: args.slice(1).join(" ") };
+module.exports = new Command({
+    name,
+    usage,
+    description,
+    type: CommandCategories.Anilist,
+    slash: new SlashCommandBuilder()
+        .setName(name)
+        .setDescription(description)
+        .addStringOption(option =>
+            option.setName('query')
+                .setDescription('The query to search for')
+                .setRequired(true)),
+
+    async run(interaction, args, run) {
+        let vars = { staffName: interaction.options.getString('query') };
 
         // TODO: Fixme description length, it crashes the bot.
-        
+
         GraphQLRequest(GraphQLQueries.Staff, vars)
             .then((response, headers) => {
                 let data = response.Staff;
@@ -30,7 +42,7 @@ module.exports = new Command({
                             .replace(/<[^>]+>/g, "")
                             .replace(/&nbsp;/g, " ")
                             .replace(/~!|!~/g, "||") /*.replace(/\n\n/g, "\n")*/ || "No description available.";
-                    const charEmbed = new Discord.MessageEmbed()
+                    const charEmbed = new EmbedBuilder()
                         .setThumbnail(data.image.large)
                         .setTitle(data.name.full)
                         .setDescription(description.length > descLength ? description.substring(0, descLength) + "..." || "No description available." : description || "No description available.")
@@ -40,14 +52,14 @@ module.exports = new Command({
                         .setURL(data.siteUrl)
                         .setColor("0x00ff00")
                         .setFooter(Footer(headers));
-                    message.channel.send({ embeds: [charEmbed] });
+                    interaction.reply({ embeds: [charEmbed] });
                 } else {
-                    return message.channel.send({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
+                    return interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
                 }
             })
             .catch((error) => {
                 console.error(error);
-                message.channel.send({ embeds: [EmbedError(error, vars)] });
+                interaction.reply({ embeds: [EmbedError(error, vars)] });
             });
     },
 });
