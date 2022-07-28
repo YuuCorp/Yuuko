@@ -46,8 +46,17 @@ class Client extends Discord.Client {
         //^ Register Slash Commands
         (async() => {
             const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
-            const clientId = '881173250091126845';
-            const guildId = '843208877326860299';
+
+            // Client and Guild ID checks
+            if (process.env.CLIENT_ID === "YOUR_CLIENT_ID_GOES_HERE" || 
+                process.env.GUILD_ID === "YOUR_GUILD_ID_GOES_HERE" ||
+                !process.env.CLIENT_ID || !process.env.GUILD_ID
+            ) {
+                console.warn("[⚠️] Warning: CLIENT_ID and/or GUILD_ID is not set properly. This will cause issues.");
+            }
+
+            const clientId = process.env.CLIENT_ID || '881173250091126845';
+            const guildId = process.env.GUILD_ID || '843208877326860299';
     
             try {
                 console.log(`Started refreshing ${slashCommands.length} slash (/) commands.`);
@@ -56,6 +65,13 @@ class Client extends Discord.Client {
                     Routes.applicationGuildCommands(clientId, guildId),
                     { body: slashCommands },
                 );
+
+                if (process.env.NODE_ENV == "production") {
+                    await rest.put(
+                        Routes.applicationCommands(clientId),
+                        { body: slashCommands },
+                    );
+                }
     
                 console.log(`Refreshed ${slashCommands.length} slash (/) commands.`);
             } catch (error) {
