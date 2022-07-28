@@ -49,7 +49,7 @@ module.exports = new Command({
                 }
             } catch (error) {
                 console.log(error);
-                message.channel.send({ embeds: [EmbedError(error, vars)] });
+                interaction.reply({ embeds: [EmbedError(error, vars)] });
             }
         }
 
