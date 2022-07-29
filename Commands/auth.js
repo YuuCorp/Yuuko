@@ -7,6 +7,7 @@ const Discord = require("discord.js"),
     Footer = require("#Utils/Footer.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
     AnilistUser = require("#Models/AnilistUser.js"),
+    GraphQLRequest = require("#Utils/GraphQLRequest.js"),
     NodeRSA = require('node-rsa'),
     encryptor = new NodeRSA(fs.readFileSync(path.join(__dirname, '../RSA/id_rsa.pub').toString())),
     decryptor = new NodeRSA(fs.readFileSync(path.join(__dirname, '../RSA/id_rsa').toString()));
@@ -79,10 +80,11 @@ module.exports = new Command({
         if (user) {
             try {
                 await user.update({ anilist_token: encryptor.encrypt(token, 'base64') });
+                let data = (await GraphQLRequest(`query{Viewer{name}}`, "", token)).Viewer;
                 return interaction.reply({
                     embeds: [{
-                        title: `Successfully updated your AniList token binding.`,
-                        description: `Your Discord-bound AniList token has been changed to \`sheesh\`.`,
+                        title: `Successfully updated your AniList account binding.`,
+                        description: `Your Discord-bound AniList account has been changed to \`${data.name}\`.`,
                         color: 0x00ff00,
                         footer: Footer(),
                     }], ephemeral: true
@@ -99,10 +101,11 @@ module.exports = new Command({
         // Create new user
         try {
             await AnilistUser.create({ discord_id: interaction.user.id, anilist_token: encryptor.encrypt(token, 'base64') });
+            let data = (await GraphQLRequest(`query{Viewer{name}}`, "", token)).Viewer;
             return interaction.reply({
                 embeds: [{
-                    title: `Successfully bound your AniList token to your Discord account.`,
-                    description: `Your AniList token is now \`sheesh\`.`,
+                    title: `Successfully bound your AniList account to your Discord account.`,
+                    description: `Your AniList account is now \`${data.name}\`.`,
                     color: 0x00ff00,
                     footer: Footer(),
                 }], ephemeral: true

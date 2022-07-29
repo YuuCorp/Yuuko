@@ -1,6 +1,9 @@
 const axios = require("axios");
 
-module.exports = function(query, vars, url = process.env.ANILIST_API || "https://graphql.anilist.co") {
+module.exports = function (query, vars, token, url = process.env.ANILIST_API || "https://graphql.anilist.co") {
+    if (token?.length > 1000) {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+    }
     return new Promise((resolve, reject) => {
         axios.post(url, {
             query,
