@@ -7,17 +7,16 @@ const AnilistUser = db.define("anilistuser", {
         allowNull: false,
         unique: true
     },
-    anilist_id: {
-        type: DataTypes.STRING(32),
+    anilist_token: {
+        type: DataTypes.STRING(3000),
         allowNull: false,
         unique: true,
         validate: {
-            is: ["^[a-zA-Z0-9_]+$", 'i'],
-            len: [1, 32]
+            len: [1, 3000]
         }
-    } 
+    }
 });
-  
+
 // (async () => {
 //   await sequelize.sync({ force: true });
 // })();
