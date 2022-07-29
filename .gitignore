@@ -76,6 +76,13 @@ web_modules/
 # .env
 .env.*
 
+# ignore all .sqlite dbs
+*.sqlite
+
+# ignore RSA keys
+id_rsa
+id_rsa.pub
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
