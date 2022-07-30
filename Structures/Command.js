@@ -21,6 +21,9 @@ class Command {
     if (options.slash) {
       this.slash = options.slash;
     }
+    if (options.middlewares) {
+      this.middlewares = options.middlewares;
+    }
   }
 }
 

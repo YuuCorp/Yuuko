@@ -5,8 +5,6 @@ const Event = require("./Event.js");
 const { SlashCommandBuilder, GatewayIntentBits } = require("discord.js");
 const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v9");
-
-require("dotenv-flow").config();
 class Client extends Discord.Client {
     constructor() {
         super({
@@ -46,14 +44,6 @@ class Client extends Discord.Client {
         //^ Register Slash Commands
         (async() => {
             const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
-
-            // Client and Guild ID checks
-            if (process.env.CLIENT_ID === "YOUR_CLIENT_ID_GOES_HERE" || 
-                process.env.GUILD_ID === "YOUR_GUILD_ID_GOES_HERE" ||
-                !process.env.CLIENT_ID || !process.env.GUILD_ID
-            ) {
-                console.warn("[⚠️] Warning: CLIENT_ID and/or GUILD_ID is not set properly. This will cause issues.");
-            }
 
             const clientId = process.env.CLIENT_ID || '881173250091126845';
             const guildId = process.env.GUILD_ID || '843208877326860299';

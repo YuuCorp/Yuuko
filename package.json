@@ -53,6 +53,9 @@
     ],
     "#RSA/*": [
       "./RSA/*"
+    ],
+    "#Middleware/*": [
+      "./Middleware/*"
     ]
   }
 }
