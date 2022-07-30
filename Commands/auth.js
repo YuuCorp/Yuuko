@@ -79,8 +79,8 @@ module.exports = new Command({
         // Update existing user
         if (user) {
             try {
-                await user.update({ anilist_token: encryptor.encrypt(token, 'base64') });
-                let data = (await GraphQLRequest(`query{Viewer{name}}`, "", token)).Viewer;
+                let data = (await GraphQLRequest(`query{Viewer{name id}}`, "", token)).Viewer;
+                await user.update({ anilist_token: encryptor.encrypt(token, 'base64'), anilist_id: data.id });
                 return interaction.reply({
                     embeds: [{
                         title: `Successfully updated your AniList account binding.`,
@@ -92,7 +92,7 @@ module.exports = new Command({
             } catch (error) {
                 console.error(error);
                 return interaction.reply({
-                    embeds: [EmbedError(`An error occurred while updating your AniList token binding:
+                    embeds: [EmbedError(`An error occurred while updating your AniList account binding:
                                                                    \n\n${error}`, null)], ephemeral: true
                 });
             }
@@ -100,8 +100,8 @@ module.exports = new Command({
 
         // Create new user
         try {
-            await AnilistUser.create({ discord_id: interaction.user.id, anilist_token: encryptor.encrypt(token, 'base64') });
-            let data = (await GraphQLRequest(`query{Viewer{name}}`, "", token)).Viewer;
+            let data = (await GraphQLRequest(`query{Viewer{name id}}`, "", token)).Viewer;
+            await AnilistUser.create({ discord_id: interaction.user.id, anilist_token: encryptor.encrypt(token, 'base64'), anilist_id: data.id });
             return interaction.reply({
                 embeds: [{
                     title: `Successfully bound your AniList account to your Discord account.`,
@@ -113,7 +113,7 @@ module.exports = new Command({
         } catch (error) {
             console.error(error);
             return await interaction.reply({
-                embeds: [EmbedError(`Something went wrong while trying to create your AniList token binding:
+                embeds: [EmbedError(`Something went wrong while trying to create your AniList account binding:
                                                                \n\n${error}`, null)], ephemeral: true
             });
         }

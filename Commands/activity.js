@@ -40,22 +40,23 @@ module.exports = new Command({
                 if (!user) {
                     return interaction.reply({ embeds: [EmbedError(`You haven't bound your AniList username to your Discord account.`)] });
                 }
-                vars = { username: user.anilist_id }
+                vars = { userid: user.anilist_id }
             } catch (error) {
                 console.log(error);
                 return interaction.reply({ embeds: [EmbedError(`Please provide a valid AniList username.`)] });
             }
-        }
+        } else {
 
-        try {
-            let uData = (await GraphQLRequest(GraphQLQueries.User, vars))?.User;
-            vars = {
-                userid: uData?.id || "Unable to find ID"
+            try {
+                let uData = (await GraphQLRequest(GraphQLQueries.User, vars))?.User;
+                vars = {
+                    userid: uData?.id || "Unable to find ID"
+                }
+            } catch (error) {
+                console.log(error);
+                interaction.reply({ embeds: [EmbedError(error, vars)] });
             }
-        } catch (error) {
-            console.log(error);
-            interaction.reply({ embeds: [EmbedError(error, vars)] });
-        }
+        };
 
 
         GraphQLRequest(GraphQLQueries.Activity, vars)

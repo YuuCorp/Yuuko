@@ -14,6 +14,15 @@ const AnilistUser = db.define("anilistuser", {
         validate: {
             len: [1, 3000]
         }
+    },
+    anilist_id: {
+        type: DataTypes.STRING(32),
+        allowNull: false,
+        unique: true,
+        validate: {
+            is: ["^[a-zA-Z0-9_]+$", 'i'],
+            len: [1, 32]
+        }
     }
 });
 

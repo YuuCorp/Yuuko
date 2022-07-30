@@ -29,6 +29,7 @@ module.exports = new Command({
 
     async run(interaction, args, run) {
         let anilistUser = interaction.options.getString('query');
+        let vars = { username: anilistUser };
 
         // If the user hasn't provided a user
         if (!anilistUser) {
@@ -38,13 +39,13 @@ module.exports = new Command({
                 if (!user) {
                     return interaction.reply({ embeds: [EmbedError(`You haven't bound your AniList username to your Discord account.`)] });
                 }
-                anilistUser = user.anilist_id;
+                vars = {
+                    userid: user.anilist_id
+                }
             } catch {
                 return interaction.reply({ embeds: [EmbedError(`Please provide a valid AniList username.`)] });
             }
         }
-
-        let vars = { username: anilistUser };
         // Make the HTTP Api request
         GraphQLRequest(GraphQLQueries.User, vars)
             .then((response, headers) => {
