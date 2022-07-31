@@ -1,12 +1,12 @@
 const Discord = require("discord.js"),
     Command = require("#Structures/Command.js"),
+    { mwGetUserEntry } = require("#Middleware/UserEntry.js"),
     { EmbedBuilder, SlashCommandBuilder } = require('discord.js'),
     EmbedError = require("#Utils/EmbedError.js"),
     Footer = require("#Utils/Footer.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
     GraphQLRequest = require("#Utils/GraphQLRequest.js"),
-    GraphQLQueries = require("#Utils/GraphQLQueries.js"),
-    AnilistUser = require("#Models/AnilistUser.js");
+    GraphQLQueries = require("#Utils/GraphQLQueries.js");
 
 const name = "user";
 const usage = 'user <?anilist name>';
@@ -16,6 +16,7 @@ module.exports = new Command({
     name,
     usage,
     description,
+    middlewares: [mwGetUserEntry],
     type: CommandCategories.Anilist,
     slash: new SlashCommandBuilder()
         .setName(name)
@@ -35,15 +36,10 @@ module.exports = new Command({
         if (!anilistUser) {
             // We try to use the one the user set
             try {
-                const user = await AnilistUser.findOne({ where: { discord_id: interaction.user.id } });
-                if (!user) {
-                    return interaction.reply({ embeds: [EmbedError(`You haven't bound your AniList username to your Discord account.`)] });
-                }
-                vars = {
-                    userid: user.anilist_id
-                }
-            } catch {
-                return interaction.reply({ embeds: [EmbedError(`Please provide a valid AniList username.`)] });
+                vars = { userid: interaction.alID }
+            } catch (error) {
+                console.log(error);
+                return interaction.reply({ embeds: [EmbedError(`You have yet to set an AniList token.`)] });
             }
         }
         // Make the HTTP Api request
