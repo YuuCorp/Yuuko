@@ -38,7 +38,7 @@ module.exports = new Command({
         else if (hook && hookdata?.id) vars.query = hookdata.id;
         else return interaction.reply({ embeds: [EmbedError(`AnimeCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)] });
 
-        if (hookdata?.id) {
+        if (hookdata && hookdata.id) {
             GraphQLQueries.Anime = GraphQLQueries.Anime.replace("$query: String", "$query: Int");
             GraphQLQueries.Anime = GraphQLQueries.Anime.replace("search:", "id:");
         }
