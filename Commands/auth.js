@@ -1,3 +1,4 @@
+const RSACryption = require("#Utils/RSACryption.js");
 const Discord = require("discord.js"),
     path = require('path'),
     fs = require('fs'),
@@ -8,9 +9,7 @@ const Discord = require("discord.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
     AnilistUser = require("#Models/AnilistUser.js"),
     GraphQLRequest = require("#Utils/GraphQLRequest.js"),
-    NodeRSA = require('node-rsa'),
-    encryptor = new NodeRSA(fs.readFileSync(path.join(__dirname, '../RSA/id_rsa.pub').toString())),
-    decryptor = new NodeRSA(fs.readFileSync(path.join(__dirname, '../RSA/id_rsa').toString()));
+    RSAcryption = require('#Utils/RSACryption.js');
 
 const name = "auth";
 const usage = "auth <help / anilist_token>";
@@ -35,27 +34,10 @@ module.exports = new Command({
                 .addStringOption(option =>
                     option.setName('token')
                         .setDescription('Add the AniList token here.')
+                        .setMinLength(750)
                         .setRequired(true))),
 
     async run(interaction, args, run) {
-        if (!fs.existsSync(path.join(__dirname, '../RSA/id_rsa.pub')) && !fs.existsSync(path.join(__dirname, '../RSA/id_rsa'))) {
-            return interaction.reply({
-                embeds: [{
-                    description: `The person that is hosting this bot has forgotten to add RSA keys, please ping them and bring this to their attention.`,
-                    footer: Footer(),
-                }], ephemeral: true
-            });
-        };
-
-        if ("hello" != decryptor.decrypt(encryptor.encrypt('hello', 'base64'), 'utf8')) {
-            return interaction.reply({
-                embeds: [{
-                    description: `The person that is hosting this bot has invalid RSA keys, please ping them and bring this to their attention.`,
-                    footer: Footer(),
-                }], ephemeral: true
-            });
-        };
-
         const type = interaction.options.getSubcommand();
         const token = interaction.options.getString('token');
 
@@ -69,7 +51,7 @@ module.exports = new Command({
             return await interaction.reply({
                 embeds: [{
                     title: `Steps to get your AniList Token.`,
-                    description: `To add you as an user you have to [login with AniList](https://anilist.co/api/v2/oauth/authorize?client_id=9020&response_type=token). \n Once you've done that, all you have to do is run the command again with the type ` + "`" + "AL_Token" + "`" + ` and paste the token you received on the site into the token option.`,
+                    description: `To add you as an user you have to [login with AniList](https://anilist.co/api/v2/oauth/authorize?client_id=9020&response_type=token). \n Once you've done that, all you have to do is run the command again with the subcommand ` + "`" + "token" + "`" + ` and paste the token you received on the site into the token option.`,
                     footer: Footer(),
                 }], ephemeral: true
             });
@@ -80,7 +62,7 @@ module.exports = new Command({
         if (user) {
             try {
                 let data = (await GraphQLRequest(`query{Viewer{name id}}`, "", token)).Viewer;
-                await user.update({ anilist_token: encryptor.encrypt(token, 'base64'), anilist_id: data.id });
+                await user.update({ anilist_token: RSACryption(token, false), anilist_id: data.id });
                 return interaction.reply({
                     embeds: [{
                         title: `Successfully updated your AniList account binding.`,
@@ -101,7 +83,7 @@ module.exports = new Command({
         // Create new user
         try {
             let data = (await GraphQLRequest(`query{Viewer{name id}}`, "", token)).Viewer;
-            await AnilistUser.create({ discord_id: interaction.user.id, anilist_token: encryptor.encrypt(token, 'base64'), anilist_id: data.id });
+            await AnilistUser.create({ discord_id: interaction.user.id, anilist_token: RSACryption(token, false), anilist_id: data.id });
             return interaction.reply({
                 embeds: [{
                     title: `Successfully bound your AniList account to your Discord account.`,

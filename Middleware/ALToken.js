@@ -1,6 +1,6 @@
 const Middleware = require("#Structures/Middleware.js");
 const AnilistUser = require("#Models/AnilistUser.js");
-
+const RSAcryption = require('#Utils/RSACryption.js');
 
 async function requireALToken(interaction) {
     let id = interaction.user.id;
@@ -8,14 +8,14 @@ async function requireALToken(interaction) {
     if (!alUser || !alUser.anilist_token) {
         throw new Error("You must have an AniList token set to use this action.");
     }
-    interaction.token = alUser.anilist_token;
+    interaction.ALtoken = RSAcryption(alUser.anilist_token);
 }
 
 async function optionalALToken(interaction) {
     let id = interaction.user.id;
     let alUser = await AnilistUser.findOne({ where: { discord_id: id } });
     if (alUser && alUser.anilist_token) {
-        interaction.token = alUser.anilist_token;
+        interaction.ALtoken = RSAcryption(alUser.anilist_token);
     }
 }
 

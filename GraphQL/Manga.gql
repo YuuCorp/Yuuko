@@ -17,6 +17,7 @@ query ($query: String) {
         synonyms
         volumes
         genres
+        id
         meanScore
         startDate {
             year

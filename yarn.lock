@@ -892,7 +892,7 @@ node-gyp@8.x:
 
 node-rsa@^1.1.1:
   version "1.1.1"
-  resolved "https://registry.yarnpkg.com/node-rsa/-/node-rsa-1.1.1.tgz#efd9ad382097782f506153398496f79e4464434d"
+  resolved "https://registry.npmjs.org/node-rsa/-/node-rsa-1.1.1.tgz"
   integrity sha512-Jd4cvbJMryN21r5HgxQOpMEqv+ooke/korixNNK3mGqfGJmy0M77WDDzo/05969+OkMy3XW1UuZsSmW9KQm7Fw==
   dependencies:
     asn1 "^0.2.4"

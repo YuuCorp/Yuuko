@@ -19,6 +19,7 @@ query ($query: String) {
         format
         source
         genres
+        id
         duration
         synonyms
         episodes

@@ -123,14 +123,14 @@ module.exports = new Command({
                                 inline: true,
                             },
                             {
-                                name: "\u200B",
-                                value: "\u200B",
+                                name: "Media ID",
+                                value: data?.id?.toString() || "Unknown",
                                 inline: true,
                             },
                             {
                                 name: "Synonyms",
                                 value: "``" + `${data.synonyms.join(", ") || "N/A"}` + "``",
-                                inline: true,
+                                inline: false,
                             }
                         )
                         .setColor("0x00ff00")
