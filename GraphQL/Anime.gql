@@ -1,5 +1,5 @@
 query ($query: String) {
-    Media (search: $query, type: ANIME, sort: POPULARITY_DESC) {
+    Media (search: $query, type: ANIME, sort: SEARCH_MATCH) {
         id
         nextAiringEpisode {
             timeUntilAiring
