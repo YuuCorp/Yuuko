@@ -1,19 +1,11 @@
 const Event = require("#Structures/Event.js");
+const { ActivityType } = require('discord.js');
 const fs = require("fs");
 
 module.exports = new Event("ready", (client) => {
-    let n = 0;
-    statusArray = [
-        () => `${client.guilds.cache.size} Servers with ${client.users.cache.size} members.`,
-        'as!help'
-    ]
-    setInterval(() => {
-        if (n === statusArray.length) n = 0;
-        const statusActivity = typeof statusArray[n] === "function" ? statusArray[n]() : statusArray[n];
-        client.user.setPresence({activities: [{ type: 'PLAYING', name: statusActivity }], status: 'online' });
-        n++;
-    }, 10000)
-    
+
+    client.user.setPresence({ activities: [{ type: ActivityType.Watching, name: `${client.guilds.cache.size} servers with ${client.users.cache.size} members.` }], status: 'online' })
+
     console.log("Bot is ready")
 
     // React to update command output if exists

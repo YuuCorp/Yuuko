@@ -1,15 +1,12 @@
 const RSACryption = require("#Utils/RSACryption.js");
 const Discord = require("discord.js"),
-    path = require('path'),
-    fs = require('fs'),
     { EmbedBuilder, SlashCommandBuilder } = require('discord.js'),
     Command = require("#Structures/Command.js"),
     EmbedError = require("#Utils/EmbedError.js"),
     Footer = require("#Utils/Footer.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
     AnilistUser = require("#Models/AnilistUser.js"),
-    GraphQLRequest = require("#Utils/GraphQLRequest.js"),
-    RSAcryption = require('#Utils/RSACryption.js');
+    GraphQLRequest = require("#Utils/GraphQLRequest.js");
 
 const name = "auth";
 const usage = "auth <help / anilist_token>";
