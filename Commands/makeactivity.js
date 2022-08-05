@@ -88,7 +88,11 @@ module.exports = new Command({
 
         if (type === "list") {
             let vars = {};
-            for(option of interaction.options._hoistedOptions){
+            for (option of interaction.options._hoistedOptions) {
+                if (option.name === "lists") {
+                    vars[option.name] = option.value.split(',');
+                    continue;
+                }
                 vars[option.name] = option.value;
             }
             GraphQLRequest(GraphQLQueries.MediaList, vars, interaction.ALtoken)
