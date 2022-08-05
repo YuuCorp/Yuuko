@@ -90,7 +90,12 @@ module.exports = new Command({
             let vars = {};
             for (option of interaction.options._hoistedOptions) {
                 if (option.name === "lists") {
-                    vars[option.name] = option.value.split(',');
+                    //.replace(/^\s+/g, '');
+                    let listArray = [];
+                    for (list of option.value.split(',')) {
+                        listArray.push(list.replace(/^\s+/g, ''))
+                    }
+                    vars[option.name] = listArray;
                     continue;
                 }
                 vars[option.name] = option.value;
