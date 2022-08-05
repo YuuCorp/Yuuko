@@ -25,7 +25,7 @@ module.exports = new Command({
             subcommand.setName('list')
                 .setDescription('Make a list activity.')
                 .addIntegerOption(option =>
-                    option.setName('media_id')
+                    option.setName('mediaid')
                         .setRequired(true)
                         .setDescription('The Media ID of the anime/manga'))
                 .addStringOption(option =>
@@ -40,6 +40,12 @@ module.exports = new Command({
                             { name: "Paused", value: "PAUSED" },
                             { name: "Repeating", value: "REPEATING" }
                         ))
+                .addBooleanOption(option =>
+                    option.setName("hide")
+                        .setDescription("Hide series from status list"))
+                .addStringOption(option =>
+                    option.setName("lists")
+                        .setDescription("The custom list(s) you want the series added to. Seperate the lists with a comma."))
                 .addNumberOption(option =>
                     option.setName('score')
                         .setDescription('The score you want to give the series.')
@@ -81,15 +87,9 @@ module.exports = new Command({
         }
 
         if (type === "list") {
-            let vars = {
-                mediaId: interaction.options.getInteger("media_id"),
-                status: interaction.options.getString("status"),
-            }
-            if (interaction.options.getNumber("score")) {
-                vars.score = interaction.options.getNumber("score");
-            }
-            if (interaction.options.getInteger("progress")) {
-                vars.progress = interaction.options.getInteger("progress");
+            let vars = {};
+            for(option of interaction.options._hoistedOptions){
+                vars[option.name] = option.value;
             }
             GraphQLRequest(GraphQLQueries.MediaList, vars, interaction.ALtoken)
                 .then((response, headers) => {
