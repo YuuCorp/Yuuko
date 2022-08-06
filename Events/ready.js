@@ -4,7 +4,7 @@ const fs = require("fs");
 
 module.exports = new Event("ready", (client) => {
 
-    client.user.setPresence({ activities: [{ type: ActivityType.Watching, name: `${client.guilds.cache.size} servers with ${getMemberCount(client)} members.` }], status: 'online' })
+    client.user.setPresence({ activities: [{ type: ActivityType.Watching, name: `${client.guilds.cache.size} servers.` }], status: 'online' })
 
     console.log(`${client.user.tag} is ready!`);
 
@@ -29,11 +29,3 @@ module.exports = new Event("ready", (client) => {
         }
     }
 });
-
-function getMemberCount(client){
-    let memberCount = 0;
-    client.guilds.cache.forEach(guild => {
-        memberCount = memberCount + guild.memberCount;
-    });
-    return memberCount;
-}

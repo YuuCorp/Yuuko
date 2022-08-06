@@ -12,7 +12,6 @@ class Client extends Discord.Client {
                 GatewayIntentBits.GuildMessageReactions,
                 GatewayIntentBits.GuildEmojisAndStickers,
                 GatewayIntentBits.DirectMessages,
-                GatewayIntentBits.Guilds,
             ],
             allowedMentions: { repliedUser: false } });
 
