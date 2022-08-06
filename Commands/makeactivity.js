@@ -90,9 +90,9 @@ module.exports = new Command({
             let vars = {};
             for (option of interaction.options._hoistedOptions) {
                 if (option.name === "lists") {
-                    //.replace(/^\s+/g, '');
                     let listArray = [];
                     for (list of option.value.split(',')) {
+                        // Replaces the first character if it's a whitespace
                         listArray.push(list.replace(/^\s+/g, ''))
                     }
                     vars[option.name] = listArray;

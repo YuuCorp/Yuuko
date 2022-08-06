@@ -9,7 +9,7 @@ const Discord = require("discord.js"),
     GraphQLRequest = require("#Utils/GraphQLRequest.js");
 
 const name = "auth";
-const usage = "auth <help / anilist_token>";
+const usage = "auth <help | anilist_token>";
 const description = "Binds an existing AniList user to your Discord account in the bot database.";
 
 module.exports = new Command({
@@ -27,7 +27,7 @@ module.exports = new Command({
         .addSubcommand(subcommand =>
             subcommand
                 .setName('token')
-                .setDescription('Use the AniList token here.')
+                .setDescription('   Use the AniList token here.')
                 .addStringOption(option =>
                     option.setName('token')
                         .setDescription('Add the AniList token here.')
@@ -53,6 +53,7 @@ module.exports = new Command({
                 }], ephemeral: true
             });
         }
+        
         const user = await AnilistUser.findOne({ where: { discord_id: interaction.user.id } });
 
         // Update existing user
