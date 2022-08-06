@@ -63,12 +63,13 @@ module.exports = new Command({
                 let reply = await interaction.fetchReply();
                 const tempFile = path.join(__dirname, "../Local/updatemsg.json");
                 console.log(reply)
-                const tempFileData = {
-                    messageID: reply.id,
-                    channelID: reply.channelId
-                }
+                //const tempFileData = {
+                //    messageID: reply.id,
+                //    channelID: reply.channelId
+                //}
                 //fs.writeFileSync(tempFile, JSON.stringify(tempFileData));
-                execSync('git rev-parse --short HEAD > commit.hash', { encoding: 'utf-8' });
+                //execSync('git rev-parse --short HEAD > commit.hash', { encoding: 'utf-8' });
+                execSync('pm2 restart 0', { encoding: 'utf-8' });
             });
         }
     }
