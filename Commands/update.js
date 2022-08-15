@@ -69,7 +69,7 @@ module.exports = new Command({
                 //}
                 //fs.writeFileSync(tempFile, JSON.stringify(tempFileData));
                 //execSync('git rev-parse --short HEAD > commit.hash', { encoding: 'utf-8' });
-                execSync('pm2 restart 0', { encoding: 'utf-8' });
+                execSync('pm2 restart "Yuuko Production"', { encoding: 'utf-8' });
             });
         }
     }
