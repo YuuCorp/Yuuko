@@ -4,9 +4,9 @@ const fs = require("fs");
 
 module.exports = new Event("ready", (client) => {
 
-    client.user.setPresence({ activities: [{ type: ActivityType.Watching, name: `${client.guilds.cache.size} servers with ${client.users.cache.size} members.` }], status: 'online' })
+    client.user.setPresence({ activities: [{ type: ActivityType.Watching, name: `${client.guilds.cache.size} servers` }], status: 'online' })
 
-    console.log("Bot is ready")
+    console.log(`${client.user.tag} is ready!`);
 
     // React to update command output if exists
     if (fs.existsSync("./Local/updatemsg.json")) {
