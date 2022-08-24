@@ -68,8 +68,11 @@ module.exports = new Command({
         // Send the description to the user
         const helpInfoEmbed = new EmbedBuilder();
         helpInfoEmbed.setTitle(":grey_question: Help");
-        helpInfoEmbed.setDescription("Here is a list of every command and how to use it. Parameters starting with \`?\` are optional. If you need more information about a command, use `" + run.prefix + "help <command>`.");
-        helpInfoEmbed.addFields({ name: "Usage", value: "Use the buttons below to navigate the help pages. Note that a category might have more than one page." });
+        helpInfoEmbed.setDescription("Here is a list of every command and how to use it. Parameters starting with \`?\` are optional.");
+        helpInfoEmbed.addFields(
+            { name: "Usage", value: "Use the buttons below to navigate the help pages. Note that a category might have more than one page." },
+            { name: "Tip", value: "Since the migration to slash commands, you can also view the list of commands in the slash menu, you can use that too." }
+        );
         helpInfoEmbed.setColor('#1873bf');
 
         let pageList = [helpInfoEmbed];
