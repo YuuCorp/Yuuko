@@ -28,7 +28,7 @@ const rsaPrivateCheck = new Check({
 })
 
 const rsaCryptionCheck = new Check({
-    name: "RSA Encrypiton & Decryption Check",
+    name: "RSA Encryption & Decryption Check",
     description: "Ensure that the RSA key's are valid by encryping & decrypting them seperately using public & private keys.",
     optional: false,
     run: () => {
