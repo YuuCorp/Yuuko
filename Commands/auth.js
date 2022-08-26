@@ -53,7 +53,7 @@ module.exports = new Command({
                 }], ephemeral: true
             });
         }
-        
+
         const user = await AnilistUser.findOne({ where: { discord_id: interaction.user.id } });
 
         // Update existing user
