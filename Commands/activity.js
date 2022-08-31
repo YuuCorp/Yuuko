@@ -40,7 +40,7 @@ module.exports = new Command({
                 vars = { userid: interaction.alID }
             } catch (error) {
                 console.log(error);
-                return interaction.reply({ embeds: [EmbedError(`You have yet to set an AniList token.`)] });
+                return interaction.reply({ embeds: [EmbedError(`You have yet to set an AniList token. You can see the instructions with /auth help`)] });
             }
         } else {
 
