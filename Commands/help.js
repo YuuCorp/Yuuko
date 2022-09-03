@@ -35,7 +35,7 @@ function generateHelpEmbeds(cmdsArr, category) {
         embed.setColor('#1873bf');
         try {
             embed.addFields({ name, value: cmdStr });
-        } catch(err) {
+        } catch (err) {
             console.error(err)
         }
         embeds.push(embed);
@@ -71,7 +71,8 @@ module.exports = new Command({
         helpInfoEmbed.setDescription("Here is a list of every command and how to use it. Parameters starting with \`?\` are optional.");
         helpInfoEmbed.addFields(
             { name: "Usage", value: "Use the buttons below to navigate the help pages. Note that a category might have more than one page." },
-            { name: "Tip", value: "Since the migration to slash commands, you can also view the list of commands in the slash menu, you can use that too." }
+            { name: "Tip", value: "Since the migration to slash commands, you can also view the list of commands in the slash menu, you can use that too." },
+            { name: "Voting", value: "[Vote for our bot on Top.GG!](https://top.gg/bot/867010131745177621) There are no added benefits yet, but they help us be seen by other users!" }
         );
         helpInfoEmbed.setColor('#1873bf');
 
