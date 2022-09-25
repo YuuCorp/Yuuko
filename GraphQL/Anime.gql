@@ -35,5 +35,14 @@ query ($query: String) {
             day
         }
         bannerImage
+      mediaListEntry {
+        status
+        progress
+        score
+        notes
+        user {
+          name
+        }
+      }
     }
 }

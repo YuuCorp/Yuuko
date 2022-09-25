@@ -2,6 +2,7 @@ const Discord = require("discord.js"),
     { EmbedBuilder, SlashCommandBuilder } = require('discord.js'),
     Command = require("#Structures/Command.js"),
     EmbedError = require("#Utils/EmbedError.js"),
+    { mwOptionalALToken } = require("#Middleware/ALToken.js"),
     Footer = require("#Utils/Footer.js"),
     BuildPagination = require("#Utils/BuildPagination.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
@@ -16,6 +17,7 @@ module.exports = new Command({
     name,
     usage,
     description,
+    middlewares: [mwOptionalALToken],
     type: CommandCategories.Anilist,
     slash: new SlashCommandBuilder()
         .setName(name)
@@ -43,7 +45,7 @@ module.exports = new Command({
             GraphQLQueries.Anime = GraphQLQueries.Anime.replace("search:", "id:");
         }
         //^ Make the HTTP Api request
-        GraphQLRequest(GraphQLQueries.Manga, vars)
+        GraphQLRequest(GraphQLQueries.Manga, vars, interaction.ALtoken)
             .then((response, headers) => {
                 let data = response.Media;
                 if (data) {
@@ -138,6 +140,38 @@ module.exports = new Command({
                         for (const field of hookdata.fields) {
                             firstPage.addFields({ name: field.name, value: field.value, inline: field.inline || false });
                         }
+                    }
+
+                    if (data.mediaListEntry) {
+                        const thirdPage = new EmbedBuilder()
+                            .setAuthor({ name: `${data.title.english} | ${data.mediaListEntry.user.name}'s Stats` })
+                            .setThumbnail(data.coverImage.large)
+                            .addFields(
+                                {
+                                    name: "Status",
+                                    value: data.mediaListEntry?.status.toString() || "Unknown",
+                                    inline: true,
+                                },
+                                {
+                                    name: "Progress",
+                                    value: data.mediaListEntry?.progress.toString() || "Unknown",
+                                    inline: true,
+                                },
+                                {
+                                    name: "Score",
+                                    value: data.mediaListEntry?.score.toString() || "Unknown",
+                                    inline: true,
+                                },
+                                {
+                                    name: "Notes",
+                                    value: data.mediaListEntry?.notes || "No Notes Found",
+                                }
+                            )
+                            .setColor("0x00ff00")
+                            .setFooter(Footer(headers));
+                        const pageList = [firstPage, secondPage, thirdPage];
+                        BuildPagination(interaction, pageList).paginate();
+                        return;
                     }
 
                     const pageList = [firstPage, secondPage];
