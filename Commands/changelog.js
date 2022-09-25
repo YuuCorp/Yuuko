@@ -16,14 +16,14 @@ module.exports = new Command({
         .setDescription(description),
 
     async run(interaction, args, run) {
-        const gitResult = execSync('git reflog --date=iso').toString();
-        const gitLog = gitResult.split("\n").filter(line => line.includes("commit:")).map(line => {
-            return line.match(/(?<=@{)(.*?)(?=\s\+0)/g).toString() + ": " + line.substring(line.indexOf("commit: ") + "commit: ".length);
+        const gitResult = execSync('git log --oneline -n 5').toString();
+        const gitLog = gitResult.split('\n').filter(item => item).map(commit => {
+            return commit.replace(commit.substring(0, commit.indexOf(' ') + 1), '');
         });
         return interaction.reply({
             embeds: [{
                 title: `Here are the most recent changes.`,
-                description: `\`\`\`\n${gitLog.join('\n')} \`\`\``,
+                description: `\`\`\`\n${gitLog.toString().replaceAll(',', '\n')} \`\`\``,
                 color: 0x00ff00,
                 footer: Footer(),
             }]
