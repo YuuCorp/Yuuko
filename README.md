@@ -25,9 +25,10 @@ Yuuko is a free and open source Discord bot that integrates with the AniList API
 ## Installation
 ### Simple Installation
 1. Clone the repository
-2. Run `yarn`
-3. Edit the file called `.env.local` and change the `TOKEN` in it
-4. Run `yarn start`
+2. Generate an rsa keypair using `mkdir -p ./RSA & ssh-keygen -t rsa -f ./RSA/id_rsa -C id_rsa`
+3. Run `yarn`
+4. Edit the file called `.env.local` and change the `TOKEN` in it
+5. Run `yarn start`
 
 ### PM2 Container Installation (Linux)
 1. Make sure `TRUSTED_USERS` includes your Discord ID in `.env`, so you can update the bot if needed.
