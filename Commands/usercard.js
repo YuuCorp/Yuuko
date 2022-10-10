@@ -23,12 +23,12 @@ module.exports = new Command({
         .setName(name)
         .setDescription(description)
         .addStringOption(option =>
-            option.setName('user')
+            option.setName('query')
                 .setDescription('The user to search for')
                 .setRequired(true)),
 
     async run(interaction, args, run) {
-        let vars = { username: interaction.options.getString('user') };
+        let vars = { username: interaction.options.getString('query') };
 
         // Make the HTTP Api request
         GraphQLRequest(GraphQLQueries.UserCard, vars)
