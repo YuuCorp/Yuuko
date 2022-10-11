@@ -23,7 +23,7 @@ module.exports = new Command({
         return interaction.reply({
             embeds: [{
                 title: `Here are the most recent changes.`,
-                description: `\`\`\`\n${gitLog.toString().replaceAll(',', '\n\n')} \`\`\``,
+                description: `\`\`\`\n${gitLog.join('<BREAKCOMMIT>').replaceAll('<BREAKCOMMIT>', '\n\n')} \`\`\``,
                 color: 0x00ff00,
                 footer: Footer(),
             }]
