@@ -18,7 +18,7 @@ module.exports = function (item, type = true) {
 
         const decryptitem = new NodeRSA(fs.readFileSync(itemContent).toString());
         return decryptitem.decrypt(item, 'utf8');
-    } else {
+    } else if (type === false) {
         let itemContent = path.join(__dirname, '../RSA/id_rsa.pub');
 
         if (!fs.existsSync(itemContent)) {
@@ -27,5 +27,7 @@ module.exports = function (item, type = true) {
 
         const encryptitem = new NodeRSA(fs.readFileSync(itemContent).toString());
         return encryptitem.encrypt(item, 'base64');
+    } else {
+        throw new Error("Invalid type.")
     };
 };

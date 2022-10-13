@@ -1,9 +1,7 @@
-const Check = require("#Structures/Check.js");
-const fs = require("fs");
-const path = require("path");
-const NodeRSA = require('node-rsa');
-const encryptor = new NodeRSA(fs.readFileSync(path.join(__dirname, '../RSA/id_rsa.pub').toString()));
-const decryptor = new NodeRSA(fs.readFileSync(path.join(__dirname, '../RSA/id_rsa').toString()));
+const Check = require("#Structures/Check.js"),
+    fs = require("fs"),
+    path = require("path"),
+    RSACryption = require('#Utils/RSACryption.js');
 
 const rsaPublicCheck = new Check({
     name: "RSA Public Key Check",
@@ -32,7 +30,7 @@ const rsaCryptionCheck = new Check({
     description: "Ensure that the RSA key's are valid by encryping & decrypting them seperately using public & private keys.",
     optional: false,
     run: () => {
-        if (decryptor.decrypt(encryptor.encrypt('hello', 'base64'), 'utf8') != "hello") {
+        if (RSACryption(RSACryption("hello", false)) !== "hello") {
             throw new Error("Public & Private RSA keys don't match.")
         }
     }

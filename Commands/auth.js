@@ -27,7 +27,7 @@ module.exports = new Command({
         .addSubcommand(subcommand =>
             subcommand
                 .setName('token')
-                .setDescription('   Use the AniList token here.')
+                .setDescription('Use the AniList token here.')
                 .addStringOption(option =>
                     option.setName('token')
                         .setDescription('Add the AniList token here.')

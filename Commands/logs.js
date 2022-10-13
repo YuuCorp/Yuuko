@@ -7,7 +7,7 @@ const Command = require("#Structures/Command.js"),
     fs = require('fs');
 
 const name = "logs";
-const description = "Allows you to see the 25 moost recent logs of the bot. (Trusted users only)";
+const description = "Allows you to see the 25 most recent logs of the bot. (Trusted users only)";
 
 module.exports = new Command({
     name,
