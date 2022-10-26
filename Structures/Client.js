@@ -14,7 +14,8 @@ class Client extends Discord.Client {
                 GatewayIntentBits.DirectMessages,
                 GatewayIntentBits.Guilds,
             ],
-            allowedMentions: { repliedUser: false } });
+            allowedMentions: { repliedUser: false }
+        });
 
         /**
          * @type {Discord.Collection<string, Command>}
@@ -43,15 +44,15 @@ class Client extends Discord.Client {
             });
 
         //^ Register Slash Commands
-        (async() => {
+        (async () => {
             const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
-            const clientId = process.env.CLIENT_ID || '881173250091126845';
+            const clientId = process.env.CLIENT_ID || '867010131745177621';
             const guildId = process.env.GUILD_ID || '843208877326860299';
-    
+
             try {
                 console.log(`Started refreshing ${slashCommands.length} slash (/) commands.`);
-    
+
                 await rest.put(
                     Routes.applicationGuildCommands(clientId, guildId),
                     { body: slashCommands },
@@ -63,12 +64,12 @@ class Client extends Discord.Client {
                         { body: slashCommands },
                     );
                 }
-    
+
                 console.log(`Refreshed ${slashCommands.length} slash (/) commands.`);
             } catch (error) {
                 console.error(error);
             }
-    
+
             fs.readdirSync("./Events")
                 .filter((file) => file.endsWith(".js"))
                 .forEach((file) => {
@@ -79,7 +80,7 @@ class Client extends Discord.Client {
                     console.log(`Event ${event.event} loaded`);
                     this.on(event.event, event.run.bind(null, this));
                 });
-    
+
             this.login(process.env.TOKEN);
         })();
     }
