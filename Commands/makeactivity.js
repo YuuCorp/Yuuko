@@ -69,7 +69,7 @@ module.exports = new Command({
         }
 
         if (type === "status") {
-            let vars = { text: interaction.options.getString('text') };
+            let vars = { text: getEmojis(interaction.options.getString('text')) };
             GraphQLRequest(GraphQLQueries.TextActivity, vars, interaction.ALtoken)
                 .then((response, headers) => {
                     let data = response?.SaveTextActivity;
@@ -114,3 +114,12 @@ module.exports = new Command({
 
     },
 });
+
+function getEmojis(messageString) {
+    let matchedResults = Array.from(messageString.matchAll(/<\w*:.*?:(\d+)>/gm), x => x[1]);
+    let filteredResults = matchedResults.map(x => `img22(https://cdn.discordapp.com/emojis/${x})`);
+    for (let i = 0; i < matchedResults.length; i++) {
+        messageString = messageString.replace(/<\w*:.*?:(\d+)>/, filteredResults[i]);
+    }
+    return messageString;
+}
