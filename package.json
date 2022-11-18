@@ -14,7 +14,7 @@
     "anime",
     "suggest"
   ],
-  "author": "Tibix & Sayykii",
+  "author": "Yuuko Devs",
   "license": "MIT",
   "dependencies": {
     "@acegoal07/discordjs-pagination": "^1.2.6",
