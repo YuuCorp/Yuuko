@@ -21,7 +21,7 @@ module.exports = new Command({
         try {
 
             if (JSON.parse(process.env.TRUSTED_USERS).includes(interaction.user.id)/* && process.env.NODE_ENV === "production"*/) {
-                let updateMessage = await interaction.reply("Updating...");
+                let updateMessage = await interaction.reply({ content: "Updating...", fetchReply: true });
                 const editMessage = async content => {
                     await interaction.editReply("```sh\n" + content + "```");
                 }
@@ -61,14 +61,9 @@ module.exports = new Command({
                         fs.mkdirSync(path.join(__dirname, "../Local"));
                     }
 
-                    let reply = await interaction.fetchReply();
                     const tempFile = path.join(__dirname, "../Local/updatemsg.json");
-                    console.log(reply)
-                    //const tempFileData = {
-                    //    messageID: reply.id,
-                    //    channelID: reply.channelId
-                    //}
-                    //fs.writeFileSync(tempFile, JSON.stringify(tempFileData));
+                    console.log(updateMessage)
+                    fs.writeFileSync(tempFile, JSON.stringify({ id: updateMessage.id, channelId: updateMessage.channelId }));
                     //execSync('git rev-parse --short HEAD > commit.hash', { encoding: 'utf-8' });
                     execSync('pm2 restart "Yuuko Production"', { encoding: 'utf-8' });
                 });

@@ -12,7 +12,7 @@ module.exports = new Event("ready", (client) => {
     if (fs.existsSync("./Local/updatemsg.json")) {
         let updatemsg = JSON.parse(fs.readFileSync("./Local/updatemsg.json"));
         try {
-            client.channels.cache.get(updatemsg.channelID).messages.fetch(updatemsg.messageID).then(async msg => {
+            client.channels.cache.get(updatemsg.channelId).messages.fetch(updatemsg.id).then(async msg => {
                 await msg.react("❤️")
                 console.log("Heartbeat sent to update output.")
             });
