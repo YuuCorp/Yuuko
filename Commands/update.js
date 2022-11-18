@@ -62,8 +62,8 @@ module.exports = new Command({
                     }
 
                     const tempFile = path.join(__dirname, "../Local/updatemsg.json");
-                    console.log(updateMessage)
-                    fs.writeFileSync(tempFile, JSON.stringify({ id: updateMessage.id, channelId: updateMessage.channelId }));
+                    console.log(updateMessage);
+                    fs.writeFileSync(tempFile, JSON.stringify(updateMessage));
                     //execSync('git rev-parse --short HEAD > commit.hash', { encoding: 'utf-8' });
                     execSync('pm2 restart "Yuuko Production"', { encoding: 'utf-8' });
                 });
