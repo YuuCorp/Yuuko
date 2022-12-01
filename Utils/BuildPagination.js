@@ -19,7 +19,6 @@ module.exports = (interaction, pageList) => {
     return new PaginationWrapper().setInterface(interaction)
         .setPageList(pageList)
         .setButtonList(buttonList)
-        .enableAutoButton(false)
-        .enableAutoDelete()
+        .enableAutoButton(true)
         .setTimeout(20000);
 }
