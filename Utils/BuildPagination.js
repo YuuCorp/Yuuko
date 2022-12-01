@@ -1,6 +1,6 @@
 const Discord = require('discord.js'),
     { ButtonBuilder } = require('discord.js'),
-    paginationWrapper = require("@acegoal07/discordjs-pagination");
+    PaginationWrapper = require("@acegoal07/discordjs-pagination");
 
 /**
  * Creates the default pagination object to avoid boilerplate.
@@ -16,11 +16,10 @@ module.exports = (interaction, pageList) => {
         new ButtonBuilder().setCustomId("lastbtn").setLabel("Last Page").setStyle("Danger"),
     ];
 
-    return new paginationWrapper().setInteraction(interaction)
+    return new PaginationWrapper().setInterface(interaction)
         .setPageList(pageList)
         .setButtonList(buttonList)
-        .enableAutoButton()
-        .enableAutoDelButton()
-        .setTimeout(20000)
-        //.enableAuthorIndependent()
+        .enableAutoButton(false)
+        .enableAutoDelete()
+        .setTimeout(20000);
 }
