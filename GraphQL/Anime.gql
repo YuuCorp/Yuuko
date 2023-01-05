@@ -38,10 +38,13 @@ query ($query: String) {
       mediaListEntry {
         status
         progress
-        score
+        score(format: POINT_10_DECIMAL)
         notes
         user {
           name
+          mediaListOptions {
+            scoreFormat
+          }
         }
       }
     }

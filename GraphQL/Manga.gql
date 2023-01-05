@@ -1,43 +1,46 @@
-query ($query: String) { 
-    Media (search: $query, type: MANGA, sort: SEARCH_MATCH) {
-        id
-        description
-        coverImage {
-            large
-            medium
-        }
-        title {
-            romaji
-            english
-            native
-        }
-        format
-        chapters
-        source
-        synonyms
-        volumes
-        genres
-        id
-        meanScore
-        startDate {
-            year
-            month
-            day
-        }
-        endDate {
-            year
-            month
-            day
-        }
-        bannerImage
-        mediaListEntry {
-            status
-            progress
-            score
-            notes
-            user {
-              name
+query ($query: String) {
+  Media(search: $query, type: MANGA, sort: SEARCH_MATCH) {
+    id
+    description
+    coverImage {
+      large
+      medium
+    }
+    title {
+      romaji
+      english
+      native
+    }
+    format
+    chapters
+    source
+    synonyms
+    volumes
+    genres
+    id
+    meanScore
+    startDate {
+      year
+      month
+      day
+    }
+    endDate {
+      year
+      month
+      day
+    }
+    bannerImage
+    mediaListEntry {
+      status
+      progress
+      score(format: POINT_10_DECIMAL)
+      notes
+      user {
+        name
+        mediaListOptions {
+          scoreFormat
         }
       }
     }
+  }
 }

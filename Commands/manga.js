@@ -143,6 +143,18 @@ module.exports = new Command({
                     }
 
                     if (data.mediaListEntry) {
+                        let score = "Unknown";
+                        const scoring = data.mediaListEntry.user?.mediaListOptions.scoreFormat;
+                        if (data.mediaListEntry.score && scoring) {
+                            score = data.mediaListEntry.score.toString();
+                            if (scoring === ("POINT_10_DECIMAL" || "POINT_10"))
+                                score = `${score} / 10`;
+                            else if (scoring === ("POINT_100" || "POINT_5"))
+                                score = `${score} / ${scoring.split("POINT_")[1]}`;
+                            else if (scoring === "POINT_3")
+                                score = score === "1" ? "☹️" : score === "2" ? "😐" : "🙂";
+                        }
+
                         const thirdPage = new EmbedBuilder()
                             .setAuthor({ name: `${data.title.english} | ${data.mediaListEntry.user.name}'s Stats` })
                             .setThumbnail(data.coverImage.large)
@@ -159,7 +171,7 @@ module.exports = new Command({
                                 },
                                 {
                                     name: "Score",
-                                    value: data.mediaListEntry?.score.toString() || "Unknown",
+                                    value: score,
                                     inline: true,
                                 },
                                 {
