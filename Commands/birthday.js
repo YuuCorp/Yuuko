@@ -19,22 +19,7 @@ module.exports = new Command({
         .addUserOption((option) => option.setName("user").setRequired(false).setDescription("The user to get the birthday of.")),
 
     async run(interaction, args, run) {
-        function daysLeftUntilBirthday(date) {
-            const today = new Date();
-            const nextBirthday = new Date(today.getFullYear(), date.getMonth(), date.getDate());
-            if (today > nextBirthday) nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
-            const daysLeft = Math.ceil((nextBirthday - today) / (1000 * 60 * 60 * 24));
-            return daysLeft;
-        }
-
-        function calculateAge(date) {
-            const today = new Date();
-            const m = today.getMonth() - date.getMonth();
-            let age = today.getFullYear() - date.getFullYear();
-            if (m < 0 || (m === 0 && today.getDate() < date.getDate())) age--;
-            return age;
-        }
-
+        if (interaction.guild.id !== process.env.GUILD_ID) return interaction.reply({ content: "Sorry, seems like you have somehow gotten access to a command you shouldn't be able to.", ephemeral: true });
         const birthdays = {
             "420825464245059586": {
                 string: "5th of March 2008",
@@ -109,6 +94,22 @@ module.exports = new Command({
                 .setTimestamp()
                 .setAuthor({ name: interaction.user.tag, iconURL: interaction.user.displayAvatarURL() });
             interaction.reply({ embeds: [embed] });
+        }
+
+        function daysLeftUntilBirthday(date) {
+            const today = new Date();
+            const nextBirthday = new Date(today.getFullYear(), date.getMonth(), date.getDate());
+            if (today > nextBirthday) nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
+            const daysLeft = Math.ceil((nextBirthday - today) / (1000 * 60 * 60 * 24));
+            return daysLeft;
+        }
+
+        function calculateAge(date) {
+            const today = new Date();
+            const m = today.getMonth() - date.getMonth();
+            let age = today.getFullYear() - date.getFullYear();
+            if (m < 0 || (m === 0 && today.getDate() < date.getDate())) age--;
+            return age;
         }
     },
 });
