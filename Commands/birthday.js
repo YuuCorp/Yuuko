@@ -1,10 +1,12 @@
 const Discord = require("discord.js"),
     Command = require("#Structures/Command.js"),
     { EmbedBuilder, SlashCommandBuilder } = require("discord.js"),
+    BuildPagination = require("#Utils/BuildPagination.js"),
+    UserBirthday = require("#Models/UserBirthday.js"),
     CommandCategories = require("#Utils/CommandCategories.js");
 
 const name = "birthday";
-const usage = "birthday <?discord user>";
+const usage = "birthday <user | list | set>";
 const description = "Shows general list of birthdays for BBH server, or shows birthday for specific person.";
 
 module.exports = new Command({
@@ -12,96 +14,90 @@ module.exports = new Command({
     usage,
     description,
     type: CommandCategories.Misc,
-    guildOnly: true,
     slash: new SlashCommandBuilder()
         .setName(name)
         .setDescription(description)
-        .addUserOption((option) => option.setName("user").setRequired(false).setDescription("The user to get the birthday of.")),
+        .addSubcommand((subcommand) =>
+            subcommand
+                .setName("user")
+                .setDescription("The user to get the birthday of.")
+                .addUserOption((option) => option.setName("user").setDescription("The user to get the birthday of.").setRequired(true))
+        )
+        .addSubcommand((subcommand) => subcommand.setName("list").setDescription("List the birthdays of all registered users in this guild."))
+        .addSubcommand((subcommand) =>
+            subcommand
+                .setName("set")
+                .setDescription("Set your birthday.")
+                .addStringOption((option) => option.setName("date").setDescription("The date of your birthday. Format: YYYY-MM-DD").setMinLength(10).setMaxLength(10).setRequired(true))
+        ),
 
     async run(interaction, args, run) {
-        if (interaction.guild.id !== process.env.GUILD_ID) return interaction.reply({ content: "Sorry, seems like you have somehow gotten access to a command you shouldn't be able to.", ephemeral: true });
-        const birthdays = {
-            "407520116478312448": {
-                string: "2nd of January 2003",
-                date: new Date("2003-01-02"),
-            }, // sprit3
-            "420825464245059586": {
-                string: "5th of March 2008",
-                date: new Date("2008-03-05"),
-            }, // miku simp
-            "592338499810885653": {
-                string: "7th of March 2007",
-                date: new Date("2007-03-07"),
-            }, // lebeb
-            "327012928031162368": {
-                string: "11th of March 2006",
-                date: new Date("2006-03-11"),
-            }, // manzom
-            "367386777758990337": {
-                string: "20th of March 2004",
-                date: new Date("2004-03-20"),
-            }, // purpleyuki
-            "236907218342117376": {
-                string: "23rd of April 2007",
-                date: new Date("2007-04-23"),
-            }, // akira
-            "313699902758715404": {
-                string: "24th of June 2005",
-                date: new Date("2005-06-24"),
-            }, // kevin
-            "419512104685666304": {
-                string: "18th of July 2006",
-                date: new Date("2006-07-18"),
-            }, // mads
-            "422007636133675018": {
-                string: "3rd of August 2006",
-                date: new Date("2006-08-03"),
-            }, // salami
-            "212179051652055040": {
-                string: "20th of August 2004",
-                date: new Date("2004-08-20"),
-            }, // martin
-            "795261856964673536": {
-                string: "12th of September 2007",
-                date: new Date("2007-09-12"),
-            }, // aishi
-            "227032992978042881": {
-                string: "1st of October 2003",
-                date: new Date("2003-10-01"),
-            }, // tibi
-            "696943140183081052": {
-                string: "12th of November 2008",
-                date: new Date("2008-11-12"),
-            }, // rye
-        };
+        const subcommand = interaction.options.getSubcommand();
 
-        const user = interaction.options.getUser("user");
+        if (subcommand === "set") {
+            const date = interaction.options.getString("date");
+            const birthday = new Date(date);
+            if (birthday.toString() === "Invalid Date") return interaction.reply({ content: "Invalid date format. Please use YYYY-MM-DD.", ephemeral: true });
+            const userBirthday = await UserBirthday.findOne({ where: { user_id: interaction.user.id } });
+            if (userBirthday) {
+                userBirthday.birthday = birthday;
+                await userBirthday.save();
+            } else {
+                await UserBirthday.create({ user_id: interaction.user.id, birthday, guild_id: interaction.guild.id });
+            }
+            return interaction.reply({ content: `Your birthday has been set to ${getReadableDate(birthday)}.`, ephemeral: true });
+        }
 
-        if (user) {
-            const birthday = birthdays[user.id];
-            if (!birthday) return interaction.reply({ content: "This user does not have a birthday set.", ephemeral: true });
-            const daysLeft = daysLeftUntilBirthday(birthday.date);
-            const embed = new EmbedBuilder()
-                .setTitle(`${user.username}'s birthday`)
-                .setDescription(`Their birthday is on ${birthday.string}, which is in ${daysLeft} days!`)
-                .setTimestamp()
-                .setAuthor({ name: interaction.user.tag, iconURL: interaction.user.displayAvatarURL() });
-            interaction.reply({ embeds: [embed] });
-        } else {
-            const embed = new EmbedBuilder()
-                .setTitle("Birthdays of bros before hoes members")
-                .setDescription(
-                    Object.entries(birthdays)
-                        .map(([id, birthday]) => {
-                            const daysLeft = daysLeftUntilBirthday(birthday.date);
-                            const age = calculateAge(birthday.date);
-                            return `<@${id}> - ${birthday.string} - **${daysLeft} days left** - ${age}yo \n`;
-                        })
-                        .join("\n")
-                )
-                .setTimestamp()
-                .setAuthor({ name: interaction.user.tag, iconURL: interaction.user.displayAvatarURL() });
-            interaction.reply({ embeds: [embed] });
+        if (subcommand === "user") {
+            const user = interaction.options.getUser("user");
+            const birthday = await UserBirthday.findOne({ where: { user_id: user.id } });
+            if (!birthday) return interaction.reply({ content: `${user.tag} has not set their birthday.`, ephemeral: true });
+            const daysLeft = daysLeftUntilBirthday(birthday.birthday);
+            const age = calculateAge(birthday.birthday);
+
+            const embed = new EmbedBuilder().setTitle(`${user.tag}'s Birthday`).addFields(
+                {
+                    name: "Birthday",
+                    value: getReadableDate(birthday.birthday),
+                },
+                {
+                    name: "Age",
+                    value: age.toString(),
+                },
+                {
+                    name: "Days Left",
+                    value: daysLeft.toString(),
+                }
+            );
+            return interaction.reply({ embeds: [embed] });
+        }
+
+        if (subcommand === "list") {
+            const birthdays = await UserBirthday.findAll({ where: { guild_id: interaction.guild.id } });
+            if (birthdays.length === 0) return interaction.reply({ content: "There are no birthdays registered for this server.", ephemeral: true });
+            const embeds = [];
+            let currentEmbed = new EmbedBuilder().setTitle("Birthdays");
+            let currentEmbedIndex = 0;
+            let currentEmbedField = 0;
+            let embedDescription = "";
+            for (const birthday of birthdays) {
+                const daysLeft = daysLeftUntilBirthday(birthday.birthday);
+                const age = calculateAge(birthday.birthday);
+                currentEmbedField++;
+                embedDescription += `<@${birthday.user_id}> ${getReadableDate(birthday.birthday)} (${age} years old, ${daysLeft} days left)\n\n`;
+                if (currentEmbedField === 10 && birthdays.length > 10) {
+                    currentEmbed.setDescription(embedDescription);
+                    embeds.push(currentEmbed);
+                    currentEmbed = new EmbedBuilder().setTitle("Birthdays");
+                    currentEmbedIndex++;
+                    currentEmbedField = 0;
+                    embedDescription = "";
+                } else if (currentEmbedField === birthdays.length) {
+                    currentEmbed.setDescription(embedDescription);
+                    embeds.push(currentEmbed);
+                }
+            }
+            BuildPagination(interaction, embeds).paginate();
         }
 
         function daysLeftUntilBirthday(date) {
@@ -110,6 +106,22 @@ module.exports = new Command({
             if (today > nextBirthday) nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
             const daysLeft = Math.ceil((nextBirthday - today) / (1000 * 60 * 60 * 24));
             return daysLeft;
+        }
+
+        function getReadableDate(date) {
+            const day = date.getDate();
+            const month = date.toLocaleString("default", { month: "long" });
+            const year = date.getFullYear();
+            return `${day}${getDaySuffix(day)} of ${month}, ${year}`;
+        }
+
+        function getDaySuffix(day) {
+            if (day > 3 && day < 21) return "th";
+            const lastDigit = day % 10;
+            if (lastDigit === 1) return "st";
+            if (lastDigit === 2) return "nd";
+            if (lastDigit === 3) return "rd";
+            return "th";
         }
 
         function calculateAge(date) {
