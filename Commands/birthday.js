@@ -21,6 +21,10 @@ module.exports = new Command({
     async run(interaction, args, run) {
         if (interaction.guild.id !== process.env.GUILD_ID) return interaction.reply({ content: "Sorry, seems like you have somehow gotten access to a command you shouldn't be able to.", ephemeral: true });
         const birthdays = {
+            "407520116478312448": {
+                string: "2nd of January 2003",
+                date: new Date("2003-01-02"),
+            }, // sprit3
             "420825464245059586": {
                 string: "5th of March 2008",
                 date: new Date("2008-03-05"),
@@ -29,6 +33,10 @@ module.exports = new Command({
                 string: "7th of March 2007",
                 date: new Date("2007-03-07"),
             }, // lebeb
+            "327012928031162368": {
+                string: "11th of March 2006",
+                date: new Date("2006-03-11"),
+            }, // manzom
             "367386777758990337": {
                 string: "20th of March 2004",
                 date: new Date("2004-03-20"),
@@ -49,7 +57,7 @@ module.exports = new Command({
                 string: "3rd of August 2006",
                 date: new Date("2006-08-03"),
             }, // salami
-            212179051652055040: {
+            "212179051652055040": {
                 string: "20th of August 2004",
                 date: new Date("2004-08-20"),
             }, // martin
