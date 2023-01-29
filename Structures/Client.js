@@ -27,6 +27,7 @@ class Client extends Discord.Client {
     start(token) {
         console.log(`Starting Yuuko in ${process.env.NODE_ENV} enviroment.`);
         const slashCommands = [];
+        const guildSlashCommands = [];
         fs.readdirSync("./Commands")
             .filter((file) => file.endsWith(".js"))
             .forEach((file) => {
@@ -39,7 +40,11 @@ class Client extends Discord.Client {
                 this.commands.set(command.name, command);
 
                 if (command.slash) {
-                    slashCommands.push(command.slash);
+                    if (command.slash.guildOnly) guildSlashCommands.push(command.slash);
+                    else {
+                        slashCommands.push(command.slash);
+                        guildSlashCommands.push(command.slash);
+                    }
                 }
             });
 
@@ -47,22 +52,16 @@ class Client extends Discord.Client {
         (async () => {
             const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
-            const clientId = process.env.CLIENT_ID || '867010131745177621';
-            const guildId = process.env.GUILD_ID || '843208877326860299';
+            const clientId = process.env.CLIENT_ID || "867010131745177621";
+            const guildId = process.env.GUILD_ID || "843208877326860299";
 
             try {
                 console.log(`Started refreshing ${slashCommands.length} slash (/) commands.`);
 
-                await rest.put(
-                    Routes.applicationGuildCommands(clientId, guildId),
-                    { body: slashCommands },
-                );
+                await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: guildSlashCommands });
 
                 if (process.env.NODE_ENV == "production") {
-                    await rest.put(
-                        Routes.applicationCommands(clientId),
-                        { body: slashCommands },
-                    );
+                    await rest.put(Routes.applicationCommands(clientId), { body: slashCommands });
                 }
 
                 console.log(`Refreshed ${slashCommands.length} slash (/) commands.`);
