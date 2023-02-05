@@ -42,6 +42,7 @@ module.exports = new Command({
                     )
             )
                 .addBooleanOption((option) => option.setName("hide").setDescription("Hide series from status list"))
+                .addBooleanOption((option) => option.setName("private").setDescription("Make the list entry private"))
                 .addStringOption((option) => option.setName("lists")
                     .setDescription("The custom list you want the series added to. (shows both manga and anime lists)").setAutocomplete(true))
                 .addNumberOption((option) => option.setName("score").setDescription("The score you want to give the series."))
