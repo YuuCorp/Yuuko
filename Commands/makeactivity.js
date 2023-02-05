@@ -4,6 +4,7 @@ const Discord = require("discord.js"),
     { EmbedBuilder, SlashCommandBuilder } = require('discord.js'),
     EmbedError = require("#Utils/EmbedError.js"),
     Footer = require("#Utils/Footer.js"),
+    AnilistUser = require("#Models/AnilistUser.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
     GraphQLRequest = require("#Utils/GraphQLRequest.js"),
     GraphQLQueries = require("#Utils/GraphQLQueries.js");
@@ -21,15 +22,14 @@ module.exports = new Command({
     slash: new SlashCommandBuilder()
         .setName(name)
         .setDescription(description)
-        .addSubcommand(subcommand =>
-            subcommand.setName('list')
-                .setDescription('Make a list activity.')
-                .addIntegerOption(option =>
-                    option.setName('mediaid')
-                        .setRequired(true)
-                        .setDescription('The Media ID of the anime/manga'))
-                .addStringOption(option =>
-                    option.setName("status")
+        .addSubcommand((subcommand) =>
+            subcommand
+                .setName("list")
+                .setDescription("Make a list activity.")
+                .addIntegerOption((option) => option.setName("mediaid").setRequired(true).setDescription("The Media ID of the anime/manga"))
+                .addStringOption((option) =>
+                    option
+                        .setName("status")
                         .setRequired(true)
                         .setDescription("The status you want it added as.")
                         .addChoices(
@@ -39,37 +39,57 @@ module.exports = new Command({
                             { name: "Dropped", value: "DROPPED" },
                             { name: "Paused", value: "PAUSED" },
                             { name: "Repeating", value: "REPEATING" }
-                        ))
-                .addBooleanOption(option =>
-                    option.setName("hide")
-                        .setDescription("Hide series from status list"))
-                .addStringOption(option =>
-                    option.setName("lists")
-                        .setDescription("The custom list(s) you want the series added to. Seperate the lists with a comma."))
-                .addNumberOption(option =>
-                    option.setName('score')
-                        .setDescription('The score you want to give the series.')
-                )
-                .addIntegerOption(option =>
-                    option.setName('progress')
-                        .setDescription("How far you've watched/read the series.")))
-        .addSubcommand(subcommand =>
-            subcommand.setName('status')
-                .setDescription('Make a text activity.')
-                .addStringOption(option =>
-                    option.setName("text")
-                        .setRequired(true)
-                        .setDescription("The text to use when making the activity."))),
+                    )
+            )
+                .addBooleanOption((option) => option.setName("hide").setDescription("Hide series from status list"))
+                .addStringOption((option) => option.setName("lists")
+                    .setDescription("The custom list you want the series added to. (shows both manga and anime lists)").setAutocomplete(true))
+                .addNumberOption((option) => option.setName("score").setDescription("The score you want to give the series."))
+                .addIntegerOption((option) => option.setName("progress").setDescription("How far you've watched/read the series."))
+        )
+        .addSubcommand((subcommand) =>
+            subcommand
+                .setName("status")
+                .setDescription("Make a text activity.")
+                .addStringOption((option) => option.setName("text").setRequired(true).setDescription("The text to use when making the activity."))
+        ),
 
+    async autocomplete(interaction) {
+        try {
+            // Get the users media lists
+            const listQuery = `query Query($userId: Int) {
+            User(id: $userId) {
+              mediaListOptions {
+                animeList {
+                  customLists
+                }
+                mangaList {
+                  customLists
+                }
+              }
+            }
+          }`
+            const alUser = await AnilistUser.findOne({ where: { discord_id: interaction.user.id } });
+
+            const vars = { userId: +alUser.anilist_id };
+            const response = await GraphQLRequest(listQuery, vars);
+            const animeLists = response?.User.mediaListOptions.animeList.customLists.map((list) => { return { name: list + " (Anime)", value: list } });
+            const mangaLists = response?.User.mediaListOptions.mangaList.customLists.map((list) => { return { name: list + " (Manga)", value: list } });
+            const lists = animeLists.concat(mangaLists);
+            await interaction.respond(lists);
+        } catch (error) {
+            console.error(error);
+        }
+    },
 
     async run(interaction, args, run) {
         const type = interaction.options.getSubcommand();
-        if (!type || type != "status" && type != "list") {
+        if (!type || (type != "status" && type != "list")) {
             return interaction.reply({ embeds: [EmbedError(`Please use either the status or list subcommand. (Yours was "${type}")`, null, false)], ephemeral: true });
         }
 
         if (type === "status") {
-            let vars = { text: getEmojis(interaction.options.getString('text')) };
+            let vars = { text: getEmojis(interaction.options.getString("text")) };
             GraphQLRequest(GraphQLQueries.TextActivity, vars, interaction.ALtoken)
                 .then((response, headers) => {
                     let data = response?.SaveTextActivity;
@@ -80,7 +100,8 @@ module.exports = new Command({
                         .setFooter(Footer(headers));
 
                     return interaction.reply({ embeds: [statusActivity] });
-                }).catch((error) => {
+                })
+                .catch((error) => {
                     console.error(error);
                     interaction.reply({ embeds: [EmbedError(error, vars)] });
                 });
@@ -88,14 +109,11 @@ module.exports = new Command({
 
         if (type === "list") {
             let vars = {};
-            for (option of interaction.options._hoistedOptions) {
-                if (option.name === "lists") {
-                    // Split the lists by comma, then if there is a whitespace at the beginning of the string, removes it.
-                    vars[option.name] = option.value.split(',').map((item) => item.replace(/^\s+/g, ''))
-                    continue;
-                }
+            for (option of interaction.options._hoistedOptions)
                 vars[option.name] = option.value;
-            }
+
+            vars["lists"] = [vars["lists"]];
+
             GraphQLRequest(GraphQLQueries.MediaList, vars, interaction.ALtoken)
                 .then((response, headers) => {
                     let data = response?.SaveMediaListEntry;
@@ -106,12 +124,12 @@ module.exports = new Command({
                         .setFooter(Footer(headers));
 
                     return interaction.reply({ embeds: [mediaListActivity] });
-                }).catch((error) => {
+                })
+                .catch((error) => {
                     console.error(error);
                     interaction.reply({ embeds: [EmbedError(error, vars)] });
                 });
         }
-
     },
 });
 

@@ -7,7 +7,7 @@ module.exports = new Event("interactionCreate", async (client, interaction) => {
     //console.log(interaction)
 
     // If the interaction wasn't a chat command, we ignore it
-    if (!interaction.isChatInputCommand()) return;
+    if (interaction.isChatInputCommand()) {
 
     // We run the command based on the interaction
     const command = client.commands.find(cmd => cmd.name == interaction.commandName);
@@ -22,4 +22,22 @@ module.exports = new Event("interactionCreate", async (client, interaction) => {
         }
     }
     command.run(interaction, null, client);
+    } else if (interaction.isAutocomplete()) {
+        const command = client.commands.find(cmd => cmd.name == interaction.commandName);
+        Logging(command, interaction);
+        if (command.middlewares) {
+            for (let middleware of command.middlewares) {
+                try {
+                    await middleware.run(interaction);
+                } catch (e) {
+                    return interaction.reply({ embeds: [EmbedError(e)] });
+                }
+            }
+        }
+        try {
+            await command.autocomplete(interaction);
+        } catch (e) {
+            console.log(e);
+        }
+    }
 })

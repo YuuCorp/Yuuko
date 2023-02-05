@@ -27,6 +27,9 @@ class Command {
     if (options.middlewares) {
       this.middlewares = options.middlewares;
     }
+    if (options.autocomplete) {
+      this.autocomplete = options.autocomplete;
+    }
   }
 }
 
