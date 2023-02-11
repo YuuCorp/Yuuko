@@ -67,14 +67,18 @@ module.exports = new Command({
 
                 ctx.drawImage(canvasImage, x, y, width, height);
 
-                ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
-                ctx.fillRect(x, y + width - 30, width, 30);
 
-                ctx.font = "15px Arial";
+                ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+                ctx.fillRect(x, y + width - 40, width, 40);
+
+                ctx.font = "17px Arial";
                 ctx.fillStyle = "white";
                 ctx.textAlign = "center";
                 const title = data[i].media.title?.english || data[i].media.title.romaji;
-                ctx.fillText(title, x + width / 2, y + width - 10);
+                const status = parseStatus(data[i], mediaType);
+                ctx.fillText(status, x + width / 2, y + width - 24);
+                ctx.fillText(title, x + width / 2, y + width - 5);
+
                 x += width;
                 if (x >= 999) {
                     x = 0;
@@ -89,3 +93,24 @@ module.exports = new Command({
         }
     },
 });
+
+function parseStatus(data, mediaType) {
+    if (!data.status) return "Unknown";
+    if (data.status === "CURRENT") {
+        if (mediaType === "ANIME") return `Watched Episode ${data.progress} of`;
+        else return `Read Chapter ${data.progress} of`;
+    }
+
+    if (data.status === "PLANNING") {
+        if (mediaType === "ANIME") return `Planning to Watch`;
+        else return `Planning to Read`;
+    }
+
+    if (data.status === "COMPLETED") return `Completed`;
+    if (data.status === "PAUSED") return `Paused`;
+    if (data.status === "DROPPED") return `Dropped`;
+    if (data.status === "REPEATING") {
+        if (mediaType === "ANIME") return `Re-watching`;
+        else return `Re-reading`;
+    }
+}

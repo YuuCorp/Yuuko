@@ -10,6 +10,8 @@ query Query($user: String, $perPage: Int, $type: MediaType, $userId: Int) {
           extraLarge
         }
       }
+      status
+      progress
     }
   }
 }
