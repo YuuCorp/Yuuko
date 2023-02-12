@@ -58,8 +58,8 @@ module.exports = new Command({
             let x = 0,
                 y = 0;
 
-            for (let i = 0; i < data.length; i++) {
-                const cover = data[i].media.coverImage.extraLarge;
+            for (item of data) {
+                const cover = item.media.coverImage?.extraLarge || "https://i.imgur.com/Hx8474m.png"; // Placeholder image
                 const canvasImage = await Canvas.loadImage(cover);
 
                 const width = 1000 / Math.ceil(data.length / 3);
@@ -67,18 +67,16 @@ module.exports = new Command({
 
                 ctx.drawImage(canvasImage, x, y, width, height);
 
-
                 ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
                 ctx.fillRect(x, y + width - 40, width, 40);
 
                 ctx.font = "17px Arial";
                 ctx.fillStyle = "white";
                 ctx.textAlign = "center";
-                const title = data[i].media.title?.english || data[i].media.title.romaji;
-                const status = parseStatus(data[i], mediaType);
+                const title = item.media.title?.english || item.media.title?.romaji || "Unknown";
+                const status = parseStatus(item, mediaType);
                 ctx.fillText(status, x + width / 2, y + width - 24);
                 ctx.fillText(title, x + width / 2, y + width - 5);
-
                 x += width;
                 if (x >= 999) {
                     x = 0;
@@ -86,8 +84,11 @@ module.exports = new Command({
                 }
             }
 
-            const attachment = new AttachmentBuilder(canvas.toBuffer(), "recent.png");
+            const canvasResult = canvas.toBuffer();
+            if (!canvasResult) return interaction.reply({ embeds: [EmbedError("Encountered an error whilst trying to create the image.", vars)] });
+            const attachment = new AttachmentBuilder(canvasResult);
             interaction.reply({ files: [attachment] });
+
         } catch (error) {
             interaction.reply({ embeds: [EmbedError(error, vars)] });
         }
@@ -96,21 +97,21 @@ module.exports = new Command({
 
 function parseStatus(data, mediaType) {
     if (!data.status) return "Unknown";
-    if (data.status === "CURRENT") {
-        if (mediaType === "ANIME") return `Watched Episode ${data.progress} of`;
-        else return `Read Chapter ${data.progress} of`;
-    }
-
-    if (data.status === "PLANNING") {
-        if (mediaType === "ANIME") return `Planning to Watch`;
-        else return `Planning to Read`;
-    }
-
-    if (data.status === "COMPLETED") return `Completed`;
-    if (data.status === "PAUSED") return `Paused`;
-    if (data.status === "DROPPED") return `Dropped`;
-    if (data.status === "REPEATING") {
-        if (mediaType === "ANIME") return `Re-watching`;
-        else return `Re-reading`;
+    switch (data.status) {
+        case "CURRENT":
+            if (mediaType === "ANIME") return `Watched Episode ${data.progress} of`;
+            else return `Read Chapter ${data.progress} of`;
+        case "PLANNING":
+            if (mediaType === "ANIME") return `Planning to Watch`;
+            else return `Planning to Read`;
+        case "COMPLETED":
+            return `Completed`;
+        case "PAUSED":
+            return `Paused`;
+        case "DROPPED":
+            return `Dropped`;
+        case "REPEATING":
+            if (mediaType === "ANIME") return `Re-watching`;
+            else return `Re-reading`;
     }
 }
