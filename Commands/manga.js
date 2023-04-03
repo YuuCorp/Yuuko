@@ -101,7 +101,7 @@ module.exports = new Command({
                         )
                         .setDescription(description.length > descLength ? description.substring(0, descLength) + "..." || "No description available." : description || "No description available.")
                         .setURL("https://anilist.co/anime/" + data.id)
-                        .setColor("0x00ff00")
+                        .setColor("Green")
                         .setFooter(Footer(headers));
 
                     const secondPage = new EmbedBuilder()
@@ -129,7 +129,7 @@ module.exports = new Command({
                                 inline: false,
                             }
                         )
-                        .setColor("0x00ff00")
+                        .setColor("Green")
                         .setFooter(Footer(headers));
 
                     if (hookdata?.image) {
@@ -179,7 +179,7 @@ module.exports = new Command({
                                     value: data.mediaListEntry?.notes || "No Notes Found",
                                 }
                             )
-                            .setColor("0x00ff00")
+                            .setColor("Green")
                             .setFooter(Footer(headers));
                         const pageList = [firstPage, secondPage, thirdPage];
                         BuildPagination(interaction, pageList).paginate();

@@ -43,7 +43,7 @@ module.exports = new Command({
                         .setTitle(`${data.name} | ${data.favourites} favourites`)
                         .setDescription(`\n${animes}`)
                         .setURL(data.siteUrl)
-                        .setColor("0x00ff00")
+                        .setColor("Green")
                         .setFooter(Footer(headers));
 
                     //data.description.split("<br>").forEach(line => titleEmbed.addField(line, "", true))

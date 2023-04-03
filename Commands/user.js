@@ -56,7 +56,7 @@ module.exports = new Command({
                             { name: "< Anime >\n\n", value: `**Watched:** ${data.statistics.anime.count.toString()}\n**Average score**: ${data.statistics.anime.meanScore.toString()}`, inline: true },
                             { name: "< Manga >\n\n", value: `**Read:** ${data.statistics.manga.count.toString()}\n**Average score**: ${data.statistics.manga.meanScore.toString()}`, inline: true }
                         )
-                        .setColor("0x00ff00")
+                        .setColor("Green")
                         .setFooter(Footer(headers));
                     interaction.reply({ embeds: [titleEmbed] });
                 } else {

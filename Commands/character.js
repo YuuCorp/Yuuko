@@ -61,7 +61,7 @@ module.exports = new Command({
                                 //{name: "Blood Type", value: `${data.bloodType || 'No blood type specified'}`}
                             )
                             .setURL(data.siteUrl)
-                            .setColor("0x00ff00")
+                            .setColor("Green")
                             .setFooter(Footer(headers));
                         //data.description.split("<br>").forEach(line => titleEmbed.addField(line, "", true))
                         // interaction.reply({ embeds: [charEmbed] });

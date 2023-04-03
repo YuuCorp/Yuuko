@@ -50,7 +50,7 @@ module.exports = new Command({
                             { name: "Staff Info: \n", value: `**Age**: ${data.age || "No age specified"} **Gender**: ${data.gender || "No gender specified."}\n **Home Town**: ${data.homeTown || "No home town specified."}` }
                         )
                         .setURL(data.siteUrl)
-                        .setColor("0x00ff00")
+                        .setColor("Green")
                         .setFooter(Footer(headers));
                     interaction.reply({ embeds: [charEmbed] });
                 } else {

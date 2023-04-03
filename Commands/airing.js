@@ -85,7 +85,7 @@ module.exports = new Command({
                     fields.forEach((fieldSet, index) => {
                         let embed = new EmbedBuilder();
                         embed.setTitle(`Airing on ${day.toDateString()}`);
-                        embed.setColor(0x00ff00);
+                        embed.setColor("Green");
                         embed.setFooter(Footer(headers));
 
                         fieldSet.forEach((field) => {

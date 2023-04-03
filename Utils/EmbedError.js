@@ -13,7 +13,7 @@ module.exports = (err, params = null, showparams = true) => {
     const embed = new EmbedBuilder()
         .setTitle("Error")
         .addFields({ name: `Tracelog / Message `, value: "```" + `${err.toString()}` + "```" })
-        .setColor('0xff0000')
+        .setColor('Red')
     if (showparams) {
         embed.addFields({ name: `Params `, value: params ? "```json\n" + JSON.stringify(params) + "```" : "No parameters provided" })
     }
