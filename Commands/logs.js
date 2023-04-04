@@ -23,11 +23,17 @@ module.exports = new Command({
             if (!fs.existsSync(path.join(__dirname, "../Logging", "logs.txt"))) {
                 return interaction.reply(`\`There are no logs to view.\``);
             }
-            const logs = fs.readFileSync(path.join(__dirname, "../Logging", "logs.txt"), "utf8").split("\n").reverse().slice(0, 25).reverse().join("\n");
+            const logs = fs.readFileSync(path.join(__dirname, "../Logging", "logs.txt"), "utf8")
+                .split("\n").reverse().slice(0, 25)
+                .reverse().join("\n");
             return interaction.reply({
                 embeds: [{
                     title: `Here are the 25 most recent logs.`,
-                    description: `\`\`\`js\n${logs}\`\`\``,
+                    /* example of formating
+                        • 2021-08-01 12:00:00: akira#6505 ran command: logs
+                        • 2021-08-01 12:00:00: akira#6505 ran command: user
+                    */
+                    description: `\`\`\`\n${logs.replace(/\n/g, "\n")}\`\`\``,
                     color: 0x00ff00,
                     footer: Footer(),
                 }]
