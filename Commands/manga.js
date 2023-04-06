@@ -48,6 +48,7 @@ module.exports = new Command({
         GraphQLRequest(GraphQLQueries.Manga, vars, interaction.ALtoken)
             .then((response, headers) => {
                 let data = response.Media;
+                const seriesTitle = data.title.english || data.title.romaji || data.title.native;
                 if (data) {
                     //^ Fix the description by replacing and converting HTML tags, and replacing duplicate newlines
                     const descLength = 350;
@@ -61,7 +62,7 @@ module.exports = new Command({
                     const firstPage = new EmbedBuilder()
                         .setImage(data.bannerImage)
                         .setThumbnail(data.coverImage.large)
-                        .setTitle(data.title.english || data.title.romaji || data.title.native)
+                        .setTitle(seriesTitle)
                         .addFields(
                             {
                                 name: "Chapters",
@@ -105,7 +106,7 @@ module.exports = new Command({
                         .setFooter(Footer(headers));
 
                     const secondPage = new EmbedBuilder()
-                        .setAuthor({ name: `${data.title.english} | Additional info` })
+                        .setAuthor({ name: `${seriesTitle} | Additional info` })
                         .setThumbnail(data.coverImage.large)
                         .addFields(
                             {
@@ -143,7 +144,7 @@ module.exports = new Command({
                     }
 
                     if (data.mediaListEntry) {
-                        let score = "Unknown";
+                        let score = "Not scored";
                         const scoring = data.mediaListEntry.user?.mediaListOptions.scoreFormat;
                         if (data.mediaListEntry.score && scoring) {
                             score = data.mediaListEntry.score.toString();
@@ -156,7 +157,7 @@ module.exports = new Command({
                         }
 
                         const thirdPage = new EmbedBuilder()
-                            .setAuthor({ name: `${data.title.english} | ${data.mediaListEntry.user.name}'s Stats` })
+                            .setAuthor({ name: `${seriesTitle} | ${data.mediaListEntry.user.name}'s Stats` })
                             .setThumbnail(data.coverImage.large)
                             .addFields(
                                 {
@@ -166,7 +167,7 @@ module.exports = new Command({
                                 },
                                 {
                                     name: "Progress",
-                                    value: data.mediaListEntry?.progress.toString() || "Unknown",
+                                    value: data.chapters ? `${data.mediaListEntry?.progress} chapter(s) out of ${data.chapters}` : `${data.mediaListEntry?.progress} chapter(s)` || "Unknown",
                                     inline: true,
                                 },
                                 {
