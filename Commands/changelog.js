@@ -16,10 +16,9 @@ module.exports = new Command({
         .setDescription(description),
 
     async run(interaction, args, run) {
-        const gitResult = execSync('git log --oneline -n 5').toString();
-        const gitLog = gitResult.split('\n').filter(item => item).map(commit => {
-            return commit.replace(commit.substring(0, commit.indexOf(' ') + 1), '');
-        });
+        //example COMMIT: Added changelog command
+        const gitResult = execSync('git log --pretty="COMMIT: %s%n%b%n" -n 5').toString();
+        const gitLog = gitResult.split('\n\n').map(commit => commit.trim()).filter(c => c);
         return interaction.reply({
             embeds: [{
                 title: `Here are the most recent changes.`,
