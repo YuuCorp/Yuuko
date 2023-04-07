@@ -17,12 +17,11 @@ module.exports = new Command({
 
     async run(interaction, args, run) {
         //example COMMIT: Added changelog command
-        const gitResult = execSync('git log --pretty="COMMIT: %s%n%b%n" -n 5').toString();
-        const gitLog = gitResult.split('\n\n').map(commit => commit.trim()).filter(c => c);
+        const gitResult = execSync('git log --pretty="COMMIT: %s%n%b" -n 5').toString();
         return interaction.reply({
             embeds: [{
                 title: `Here are the most recent changes.`,
-                description: `\`\`\`\n${gitLog.join('<BREAKCOMMIT>').replaceAll('<BREAKCOMMIT>', '\n\n')} \`\`\``,
+                description: `\`\`\`\n${gitResult.trim()} \`\`\``,
                 color: 0x00ff00,
                 footer: Footer(),
             }]

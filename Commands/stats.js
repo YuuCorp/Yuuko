@@ -1,4 +1,6 @@
 const Command = require("#Structures/Command.js"),
+    fs = require("fs"),
+    path = require("path"),
     CommandCategories = require("#Utils/CommandCategories.js"),
     { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 
@@ -14,12 +16,19 @@ module.exports = new Command({
         .setDescription(description),
 
     async run(interaction, args, client) {
+        const uptime = Date.now() - fs.readFileSync(path.join(__dirname, "../Logging/uptime.txt"), "utf8");
+        const days = Math.floor(uptime / 86400000);
+        const hours = Math.floor(uptime / 3600000) % 24;
+        const minutes = Math.floor(uptime / 60000) % 60;
+        const seconds = Math.floor(uptime / 1000) % 60;
+        const uptimeString = `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+
         const embed = new EmbedBuilder()
             .setTitle("Here are the stats!")
             .setColor("Blurple")
             .addFields(
                 { name: "Server Stats", value: `${interaction.guild.memberCount.toString()} members` },
-                { name: "Bot Stats", value: `${client.guilds.cache.size.toString()} servers \n ${getMemberCount(client).toString()} members` },
+                { name: "Bot Stats", value: `${client.guilds.cache.size.toString()} servers \n ${getMemberCount(client).toString()} members \n Uptime: ${uptimeString}` },
             )
         interaction.reply({ embeds: [embed] });
 

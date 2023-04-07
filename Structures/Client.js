@@ -1,5 +1,6 @@
 const Discord = require("discord.js");
 const fs = require("fs");
+const path = require('path');
 const Command = require("./Command.js");
 const Event = require("./Event.js");
 const { SlashCommandBuilder, GatewayIntentBits } = require("discord.js");
@@ -75,6 +76,10 @@ class Client extends Discord.Client {
                     this.on(event.event, event.run.bind(null, this));
                 });
 
+            if (!fs.existsSync(path.join(__dirname, "../Logging"))) {
+                fs.mkdirSync(path.join(__dirname, "../Logging"));
+            }
+            fs.writeFileSync(path.join(__dirname, "../Logging/uptime.txt"), Date.now().toString());
             this.login(process.env.TOKEN);
         })();
     }
