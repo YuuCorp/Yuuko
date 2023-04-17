@@ -11,7 +11,8 @@ module.exports = function (query, vars, token, url = process.env.ANILIST_API || 
         }).then(res => {
             resolve(res.data.data, res.headers);
         }).catch(err => {
-            reject("GraphQL Request Rejected\n\n" + err?.response?.data?.errors.map(e => `> ${e.message}\n`) || err);
+            console.error(err);
+            reject("GraphQL Request Rejected\n\n" + err?.response?.data?.errors?.map(e => `> ${e.message}\n`) || err);
         });
     });
 }

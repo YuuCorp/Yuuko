@@ -172,7 +172,7 @@ module.exports = new Command({
                                 },
                                 {
                                     name: "Progress",
-                                    value: data.mediaListEntry?.progress.toString() || "Unknown",
+                                    value: data.episodes ? `${data.mediaListEntry?.progress} episode(s) out of ${data.episodes}` : `${data.mediaListEntry?.progress} episode(s)` || "Unknown",
                                     inline: true,
                                 },
                                 {
