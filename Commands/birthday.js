@@ -84,7 +84,9 @@ module.exports = new Command({
                 const daysLeft = daysLeftUntilBirthday(birthday.birthday);
                 const age = calculateAge(birthday.birthday);
                 currentEmbedField++;
-                embedDescription += `<@${birthday.user_id}> ${getReadableDate(birthday.birthday)} (${age} years old, ${daysLeft} days left)\n\n`;
+                if (daysLeft > 0) embedDescription += `<@${birthday.user_id}> ${getReadableDate(birthday.birthday)} (${age} years old, ${daysLeft} days left)\n\n`;
+                else embedDescription += `<@${birthday.user_id}> ${getReadableDate(birthday.birthday)} (${age} years old, **Birthday Today!**)\n\n`;
+
                 if (currentEmbedField === 10 && birthdays.length > 10) {
                     currentEmbed.setDescription(embedDescription);
                     embeds.push(currentEmbed);
@@ -102,6 +104,7 @@ module.exports = new Command({
 
         function daysLeftUntilBirthday(date) {
             const today = new Date();
+            today.setHours(0, 0, 0, 0);
             const nextBirthday = new Date(today.getFullYear(), date.getMonth(), date.getDate());
             if (today > nextBirthday) nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
             const daysLeft = Math.ceil((nextBirthday - today) / (1000 * 60 * 60 * 24));
