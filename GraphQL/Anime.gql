@@ -17,6 +17,7 @@ query ($query: String) {
             native
         }
         format
+        siteUrl
         source
         genres
         id

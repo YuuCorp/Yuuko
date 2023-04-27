@@ -101,7 +101,7 @@ module.exports = new Command({
                             }
                         )
                         .setDescription(description.length > descLength ? description.substring(0, descLength) + "..." || "No description available." : description || "No description available.")
-                        .setURL("https://anilist.co/anime/" + data.id)
+                        .setURL(data.siteUrl)
                         .setColor("Green")
                         .setFooter(Footer(headers));
 

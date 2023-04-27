@@ -25,6 +25,8 @@ query ($userid: Int) {
       status
       progress
       media {
+        siteUrl
+        bannerImage
         title {
           romaji
           native

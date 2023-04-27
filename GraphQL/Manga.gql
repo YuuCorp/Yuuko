@@ -18,6 +18,7 @@ query ($query: String) {
     volumes
     genres
     id
+    siteUrl
     meanScore
     startDate {
       year

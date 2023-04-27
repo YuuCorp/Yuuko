@@ -43,7 +43,6 @@ module.exports = new Command({
                 return interaction.reply({ embeds: [EmbedError(`You have yet to set an AniList token. You can see the instructions with /auth help`)] });
             }
         } else {
-
             try {
                 let uData = (await GraphQLRequest(GraphQLQueries.User, vars))?.User;
                 vars = {
@@ -75,10 +74,11 @@ module.exports = new Command({
                         return interaction.reply({ embeds: [embed] });
 
                     } else
+                        if (data.media?.bannerImage) embed.setImage(data?.media?.bannerImage);
+                        else embed.setThumbnail(data?.media?.coverImage?.large || data?.media?.coverImage?.medium);
                         embed
-                            .setTitle(`Here's ${data?.user?.name?.toString()}'s most recent activity!`)
-                            .setThumbnail(data?.media?.coverImage?.large || data?.media?.coverImage?.medium)
-                            .setDescription(`**${data?.status?.toString().replace(/(^\w{1})|(\s{1}\w{1})/g, (match) => match.toUpperCase())} ${data?.progress?.toString() || ""} ${data?.media?.title?.romaji || data?.media?.title?.english || data?.media?.title?.native}**`)
+                            .setTitle(`Here's ${data?.user?.name?.toString() || "Unknown Name"}'s most recent activity!`)
+                            .setDescription(`${data?.status.charAt(0).toUpperCase() + data?.status.slice(1)} ${data?.progress?.toLowerCase() || ""} of **[${data?.media?.title?.romaji || data?.media?.title?.english || data?.media?.title?.native || "Unknown"}](${data?.media?.siteUrl})**`)
                     return interaction.reply({ embeds: [embed] });
                 } else {
                     return interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
