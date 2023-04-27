@@ -22,7 +22,8 @@ module.exports = new Command({
         .setDescription(description)
         .addAttachmentOption(option => option
             .setName('image')
-            .setDescription('Attach the image of the anime.')),
+            .setDescription('Attach the image of the anime.')
+            .setRequired(true)),
 
 
     async run(interaction, args, run) {

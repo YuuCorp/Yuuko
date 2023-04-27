@@ -37,13 +37,13 @@ module.exports = new Command({
             }
             vars.query = anime;
         } else if (hook && hookdata?.title) vars.query = hookdata.title;
-        else if (hook && hookdata?.id) vars.query = hookdata.id;
+        else if (hook && hookdata?.id) vars.aID = hookdata.id;
         else return interaction.reply({ embeds: [EmbedError(`AnimeCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)] });
 
-        if (hookdata && hookdata?.id) {
-            GraphQLQueries.Anime = GraphQLQueries.Anime.replace("$query: String", "$query: Int");
-            GraphQLQueries.Anime = GraphQLQueries.Anime.replace("search:", "id:");
-        }
+        // if (hookdata && hookdata?.id) {
+        //     GraphQLQueries.Anime = GraphQLQueries.Anime.replace("$query: String", "$query: Int");
+        //     GraphQLQueries.Anime = GraphQLQueries.Anime.replace("search:", "id:");
+        // }
         //^ Make the HTTP Api request
         GraphQLRequest(GraphQLQueries.Anime, vars, interaction.ALtoken)
             .then((response, headers) => {
