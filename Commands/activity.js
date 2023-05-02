@@ -69,7 +69,7 @@ module.exports = new Command({
           embed
             .setTitle(`Here's ${data?.user?.name?.toString() || "Unknown Name"}'s most recent activity!`)
             .setDescription(
-              `${data?.status.charAt(0).toUpperCase() + data?.status.slice(1)} ${data?.progress?.toLowerCase() || ""} ${data?.status.mething("read" || "watched") ? 'of' : ''} **[${data?.media?.title?.romaji || data?.media?.title?.english || data?.media?.title?.native || "Unknown"}](${
+              `${data?.status.charAt(0).toUpperCase() + data?.status.slice(1)} ${data?.progress?.toLowerCase() || ""} ${data?.status.startsWith("read" || "watched") ? 'of' : ''} **[${data?.media?.title?.romaji || data?.media?.title?.english || data?.media?.title?.native || "Unknown"}](${
                 data?.media?.siteUrl
               })**`
             )
