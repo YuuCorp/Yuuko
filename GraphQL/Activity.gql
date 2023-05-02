@@ -14,6 +14,8 @@ query ($userid: Int) {
       likes {
         name
       }
+      likeCount
+      replyCount
     }
     ... on ListActivity {
       user {
@@ -22,6 +24,8 @@ query ($userid: Int) {
           large
         }
       }
+      likeCount
+      replyCount
       status
       progress
       media {
