@@ -13,21 +13,26 @@ const usage = "auth <help | anilist_token | wipe>";
 const description = "Binds an existing AniList user to your Discord account in the bot database.";
 
 module.exports = new Command({
-  name,
-  usage,
-  description,
-  type: CommandCategories.Anilist,
-  slash: new SlashCommandBuilder()
-    .setName(name)
-    .setDescription(description)
-    .addSubcommand((subcommand) => subcommand.setName("help").setDescription("Shows you info on how to get your AniList token."))
-    .addSubcommand((subcommand) => subcommand.setName("wipe").setDescription("Wipes your AniList token from our database."))
-    .addSubcommand((subcommand) =>
-      subcommand
-        .setName("token")
-        .setDescription("Use the AniList token here.")
-        .addStringOption((option) => option.setName("token").setDescription("Add the AniList token here.").setMinLength(750).setRequired(true))
-    ),
+    name,
+    usage,
+    description,
+    type: CommandCategories.Anilist,
+    slash: new SlashCommandBuilder()
+        .setName(name)
+        .setDescription(description)
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('help')
+                .setDescription('Shows you info on how to get your AniList token.'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('token')
+                .setDescription('Use the AniList token here.')
+                .addStringOption(option =>
+                    option.setName('token')
+                        .setDescription('Add the AniList token here.')
+                        .setMinLength(750)
+                        .setRequired(true))),
 
   async run(interaction, args, run) {
     const type = interaction.options.getSubcommand();

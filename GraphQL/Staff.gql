@@ -11,5 +11,37 @@ query($staffName: String) {
         gender
         homeTown
         siteUrl
+      staffMedia {
+        edges {
+          staffRole
+          node {
+            title {
+              romaji
+              english
+              native
+              userPreferred
+            }
+            siteUrl
+          }
+        }
+      }
+      characterMedia {
+        edges {
+          node {
+            title {
+              romaji
+              english
+              native
+              userPreferred
+            }
+            siteUrl
+          }
+          characters {
+            name {
+              full
+            }
+          }
+        }
+      }
     }
 }
