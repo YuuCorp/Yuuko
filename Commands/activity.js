@@ -54,25 +54,14 @@ module.exports = new Command({
       .then((response, headers) => {
         let data = response.Activity;
         if (data) {
-          const embed = new EmbedBuilder().setURL(data?.siteUrl).setFooter(Footer(headers));
+          const embed = new EmbedBuilder().setURL(data?.siteUrl).setTimestamp(data?.createdAt * 1000);
 
           if (data?.__typename.includes("TextActivity")) {
             embed
               .setTitle(`Here's ${data?.user?.name?.toString() || "Unknown Name"}'s most recent activity!`)
               .setDescription(data?.text?.replace(`!~`, `||`).replace(`~!`, `||`).replaceAll("~", ``))
               .setThumbnail(data?.user?.avatar?.large)
-              .setFields(
-                {
-                  name: "Likes",
-                  value: data?.likeCount.toString() || "0",
-                  inline: true,
-                },
-                {
-                  name: "Replies",
-                  value: data?.replyCount.toString() || "0 ",
-                  inline: true,
-                }
-              );
+              .setFooter({ text: `${data?.likeCount | 0} ♥  ${data?.replyCount | 0} 💬` })
 
             return interaction.reply({ embeds: [embed] });
           } else if (data.media?.bannerImage) embed.setImage(data?.media?.bannerImage);
@@ -84,18 +73,8 @@ module.exports = new Command({
                 data?.media?.siteUrl
               })**`
             )
-            .setFields(
-              {
-                name: "Likes",
-                value: data?.likeCount.toString() || "0",
-                inline: true,
-              },
-              {
-                name: "Replies",
-                value: data?.replyCount.toString() || "0 ",
-                inline: true,
-              }
-            );
+            .setFooter({ text: `${data?.likeCount | 0} ♥  ${data?.replyCount | 0} 💬` })
+
           return interaction.reply({ embeds: [embed] });
         } else {
           return interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });

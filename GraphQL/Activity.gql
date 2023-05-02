@@ -48,5 +48,8 @@ query ($userid: Int) {
         name
       }
     }
+    ... on MessageActivity {
+      createdAt
+    }
   }
 }
