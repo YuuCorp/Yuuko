@@ -80,13 +80,21 @@ module.exports = new Command({
             let currentEmbedIndex = 0;
             let currentEmbedField = 0;
             let embedDescription = "";
-            for (const birthday of birthdays) {
+
+            // Co-authored by Github Copilot
+            let sortedBirthdays = birthdays.sort((a, b) => {
+                const aDate = new Date(a.birthday);
+                const bDate = new Date(b.birthday);
+                if (aDate.getMonth() === bDate.getMonth()) return aDate.getDate() - bDate.getDate();
+                return aDate.getMonth() - bDate.getMonth();
+            });
+
+            for (const birthday of sortedBirthdays) {
                 const daysLeft = daysLeftUntilBirthday(birthday.birthday);
                 const age = calculateAge(birthday.birthday);
                 currentEmbedField++;
                 if (daysLeft > 0) embedDescription += `<@${birthday.user_id}> ${getReadableDate(birthday.birthday)} (${age} years old, ${daysLeft} days left)\n\n`;
                 else embedDescription += `<@${birthday.user_id}> ${getReadableDate(birthday.birthday)} (${age} years old, **Birthday Today!**)\n\n`;
-
                 if (currentEmbedField === 10 && birthdays.length > 10) {
                     currentEmbed.setDescription(embedDescription);
                     embeds.push(currentEmbed);
