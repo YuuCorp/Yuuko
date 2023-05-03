@@ -47,6 +47,9 @@ module.exports = new Command({
             .then((response, headers) => {
                 let data = response.User;
                 if (data) {
+                    let userColor = data.options.profileColor.charAt(0).toUpperCase() + data.options.profileColor.slice(1);
+                    if (data.options.profileColor === "pink") userColor = "LuminousVividPink"
+                    if (data.options.profileColor === "gray") userColor = "Grey"
                     const titleEmbed = new EmbedBuilder()
                         // TODO: Fix depricated function calls 101
                         .setAuthor({ name: data.name, iconURL: "https://anilist.co/img/icons/android-chrome-512x512.png", url: data.siteUrl })
@@ -56,7 +59,7 @@ module.exports = new Command({
                             { name: "< Anime >\n\n", value: `**Watched:** ${data.statistics.anime.count.toString()}\n**Average score**: ${data.statistics.anime.meanScore.toString()}`, inline: true },
                             { name: "< Manga >\n\n", value: `**Read:** ${data.statistics.manga.count.toString()}\n**Average score**: ${data.statistics.manga.meanScore.toString()}`, inline: true }
                         )
-                        .setColor("Green")
+                        .setColor(userColor)
                         .setFooter(Footer(headers));
                     interaction.reply({ embeds: [titleEmbed] });
                 } else {

@@ -9,6 +9,9 @@ query ($username: String, $userid: Int) {
     bannerImage
     siteUrl
     createdAt
+    options {
+      profileColor
+    }
     statistics {
       anime {
         count
