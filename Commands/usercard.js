@@ -110,7 +110,7 @@ module.exports = new Command({
                         const attachment = new AttachmentBuilder(canvas.toBuffer(), "anilist_banner.png");
                         interaction.reply({ files: [attachment] });
                     } catch (error) {
-                        console.log(error)
+                        console.error(error)
                     }
                 } else {
                     return interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });

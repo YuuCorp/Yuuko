@@ -53,7 +53,7 @@ module.exports = new Command({
                 }
             })
             .catch((error) => {
-                console.log(error);
+                console.error(error);
                 interaction.reply({ embeds: [EmbedError(error, vars)] });
             });
     },

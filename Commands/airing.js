@@ -97,7 +97,7 @@ module.exports = new Command({
           let pageList = [];
           fields.forEach((fieldSet, index) => {
             let embed = new EmbedBuilder();
-            embed.setTitle(`Airing from ${day.toDateString()} to ${nextWeek.toDateString()}`);
+            embed.setTitle(`Airing between ${day.toDateString()} to ${nextWeek.toDateString()}`);
             embed.setColor("Green");
             embed.setFooter(Footer(headers));
 
@@ -122,7 +122,7 @@ module.exports = new Command({
         }
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
         interaction.reply({ embeds: [EmbedError(error, vars)] });
       });
   },

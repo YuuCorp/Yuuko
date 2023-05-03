@@ -35,7 +35,7 @@ module.exports = new Command({
       try {
         vars = { userid: interaction.alID };
       } catch (error) {
-        console.log(error);
+        console.error(error);
         return interaction.reply({ embeds: [EmbedError(`You have yet to set an AniList token. You can see the instructions with /auth help`)] });
       }
     } else {
@@ -45,7 +45,7 @@ module.exports = new Command({
           userid: uData?.id || "Unable to find ID",
         };
       } catch (error) {
-        console.log(error);
+        console.error(error);
         interaction.reply({ embeds: [EmbedError(error, vars)] });
       }
     }
@@ -81,7 +81,7 @@ module.exports = new Command({
         }
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
         interaction.reply({ embeds: [EmbedError(error, vars)] });
       });
   },

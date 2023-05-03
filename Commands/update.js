@@ -69,7 +69,7 @@ module.exports = new Command({
                 });
             }
         } catch (error) {
-            console.log(error)
+            console.error(error)
         }
     }
 });

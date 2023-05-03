@@ -63,7 +63,7 @@ module.exports = new Command({
                 if (error.response) {
                     console.log(error.response.data.errors);
                 } else {
-                    console.log(error);
+                    console.error(error);
                 }
                 interaction.reply({ embeds: [EmbedError(error)] });
             })
