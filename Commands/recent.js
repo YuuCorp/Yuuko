@@ -3,7 +3,7 @@ const Discord = require("discord.js"),
     { mwGetUserEntry } = require("#Middleware/UserEntry.js"),
     Command = require("#Structures/Command.js"),
     EmbedError = require("#Utils/EmbedError.js"),
-    Footer = require("#Utils/Footer.js"),
+    SeriesTitle = require("#Utils/SeriesTitle.js"),
     Canvas = require("canvas"),
     CommandCategories = require("#Utils/CommandCategories.js"),
     GraphQLRequest = require("#Utils/GraphQLRequest.js"),
@@ -73,7 +73,7 @@ module.exports = new Command({
                 ctx.font = "17px Arial";
                 ctx.fillStyle = "white";
                 ctx.textAlign = "center";
-                const title = item.media.title?.english || item.media.title?.romaji || "Unknown";
+                const title = SeriesTitle(item.media);
                 const status = parseStatus(item, mediaType);
                 ctx.fillText(status, x + width / 2, y + width - 24);
                 ctx.fillText(title, x + width / 2, y + width - 5);

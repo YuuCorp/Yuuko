@@ -3,7 +3,7 @@ const Discord = require("discord.js"),
   { mwGetUserEntry } = require("#Middleware/UserEntry.js"),
   Command = require("#Structures/Command.js"),
   EmbedError = require("#Utils/EmbedError.js"),
-  Footer = require("#Utils/Footer.js"),
+  SeriesTitle = require("#Utils/SeriesTitle.js"),
   CommandCategories = require("#Utils/CommandCategories.js"),
   GraphQLRequest = require("#Utils/GraphQLRequest.js"),
   GraphQLQueries = require("#Utils/GraphQLQueries.js");
@@ -69,7 +69,7 @@ module.exports = new Command({
           embed
             .setTitle(`Here's ${data?.user?.name?.toString() || "Unknown Name"}'s most recent activity!`)
             .setDescription(
-              `${data?.status.charAt(0).toUpperCase() + data?.status.slice(1)} ${data?.progress?.toLowerCase() || ""} ${data?.status.startsWith("read" || "watched") ? 'of' : ''} **[${data?.media?.title?.romaji || data?.media?.title?.english || data?.media?.title?.native || "Unknown"}](${
+              `${data?.status.charAt(0).toUpperCase() + data?.status.slice(1)} ${data?.progress?.toLowerCase() || ""} ${data?.status.startsWith("read" || "watched") ? 'of' : ''} **[${SeriesTitle(data.media)}](${
                 data?.media?.siteUrl
               })**`
             )

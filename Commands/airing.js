@@ -5,6 +5,7 @@ const Discord = require("discord.js"),
   GraphQLRequest = require("#Utils/GraphQLRequest.js"),
   GraphQLQueries = require("#Utils/GraphQLQueries.js"),
   Footer = require("#Utils/Footer.js"),
+  SeriesTitle = require("#Utils/SeriesTitle.js"),
   CommandCategories = require("#Utils/CommandCategories.js"),
   pagination = require("@acegoal07/discordjs-pagination"),
   ms = require("ms"),
@@ -103,10 +104,9 @@ module.exports = new Command({
 
             fieldSet.forEach((field) => {
               const { media, episode, airingAt } = field;
-              const { title } = media;
 
               embed.addFields({
-                name: `${title.english || title.romaji || title.native}`,
+                name: `${SeriesTitle(media)}`,
                 value: `> **[EP - ${episode}]** :airplane: ${new Date(airingAt * 1000) > new Date() ? `Going to air <t:${airingAt}:R>` : `Aired <t:${airingAt}:R>`}`,
                 inline: false,
               });

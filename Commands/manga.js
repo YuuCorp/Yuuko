@@ -6,6 +6,7 @@ const Discord = require("discord.js"),
     Footer = require("#Utils/Footer.js"),
     BuildPagination = require("#Utils/BuildPagination.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
+    seriesTitle = require("#Utils/SeriesTitle.js"),
     GraphQLRequest = require("#Utils/GraphQLRequest.js"),
     GraphQLQueries = require("#Utils/GraphQLQueries.js");
 
@@ -48,7 +49,6 @@ module.exports = new Command({
         GraphQLRequest(GraphQLQueries.Manga, vars, interaction.ALtoken)
             .then((response, headers) => {
                 let data = response.Media;
-                const seriesTitle = data.title.english || data.title.romaji || data.title.native;
                 if (data) {
                     //^ Fix the description by replacing and converting HTML tags, and replacing duplicate newlines
                     const descLength = 350;
@@ -62,7 +62,7 @@ module.exports = new Command({
                     const firstPage = new EmbedBuilder()
                         .setImage(data.bannerImage)
                         .setThumbnail(data.coverImage.large)
-                        .setTitle(seriesTitle)
+                        .setTitle(seriesTitle(data))
                         .addFields(
                             {
                                 name: "Chapters",
@@ -106,7 +106,7 @@ module.exports = new Command({
                         .setFooter(Footer(headers));
 
                     const secondPage = new EmbedBuilder()
-                        .setAuthor({ name: `${seriesTitle} | Additional info` })
+                        .setAuthor({ name: `${seriesTitle(data)} | Additional info` })
                         .setThumbnail(data.coverImage.large)
                         .addFields(
                             {
@@ -157,7 +157,7 @@ module.exports = new Command({
                         }
 
                         const thirdPage = new EmbedBuilder()
-                            .setAuthor({ name: `${seriesTitle} | ${data.mediaListEntry.user.name}'s Stats` })
+                            .setAuthor({ name: `${seriesTitle(data)} | ${data.mediaListEntry.user.name}'s Stats` })
                             .setThumbnail(data.coverImage.large)
                             .addFields(
                                 {

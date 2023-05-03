@@ -6,6 +6,7 @@ const Discord = require("discord.js"),
   BuildPagination = require("#Utils/BuildPagination.js"),
   EmbedError = require("#Utils/EmbedError.js"),
   GraphQLRequest = require("#Utils/GraphQLRequest.js"),
+  seriesTitle = require("#Utils/SeriesTitle.js"),
   GraphQLQueries = require("#Utils/GraphQLQueries.js");
 
 const name = "staff";
@@ -67,7 +68,7 @@ module.exports = new Command({
           if (characterMedia.edges.length > 0) {
             const media = characterMedia.edges.map((node) => {
               const work = node.characters.map((character) => {
-                return `${character.name.full || "Unknown"} - [${node.node?.title?.english || node.node?.title?.romaji || node.node?.title?.native}](${node.node.siteUrl})`;
+                return `${character.name.full || "Unknown"} - [${seriesTitle(node.node)}](${node.node.siteUrl})`;
               });
               return work;
             });

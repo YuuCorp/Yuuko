@@ -5,6 +5,7 @@ const Discord = require("discord.js"),
     EmbedError = require("#Utils/EmbedError.js"),
     Footer = require("#Utils/Footer.js"),
     BuildPagination = require("#Utils/BuildPagination.js"),
+    SeriesTitle = require("#Utils/SeriesTitle.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
     GraphQLRequest = require("#Utils/GraphQLRequest.js"),
     GraphQLQueries = require("#Utils/GraphQLQueries.js");
@@ -61,7 +62,7 @@ module.exports = new Command({
                     const firstPage = new EmbedBuilder()
                         .setImage(data.bannerImage)
                         .setThumbnail(data.coverImage.large)
-                        .setTitle(data.title.english || data.title.romaji || data.title.native)
+                        .setTitle(SeriesTitle(data))
                         .addFields(
                             {
                                 name: "Episodes",
