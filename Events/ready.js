@@ -4,7 +4,9 @@ const fs = require("fs");
 
 module.exports = new Event("ready", (client) => {
 
-    client.user.setPresence({ activities: [{ type: ActivityType.Watching, name: `${client.guilds.cache.size} servers` }], status: 'online' })
+    setInterval(async () => {
+        client.user.setPresence({ activities: [{ type: ActivityType.Watching, name: `${client.guilds.cache.size} servers` }], status: 'online' })
+    }, 15000)
 
     console.log(`${client.user.tag} is ready!`);
 
