@@ -5,6 +5,7 @@ const Discord = require("discord.js"),
     Footer = require("#Utils/Footer.js"),
     CommandCategories = require("#Utils/CommandCategories.js"),
     BuildPagination = require("#Utils/BuildPagination.js"),
+    SeriesTitle = require("#Utils/SeriesTitle.js"),
     GraphQLRequest = require("#Utils/GraphQLRequest.js"),
     GraphQLQueries = require("#Utils/GraphQLQueries.js");
 
@@ -40,6 +41,7 @@ module.exports = new Command({
                         .replace(/&nbsp;/g, " ")
                         .replace(/~!|!~/g, "||") /*.replace(/\n\n/g, "\n")*/ || "No description available.";
                 if (data) {
+                    const embedDate = new Date;
                     for (let i = 0; i < Math.ceil(description.length / 4093); i++) {
                         //^ Fix the description by replacing and converting HTML tags
                         //console.log(data.dateOfBirth.day || 'no' + data.dateOfBirth.month + data.dateOfBirth.year)
@@ -56,18 +58,33 @@ module.exports = new Command({
                                 //gender
                                 //{name: "Gender", value: `${data.gender || 'No gender specified'}`},
                                 //Date of birth
-                                //{name: "Date Of Birth", value: `${data.dateOfBirth.day || 'no' + data.dateOfBirth.month + data.dateOfBirth.year || 'No date of birth specified'}`},
+                                //{name: "Date Of Birth", value: `${data.dateOfBirth.day || 'no' + data.dateOfBirth..month + data.dateOfBirth.year || 'No date of birth specified'}`},
                                 //BloodType
                                 //{name: "Blood Type", value: `${data.bloodType || 'No blood type specified'}`}
                             )
                             .setURL(data.siteUrl)
                             .setColor("Green")
-                            .setFooter(Footer(headers));
+                            .setFooter({ text: `${data.favourites} ♥ ${Footer(headers).text}` })
+                            .setTimestamp(embedDate)
                         //data.description.split("<br>").forEach(line => titleEmbed.addField(line, "", true))
                         // interaction.reply({ embeds: [charEmbed] });
                         embeds.push(charEmbed);
+                        if (data.media.nodes.length > 0) {
+                            let medias = [];
+                            for (let media of data.media.nodes) {
+                                medias.push(`[${SeriesTitle(media)}](${media.siteUrl})`);
+                            }
+                            const charMediaEmbed = new EmbedBuilder()
+                                .setTitle("Series character has appeared in")
+                                .setDescription(medias.join("\n"))
+                                .setTimestamp(embedDate)
+                                .setFooter({ text: `${data.media.nodes.length} series ${Footer(headers).text}` })
+
+                            embeds.push(charMediaEmbed)
+                        }
                     }
-                    BuildPagination(interaction, embeds).paginate();
+                    const pagination = BuildPagination(interaction, embeds);
+                    pagination.paginate();
                 } else {
                     return interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
                 }

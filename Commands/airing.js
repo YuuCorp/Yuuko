@@ -7,7 +7,6 @@ const Discord = require("discord.js"),
   Footer = require("#Utils/Footer.js"),
   SeriesTitle = require("#Utils/SeriesTitle.js"),
   CommandCategories = require("#Utils/CommandCategories.js"),
-  pagination = require("@acegoal07/discordjs-pagination"),
   ms = require("ms"),
   BuildPagination = require("#Utils/BuildPagination.js");
 

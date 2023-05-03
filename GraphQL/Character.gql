@@ -16,5 +16,16 @@ query ($charName: String) {
             day
         }
         gender
+        favourites
+        media {
+          nodes {
+            siteUrl
+            title {
+              romaji
+              native
+              english
+            }
+          }
+      }
     }
 }
