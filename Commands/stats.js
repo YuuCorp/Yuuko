@@ -16,12 +16,11 @@ module.exports = new Command({
         .setDescription(description),
 
     async run(interaction, args, client) {
-        const uptime = Date.now() - fs.readFileSync(path.join(__dirname, "../Logging/uptime.txt"), "utf8");
-        const days = Math.floor(uptime / 86400000);
-        const hours = Math.floor(uptime / 3600000) % 24;
-        const minutes = Math.floor(uptime / 60000) % 60;
-        const seconds = Math.floor(uptime / 1000) % 60;
-        const uptimeString = `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+        const uptime = Date.now() - process.env.UPTIME;
+        const hours = Math.floor(uptime / 3600000);
+        const minutes = Math.floor((uptime % 3600000) / 60000);
+        const seconds = Math.floor(((uptime % 3600000) % 60000) / 1000);
+        const uptimeString = `${hours} hours, ${minutes} minutes, ${seconds} seconds`;
 
         const embed = new EmbedBuilder()
             .setTitle("Here are the stats!")

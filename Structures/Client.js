@@ -79,7 +79,7 @@ class Client extends Discord.Client {
             if (!fs.existsSync(path.join(__dirname, "../Logging"))) {
                 fs.mkdirSync(path.join(__dirname, "../Logging"));
             }
-            fs.writeFileSync(path.join(__dirname, "../Logging/uptime.txt"), Date.now().toString());
+            process.env.UPTIME = Date.now();
             this.login(process.env.TOKEN);
         })();
     }
