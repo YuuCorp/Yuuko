@@ -22,6 +22,7 @@ class Client extends Discord.Client {
          * @type {Discord.Collection<string, Command>}
          */
         this.commands = new Discord.Collection();
+        this.components = new Discord.Collection();
 
         this.prefix = process.env.PREFIX || "as!";
     }
@@ -42,6 +43,14 @@ class Client extends Discord.Client {
                 if (command.slash) {
                     slashCommands.push(command.slash);
                 }
+            });
+
+        fs.readdirSync("./Components")
+            .filter((file) => file.endsWith(".js"))
+            .forEach((file) => {
+                const comp = require(`#Components/${file}`);
+                console.log(`Component ${comp.name} loaded`);
+                this.components.set(comp.name, comp);
             });
 
         //^ Register Slash Commands

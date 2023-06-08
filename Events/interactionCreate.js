@@ -12,32 +12,28 @@ module.exports = new Event("interactionCreate", async (client, interaction) => {
     // We run the command based on the interaction
     const command = client.commands.find(cmd => cmd.name == interaction.commandName);
     Logging(command, interaction);
-    if (command.middlewares) {
-        for (let middleware of command.middlewares) {
-            try {
-                await middleware.run(interaction);
-            } catch (e) {
-                return interaction.reply({ embeds: [EmbedError(e)] });
-            }
-        }
-    }
-    command.run(interaction, null, client);
+        command.run(await runMiddleware(command, interaction), null, client);
+
+        // Check for autocomplete
     } else if (interaction.isAutocomplete()) {
         const command = client.commands.find(cmd => cmd.name == interaction.commandName);
-        Logging(command, interaction);
-        if (command.middlewares) {
-            for (let middleware of command.middlewares) {
-                try {
-                    await middleware.run(interaction);
-                } catch (e) {
-                    return interaction.reply({ embeds: [EmbedError(e)] });
-                }
-            }
-        }
-        try {
-            await command.autocomplete(interaction);
-        } catch (e) {
-            console.log(e);
-        }
+        await command.autocomplete(await runMiddleware(command, interaction));
+
+        // Check for modal
+    } else if (interaction.isModalSubmit()) {
+        const component = client.components.find(comp => comp.name == interaction.customId);
+        component.run(await runMiddleware(component, interaction), null, client);
     }
 })
+
+async function runMiddleware(item, interaction) {
+    if (!item.middlewares) return interaction;
+    for (let middleware of item.middlewares) {
+        try {
+            await middleware.run(interaction);
+        } catch (e) {
+            return interaction.reply({ embeds: [EmbedError(e)] });
+        }
+    }
+    return interaction;
+}
