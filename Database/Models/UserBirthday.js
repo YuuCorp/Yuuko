@@ -21,7 +21,7 @@ const UserBirthday = db.define("userbirthday", {
     birthday: {
         type: DataTypes.DATE,
         allowNull: false,
-        unique: true,
+        unique: false,
     },
 });
 

@@ -3,6 +3,7 @@ const Discord = require("discord.js"),
     Command = require("#Structures/Command.js"),
     fs = require("fs"),
     path = require("path"),
+    AnnouncementDB = require("#Models/Announcement.js");
     BuildPagination = require("#Utils/BuildPagination.js");
 
 function generateHelpEmbeds(cmdsArr, category) {
@@ -66,13 +67,16 @@ module.exports = new Command({
             cmdGroups[cmdEntry.type].push({ usage: cmdEntry.usage, name: cmdEntry.name, description: cmdEntry.description });
         }
         // Send the description to the user
+        const announcements = await AnnouncementDB.findAll({ order: [['date', 'DESC']] }).then((x) => x.slice(0, 5));
+
         const helpInfoEmbed = new EmbedBuilder();
         helpInfoEmbed.setTitle(":grey_question: Help");
         helpInfoEmbed.setDescription("Here is a list of every command and how to use it. Parameters starting with \`?\` are optional.");
         helpInfoEmbed.addFields(
             { name: "Usage", value: "Use the buttons below to navigate the help pages. Note that a category might have more than one page." },
             { name: "Tip", value: "Since the migration to slash commands, you can also view the list of commands in the slash menu, you can use that too." },
-            { name: "Voting", value: "[Vote for our bot on Top.GG!](https://top.gg/bot/867010131745177621) There are no added benefits yet, but they help us be seen by other users!" }
+            { name: "Announcements", value: announcements.length > 0 ? announcements.map((x) => `${Discord.time(x.date)} - ${x.announcement}`).join("\n") : "No announcements yet!" },
+            { name: "Voting", value: "[Vote for our bot on Top.GG!](https://top.gg/bot/867010131745177621) There are no added benefits yet, but they help us be seen by other users!" },
         );
         helpInfoEmbed.setColor('#1873bf');
 
