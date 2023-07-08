@@ -24,8 +24,12 @@ module.exports = new Command({
             subcommand
                 .setName('help')
                 .setDescription('Shows you info on how to get your AniList token.'))
-        .addSubcommand(subcommand =>
-            subcommand
+      .addSubcommand(subcommand =>
+        subcommand
+          .setName('wipe')
+          .setDescription('Unlink your AniList token from the bot.'))
+      .addSubcommand(subcommand =>
+        subcommand
                 .setName('token')
                 .setDescription('Use the AniList token here.')
                 .addStringOption(option =>
