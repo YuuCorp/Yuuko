@@ -9,7 +9,8 @@ module.exports = (command, interaction) => {
             fs.mkdirSync(path.join(__dirname, "../Logging"));
             fs.writeFileSync(logPath, 'Initiating log!');
         }
-        const log = fs.readFileSync(logPath, 'utf8').toString() + "\n" + `${currentDate}: ${interaction.user.username}#${interaction.user.discriminator} ran command: ${command.name}!`;
+        const subcommand = interaction.options.getSubcommand(false);
+        const log = fs.readFileSync(logPath, 'utf8').toString() + "\n" + `${currentDate}: ${interaction.user.username}#${interaction.user.discriminator} ran command: ${command.name}${subcommand ? " " + subcommand : ""}`;
         fs.writeFileSync(logPath, log, 'utf8');
     } catch (e) {
         console.log(e);
