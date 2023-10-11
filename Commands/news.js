@@ -21,7 +21,7 @@ module.exports = new Command({
         .setDescription(description),
 
     async run(interaction, args, run) {
-        const rss_feed = "https://api.rss2json.com/v1/api.json?rss_url=http%3A%2F%2Ffeeds.feedburner.com%2Fcrunchyroll%2Fanimenews";
+        const rss_feed = "https://api.rss2json.com/v1/api.json?rss_url=https://cr-news-api-service.prd.crunchyrollsvc.com/v1/en-US/rss";
         axios.get(rss_feed)
             .then(res => {
                 const rss = res.data;
