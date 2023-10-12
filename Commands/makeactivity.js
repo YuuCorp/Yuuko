@@ -5,9 +5,10 @@ const Discord = require("discord.js"),
   EmbedError = require("#Utils/EmbedError.js"),
   Footer = require("#Utils/Footer.js"),
   AnilistUser = require("#Models/AnilistUser.js"),
-  CommandCategories = require("#Utils/CommandCategories.js"),
-  GraphQLRequest = require("#Utils/GraphQLRequest.js"),
-  GraphQLQueries = require("#Utils/GraphQLQueries.js");
+  CommandCategories = require("#Utils/CommandCategories.js")
+
+import { GraphQLRequest } from "#Utils/GraphQLRequest.ts";
+import { GraphQLQueries } from "#Utils/GraphQLQueries.ts";
 
 const name = "makeactivity";
 const usage = "makeactivity <list | status>";

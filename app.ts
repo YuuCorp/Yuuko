@@ -1,7 +1,7 @@
 require("dotenv-flow").config();
-require("./Checks/Run.js");
+require("../Checks/Run.js");
 
-const Client = require("#Structures/Client.js");
+import { Client } from "./Structures/Client";
 const client = new Client();
 
 client.start();
