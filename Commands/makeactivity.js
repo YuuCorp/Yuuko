@@ -5,7 +5,7 @@ const Discord = require("discord.js"),
   EmbedError = require("#Utils/EmbedError.js"),
   Footer = require("#Utils/Footer.js"),
   AnilistUser = require("#Models/AnilistUser.js"),
-  CommandCategories = require("#Utils/CommandCategories.js")
+  CommandCategories = require("#Utils/CommandCategories.js");
 
 import { GraphQLRequest } from "#Utils/GraphQLRequest.ts";
 import { GraphQLQueries } from "#Utils/GraphQLQueries.ts";
@@ -39,20 +39,20 @@ module.exports = new Command({
               { name: "Completed", value: "COMPLETED" },
               { name: "Dropped", value: "DROPPED" },
               { name: "Paused", value: "PAUSED" },
-              { name: "Repeating", value: "REPEATING" }
-            )
+              { name: "Repeating", value: "REPEATING" },
+            ),
         )
         .addBooleanOption((option) => option.setName("hide").setDescription("Hide series from status list"))
         .addBooleanOption((option) => option.setName("private").setDescription("Make the list entry private"))
         .addStringOption((option) => option.setName("lists").setDescription("The custom list you want the series added to. (shows both manga and anime lists)").setAutocomplete(true))
         .addNumberOption((option) => option.setName("score").setDescription("The score you want to give the series."))
-        .addIntegerOption((option) => option.setName("progress").setDescription("How far you've watched/read the series."))
+        .addIntegerOption((option) => option.setName("progress").setDescription("How far you've watched/read the series.")),
     )
     .addSubcommand((subcommand) =>
       subcommand
         .setName("status")
         .setDescription("Make a text activity.")
-        .addStringOption((option) => option.setName("text").setRequired(true).setDescription("The text to use when making the activity."))
+        .addStringOption((option) => option.setName("text").setRequired(true).setDescription("The text to use when making the activity.")),
     ),
 
   async autocomplete(interaction) {

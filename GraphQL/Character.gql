@@ -1,31 +1,31 @@
 query ($charName: String) {
-    Character (search: $charName) {
-        name{
-          full
-            }
-        age
-        description
+  Character(search: $charName) {
+    name {
+      full
+    }
+    age
+    description
+    siteUrl
+    image {
+      large
+    }
+    bloodType
+    dateOfBirth {
+      year
+      month
+      day
+    }
+    gender
+    favourites
+    media {
+      nodes {
         siteUrl
-        image {
-          large
+        title {
+          romaji
+          native
+          english
         }
-        bloodType
-        dateOfBirth {
-            year
-            month
-            day
-        }
-        gender
-        favourites
-        media {
-          nodes {
-            siteUrl
-            title {
-              romaji
-              native
-              english
-            }
-          }
       }
     }
+  }
 }

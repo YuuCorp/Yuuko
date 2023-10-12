@@ -1,47 +1,47 @@
-query($staffName: String) {
-    Staff(search: $staffName) {
-        name{
-            full
-            }
-        age
-        image{
-            large
-        }
-        description
-        gender
-        homeTown
-        siteUrl
-      staffMedia {
-        edges {
-          staffRole
-          node {
-            title {
-              romaji
-              english
-              native
-              userPreferred
-            }
-            siteUrl
+query ($staffName: String) {
+  Staff(search: $staffName) {
+    name {
+      full
+    }
+    age
+    image {
+      large
+    }
+    description
+    gender
+    homeTown
+    siteUrl
+    staffMedia {
+      edges {
+        staffRole
+        node {
+          title {
+            romaji
+            english
+            native
+            userPreferred
           }
+          siteUrl
         }
       }
-      characterMedia {
-        edges {
-          node {
-            title {
-              romaji
-              english
-              native
-              userPreferred
-            }
-            siteUrl
+    }
+    characterMedia {
+      edges {
+        node {
+          title {
+            romaji
+            english
+            native
+            userPreferred
           }
-          characters {
-            name {
-              full
-            }
+          siteUrl
+        }
+        characters {
+          name {
+            full
           }
         }
       }
     }
+  }
 }

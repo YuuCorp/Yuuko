@@ -1,15 +1,15 @@
 {
-    "compilerOptions": {
-        "baseUrl": ".",
-        "paths": {
-            "#Utils/*": ["./Utils/*"],
-            "#Commands/*": ["./Commands/*"],
-            "#Structures/*": ["./Structures/*"],
-            "#GraphQL/*": ["./GraphQL/*"],
-            "#Models/*": ["./Database/Models/*"],
-            "#Caching/*": ["./Caching/*"],
-            "#RSA/*": ["./RSA/*"],
-            "#Middleware/*": ["./Middleware/*"]
-        }
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "#Utils/*": ["./Utils/*"],
+      "#Commands/*": ["./Commands/*"],
+      "#Structures/*": ["./Structures/*"],
+      "#GraphQL/*": ["./GraphQL/*"],
+      "#Models/*": ["./Database/Models/*"],
+      "#Caching/*": ["./Caching/*"],
+      "#RSA/*": ["./RSA/*"],
+      "#Middleware/*": ["./Middleware/*"]
     }
+  }
 }

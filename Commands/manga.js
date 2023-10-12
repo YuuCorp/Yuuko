@@ -95,7 +95,7 @@ module.exports = new Command({
                 name: "Genres",
                 value: "``" + `${data.genres.join(", ") || "N/A"}` + "``",
                 inline: true,
-              }
+              },
             )
             .setDescription(description.length > descLength ? description.substring(0, descLength) + "..." || "No description available." : description || "No description available.")
             .setURL(data.siteUrl)
@@ -125,7 +125,7 @@ module.exports = new Command({
                 name: "Synonyms",
                 value: "``" + `${data.synonyms.join(", ") || "N/A"}` + "``",
                 inline: false,
-              }
+              },
             )
             .setColor("Green")
             .setFooter(Footer(headers));
@@ -172,7 +172,7 @@ module.exports = new Command({
                 {
                   name: "Notes",
                   value: data.mediaListEntry?.notes || "No Notes Found",
-                }
+                },
               )
               .setColor("Green")
               .setFooter(Footer(headers));

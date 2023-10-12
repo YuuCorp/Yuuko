@@ -13,30 +13,21 @@ const usage = "auth <help | anilist_token | wipe>";
 const description = "Binds an existing AniList user to your Discord account in the bot database.";
 
 module.exports = new Command({
-    name,
-    usage,
-    description,
-    type: CommandCategories.Anilist,
-    slash: new SlashCommandBuilder()
-        .setName(name)
-        .setDescription(description)
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('help')
-                .setDescription('Shows you info on how to get your AniList token.'))
-      .addSubcommand(subcommand =>
-        subcommand
-          .setName('wipe')
-          .setDescription('Unlink your AniList token from the bot.'))
-      .addSubcommand(subcommand =>
-        subcommand
-                .setName('token')
-                .setDescription('Use the AniList token here.')
-                .addStringOption(option =>
-                    option.setName('token')
-                        .setDescription('Add the AniList token here.')
-                        .setMinLength(750)
-                        .setRequired(true))),
+  name,
+  usage,
+  description,
+  type: CommandCategories.Anilist,
+  slash: new SlashCommandBuilder()
+    .setName(name)
+    .setDescription(description)
+    .addSubcommand((subcommand) => subcommand.setName("help").setDescription("Shows you info on how to get your AniList token."))
+    .addSubcommand((subcommand) => subcommand.setName("wipe").setDescription("Unlink your AniList token from the bot."))
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName("token")
+        .setDescription("Use the AniList token here.")
+        .addStringOption((option) => option.setName("token").setDescription("Add the AniList token here.").setMinLength(750).setRequired(true)),
+    ),
 
   async run(interaction, args, run) {
     const type = interaction.options.getSubcommand();
@@ -66,8 +57,8 @@ module.exports = new Command({
 
     const user = await AnilistUser.findOne({ where: { discord_id: interaction.user.id } });
 
-    if(type === "wipe") {
-      if(!user) return interaction.reply({ embeds: [EmbedError(`You don't have an AniList account bound to your Discord account.`, null, false)], ephemeral: true });
+    if (type === "wipe") {
+      if (!user) return interaction.reply({ embeds: [EmbedError(`You don't have an AniList account bound to your Discord account.`, null, false)], ephemeral: true });
       try {
         await AnilistUser.destroy({ where: { discord_id: interaction.user.id } });
         return interaction.reply({
@@ -88,7 +79,7 @@ module.exports = new Command({
             EmbedError(
               `An error occurred while updating your AniList account binding:
                                                                    \n\n${error}`,
-              null
+              null,
             ),
           ],
           ephemeral: true,
@@ -119,7 +110,7 @@ module.exports = new Command({
             EmbedError(
               `An error occurred while updating your AniList account binding:
                                                                    \n\n${error}`,
-              null
+              null,
             ),
           ],
           ephemeral: true,
@@ -149,7 +140,7 @@ module.exports = new Command({
           EmbedError(
             `Something went wrong while trying to create your AniList account binding:
                                                                \n\n${error}`,
-            null
+            null,
           ),
         ],
         ephemeral: true,

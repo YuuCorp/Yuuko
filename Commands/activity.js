@@ -61,19 +61,15 @@ module.exports = new Command({
               .setTitle(`Here's ${data?.user?.name?.toString() || "Unknown Name"}'s most recent activity!`)
               .setDescription(data?.text?.replace(`!~`, `||`).replace(`~!`, `||`).replaceAll("~", ``))
               .setThumbnail(data?.user?.avatar?.large)
-              .setFooter({ text: `${data?.likeCount | 0} ♥  ${data?.replyCount | 0} 💬` })
+              .setFooter({ text: `${data?.likeCount | 0} ♥  ${data?.replyCount | 0} 💬` });
 
             return interaction.reply({ embeds: [embed] });
           } else if (data.media?.bannerImage) embed.setImage(data?.media?.bannerImage);
           else embed.setThumbnail(data?.media?.coverImage?.large || data?.media?.coverImage?.medium);
           embed
             .setTitle(`Here's ${data?.user?.name?.toString() || "Unknown Name"}'s most recent activity!`)
-            .setDescription(
-              `${data?.status.charAt(0).toUpperCase() + data?.status.slice(1)} ${data?.progress?.toLowerCase() || ""} ${data?.status.startsWith("read" || "watched") ? 'of' : ''} **[${SeriesTitle(data.media)}](${
-                data?.media?.siteUrl
-              })**`
-            )
-            .setFooter({ text: `${data?.likeCount | 0} ♥  ${data?.replyCount | 0} 💬` })
+            .setDescription(`${data?.status.charAt(0).toUpperCase() + data?.status.slice(1)} ${data?.progress?.toLowerCase() || ""} ${data?.status.startsWith("read" || "watched") ? "of" : ""} **[${SeriesTitle(data.media)}](${data?.media?.siteUrl})**`)
+            .setFooter({ text: `${data?.likeCount | 0} ♥  ${data?.replyCount | 0} 💬` });
 
           return interaction.reply({ embeds: [embed] });
         } else {

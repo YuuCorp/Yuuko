@@ -10,7 +10,6 @@ module.exports = new YuukoEvent("ready", (client) => {
 
   console.log(`${client.user.tag} is ready!`);
 
-
   // React to update command output if exists
   if (fs.existsSync("./Local/updatemsg.json")) {
     let updatemsg = JSON.parse(fs.readFileSync("./Local/updatemsg.json").toString());
@@ -18,12 +17,10 @@ module.exports = new YuukoEvent("ready", (client) => {
       const channel = client.channels.cache.get(updatemsg.channelId);
       // TODO: Actually check if this works
       if (channel && channel.type === ChannelType.GuildText) {
-          channel
-          ?.messages.fetch(updatemsg.id)
-          .then(async (msg: Message) => {
-            await msg.react("❤️");
-            console.log("Heartbeat sent to update output.");
-          });
+        channel?.messages.fetch(updatemsg.id).then(async (msg: Message) => {
+          await msg.react("❤️");
+          console.log("Heartbeat sent to update output.");
+        });
       }
       fs.unlink("./Local/updatemsg.json", (err) => {
         if (err) {

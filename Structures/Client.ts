@@ -7,8 +7,8 @@ import { Command } from "./Command";
 import { YuukoComponent } from "../Utils/types";
 
 export class Client extends DiscordClient {
-  public commands: Collection<string, Command>
-  public components: Collection<string, YuukoComponent>
+  public commands: Collection<string, Command>;
+  public components: Collection<string, YuukoComponent>;
   constructor() {
     super({
       intents: [GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildEmojisAndStickers, GatewayIntentBits.DirectMessages, GatewayIntentBits.Guilds],
@@ -41,7 +41,7 @@ export class Client extends DiscordClient {
     fs.readdirSync("./Components")
       .filter((file) => file.endsWith(".ts"))
       .forEach((file) => {
-        const comp:YuukoComponent = require(`#Components/${file}`);
+        const comp: YuukoComponent = require(`#Components/${file}`);
         console.log(`Component ${comp.name} loaded`);
         // @ts-ignore
         this.components.set(comp.name, comp);

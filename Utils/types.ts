@@ -20,7 +20,7 @@ export type Media = {
 export type YuukoComponent = {
   name: string;
   run: (interaction: Interaction, args: any, client: Client) => void;
-  middlewares? : Middleware[];
+  middlewares?: Middleware[];
 };
 
 export type Announcement = Model & {

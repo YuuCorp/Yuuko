@@ -36,7 +36,7 @@ export class Command {
       this.slash = options.slash;
     }
     if (options.guildOnly) {
-        this.guildOnly = options.guildOnly;
+      this.guildOnly = options.guildOnly;
     }
     if (options.middlewares) {
       this.middlewares = options.middlewares;

@@ -1,5 +1,5 @@
 query Query($user: String, $perPage: Int, $type: MediaType, $userId: Int) {
-  Page(perPage: $perPage){
+  Page(perPage: $perPage) {
     mediaList(userName: $user, sort: UPDATED_TIME_DESC, type: $type, userId: $userId) {
       media {
         title {

@@ -1,4 +1,3 @@
-
 interface roundRectOptions {
   ctx: CanvasRenderingContext2D;
   x: number;
@@ -16,7 +15,7 @@ type Radius = {
   tr: number;
   br: number;
   bl: number;
-}
+};
 
 /**
  * Draws a rounded rectangle using the current state of the canvas.

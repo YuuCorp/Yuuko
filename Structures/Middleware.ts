@@ -12,7 +12,7 @@ export class Middleware {
   name: string;
   description: string;
   run: InteractionRunner | AsyncInteractionRunner;
-  
+
   constructor(options: MiddlewareOptions) {
     this.name = options.name;
     this.description = options.description;

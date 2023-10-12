@@ -43,5 +43,5 @@ AnilistUser.init(
   {
     sequelize: db,
     tableName: "anilistuser",
-  }
+  },
 );
