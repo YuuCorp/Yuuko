@@ -1,4 +1,4 @@
-query ($query: String) {
+query Manga($query: String) {
   Media(search: $query, type: MANGA, sort: SEARCH_MATCH) {
     id
     description

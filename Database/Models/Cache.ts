@@ -1,7 +1,7 @@
-const { DataTypes } = require('sequelize')
-const db = require('../db')
+const { DataTypes } = require("sequelize");
+const db = require("../db");
 
-export const CacheModel = db.define('cache', {
+export const CacheModel = db.define("cache", {
   type: {
     type: DataTypes.STRING(32),
     allowNull: false,
@@ -20,4 +20,4 @@ export const CacheModel = db.define('cache', {
     type: DataTypes.TEXT(),
     allowNull: false,
   },
-}) as Cache
+}) as Cache;

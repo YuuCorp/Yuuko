@@ -1,8 +1,8 @@
-import { Client } from './Structures/Client'
+import { Client } from "./Structures/Client";
 
-require('dotenv-flow').config()
-require('./Checks/Run.ts')
+require("dotenv-flow").config();
+require("./Checks/Run.ts");
 
-const client = new Client()
+const client = new Client();
 
-client.start()
+client.start();

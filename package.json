@@ -18,7 +18,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "prettier --write .",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "gen:gql": "graphql-codegen",
+    "gen:queries": "bun run ./Scripts/genQueries.ts"
   },
   "dependencies": {
     "@acegoal07/discordjs-pagination": "^1.5.0",
@@ -70,6 +72,10 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^1.0.0-beta.26",
+    "@graphql-codegen/cli": "^5.0.0",
+    "@graphql-codegen/typescript": "^4.0.1",
+    "@graphql-codegen/typescript-operations": "^4.0.1",
+    "@graphql-codegen/typescript-resolvers": "^4.0.1",
     "@types/node": "^20.6.3",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",

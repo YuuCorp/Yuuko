@@ -1,4 +1,4 @@
-query ($query: String, $aID: Int) {
+query Anime($query: String, $aID: Int) {
   Media(search: $query, id: $aID, type: ANIME, sort: SEARCH_MATCH) {
     id
     nextAiringEpisode {

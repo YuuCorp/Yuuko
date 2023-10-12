@@ -1,4 +1,4 @@
-query ($username: String, $userid: Int) {
+query User($username: String, $userid: Int) {
   User(name: $username, id: $userid) {
     id
     name

@@ -1,17 +1,17 @@
-const Discord = require('discord.js')
-const { EmbedBuilder, SlashCommandBuilder } = require('discord.js')
-const Command = require('#Structures/Command.js')
-const CommandCategories = require('#Utils/CommandCategories.js')
-const Footer = require('#Utils/Footer.js')
-const BuildPagination = require('#Utils/BuildPagination.js')
-const EmbedError = require('#Utils/EmbedError.js')
-const GraphQLRequest = require('#Utils/GraphQLRequest.js')
-const seriesTitle = require('#Utils/SeriesTitle.js')
-const GraphQLQueries = require('#Utils/GraphQLQueries.js')
+const Discord = require("discord.js");
+const { EmbedBuilder, SlashCommandBuilder } = require("discord.js");
+const Command = require("#Structures/Command.js");
+const CommandCategories = require("#Utils/CommandCategories.js");
+const Footer = require("#Utils/Footer.js");
+const BuildPagination = require("#Utils/BuildPagination.js");
+const EmbedError = require("#Utils/EmbedError.js");
+const GraphQLRequest = require("#Utils/GraphQLRequest.js");
+const seriesTitle = require("#Utils/SeriesTitle.js");
+const GraphQLQueries = require("#Utils/GraphQLQueries.js");
 
-const name = 'staff'
-const usage = 'staff <name>'
-const description = 'Gives you info about a staff member from anilist\'s DB.'
+const name = "staff";
+const usage = "staff <name>";
+const description = "Gives you info about a staff member from anilist's DB.";
 
 module.exports = new Command({
   name,
@@ -21,74 +21,63 @@ module.exports = new Command({
   slash: new SlashCommandBuilder()
     .setName(name)
     .setDescription(description)
-    .addStringOption(option => option.setName('query').setDescription('The query to search for').setRequired(true)),
+    .addStringOption((option) => option.setName("query").setDescription("The query to search for").setRequired(true)),
 
   async run(interaction, args, run) {
-    const vars = { staffName: interaction.options.getString('query') }
+    const vars = { staffName: interaction.options.getString("query") };
 
     // TODO: Fixme description length, it crashes the bot.
 
     GraphQLRequest(GraphQLQueries.Staff, vars)
       .then((response, headers) => {
-        const data = response.Staff
-        const staffMedia = data.staffMedia
-        const characterMedia = data.characterMedia
+        const data = response.Staff;
+        const staffMedia = data.staffMedia;
+        const characterMedia = data.characterMedia;
         if (data) {
           // Fix the description by replacing and converting HTML tags
-          const descLength = 1000
-          const description
-            = data.description
-              ?.replace(/<br><br>/g, '\n')
-              .replace(/<br>/g, '\n')
-              .replace(/<[^>]+>/g, '')
-              .replace(/&nbsp;/g, ' ')
-              .replace(/~!|!~/g, '||') /* .replace(/\n\n/g, "\n") */ || 'No description available.'
+          const descLength = 1000;
+          const description =
+            data.description
+              ?.replace(/<br><br>/g, "\n")
+              .replace(/<br>/g, "\n")
+              .replace(/<[^>]+>/g, "")
+              .replace(/&nbsp;/g, " ")
+              .replace(/~!|!~/g, "||") /* .replace(/\n\n/g, "\n") */ || "No description available.";
           const staffEmbed = new EmbedBuilder()
             .setThumbnail(data.image.large)
             .setTitle(data.name.full)
-            .setDescription(description.length > descLength ? `${description.substring(0, descLength)}...` || 'No description available.' : description || 'No description available.')
-            .addFields({ name: 'Staff Info: \n', value: `**Age**: ${data.age || 'No age specified'} **Gender**: ${data.gender || 'No gender specified.'}\n **Home Town**: ${data.homeTown || 'No home town specified.'}` })
+            .setDescription(description.length > descLength ? `${description.substring(0, descLength)}...` || "No description available." : description || "No description available.")
+            .addFields({ name: "Staff Info: \n", value: `**Age**: ${data.age || "No age specified"} **Gender**: ${data.gender || "No gender specified."}\n **Home Town**: ${data.homeTown || "No home town specified."}` })
             .setURL(data.siteUrl)
-            .setColor('Green')
-            .setFooter(Footer(headers))
+            .setColor("Green")
+            .setFooter(Footer(headers));
 
-          const pageList = [staffEmbed]
+          const pageList = [staffEmbed];
           if (staffMedia.edges.length > 0) {
             const media = staffMedia.edges.map((edge) => {
-              return `${edge.staffRole} - [${edge.node?.title?.english || edge.node?.title?.romaji || edge.node?.title?.native}](${edge.node.siteUrl})`
-            })
-            const mediaEmbed = new EmbedBuilder()
-              .setThumbnail(data.image.large)
-              .setTitle(`${data.name.full}'s Media`)
-              .setDescription(media.join('\n'))
-              .setURL(data.siteUrl)
-              .setColor('Green')
-            pageList.push(mediaEmbed)
+              return `${edge.staffRole} - [${edge.node?.title?.english || edge.node?.title?.romaji || edge.node?.title?.native}](${edge.node.siteUrl})`;
+            });
+            const mediaEmbed = new EmbedBuilder().setThumbnail(data.image.large).setTitle(`${data.name.full}'s Media`).setDescription(media.join("\n")).setURL(data.siteUrl).setColor("Green");
+            pageList.push(mediaEmbed);
           }
           if (characterMedia.edges.length > 0) {
             const media = characterMedia.edges.map((node) => {
               const work = node.characters.map((character) => {
-                return `${character.name.full || 'Unknown'} - [${seriesTitle(node.node)}](${node.node.siteUrl})`
-              })
-              return work
-            })
-            const charEmbed = new EmbedBuilder()
-              .setThumbnail(data.image.large)
-              .setTitle(`${data.name.full}'s Characters`)
-              .setDescription(media.join('\n'))
-              .setURL(data.siteUrl)
-              .setColor('Green')
-            pageList.push(charEmbed)
+                return `${character.name.full || "Unknown"} - [${seriesTitle(node.node)}](${node.node.siteUrl})`;
+              });
+              return work;
+            });
+            const charEmbed = new EmbedBuilder().setThumbnail(data.image.large).setTitle(`${data.name.full}'s Characters`).setDescription(media.join("\n")).setURL(data.siteUrl).setColor("Green");
+            pageList.push(charEmbed);
           }
-          return BuildPagination(interaction, pageList).paginate()
-        }
-        else {
-          return interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] })
+          return BuildPagination(interaction, pageList).paginate();
+        } else {
+          return interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
         }
       })
       .catch((error) => {
-        console.error(error)
-        interaction.reply({ embeds: [EmbedError(error, vars)] })
-      })
+        console.error(error);
+        interaction.reply({ embeds: [EmbedError(error, vars)] });
+      });
   },
-})
+});

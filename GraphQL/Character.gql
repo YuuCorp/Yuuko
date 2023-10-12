@@ -1,4 +1,4 @@
-query ($charName: String) {
+query Character($charName: String) {
   Character(search: $charName) {
     name {
       full

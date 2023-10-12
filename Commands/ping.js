@@ -1,9 +1,9 @@
-const { SlashCommandBuilder } = require('discord.js')
-const Command = require('#Structures/Command.js')
-const CommandCategories = require('#Utils/CommandCategories.js')
+const { SlashCommandBuilder } = require("discord.js");
+const Command = require("#Structures/Command.js");
+const CommandCategories = require("#Utils/CommandCategories.js");
 
-const name = 'ping'
-const description = 'Shows the ping of the bot!'
+const name = "ping";
+const description = "Shows the ping of the bot!";
 
 module.exports = new Command({
   name,
@@ -12,6 +12,6 @@ module.exports = new Command({
   slash: new SlashCommandBuilder().setName(name).setDescription(description),
 
   async run(interaction, args, client) {
-    interaction.reply(`Ping: ${client.ws.ping} ms.`)
+    interaction.reply(`Ping: ${client.ws.ping} ms.`);
   },
-})
+});

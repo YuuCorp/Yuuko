@@ -1,4 +1,4 @@
-query ($dateStart: Int, $nextDay: Int!, $getID: [Int]) {
+query Airing($dateStart: Int, $nextDay: Int!, $getID: [Int]) {
   Page {
     airingSchedules(sort: TIME, airingAt_greater: $dateStart, airingAt_lesser: $nextDay, mediaId_in: $getID) {
       media {

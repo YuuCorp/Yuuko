@@ -1,4 +1,4 @@
-query ($query: String) {
+query Studio($query: String) {
   Studio(search: $query) {
     isAnimationStudio
     siteUrl

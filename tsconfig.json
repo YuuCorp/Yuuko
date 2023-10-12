@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
     "target": "es2022",
-    "lib": [
-      "es2022"
-    ],
+    "lib": ["es2022"],
     "moduleDetection": "force",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
@@ -14,9 +14,9 @@
     "allowJs": true,
     "strict": true,
     "noUncheckedIndexedAccess": true,
+    "noEmit": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
     "verbatimModuleSyntax": true,
-    "noEmit": true
+    "skipLibCheck": true
   }
 }

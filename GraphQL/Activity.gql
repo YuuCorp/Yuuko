@@ -1,4 +1,4 @@
-query ($userid: Int) {
+query Activity($userid: Int) {
   Activity(userId: $userid, sort: ID_DESC, type_not: MESSAGE) {
     __typename
     ... on TextActivity {

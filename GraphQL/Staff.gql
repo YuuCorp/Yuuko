@@ -1,4 +1,4 @@
-query ($staffName: String) {
+query Staff($staffName: String) {
   Staff(search: $staffName) {
     name {
       full

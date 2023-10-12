@@ -1,20 +1,20 @@
-import type { Optional } from 'sequelize'
-import { DataTypes, Model } from 'sequelize'
+import type { Optional } from "sequelize";
+import { DataTypes, Model } from "sequelize";
 
-import { db } from '../db' // assuming this is the correct path for your db instance
+import { db } from "../db"; // assuming this is the correct path for your db instance
 
 interface AnilistUserAttributes {
-  discord_id: string
-  anilist_token: string
-  anilist_id: string
+  discord_id: string;
+  anilist_token: string;
+  anilist_id: string;
 }
 
-interface AnilistUserCreationAttributes extends Optional<AnilistUserAttributes, 'discord_id' | 'anilist_token' | 'anilist_id'> {}
+interface AnilistUserCreationAttributes extends Optional<AnilistUserAttributes, "discord_id" | "anilist_token" | "anilist_id"> {}
 
 export class AnilistUser extends Model<AnilistUserAttributes, AnilistUserCreationAttributes> implements AnilistUserAttributes {
-  public discord_id!: string
-  public anilist_token!: string
-  public anilist_id!: string
+  public discord_id!: string;
+  public anilist_token!: string;
+  public anilist_id!: string;
 }
 
 AnilistUser.init(
@@ -37,13 +37,13 @@ AnilistUser.init(
       allowNull: false,
       unique: true,
       validate: {
-        is: ['^[a-zA-Z0-9_]+$', 'i'],
+        is: ["^[a-zA-Z0-9_]+$", "i"],
         len: [1, 32],
       },
     },
   },
   {
     sequelize: db,
-    tableName: 'anilistuser',
+    tableName: "anilistuser",
   },
-)
+);

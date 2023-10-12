@@ -1,4 +1,4 @@
-query ($username: String) {
+query UserCard($username: String) {
   User(name: $username) {
     id
     name
