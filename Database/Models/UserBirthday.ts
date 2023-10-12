@@ -1,7 +1,7 @@
-const { DataTypes } = require("sequelize");
-const db = require("../db");
+const { DataTypes } = require('sequelize')
+const db = require('../db')
 
-export const UserBirthday = db.define("userbirthday", {
+export const UserBirthday = db.define('userbirthday', {
   guild_id: {
     type: DataTypes.STRING(18),
     allowNull: false,
@@ -23,4 +23,4 @@ export const UserBirthday = db.define("userbirthday", {
     allowNull: false,
     unique: false,
   },
-});
+})

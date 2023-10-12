@@ -1,9 +1,7 @@
-import { Model } from "sequelize";
+const { DataTypes } = require('sequelize')
+const db = require('../db')
 
-const { DataTypes } = require("sequelize");
-const db = require("../db");
-
-export const AnnouncementModel = db.define("announcement", {
+export const AnnouncementModel = db.define('announcement', {
   date: {
     type: DataTypes.DATE,
     allowNull: false,
@@ -14,4 +12,4 @@ export const AnnouncementModel = db.define("announcement", {
     allowNull: false,
     unique: false,
   },
-});
+})

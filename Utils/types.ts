@@ -1,51 +1,51 @@
-import { Model, DataTypes } from "sequelize";
-import { Middleware } from "../Structures/Middleware";
-import { Client } from "../Structures/Client";
-import { Interaction } from "discord.js";
+import type { Model } from 'sequelize'
+import type { Interaction } from 'discord.js'
+import type { Middleware } from '../Structures/Middleware'
+import type { Client } from '../Structures/Client'
 
-export type Media = {
+export interface Media {
   title?: {
-    english: string;
-    romaji: string;
-    native: string;
-  };
-  id?: number;
-  duration?: number;
-  episodes?: number;
-  chapters?: number;
-  volumes?: number;
-  status: "FINISHED" | "RELEASING" | "NOT_YET_RELEASED" | "CANCELLED" | "HIATUS";
-};
+    english: string
+    romaji: string
+    native: string
+  }
+  id?: number
+  duration?: number
+  episodes?: number
+  chapters?: number
+  volumes?: number
+  status: 'FINISHED' | 'RELEASING' | 'NOT_YET_RELEASED' | 'CANCELLED' | 'HIATUS'
+}
 
-export type YuukoComponent = {
-  name: string;
-  run: (interaction: Interaction, args: any, client: Client) => void;
-  middlewares?: Middleware[];
-};
+export interface YuukoComponent {
+  name: string
+  run: (interaction: Interaction, args: any, client: Client) => void
+  middlewares?: Middleware[]
+}
 
 export type Announcement = Model & {
-  date: Date;
-  announcement: string;
-};
+  date: Date
+  announcement: string
+}
 
 export type Cache = Model & {
-  type: string;
-  cacheID: string;
-  keywords: string;
-  data: string;
-};
+  type: string
+  cacheID: string
+  keywords: string
+  data: string
+}
 
 export type UserBirthday = Model & {
-  guild_id: string;
-  user_id: string;
-  birthday: Date;
-};
+  guild_id: string
+  user_id: string
+  birthday: Date
+}
 
-export type Headers = {
-  [key: string]: string;
-};
+export interface Headers {
+  [key: string]: string
+}
 
-export type GraphQLResponse = {
-  data: any;
-  headers: Headers;
-};
+export interface GraphQLResponse {
+  data: any
+  headers: Headers
+}

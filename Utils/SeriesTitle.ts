@@ -1,5 +1,5 @@
-import { Media } from "./types";
+import type { Media } from './types'
 
-export const SeriesTitle = (media: Media) => {
-  return media.title?.english || media.title?.romaji || media.title?.native || "Unknown";
-};
+export function SeriesTitle(media: Media) {
+  return media.title?.english || media.title?.romaji || media.title?.native || 'Unknown'
+}
