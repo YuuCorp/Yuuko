@@ -3,12 +3,17 @@ import path from "node:path";
 import { Check } from "#Structures/Check.ts";
 
 // Flatten the array of checks
-const checks: Check[] = (await Promise.all(fs.readdirSync(path.join(__dirname))
-  .filter((file) => file.endsWith(".ts") && file !== "Run.ts")
-  .map(async (file) => {
-    const check = await import(path.join(__dirname, file));
-    return check.default; })
-  )).flat();
+const checks: Check[] = (
+  await Promise.all(
+    fs
+      .readdirSync(path.join(__dirname))
+      .filter((file) => file.endsWith(".ts") && file !== "Run.ts")
+      .map(async (file) => {
+        const check = await import(path.join(__dirname, file));
+        return check.default;
+      }),
+  )
+).flat();
 console.log(`[CheckRunner] Running ${checks.length} checks...`);
 
 for (const check of checks) {

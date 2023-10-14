@@ -20,16 +20,9 @@ export default {
     }
 
     const annModal = new ModalBuilder().setCustomId("annModal").setTitle("Announcement!");
-    const annInput = new TextInputBuilder()
-      .setRequired(true)
-      .setMinLength(1)
-      .setMaxLength(128)
-      .setPlaceholder("Hereby I announce something!")
-      .setCustomId("annInput")
-      .setLabel("What would you like to announce?")
-      .setStyle(TextInputStyle.Paragraph)
+    const annInput = new TextInputBuilder().setRequired(true).setMinLength(1).setMaxLength(128).setPlaceholder("Hereby I announce something!").setCustomId("annInput").setLabel("What would you like to announce?").setStyle(TextInputStyle.Paragraph);
 
     annModal.addComponents(new ActionRowBuilder<TextInputBuilder>().setComponents(annInput));
     await interaction.showModal(annModal);
-  }
+  },
 } satisfies Command;

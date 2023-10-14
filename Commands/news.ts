@@ -23,17 +23,14 @@ export default {
       .get(rss_feed)
       .then((res) => {
         const rss = res.data;
-        const embed = new EmbedBuilder()
-          .setTitle(rss.feed.title)
-          .setColor(0x00ae86)
-          .setFooter(Footer(res.headers));
+        const embed = new EmbedBuilder().setTitle(rss.feed.title).setColor(0x00ae86).setFooter(Footer(res.headers));
 
         // console.log(rss.items);
         const clamp = (num: number, min: number, max: number) => Math.min(Math.max(num, min), max);
         for (let i = 0; i < clamp(process.env.RSS_LIMIT || 5, 0, rss.items.length); i++) {
           console.log(`Processing ${i}...`);
-          let content: string = rss.items[i].content
-            /*
+          let content: string = rss.items[i].content;
+          /*
             .replace(/<img .*?>/g, "") // Remove image tags
             .replace(/(<br\ ?\/?>)+/g, "\n"); // Replace line breaks with newlines
             */ // New RSS feed doesn't include HTML tags

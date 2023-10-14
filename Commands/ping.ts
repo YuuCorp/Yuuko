@@ -15,5 +15,5 @@ export default {
   run: async ({ interaction, client }): Promise<void> => {
     if (!interaction.isCommand()) return;
     interaction.reply(`Ping: ${client.ws.ping} ms.`);
-  }
+  },
 } satisfies Command;

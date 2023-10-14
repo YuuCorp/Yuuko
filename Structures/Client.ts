@@ -30,7 +30,6 @@ export class Client extends DiscordClient {
          */
         const command = require(`#Commands/${file}`);
         console.log(`Command ${command.name} loaded`);
-        // @ts-expect-error
         this.commands.set(command.name, command);
 
         if (command.slash) slashCommands.push(command.slash);
@@ -41,7 +40,6 @@ export class Client extends DiscordClient {
       .forEach((file) => {
         const comp: YuukoComponent = require(`#Components/${file}`);
         console.log(`Component ${comp.name} loaded`);
-        // @ts-expect-error
         this.components.set(comp.name, comp);
       });
 

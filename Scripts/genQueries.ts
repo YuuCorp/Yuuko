@@ -15,6 +15,5 @@ import path from "path";
 
   const fullPath = path.join(__dirname, "../GraphQL/types/queries.ts");
 
-  console.log(`Finished generating queries. ${fullPath}` )
-
+  console.log(`Finished generating queries. ${fullPath}`);
 })();
