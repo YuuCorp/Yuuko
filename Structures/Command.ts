@@ -31,8 +31,8 @@ export interface RunOptions<Args = any> {
 export interface Command {
   name: string;
   description: string;
-  usage: string;
-  type: (typeof CommandCategories)[keyof typeof CommandCategories];
+  usage?: string;
+  type?: (typeof CommandCategories)[keyof typeof CommandCategories];
   run: <Args = any>(o: RunOptions<Args>) => MaybePromise<void>;
   slash?: any;
   guildOnly?: boolean;

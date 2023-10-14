@@ -91,9 +91,15 @@ export default {
           airingSchedules.sort((a, b) => {
             if (!a || !b) return 0;
             if (!a.media || !b.media) return 0;
-            if (a.media.title == null || b.media.title == null) return 0;
-            const aTitle = (a!.media!.title!.english || a!.media!.title!.romaji || a!.media!.title!.native!).toLowerCase();
-            const bTitle = (b!.media!.title!.english || b!.media!.title!.romaji || b!.media!.title!.native!).toLowerCase();
+
+            const aMedia = a.media.title;
+            const bMedia = b.media.title;
+
+            let aTitle = aMedia?.english || aMedia?.romaji || aMedia?.native;
+            let bTitle = bMedia?.english || bMedia?.romaji || bMedia?.native;
+
+            if (!aTitle || !bTitle) return 0;
+
             if (aTitle < bTitle) return -1;
 
             if (aTitle > bTitle) return 1;
@@ -116,7 +122,6 @@ export default {
               const { media, episode, airingAt } = field;
 
               embed.addFields({
-
                 name: `${SeriesTitle(media as Media)}`,
                 value: `> **[EP - ${episode}]** :airplane: ${new Date(airingAt * 1000) > new Date() ? `Going to air <t:${airingAt}:R>` : `Aired <t:${airingAt}:R>`}`,
                 inline: false,
