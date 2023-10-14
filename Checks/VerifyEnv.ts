@@ -1,4 +1,4 @@
-const Check = require("#Structures/Check.js");
+import { Check } from "#Structures/Check.ts";
 
 const tokenCheck = new Check({
   name: "Token Check",
@@ -14,7 +14,7 @@ const clientIDCheck = new Check({
   description: "Ensure that process.env.CLIENT_ID is present and valid. This is required to register slash commands.",
   optional: false,
   run: () => {
-    if (!process.env.CLIENT_ID || process.env.CLIENT_ID === "YOUR_CLIENT_ID_GOES_HERE") throw new Error("CLIENT_ID is not set properly.");
+    if (!process.env.CLIENT_ID) throw new Error("CLIENT_ID is not set properly.");
   },
 });
 
@@ -24,8 +24,8 @@ const guildIDCheck = new Check({
     This is required for slash commands to be instantly visible in a guild when developing.`,
   optional: true,
   run: () => {
-    if (!process.env.GUILD_ID || process.env.GUILD_ID === "YOUR_GUILD_ID_GOES_HERE") throw new Error("GUILD_ID is not set properly.");
+    if (!process.env.GUILD_ID) throw new Error("GUILD_ID is not set properly.");
   },
 });
 
-module.exports = [tokenCheck, clientIDCheck, guildIDCheck];
+export default [tokenCheck, clientIDCheck, guildIDCheck];

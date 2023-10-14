@@ -1,5 +1,5 @@
-const { DataTypes } = require("sequelize");
-const db = require("../db");
+import { DataTypes } from "sequelize";
+import { db } from "../db";
 
 export const AnnouncementModel = db.define("announcement", {
   date: {

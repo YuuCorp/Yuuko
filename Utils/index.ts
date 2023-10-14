@@ -3,7 +3,6 @@ export * from "./CanvasHelper";
 export * from "./CommandCategories";
 export * from "./EmbedError";
 export * from "./Footer";
-export * from "./GraphQLQueries";
 export * from "./GraphQLRequest";
 export * from "./Logging";
 export * from "./RSACryption";

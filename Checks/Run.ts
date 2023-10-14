@@ -1,13 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
+import { Check } from "#Structures/Check.ts";
 
-const checks = fs
-  .readdirSync(__dirname)
-  .filter((f) => f.endsWith(".js") && !f.includes("Run.js"))
-  .map((f) => require(path.join(__dirname, f)))
-  .filter((c) => Array.isArray(c))
-  .flat();
-
+// Flatten the array of checks
+const checks: Check[] = (await Promise.all(fs.readdirSync(path.join(__dirname))
+  .filter((file) => file.endsWith(".ts") && file !== "Run.ts")
+  .map(async (file) => {
+    const check = await import(path.join(__dirname, file));
+    return check.default; })
+  )).flat();
 console.log(`[CheckRunner] Running ${checks.length} checks...`);
 
 for (const check of checks) {

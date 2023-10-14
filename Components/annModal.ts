@@ -1,6 +1,6 @@
 import type { YuukoComponent } from "../Utils/types";
 
-const Announcement = require("#Models/Announcement.js");
+const Announcement = require("#Models/Announcement.ts");
 
 export default {
   name: "annModal",

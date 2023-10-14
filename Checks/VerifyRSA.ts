@@ -1,7 +1,7 @@
-const fs = require("node:fs");
-const path = require("node:path");
-const Check = require("#Structures/Check.js");
-const RSACryption = require("#Utils/RSACryption.js");
+import { RSACryption } from "#Utils/RSACryption.ts";
+import { Check } from "#Structures/Check.ts";
+import fs from "node:fs";
+import path from "node:path";
 
 const rsaPublicCheck = new Check({
   name: "RSA Public Key Check",
@@ -30,4 +30,4 @@ const rsaCryptionCheck = new Check({
   },
 });
 
-module.exports = [rsaPublicCheck, rsaPrivateCheck, rsaCryptionCheck];
+export default [rsaPublicCheck, rsaPrivateCheck, rsaCryptionCheck];

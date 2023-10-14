@@ -1,7 +1,9 @@
 import { Client } from "./Structures/Client";
 
-require("dotenv-flow").config();
-require("./Checks/Run.ts");
+import dotenvFlow from 'dotenv-flow';
+dotenvFlow.config();
+
+await import("./Checks/Run")
 
 const client = new Client();
 
