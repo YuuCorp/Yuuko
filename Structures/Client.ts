@@ -23,12 +23,8 @@ export class Client extends DiscordClient {
     const slashCommands: string[] = [];
     fs.readdirSync("./Commands")
       .filter((file) => file.endsWith(".ts"))
-      .forEach((file) => {
-        /**
-         * @type {Command}
-         * Legacy commands with prefix
-         */
-        const command = require(`#Commands/${file}`);
+      .forEach(async (file) => {
+        const command: Command = (await import(`#Commands/${file}`)).default;
         console.log(`Command ${command.name} loaded`);
         this.commands.set(command.name, command);
 
@@ -37,8 +33,8 @@ export class Client extends DiscordClient {
 
     fs.readdirSync("./Components")
       .filter((file) => file.endsWith(".ts"))
-      .forEach((file) => {
-        const comp: YuukoComponent = require(`#Components/${file}`);
+      .forEach(async (file) => {
+        const comp: YuukoComponent = (await import(`#Components/${file}`)).default;
         console.log(`Component ${comp.name} loaded`);
         this.components.set(comp.name, comp);
       });
@@ -65,7 +61,7 @@ export class Client extends DiscordClient {
       fs.readdirSync("./Events")
         .filter((file) => file.endsWith(".ts"))
         .forEach(async (file) => {
-          const event = await import(`../Events/${file}`);
+          const event = (await import(`../Events/${file}`)).default;
           console.log(`Event ${event.event} loaded`);
           this.on(event.event, event.run.bind(this));
         });

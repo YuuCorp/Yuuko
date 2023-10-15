@@ -88,14 +88,14 @@ export default {
     if (user) {
       try {
         if(!token) return void interaction.reply({ embeds: [EmbedError(`Please provide a token with this option.`)], ephemeral: true });
-        const { data } = (await GraphQLRequest("Viewer", {}, token));
-        if(!data.Viewer) return void interaction.reply({ embeds: [EmbedError(`Invalid token provided.`)], ephemeral: true });
-        await user.update({ anilist_token: RSACryption(token, false), anilist_id: data.Viewer.id.toString() });
+        const { Viewer: data } = (await GraphQLRequest("Viewer", {}, token)).data;
+        if(!data) return void interaction.reply({ embeds: [EmbedError(`Invalid token provided.`)], ephemeral: true });
+        await user.update({ anilist_token: RSACryption(token, false), anilist_id: data.id.toString() });
         return void interaction.reply({
           embeds: [
             {
               title: `Successfully updated your AniList account binding.`,
-              description: `Your Discord-bound AniList account has been changed to \`${data.Viewer.name}\`.`,
+              description: `Your Discord-bound AniList account has been changed to \`${data.name}\`.`,
               color: 0x00ff00,
               footer: Footer(),
             },
@@ -120,14 +120,14 @@ export default {
     // Create new user
     try {
       if(!token) return void interaction.reply({ embeds: [EmbedError(`Please provide a token with this option.`)], ephemeral: true });
-      const { data } = (await GraphQLRequest("Viewer", {}, token));
-      if(!data.Viewer) return void interaction.reply({ embeds: [EmbedError(`Invalid token provided.`)], ephemeral: true });
-      await AnilistUser.create({ discord_id: interaction.user.id, anilist_token: RSACryption(token, false), anilist_id: data.Viewer.id.toString() });
+      const { Viewer: data } = (await GraphQLRequest("Viewer", {}, token)).data;
+      if(!data) return void interaction.reply({ embeds: [EmbedError(`Invalid token provided.`)], ephemeral: true });
+      await AnilistUser.create({ discord_id: interaction.user.id, anilist_token: RSACryption(token, false), anilist_id: data.id.toString() });
       return void interaction.reply({
         embeds: [
           {
             title: `Successfully bound your AniList account to your Discord account.`,
-            description: `Your AniList account is now \`${data.Viewer.name}\`.`,
+            description: `Your AniList account is now \`${data.name}\`.`,
             color: 0x00ff00,
             footer: Footer(),
           },

@@ -6,9 +6,8 @@ import { Logging } from "../Utils/Logging";
 import type { Middleware } from "../Structures/Middleware";
 
 /* discord doesn't have the commands property in their class for somea reason */
-export const interactionCreate = new YuukoEvent("interactionCreate", async (client, interaction) => {
+export default new YuukoEvent("interactionCreate", async (client, interaction) => {
   // If the interaction wasn't a chat command, we ignore it
-
   if (interaction.isChatInputCommand()) {
     // We run the command based on the interaction
     const command = client.commands.find((cmd) => cmd.name == interaction.commandName);

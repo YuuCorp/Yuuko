@@ -3,7 +3,7 @@ import type { Message } from "discord.js";
 import { ActivityType, ChannelType } from "discord.js";
 import { YuukoEvent } from "../Structures/Event";
 
-module.exports = new YuukoEvent("ready", (client) => {
+export default new YuukoEvent("ready", (client) => {
   if (!client.user) return;
   setInterval(async () => {
     client.user?.setPresence({ activities: [{ type: ActivityType.Watching, name: `${client.guilds.cache.size} servers` }], status: "online" });
