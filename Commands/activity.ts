@@ -25,7 +25,7 @@ export default {
 
     const vars: Partial<{
       username: string;
-      userid: string;
+      userid: number;
     }> = {
       username,
       userid: interaction.alID,
@@ -41,7 +41,7 @@ export default {
           username: vars.username,
         })
       ).data.User;
-      vars.userid = uData?.id.toString();
+      vars.userid = uData?.id;
       if (!vars.userid) throw new Error("Couldn't find user id.");
     } catch (error: any) {
       console.error(error);
@@ -49,7 +49,7 @@ export default {
     }
 
     GraphQLRequest("Activity", {
-      userid: Number(vars.userid),
+      userid: vars.userid,
     })
       .then((response) => {
         const data = response.data.Activity!;

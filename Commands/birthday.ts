@@ -1,19 +1,18 @@
-const Discord = require("discord.js");
-const { EmbedBuilder, SlashCommandBuilder } = require("discord.js");
-const Command = require("#Structures/Command.js");
-const BuildPagination = require("#Utils/BuildPagination.js");
-const UserBirthday = require("#Models/UserBirthday.js");
-const CommandCategories = require("#Utils/CommandCategories.js");
+import { EmbedBuilder, SlashCommandBuilder, CommandInteractionOptionResolver } from "discord.js";
+import { BuildPagination } from "#Utils/BuildPagination.ts";
+import { UserBirthday } from "#Models/UserBirthday.ts";
+import { getOptions } from "#Utils/getOptions.ts";
+import type { Command } from "../Structures";
 
 const name = "birthday";
 const usage = "birthday <user | list | set>";
 const description = "Shows general list of birthdays for BBH server, or shows birthday for specific person.";
 
-module.exports = new Command({
+export default {
   name,
   usage,
   description,
-  type: CommandCategories.Misc,
+  type: "Misc",
   slash: new SlashCommandBuilder()
     .setName(name)
     .setDescription(description)
@@ -31,13 +30,15 @@ module.exports = new Command({
         .addStringOption((option) => option.setName("date").setDescription("The date of your birthday. Format: YYYY-MM-DD").setMinLength(10).setMaxLength(10).setRequired(true)),
     ),
 
-  async run(interaction, args, run) {
-    const subcommand = interaction.options.getSubcommand();
+  run: async ({ interaction, client }): Promise<void> => {
+    if (!interaction.isCommand()) return;
+    if(!interaction.guild) return void interaction.reply({ content: "This command can only be used in a server.", ephemeral: true });
+    const subcommand = (interaction.options as CommandInteractionOptionResolver).getSubcommand();
 
     if (subcommand === "set") {
-      const date = interaction.options.getString("date");
+      const { date } = getOptions<{ date: string }>(interaction.options, ["date"]);
       const birthday = new Date(date);
-      if (birthday.toString() === "Invalid Date") return interaction.reply({ content: "Invalid date format. Please use YYYY-MM-DD.", ephemeral: true });
+      if (birthday.toString() === "Invalid Date") return void interaction.reply({ content: "Invalid date format. Please use YYYY-MM-DD.", ephemeral: true });
       const userBirthday = await UserBirthday.findOne({ where: { user_id: interaction.user.id } });
       if (userBirthday) {
         userBirthday.birthday = birthday;
@@ -45,13 +46,14 @@ module.exports = new Command({
       } else {
         await UserBirthday.create({ user_id: interaction.user.id, birthday, guild_id: interaction.guild.id });
       }
-      return interaction.reply({ content: `Your birthday has been set to ${getReadableDate(birthday)}.`, ephemeral: true });
+      return void interaction.reply({ content: `Your birthday has been set to ${getReadableDate(birthday)}.`, ephemeral: true });
     }
 
     if (subcommand === "user") {
       const user = interaction.options.getUser("user");
+      if(!user) return void interaction.reply({ content: "Please provide a user.", ephemeral: true });
       const birthday = await UserBirthday.findOne({ where: { user_id: user.id } });
-      if (!birthday) return interaction.reply({ content: `${user.tag} has not set their birthday.`, ephemeral: true });
+      if (!birthday) return void interaction.reply({ content: `${user.tag} has not set their birthday.`, ephemeral: true });
       const daysLeft = daysLeftUntilBirthday(birthday.birthday);
       const age = calculateAge(birthday.birthday);
 
@@ -69,12 +71,12 @@ module.exports = new Command({
           value: daysLeft.toString(),
         },
       );
-      return interaction.reply({ embeds: [embed] });
+      return void interaction.reply({ embeds: [embed] });
     }
 
     if (subcommand === "list") {
       const birthdays = await UserBirthday.findAll({ where: { guild_id: interaction.guild.id } });
-      if (birthdays.length === 0) return interaction.reply({ content: "There are no birthdays registered for this server.", ephemeral: true });
+      if (birthdays.length === 0) return void interaction.reply({ content: "There are no birthdays registered for this server.", ephemeral: true });
       const embeds = [];
       let currentEmbed = new EmbedBuilder().setTitle("Birthdays");
       let currentEmbedIndex = 0;
@@ -110,23 +112,23 @@ module.exports = new Command({
       BuildPagination(interaction, embeds).paginate();
     }
 
-    function daysLeftUntilBirthday(date) {
+    function daysLeftUntilBirthday(date: Date) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const nextBirthday = new Date(today.getFullYear(), date.getMonth(), date.getDate());
       if (today > nextBirthday) nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
-      const daysLeft = Math.ceil((nextBirthday - today) / (1000 * 60 * 60 * 24));
+      const daysLeft = Math.ceil((nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
       return daysLeft;
     }
 
-    function getReadableDate(date) {
+    function getReadableDate(date: Date) {
       const day = date.getDate();
       const month = date.toLocaleString("default", { month: "long" });
       const year = date.getFullYear();
       return `${day}${getDaySuffix(day)} of ${month}, ${year}`;
     }
 
-    function getDaySuffix(day) {
+    function getDaySuffix(day: number) {
       if (day > 3 && day < 21) return "th";
       const lastDigit = day % 10;
       if (lastDigit === 1) return "st";
@@ -135,7 +137,7 @@ module.exports = new Command({
       return "th";
     }
 
-    function calculateAge(date) {
+    function calculateAge(date: Date) {
       const today = new Date();
       const m = today.getMonth() - date.getMonth();
       let age = today.getFullYear() - date.getFullYear();
@@ -143,4 +145,4 @@ module.exports = new Command({
       return age;
     }
   },
-});
+} satisfies Command;
