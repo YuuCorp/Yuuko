@@ -18,7 +18,7 @@ const description = "Allows you to see the 25 most recent logs of the bot. (Trus
 export default {
   name,
   description,
-  type: CommandCategories.Misc,
+  type: "Misc",
   slash: new SlashCommandBuilder().setName(name).setDescription(description),
 
   run: async ({ interaction, client }): Promise<void> => {

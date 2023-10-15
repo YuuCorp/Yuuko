@@ -8,6 +8,7 @@ export declare global {
       ANILIST_API: string;
       CLIENT_ID: string;
       GUILD_ID: string;
+      UPTIME: number;
     }
   }
 }

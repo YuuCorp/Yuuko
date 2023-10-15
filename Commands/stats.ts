@@ -1,19 +1,19 @@
-const fs = require("node:fs");
-const path = require("node:path");
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const CommandCategories = require("#Utils/CommandCategories.js");
-const Command = require("#Structures/Command.js");
+import type { Client, Command } from "../Structures";
+import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 
 const name = "stats";
 const description = "Shows you the statistics of the server & bot.";
 
-module.exports = new Command({
+export default {
   name,
   description,
-  type: CommandCategories.Misc,
+  type: "Misc",
   slash: new SlashCommandBuilder().setName(name).setDescription(description),
 
-  async run(interaction, args, client) {
+  run: async ({ interaction, client }): Promise<void> => {
+    if (!interaction.isCommand()) return;
+    if(!interaction.guild) return;
+
     const uptime = Date.now() - process.env.UPTIME;
     const hours = Math.floor(uptime / 3600000);
     const minutes = Math.floor((uptime % 3600000) / 60000);
@@ -25,11 +25,11 @@ module.exports = new Command({
       .setColor("Blurple")
       .addFields(
         { name: "Server Stats", value: `${interaction.guild.memberCount.toString()} members` },
-        { name: "Bot Stats", value: `${client.guilds.cache.size.toString()} servers \n ${getMemberCount(client).toString()} members \n Uptime: ${uptimeString}` },
+        { name: "Bot Stats", value: `${client.guilds.cache.size.toString()} servers \n${getMemberCount(client).toString()} members \nUptime: ${uptimeString}` },
       );
     interaction.reply({ embeds: [embed] });
 
-    function getMemberCount(client) {
+    function getMemberCount(client: Client) {
       let memberCount = 0;
       client.guilds.cache.forEach((guild) => {
         memberCount = memberCount + guild.memberCount;
@@ -37,4 +37,4 @@ module.exports = new Command({
       return memberCount;
     }
   },
-});
+} satisfies Command;

@@ -72,7 +72,7 @@ export class Client extends DiscordClient {
 
       if (!fs.existsSync(path.join(__dirname, "../Logging"))) fs.mkdirSync(path.join(__dirname, "../Logging"));
 
-      process.env.UPTIME = Date.now().toString();
+      process.env.UPTIME = Date.now();
       this.login(process.env.TOKEN);
     })();
   }

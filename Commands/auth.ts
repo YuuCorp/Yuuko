@@ -1,22 +1,17 @@
-const Discord = require("discord.js");
-const { EmbedBuilder, SlashCommandBuilder } = require("discord.js");
-const RSACryption = require("#Utils/RSACryption.js");
-const Command = require("#Structures/Command.js");
-const EmbedError = require("#Utils/EmbedError.js");
-const Footer = require("#Utils/Footer.js");
-const CommandCategories = require("#Utils/CommandCategories.js");
-const AnilistUser = require("#Models/AnilistUser.js");
-const GraphQLRequest = require("#Utils/GraphQLRequest.js");
+import { EmbedError, GraphQLRequest, Footer, RSACryption, getOptions } from "../Utils";
+import { CommandInteractionOptionResolver, SlashCommandBuilder } from "discord.js";
+import { AnilistUser } from "#Models/AnilistUser.ts";
+import type { Command } from "../Structures";
 
 const name = "auth";
 const usage = "auth <help | anilist_token | wipe>";
 const description = "Binds an existing AniList user to your Discord account in the bot database.";
 
-module.exports = new Command({
+export default {
   name,
   usage,
   description,
-  type: CommandCategories.Anilist,
+  type: "Anilist",
   slash: new SlashCommandBuilder()
     .setName(name)
     .setDescription(description)
@@ -29,14 +24,18 @@ module.exports = new Command({
         .addStringOption((option) => option.setName("token").setDescription("Add the AniList token here.").setMinLength(750).setRequired(true)),
     ),
 
-  async run(interaction, args, run) {
-    const type = interaction.options.getSubcommand();
-    const token = interaction.options.getString("token");
-
-    if (type === "token" && !token) return interaction.reply({ embeds: [EmbedError(`Please provide a token with this option.`)], ephemeral: true });
+  run: async ({ interaction, client }): Promise<void> => {
+    if (!interaction.isCommand()) return;
+    
+    const type = (interaction.options as CommandInteractionOptionResolver).getSubcommand();
+    const { token } = getOptions<{ token: string | undefined }>(interaction.options, ["token"]);
+    
+    if (type === "token" && !token) {
+      return void interaction.reply({ embeds: [EmbedError(`Please provide a token with this option.`)], ephemeral: true });
+    }
 
     if (type === "help") {
-      return await interaction.reply({
+      return void await interaction.reply({
         embeds: [
           {
             title: `Steps to get your AniList Token.`,
@@ -56,10 +55,10 @@ module.exports = new Command({
     const user = await AnilistUser.findOne({ where: { discord_id: interaction.user.id } });
 
     if (type === "wipe") {
-      if (!user) return interaction.reply({ embeds: [EmbedError(`You don't have an AniList account bound to your Discord account.`, null, false)], ephemeral: true });
+      if (!user) return void interaction.reply({ embeds: [EmbedError(`You don't have an AniList account bound to your Discord account.`, null, false)], ephemeral: true });
       try {
         await AnilistUser.destroy({ where: { discord_id: interaction.user.id } });
-        return interaction.reply({
+        return void interaction.reply({
           embeds: [
             {
               title: `Successfully wiped your AniList account binding.`,
@@ -72,7 +71,7 @@ module.exports = new Command({
         });
       } catch (error) {
         console.error(error);
-        return interaction.reply({
+        return void interaction.reply({
           embeds: [
             EmbedError(
               `An error occurred while updating your AniList account binding:
@@ -88,13 +87,15 @@ module.exports = new Command({
     // Update existing user
     if (user) {
       try {
-        const data = (await GraphQLRequest(`query{Viewer{name id}}`, "", token)).Viewer;
-        await user.update({ anilist_token: RSACryption(token, false), anilist_id: data.id });
-        return interaction.reply({
+        if(!token) return void interaction.reply({ embeds: [EmbedError(`Please provide a token with this option.`)], ephemeral: true });
+        const { data } = (await GraphQLRequest("Viewer", {}, token));
+        if(!data.Viewer) return void interaction.reply({ embeds: [EmbedError(`Invalid token provided.`)], ephemeral: true });
+        await user.update({ anilist_token: RSACryption(token, false), anilist_id: data.Viewer.id.toString() });
+        return void interaction.reply({
           embeds: [
             {
               title: `Successfully updated your AniList account binding.`,
-              description: `Your Discord-bound AniList account has been changed to \`${data.name}\`.`,
+              description: `Your Discord-bound AniList account has been changed to \`${data.Viewer.name}\`.`,
               color: 0x00ff00,
               footer: Footer(),
             },
@@ -103,7 +104,7 @@ module.exports = new Command({
         });
       } catch (error) {
         console.error(error);
-        return interaction.reply({
+        return void interaction.reply({
           embeds: [
             EmbedError(
               `An error occurred while updating your AniList account binding:
@@ -118,13 +119,15 @@ module.exports = new Command({
 
     // Create new user
     try {
-      const data = (await GraphQLRequest(`query{Viewer{name id}}`, "", token)).Viewer;
-      await AnilistUser.create({ discord_id: interaction.user.id, anilist_token: RSACryption(token, false), anilist_id: data.id });
-      return interaction.reply({
+      if(!token) return void interaction.reply({ embeds: [EmbedError(`Please provide a token with this option.`)], ephemeral: true });
+      const { data } = (await GraphQLRequest("Viewer", {}, token));
+      if(!data.Viewer) return void interaction.reply({ embeds: [EmbedError(`Invalid token provided.`)], ephemeral: true });
+      await AnilistUser.create({ discord_id: interaction.user.id, anilist_token: RSACryption(token, false), anilist_id: data.Viewer.id.toString() });
+      return void interaction.reply({
         embeds: [
           {
             title: `Successfully bound your AniList account to your Discord account.`,
-            description: `Your AniList account is now \`${data.name}\`.`,
+            description: `Your AniList account is now \`${data.Viewer.name}\`.`,
             color: 0x00ff00,
             footer: Footer(),
           },
@@ -133,7 +136,7 @@ module.exports = new Command({
       });
     } catch (error) {
       console.error(error);
-      return await interaction.reply({
+      return void await interaction.reply({
         embeds: [
           EmbedError(
             `Something went wrong while trying to create your AniList account binding:
@@ -145,4 +148,4 @@ module.exports = new Command({
       });
     }
   },
-});
+} satisfies Command;
