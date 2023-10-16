@@ -10,7 +10,7 @@ export default {
   name,
   usage,
   description,
-  commandType: CommandCategories.Anilist,
+  commandType: "Anilist",
   withBuilder: new SlashCommandBuilder()
     .setName(name)
     .setDescription(description)

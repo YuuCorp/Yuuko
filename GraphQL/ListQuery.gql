@@ -1,0 +1,12 @@
+query ListQuery($userId: Int) {
+    User(id: $userId) {
+      mediaListOptions {
+        animeList {
+          customLists
+        }
+        mangaList {
+          customLists
+        }
+      }
+    }
+}

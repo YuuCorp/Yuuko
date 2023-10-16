@@ -5,9 +5,9 @@ import { AnilistUser } from '../Database/Models/AnilistUser'
 async function getUserEntry(interaction: Interaction) {
   const id = interaction.user.id
   const alUser = await AnilistUser.findOne({ where: { discord_id: id } })
-  if (alUser && alUser.anilist_id) {
+  if (alUser && alUser.getDataValue('anilist_id')) {
     // @ts-expect-error | This is a valid property
-    interaction.alID = alUser.anilist_id
+    interaction.alID = alUser.getDataValue('anilist_id');
   }
 }
 

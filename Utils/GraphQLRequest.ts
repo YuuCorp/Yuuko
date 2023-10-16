@@ -34,6 +34,8 @@ import type {
   UserQueryVariables,
   ViewerQuery,
   ViewerQueryVariables,
+  ListQueryQuery,
+  ListQueryQueryVariables,
 } from '../GraphQL/types'
 import Queries from '../GraphQL/types/queries'
 import type { GraphQLResponse } from './types'
@@ -58,6 +60,7 @@ interface QueryVariables {
   Character: [CharacterQuery, CharacterQueryVariables]
   User: [UserQuery, UserQueryVariables]
   Viewer: [ViewerQuery, ViewerQueryVariables]
+  ListQuery: [ListQueryQuery, ListQueryQueryVariables]
 }
 
 export function GraphQLRequest<QueryKey extends Query>(queryKey: QueryKey, vars: QueryVariables[QueryKey][1], token?: string, url = baseUrl) {

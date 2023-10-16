@@ -12,9 +12,9 @@ interface AnilistUserAttributes {
 interface AnilistUserCreationAttributes extends Optional<AnilistUserAttributes, 'discord_id' | 'anilist_token' | 'anilist_id'> {}
 
 export class AnilistUser extends Model<AnilistUserAttributes, AnilistUserCreationAttributes> implements AnilistUserAttributes {
-  public discord_id!: string
-  public anilist_token!: string
-  public anilist_id!: number
+  declare discord_id: string
+  declare anilist_token: string
+  declare anilist_id: number
 }
 
 AnilistUser.init(

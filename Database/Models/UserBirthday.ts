@@ -12,9 +12,9 @@ interface UserBirthdayAttributes {
 interface UserBirthdayCreationAttributes extends Optional<UserBirthdayAttributes, 'guild_id' | 'user_id' | 'birthday'> {}
 
 export class UserBirthday extends Model<UserBirthdayAttributes, UserBirthdayCreationAttributes> implements UserBirthdayAttributes {
-  public guild_id!: string
-  public user_id!: string
-  public birthday!: Date
+  declare guild_id: string
+  declare user_id: string
+  declare birthday: Date
 }
 
 UserBirthday.init(

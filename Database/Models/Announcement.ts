@@ -11,8 +11,8 @@ interface AnnouncementModelAttributes {
 interface AnnouncementModelCreationAttributes extends Optional<AnnouncementModelAttributes, 'date' | 'announcement'> {}
 
 export class AnnouncementModel extends Model<AnnouncementModelAttributes, AnnouncementModelCreationAttributes> implements AnnouncementModelAttributes {
-  public date!: Date
-  public announcement!: string
+  declare date: Date
+  declare announcement: string
 }
 
 AnnouncementModel.init(

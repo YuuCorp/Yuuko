@@ -101,12 +101,13 @@ export default {
       })
 
       for (const birthday of sortedBirthdays) {
-        const daysLeft = daysLeftUntilBirthday(birthday.birthday)
-        const age = calculateAge(birthday.birthday)
+        const userBirthday = birthday.getDataValue('birthday');
+        const daysLeft = daysLeftUntilBirthday(userBirthday)
+        const age = calculateAge(userBirthday)
         currentEmbedField++
         if (daysLeft > 0)
-          embedDescription += `<@${birthday.user_id}> ${getReadableDate(birthday.birthday)} (${age} years old, ${daysLeft} days left)\n\n`
-        else embedDescription += `<@${birthday.user_id}> ${getReadableDate(birthday.birthday)} (${age} years old, **Birthday Today!**)\n\n`
+          embedDescription += `<@${birthday.getDataValue('user_id')}> ${getReadableDate(userBirthday)} (${age} years old, ${daysLeft} days left)\n\n`
+        else embedDescription += `<@${birthday.getDataValue('user_id')}> ${getReadableDate(userBirthday)} (${age} years old, **Birthday Today!**)\n\n`
         if (currentEmbedField === 10 && birthdays.length > 10) {
           currentEmbed.setDescription(embedDescription)
           embeds.push(currentEmbed)

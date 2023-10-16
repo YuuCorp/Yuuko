@@ -8,19 +8,19 @@ async function requireALToken(interaction: Interaction) {
   // We can be sure we are passing a valid one;
   const id = interaction.user.id
   const alUser = await AnilistUser.findOne({ where: { discord_id: id } })
-  if (!alUser || !alUser.anilist_token)
+  if (!alUser || !alUser.getDataValue('anilist_token'))
     throw new Error('You must have an AniList token set to use this action.')
 
   // @ts-expect-error
-  interaction.ALtoken = RSACryption(alUser.anilist_token)
+  interaction.ALtoken = RSACryption(alUser.getDataValue('anilist_token'))
 }
 
 async function optionalALToken(interaction: Interaction) {
   const id = interaction.user.id
   const alUser = await AnilistUser.findOne({ where: { discord_id: id } })
-  if (alUser && alUser.anilist_token) {
+  if (alUser && alUser.getDataValue('anilist_token')) {
     // @ts-expect-error
-    interaction.ALtoken = RSACryption(alUser.anilist_token)
+    interaction.ALtoken = RSACryption(alUser.getDataValue('anilist_token'))
   }
 }
 

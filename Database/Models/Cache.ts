@@ -13,10 +13,10 @@ interface CacheModelAttributes {
 interface CacheModelCreationAttributes extends Optional<CacheModelAttributes, 'type' | 'cacheID' | 'keywords' | 'data'> {}
 
 export class CacheModel extends Model<CacheModelAttributes, CacheModelCreationAttributes> implements CacheModelAttributes {
-  public type!: string
-  public cacheID!: string
-  public keywords!: Text
-  public data!: Text
+  declare type: string
+  declare cacheID: string
+  declare keywords: Text
+  declare data: Text
 }
 
 CacheModel.init(
