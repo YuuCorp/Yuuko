@@ -36,6 +36,10 @@ import type {
   ViewerQueryVariables,
   ListQueryQuery,
   ListQueryQueryVariables,
+  SaveMediaListEntryMutation,
+  SaveMediaListEntryMutationVariables,
+  SaveTextActivityMutation,
+  SaveTextActivityMutationVariables,
 } from '../GraphQL/types'
 import Queries from '../GraphQL/types/queries'
 import type { GraphQLResponse } from './types'
@@ -60,6 +64,8 @@ interface QueryVariables {
   Character: [CharacterQuery, CharacterQueryVariables]
   User: [UserQuery, UserQueryVariables]
   Viewer: [ViewerQuery, ViewerQueryVariables]
+  SaveMediaList: [SaveMediaListEntryMutation, SaveMediaListEntryMutationVariables]
+  SaveTextActivity: [SaveTextActivityMutation, SaveTextActivityMutationVariables]
   ListQuery: [ListQueryQuery, ListQueryQueryVariables]
 }
 

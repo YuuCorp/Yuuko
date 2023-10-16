@@ -91,14 +91,18 @@ export default {
     if (!type || (type != "status" && type != "list")) return void interaction.reply({ embeds: [EmbedError(`Please use either the status or list subcommand. (Yours was "${type}")`, null, false)], ephemeral: true });
 
     if (type === "status") {
-      const vars = { text: getOptions<{ text: string }>(interaction.options, ["text"]) };
-      GraphQLRequest("TextActivity", { asHtml: true} )
+      const vars = { text: getEmojis(interaction.options.getString("text", true)), asHtml: true };
+      GraphQLRequest("SaveTextActivity", vars, interaction.ALtoken)
         .then((response) => {
-          const data = response?.data;
+          const data = response.data.SaveTextActivity;
+          const userName = data!.user?.name || "Unknown";
+          const userText = data!.text || "Unknown";
+          if(!userName || !userText) return;
+
           const statusActivity = new EmbedBuilder()
-            .setURL(data?.siteUrl || "Unknown")
-            .setTitle(`${data.user?.name || "Unknown"} made a new activity!`)
-            .setDescription(data?.text || "Unknown")
+            .setURL(data?.siteUrl || "https://anilist.co")
+            .setTitle(`${userName} made a new activity!`)
+            .setDescription(userText)
             .setFooter(Footer(response.headers));
 
           return interaction.reply({ embeds: [statusActivity] });
@@ -110,31 +114,20 @@ export default {
     }
 
     if (type === "list") {
-      const vars = {}; 
-      const listOptions = ["hide", "private", "lists", "score", "progress"]
-      /* // should it be something like this instead for dynamic fetching?
-        {
-          name: "hide",
-          type: boolean,
-        }
-      */
-      listOptions.filter((x) => interaction.options.get(x));
-      for (const option of listOptions) {
-        /*
-          vars[option.name] = option.value;
-          if (option.name === "lists") vars[option.name] = [option.value];
-        */
-       vars[option] = 
-      }
+      const listOptions = ["mediaid", "status", "hide", "private", "lists", "score", "progress"].filter((x) => interaction.options.get(x));
+      const vars: { [key: string]: any } = {};
+      for (const option of listOptions)
+        vars[option] = interaction.options.get(option)?.value;
 
-      GraphQLRequest('MediaList', vars, interaction.ALtoken)
-        .then((response, headers) => {
-          const data = response?.SaveMediaListEntry;
+      GraphQLRequest('SaveMediaList', vars, interaction.ALtoken)
+        .then((response) => {
+          const data = response.data.SaveMediaListEntry;
+          if(!data) return interaction.reply({ embeds: [EmbedError("Something went wrong while making the activity.")] });
           const mediaListActivity = new EmbedBuilder()
             .setURL(`https://anilist.co/${data?.media?.type || ""}/${data?.mediaId || ""}`)
-            .setTitle(`${data?.user.name || "Unknown"} added ${data?.media?.title?.userPreferred || "Unknown"} to ${data?.status || "Unknown"}!`)
-            .setImage(data?.media?.bannerImage)
-            .setFooter(Footer(headers));
+            .setTitle(`${data.user?.name || "Unknown"} added ${data?.media?.title?.userPreferred || "Unknown"} to ${data?.status || "Unknown"}!`)
+            .setFooter(Footer(response.headers));
+          if(data.media && data.media.bannerImage) mediaListActivity.setImage(data.media.bannerImage);
 
           return interaction.reply({ embeds: [mediaListActivity] });
         })
@@ -149,8 +142,8 @@ export default {
 function getEmojis(messageString: string) {
   const matchedResults = Array.from(messageString.matchAll(/<\w*:.*?:(\d+)>/gm), (x) => x[1]);
   const filteredResults = matchedResults.map((x) => `img22(https://cdn.discordapp.com/emojis/${x})`);
-  for (let i = 0; i < matchedResults.length; i++)
-    messageString = messageString.replace(/<\w*:.*?:(\d+)>/, filteredResults[i]);
-
+  for (let i = 0; i < matchedResults.length; i++) {
+    messageString = messageString.replace(/<\w*:.*?:(\d+)>/, filteredResults[i] || "");
+  }
   return messageString;
 }

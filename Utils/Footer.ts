@@ -9,6 +9,6 @@ interface Headers {
   'x-ratelimit-limit': string
 }
 export function Footer(headers?: Headers | null) {
-  const footerString = headers ? `Yuuko Beta (${`${headers['x-ratelimit-remaining']}/${headers['x-ratelimit-limit']}`})}` : `Yuuko Beta`
+  const footerString = headers ? `Yuuko Beta ( ${`${headers['x-ratelimit-remaining']} / ${headers['x-ratelimit-limit']}`} )` : `Yuuko Beta`
   return { text: footerString }
 }

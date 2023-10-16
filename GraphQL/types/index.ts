@@ -4719,19 +4719,6 @@ export type MangaQueryVariables = Exact<{
 
 export type MangaQuery = { __typename?: 'Query', Media?: { __typename?: 'Media', id: number, description?: string | null, format?: MediaFormat | null, chapters?: number | null, source?: MediaSource | null, synonyms?: Array<string | null> | null, volumes?: number | null, genres?: Array<string | null> | null, siteUrl?: string | null, meanScore?: number | null, bannerImage?: string | null, coverImage?: { __typename?: 'MediaCoverImage', large?: string | null, medium?: string | null } | null, title?: { __typename?: 'MediaTitle', romaji?: string | null, english?: string | null, native?: string | null } | null, startDate?: { __typename?: 'FuzzyDate', year?: number | null, month?: number | null, day?: number | null } | null, endDate?: { __typename?: 'FuzzyDate', year?: number | null, month?: number | null, day?: number | null } | null, mediaListEntry?: { __typename?: 'MediaList', status?: MediaListStatus | null, progress?: number | null, score?: number | null, notes?: string | null, user?: { __typename?: 'User', name: string, mediaListOptions?: { __typename?: 'MediaListOptions', scoreFormat?: ScoreFormat | null } | null } | null } | null } | null };
 
-export type SaveMediaListEntryMutationVariables = Exact<{
-  mediaid?: InputMaybe<Scalars['Int']['input']>;
-  status?: InputMaybe<MediaListStatus>;
-  score?: InputMaybe<Scalars['Float']['input']>;
-  progress?: InputMaybe<Scalars['Int']['input']>;
-  hide?: InputMaybe<Scalars['Boolean']['input']>;
-  lists?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
-  private?: InputMaybe<Scalars['Boolean']['input']>;
-}>;
-
-
-export type SaveMediaListEntryMutation = { __typename?: 'Mutation', SaveMediaListEntry?: { __typename?: 'MediaList', mediaId: number, status?: MediaListStatus | null, media?: { __typename?: 'Media', bannerImage?: string | null, type?: MediaType | null, title?: { __typename?: 'MediaTitle', userPreferred?: string | null } | null } | null, user?: { __typename?: 'User', name: string } | null } | null };
-
 export type RecentChartQueryVariables = Exact<{
   user?: InputMaybe<Scalars['String']['input']>;
   perPage?: InputMaybe<Scalars['Int']['input']>;
@@ -4751,6 +4738,26 @@ export type RecommendationsQueryVariables = Exact<{
 
 export type RecommendationsQuery = { __typename?: 'Query', Page?: { __typename?: 'Page', media?: Array<{ __typename?: 'Media', genres?: Array<string | null> | null, title?: { __typename?: 'MediaTitle', english?: string | null } | null } | null> | null } | null };
 
+export type SaveMediaListEntryMutationVariables = Exact<{
+  mediaid?: InputMaybe<Scalars['Int']['input']>;
+  status?: InputMaybe<MediaListStatus>;
+  score?: InputMaybe<Scalars['Float']['input']>;
+  progress?: InputMaybe<Scalars['Int']['input']>;
+  hide?: InputMaybe<Scalars['Boolean']['input']>;
+  lists?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+  private?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type SaveMediaListEntryMutation = { __typename?: 'Mutation', SaveMediaListEntry?: { __typename?: 'MediaList', mediaId: number, status?: MediaListStatus | null, media?: { __typename?: 'Media', bannerImage?: string | null, type?: MediaType | null, title?: { __typename?: 'MediaTitle', userPreferred?: string | null } | null } | null, user?: { __typename?: 'User', name: string } | null } | null };
+
+export type SaveTextActivityMutationVariables = Exact<{
+  text?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type SaveTextActivityMutation = { __typename?: 'Mutation', SaveTextActivity?: { __typename?: 'TextActivity', siteUrl?: string | null, text?: string | null, user?: { __typename?: 'User', name: string } | null } | null };
+
 export type StaffQueryVariables = Exact<{
   staffName?: InputMaybe<Scalars['String']['input']>;
 }>;
@@ -4764,13 +4771,6 @@ export type StudioQueryVariables = Exact<{
 
 
 export type StudioQuery = { __typename?: 'Query', Studio?: { __typename?: 'Studio', isAnimationStudio: boolean, siteUrl?: string | null, name: string, favourites?: number | null, media?: { __typename?: 'MediaConnection', nodes?: Array<{ __typename?: 'Media', id: number, title?: { __typename?: 'MediaTitle', romaji?: string | null, english?: string | null } | null } | null> | null } | null } | null };
-
-export type SaveTextActivityMutationVariables = Exact<{
-  text?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type SaveTextActivityMutation = { __typename?: 'Mutation', SaveTextActivity?: { __typename?: 'TextActivity', siteUrl?: string | null, text?: string | null, user?: { __typename?: 'User', name: string } | null } | null };
 
 export type UserQueryVariables = Exact<{
   username?: InputMaybe<Scalars['String']['input']>;
