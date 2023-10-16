@@ -1,15 +1,9 @@
-import type { ClientEvents } from "discord.js";
-import type { Client } from "./Client";
+import type { ClientEvents as DiscordClientEvents, Interaction } from 'discord.js'
+import type { Client } from './Client'
 
-export type ClientEvent = keyof ClientEvents;
-export type Event<Event extends ClientEvent> = (...args: ClientEvents[Event]) => void;
-
-export class YuukoEvent<K extends keyof ClientEvents> {
-  event: K;
-  run: (client: Client, ...args: ClientEvents[K]) => void;
-
-  constructor(event: K, run: (client: Client, ...args: ClientEvents[K]) => void) {
-    this.event = event;
-    this.run = run;
-  }
+export type UsableClientEvents = DiscordClientEvents & {
+  interactionCreate: [Interaction]
 }
+export type ClientEvent = keyof UsableClientEvents
+export type YuukoEvent<Event extends ClientEvent> = (client: Client, ...args: UsableClientEvents[Event]) => void
+

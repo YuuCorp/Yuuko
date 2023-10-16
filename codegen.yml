@@ -1,6 +1,6 @@
 overwrite: true
-schema: "https://graphql.anilist.co" # Replace with your GraphQL endpoint
-documents: "./GraphQL/*.gql"
+schema: 'https://graphql.anilist.co' # Replace with your GraphQL endpoint
+documents: './GraphQL/*.gql'
 generates:
   ./GraphQL/types/index.ts:
     plugins:

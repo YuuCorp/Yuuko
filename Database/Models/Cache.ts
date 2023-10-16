@@ -1,22 +1,22 @@
-import type { Optional } from "sequelize";
-import { DataTypes, Model } from "sequelize";
+import type { Optional } from 'sequelize'
+import { DataTypes, Model } from 'sequelize'
 
-import { db } from "../db"; // assuming this is the correct path for your db instance
+import { db } from '../db' // assuming this is the correct path for your db instance
 
 interface CacheModelAttributes {
-  type: string;
-  cacheID: string;
-  keywords: Text;
-  data: Text;
+  type: string
+  cacheID: string
+  keywords: Text
+  data: Text
 }
 
-interface CacheModelCreationAttributes extends Optional<CacheModelAttributes, "type" | "cacheID" | "keywords" | "data"> {}
+interface CacheModelCreationAttributes extends Optional<CacheModelAttributes, 'type' | 'cacheID' | 'keywords' | 'data'> {}
 
 export class CacheModel extends Model<CacheModelAttributes, CacheModelCreationAttributes> implements CacheModelAttributes {
-  public type!: string;
-  public cacheID!: string;
-  public keywords!: Text;
-  public data!: Text;
+  public type!: string
+  public cacheID!: string
+  public keywords!: Text
+  public data!: Text
 }
 
 CacheModel.init(
@@ -42,6 +42,6 @@ CacheModel.init(
   },
   {
     sequelize: db,
-    tableName: "cachemodel",
+    tableName: 'cachemodel',
   },
-);
+)

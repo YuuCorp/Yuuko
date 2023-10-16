@@ -1,90 +1,95 @@
-import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import type { Command } from "../Structures";
-import { EmbedError, GraphQLRequest, SeriesTitle, getOptions } from "../Utils";
-import { mwGetUserEntry } from "../Middleware/UserEntry";
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js'
+import type { Command } from '../Structures'
+import { EmbedError, GraphQLRequest, getOptions } from '../Utils'
+import { mwGetUserEntry } from '../Middleware/UserEntry'
 
-const name = "activity";
-const usage = "activity <user>";
-const description = "Searches for an user and shows you their most recent activity.";
+const name = 'activity'
+const usage = 'activity <user>'
+const description = 'Searches for an user and shows you their most recent activity.'
 
 export default {
   name,
   usage,
   description,
   middlewares: [mwGetUserEntry],
-  type: "Anilist",
+  type: 'Anilist',
   slash: new SlashCommandBuilder()
     .setName(name)
     .setDescription(description)
-    .addStringOption((option) => option.setName("user").setDescription("The user to search for").setRequired(false)),
+    .addStringOption(option => option.setName('user').setDescription('The user to search for').setRequired(false)),
 
   run: async ({ interaction, client }): Promise<void> => {
-    if (!interaction.isCommand()) return;
-    getOptions;
-    const { user: username } = getOptions<{ user: string | undefined }>(interaction.options, ["user"]);
+    if (!interaction.isCommand())
+      return
+    getOptions
+    const { user: username } = getOptions<{ user: string | undefined }>(interaction.options, ['user'])
 
     const vars: Partial<{
-      username: string;
-      userid: number;
+      username: string
+      userid: number
     }> = {
       username,
       userid: interaction.alID,
-    };
-
-    if (!interaction.options.get("user") && !vars.userid) {
-      return void interaction.reply({ embeds: [EmbedError(`You have yet to set an AniList token. You can see the instructions with /auth help`)] });
     }
+
+    if (!interaction.options.get('user') && !vars.userid)
+      return void interaction.reply({ embeds: [EmbedError(`You have yet to set an AniList token. You can see the instructions with /auth help`)] })
 
     try {
       const uData = (
-        await GraphQLRequest("User", {
+        await GraphQLRequest('User', {
           username: vars.username,
         })
-      ).data.User;
-      vars.userid = uData?.id;
-      if (!vars.userid) throw new Error("Couldn't find user id.");
-    } catch (error: any) {
-      console.error(error);
-      interaction.reply({ embeds: [EmbedError(error, vars)] });
+      ).data.User
+      vars.userid = uData?.id
+      if (!vars.userid)
+        throw new Error('Couldn\'t find user id.')
+    }
+    catch (error: any) {
+      console.error(error)
+      interaction.reply({ embeds: [EmbedError(error, vars)] })
     }
 
-    GraphQLRequest("Activity", {
+    GraphQLRequest('Activity', {
       userid: vars.userid,
     })
       .then((response) => {
-        const data = response.data.Activity!;
+        const data = response.data.Activity!
         if (data) {
-          const embed = new EmbedBuilder().setTimestamp(data?.createdAt * 1000);
+          const embed = new EmbedBuilder().setTimestamp(data?.createdAt * 1000)
           switch (data?.__typename) {
-            case "ListActivity":
-              embed.setURL(data?.siteUrl!);
+            case 'ListActivity':
+              embed.setURL(data?.siteUrl!)
               if (data.media?.bannerImage) {
-                embed.setImage(data.media.bannerImage);
-              } else {
-                const thumbnail = data?.media?.coverImage?.large || data?.media?.coverImage?.medium;
-                if (thumbnail) embed.setThumbnail(thumbnail);
+                embed.setImage(data.media.bannerImage)
               }
-              break;
-            case "TextActivity":
+              else {
+                const thumbnail = data?.media?.coverImage?.large || data?.media?.coverImage?.medium
+                if (thumbnail)
+                  embed.setThumbnail(thumbnail)
+              }
+              break
+            case 'TextActivity':
               embed
-                .setTitle(`Here's ${data?.user?.name?.toString() || "Unknown Name"}'s most recent activity!`)
-                .setDescription(data?.text?.replace(`!~`, `||`).replace(`~!`, `||`).replaceAll("~", ``) || "No text found.")
+                .setTitle(`Here's ${data?.user?.name?.toString() || 'Unknown Name'}'s most recent activity!`)
+                .setDescription(data?.text?.replace(`!~`, `||`).replace(`~!`, `||`).replaceAll('~', ``) || 'No text found.')
                 .setThumbnail(data?.user?.avatar?.large!)
-                .setFooter({ text: `${data?.likeCount | 0} ♥  ${data?.replyCount | 0} 💬` });
+                .setFooter({ text: `${data?.likeCount | 0} ♥  ${data?.replyCount | 0} 💬` })
 
-              return void interaction.reply({ embeds: [embed] });
+              return void interaction.reply({ embeds: [embed] })
 
-            case "MessageActivity":
-              break;
+            case 'MessageActivity':
+              break
           }
-          return interaction.reply({ embeds: [embed] });
-        } else {
-          return interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
+          return interaction.reply({ embeds: [embed] })
+        }
+        else {
+          return interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] })
         }
       })
       .catch((error) => {
-        console.error(error);
-        interaction.reply({ embeds: [EmbedError(error, vars)] });
-      });
+        console.error(error)
+        interaction.reply({ embeds: [EmbedError(error, vars)] })
+      })
   },
-} satisfies Command;
+} satisfies Command

@@ -1,6 +1,7 @@
-import type { Media } from "./types";
+import type { MediaTitle } from '../GraphQL/types'
 
-export function SeriesTitle(media: Media | undefined) {
-  if (!media) return "Unknown";
-  return media.title?.english || media.title?.romaji || media.title?.native || "Unknown";
+export function SeriesTitle(media: MediaTitle | undefined) {
+  if (!media)
+    return 'Unknown'
+  return media.english || media.romaji || media.native || 'Unknown'
 }

@@ -1,18 +1,18 @@
-import { GraphQLRequest } from "#Utils/GraphQLRequest.ts";
-import { GraphQLQueries } from "#Utils/GraphQLQueries.ts";
+import { GraphQLRequest } from '#Utils/GraphQLRequest.ts'
+import { GraphQLQueries } from '#Utils/GraphQLQueries.ts'
 
-const Discord = require("discord.js");
-const { EmbedBuilder, SlashCommandBuilder } = require("discord.js");
-const Command = require("#Structures/Command.js");
-const { mwRequireALToken } = require("#Middleware/ALToken.js");
-const EmbedError = require("#Utils/EmbedError.js");
-const Footer = require("#Utils/Footer.js");
-const AnilistUser = require("#Models/AnilistUser.js");
-const CommandCategories = require("#Utils/CommandCategories.js");
+const Discord = require('discord.js')
+const { EmbedBuilder, SlashCommandBuilder } = require('discord.js')
+const Command = require('#Structures/Command.js')
+const { mwRequireALToken } = require('#Middleware/ALToken.js')
+const EmbedError = require('#Utils/EmbedError.js')
+const Footer = require('#Utils/Footer.js')
+const AnilistUser = require('#Models/AnilistUser.js')
+const CommandCategories = require('#Utils/CommandCategories.js')
 
-const name = "makeactivity";
-const usage = "makeactivity <list | status>";
-const description = "Allows you to make an Anilist activity from Discord. Requires an AniList token.";
+const name = 'makeactivity'
+const usage = 'makeactivity <list | status>'
+const description = 'Allows you to make an Anilist activity from Discord. Requires an AniList token.'
 
 module.exports = new Command({
   name,
@@ -23,36 +23,36 @@ module.exports = new Command({
   slash: new SlashCommandBuilder()
     .setName(name)
     .setDescription(description)
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
-        .setName("list")
-        .setDescription("Make a list activity.")
-        .addIntegerOption((option) => option.setName("mediaid").setRequired(true).setDescription("The Media ID of the anime/manga"))
-        .addStringOption((option) =>
+        .setName('list')
+        .setDescription('Make a list activity.')
+        .addIntegerOption(option => option.setName('mediaid').setRequired(true).setDescription('The Media ID of the anime/manga'))
+        .addStringOption(option =>
           option
-            .setName("status")
+            .setName('status')
             .setRequired(true)
-            .setDescription("The status you want it added as.")
+            .setDescription('The status you want it added as.')
             .addChoices(
-              { name: "Current", value: "CURRENT" },
-              { name: "Planning", value: "PLANNING" },
-              { name: "Completed", value: "COMPLETED" },
-              { name: "Dropped", value: "DROPPED" },
-              { name: "Paused", value: "PAUSED" },
-              { name: "Repeating", value: "REPEATING" },
+              { name: 'Current', value: 'CURRENT' },
+              { name: 'Planning', value: 'PLANNING' },
+              { name: 'Completed', value: 'COMPLETED' },
+              { name: 'Dropped', value: 'DROPPED' },
+              { name: 'Paused', value: 'PAUSED' },
+              { name: 'Repeating', value: 'REPEATING' },
             ),
         )
-        .addBooleanOption((option) => option.setName("hide").setDescription("Hide series from status list"))
-        .addBooleanOption((option) => option.setName("private").setDescription("Make the list entry private"))
-        .addStringOption((option) => option.setName("lists").setDescription("The custom list you want the series added to. (shows both manga and anime lists)").setAutocomplete(true))
-        .addNumberOption((option) => option.setName("score").setDescription("The score you want to give the series."))
-        .addIntegerOption((option) => option.setName("progress").setDescription("How far you've watched/read the series.")),
+        .addBooleanOption(option => option.setName('hide').setDescription('Hide series from status list'))
+        .addBooleanOption(option => option.setName('private').setDescription('Make the list entry private'))
+        .addStringOption(option => option.setName('lists').setDescription('The custom list you want the series added to. (shows both manga and anime lists)').setAutocomplete(true))
+        .addNumberOption(option => option.setName('score').setDescription('The score you want to give the series.'))
+        .addIntegerOption(option => option.setName('progress').setDescription('How far you\'ve watched/read the series.')),
     )
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
-        .setName("status")
-        .setDescription("Make a text activity.")
-        .addStringOption((option) => option.setName("text").setRequired(true).setDescription("The text to use when making the activity.")),
+        .setName('status')
+        .setDescription('Make a text activity.')
+        .addStringOption(option => option.setName('text').setRequired(true).setDescription('The text to use when making the activity.')),
     ),
 
   async autocomplete(interaction) {
@@ -69,77 +69,80 @@ module.exports = new Command({
                 }
               }
             }
-          }`;
-      const alUser = await AnilistUser.findOne({ where: { discord_id: interaction.user.id } });
+          }`
+      const alUser = await AnilistUser.findOne({ where: { discord_id: interaction.user.id } })
 
-      const vars = { userId: +alUser.anilist_id };
-      const response = await GraphQLRequest(listQuery, vars);
+      const vars = { userId: +alUser.anilist_id }
+      const response = await GraphQLRequest(listQuery, vars)
       const animeLists = response?.User.mediaListOptions.animeList.customLists.map((list) => {
-        return { name: `${list} (Anime)`, value: list };
-      });
+        return { name: `${list} (Anime)`, value: list }
+      })
       const mangaLists = response?.User.mediaListOptions.mangaList.customLists.map((list) => {
-        return { name: `${list} (Manga)`, value: list };
-      });
-      const lists = animeLists.concat(mangaLists);
-      await interaction.respond(lists);
-    } catch (error) {
-      console.error(error);
+        return { name: `${list} (Manga)`, value: list }
+      })
+      const lists = animeLists.concat(mangaLists)
+      await interaction.respond(lists)
+    }
+    catch (error) {
+      console.error(error)
     }
   },
 
   async run(interaction, args, run) {
-    const type = interaction.options.getSubcommand();
-    if (!type || (type != "status" && type != "list")) return interaction.reply({ embeds: [EmbedError(`Please use either the status or list subcommand. (Yours was "${type}")`, null, false)], ephemeral: true });
+    const type = interaction.options.getSubcommand()
+    if (!type || (type != 'status' && type != 'list'))
+      return interaction.reply({ embeds: [EmbedError(`Please use either the status or list subcommand. (Yours was "${type}")`, null, false)], ephemeral: true })
 
-    if (type === "status") {
-      const vars = { text: getEmojis(interaction.options.getString("text")) };
+    if (type === 'status') {
+      const vars = { text: getEmojis(interaction.options.getString('text')) }
       GraphQLRequest(GraphQLQueries.TextActivity, vars, interaction.ALtoken)
         .then((response, headers) => {
-          const data = response?.SaveTextActivity;
+          const data = response?.SaveTextActivity
           const statusActivity = new EmbedBuilder()
-            .setURL(data?.siteUrl || "Unknown")
-            .setTitle(`${data?.user.name || "Unknown"} made a new activity!`)
-            .setDescription(data?.text || "Unknown")
-            .setFooter(Footer(headers));
+            .setURL(data?.siteUrl || 'Unknown')
+            .setTitle(`${data?.user.name || 'Unknown'} made a new activity!`)
+            .setDescription(data?.text || 'Unknown')
+            .setFooter(Footer(headers))
 
-          return interaction.reply({ embeds: [statusActivity] });
+          return interaction.reply({ embeds: [statusActivity] })
         })
         .catch((error) => {
-          console.error(error);
-          interaction.reply({ embeds: [EmbedError(error, vars)] });
-        });
+          console.error(error)
+          interaction.reply({ embeds: [EmbedError(error, vars)] })
+        })
     }
 
-    if (type === "list") {
-      const vars = {};
+    if (type === 'list') {
+      const vars = {}
       for (option of interaction.options._hoistedOptions) {
-        vars[option.name] = option.value;
-        if (option.name === "lists") vars[option.name] = [option.value];
+        vars[option.name] = option.value
+        if (option.name === 'lists')
+          vars[option.name] = [option.value]
       }
 
       GraphQLRequest(GraphQLQueries.MediaList, vars, interaction.ALtoken)
         .then((response, headers) => {
-          const data = response?.SaveMediaListEntry;
+          const data = response?.SaveMediaListEntry
           const mediaListActivity = new EmbedBuilder()
-            .setURL(`https://anilist.co/${data?.media?.type || ""}/${data?.mediaId || ""}`)
-            .setTitle(`${data?.user.name || "Unknown"} added ${data?.media?.title?.userPreferred || "Unknown"} to ${data?.status || "Unknown"}!`)
+            .setURL(`https://anilist.co/${data?.media?.type || ''}/${data?.mediaId || ''}`)
+            .setTitle(`${data?.user.name || 'Unknown'} added ${data?.media?.title?.userPreferred || 'Unknown'} to ${data?.status || 'Unknown'}!`)
             .setImage(data?.media?.bannerImage)
-            .setFooter(Footer(headers));
+            .setFooter(Footer(headers))
 
-          return interaction.reply({ embeds: [mediaListActivity] });
+          return interaction.reply({ embeds: [mediaListActivity] })
         })
         .catch((error) => {
-          console.error(error);
-          interaction.reply({ embeds: [EmbedError(error, vars)] });
-        });
+          console.error(error)
+          interaction.reply({ embeds: [EmbedError(error, vars)] })
+        })
     }
   },
-});
+})
 
 function getEmojis(messageString) {
-  const matchedResults = Array.from(messageString.matchAll(/<\w*:.*?:(\d+)>/gm), (x) => x[1]);
-  const filteredResults = matchedResults.map((x) => `img22(https://cdn.discordapp.com/emojis/${x})`);
-  for (let i = 0; i < matchedResults.length; i++) messageString = messageString.replace(/<\w*:.*?:(\d+)>/, filteredResults[i]);
+  const matchedResults = Array.from(messageString.matchAll(/<\w*:.*?:(\d+)>/gm), x => x[1])
+  const filteredResults = matchedResults.map(x => `img22(https://cdn.discordapp.com/emojis/${x})`)
+  for (let i = 0; i < matchedResults.length; i++) messageString = messageString.replace(/<\w*:.*?:(\d+)>/, filteredResults[i])
 
-  return messageString;
+  return messageString
 }

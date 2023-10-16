@@ -1,20 +1,16 @@
-const Discord = require('discord.js')
-const { EmbedBuilder, SlashCommandBuilder } = require('discord.js')
-const Command = require('#Structures/Command.js')
-const EmbedError = require('#Utils/EmbedError.js')
-const { mwOptionalALToken } = require('#Middleware/ALToken.js')
-const Footer = require('#Utils/Footer.js')
-const BuildPagination = require('#Utils/BuildPagination.js')
-const CommandCategories = require('#Utils/CommandCategories.js')
-const seriesTitle = require('#Utils/SeriesTitle.js')
-const GraphQLRequest = require('#Utils/GraphQLRequest.js')
-const GraphQLQueries = require('#Utils/GraphQLQueries.js')
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js'
+import type { CommandWithHook } from '../Structures'
 
-const name = 'manga'
-const usage = 'manga <title>'
-const description = 'Gets an manga from anilist based on a search result.'
+// use esm
 
-module.exports = new Command({
+import { mwOptionalALToken } from '../Middleware/ALToken'
+import { BuildPagination, CommandCategories, EmbedError, Footer, GraphQLRequest, SeriesTitle, getOptions } from '../Utils'
+
+const name = 'anime'
+const usage = 'anime <title>'
+const description = 'Gets an anime from anilist based on a search result.'
+
+export default {
   name,
   usage,
   description,
@@ -25,37 +21,41 @@ module.exports = new Command({
     .setDescription(description)
     .addStringOption(option => option.setName('query').setDescription('The query to search for').setRequired(true)),
 
-  async run(interaction, args, run, hook = false, hookdata = null) {
-    const manga = interaction.options.getString('query')
-    const vars = {}
+  run: async ({ interaction, client, hook = false, hookdata = null }): Promise<void> => {
+    if (!interaction.isCommand())
+      return
+    // const anime = interaction.options.getString("query");
+    const { query } = getOptions<{ query: string }>(interaction.options, ['query'])
+    const vars = {} as any
     // ^ Hook data is passed in if this command is called from another command
     if (!hook) {
-      if (manga.length < 3)
-        return interaction.reply({ embeds: [EmbedError(`Please enter a search query of at least 3 characters.`, null, false)] })
+      if (query.length < 3)
+        return void interaction.reply({ embeds: [EmbedError(`Please enter a search query of at least 3 characters.`, null, false)] })
 
-      vars.query = manga
+      vars.query = query
     }
     else if (hook && hookdata?.title) {
       vars.query = hookdata.title
     }
     else if (hook && hookdata?.id) {
-      vars.query = hookdata.id
+      vars.aID = hookdata.id
     }
     else {
-      return interaction.reply({ embeds: [EmbedError(`MangaCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)] })
+      return void interaction.reply({ embeds: [EmbedError(`AnimeCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)] })
     }
 
-    if (hookdata && hookdata.id) {
-      GraphQLQueries.Anime = GraphQLQueries.Anime.replace('$query: String', '$query: Int')
-      GraphQLQueries.Anime = GraphQLQueries.Anime.replace('search:', 'id:')
-    }
+    // if (hookdata && hookdata?.id) {
+    //     GraphQLQueries.Anime = GraphQLQueries.Anime.replace("$query: String", "$query: Int");
+    //     GraphQLQueries.Anime = GraphQLQueries.Anime.replace("search:", "id:");
+    // }
     // ^ Make the HTTP Api request
-    GraphQLRequest(GraphQLQueries.Manga, vars, interaction.ALtoken)
-      .then((response, headers) => {
-        const data = response.Media
+    GraphQLRequest('Anime', vars, interaction.ALtoken)
+      .then(({ data: { Media }, headers }) => {
+        const data = Media
         if (data) {
           // ^ Fix the description by replacing and converting HTML tags, and replacing duplicate newlines
           const descLength = 350
+          const endDate = data?.endDate?.year ? `${data.endDate.day}-${data.endDate.month}-${data.endDate.year}` : 'Unknown'
           const description
             = data?.description
               ?.replace(/<br><br>/g, '\n')
@@ -64,13 +64,13 @@ module.exports = new Command({
               .replace(/&nbsp;/g, ' ')
               .replace(/\n\n/g, '\n') || 'No description available.'
           const firstPage = new EmbedBuilder()
-            .setImage(data.bannerImage)
-            .setThumbnail(data.coverImage.large)
-            .setTitle(seriesTitle(data))
+            .setImage(data.bannerImage!)
+            .setThumbnail(data.coverImage?.large!)
+            .setTitle(data.title ? SeriesTitle(data.title) : 'Unknown')
             .addFields(
               {
-                name: 'Chapters',
-                value: data?.chapters?.toString() || 'Unknown',
+                name: 'Episodes',
+                value: data?.episodes?.toString() || 'Unknown',
                 inline: true,
               },
               {
@@ -85,33 +85,35 @@ module.exports = new Command({
               },
               {
                 name: 'Start Date',
-                value: data.startDate.day ? `${data.startDate.day}-${data.startDate.month}-${data.startDate.year}` : 'Unknown',
+                value: data.startDate?.day ? `${data.startDate.day}-${data.startDate.month}-${data.startDate.year}` : 'Unknown',
                 inline: true,
               },
               {
                 name: 'End Date',
-                value: data.endDate.day ? `${data.endDate.day}-${data.endDate.month}-${data.endDate.year}` : 'Unknown',
+                value: data.endDate?.day ? `${data.endDate.day}-${data.endDate.month}-${data.endDate.year}` : 'Unknown',
                 inline: true,
               },
               {
-                name: '\u200B',
-                value: '\u200B',
+                // ^ Check if the anime has finished airing
+                name: data?.nextAiringEpisode?.episode ? `Episode ${data.nextAiringEpisode.episode} airing in:` : 'Completed on:',
+                value: data?.nextAiringEpisode?.airingAt ? `<t:${data.nextAiringEpisode.airingAt}:R>` : endDate,
                 inline: true,
               },
               {
                 name: 'Genres',
-                value: '``' + `${data.genres.join(', ') || 'N/A'}` + '``',
+                value: '``' + `${data.genres?.join(', ') || 'N/A'}` + '``',
                 inline: true,
               },
             )
             .setDescription(description.length > descLength ? `${description.substring(0, descLength)}...` || 'No description available.' : description || 'No description available.')
-            .setURL(data.siteUrl)
+            .setURL(data.siteUrl?.toString() || 'https://anilist.co/')
             .setColor('Green')
             .setFooter(Footer(headers))
 
           const secondPage = new EmbedBuilder()
-            .setAuthor({ name: `${seriesTitle(data)} | Additional info` })
-            .setThumbnail(data.coverImage.large)
+            .setAuthor({ name: `${data.title?.english || 'N/A'} | Additional info` })
+            // .setThumbnail(data.coverImage.large)
+
             .addFields(
               {
                 name: 'Source',
@@ -130,12 +132,15 @@ module.exports = new Command({
               },
               {
                 name: 'Synonyms',
-                value: '``' + `${data.synonyms.join(', ') || 'N/A'}` + '``',
+                value: '``' + `${data.synonyms?.join(', ') || 'N/A'}` + '``',
                 inline: false,
               },
             )
             .setColor('Green')
             .setFooter(Footer(headers))
+
+          if (data.coverImage?.large)
+            secondPage.setThumbnail(data.coverImage.large)
 
           if (hookdata?.image)
             firstPage.setImage(hookdata.image)
@@ -144,9 +149,9 @@ module.exports = new Command({
             for (const field of hookdata.fields) firstPage.addFields({ name: field.name, value: field.value, inline: field.inline || false })
 
           if (data.mediaListEntry) {
-            let score = 'Not scored'
-            const scoring = data.mediaListEntry.user?.mediaListOptions.scoreFormat
-            if (data.mediaListEntry.score && scoring) {
+            let score = 'Unknown'
+            const scoring = data.mediaListEntry?.user?.mediaListOptions?.scoreFormat
+            if (data.mediaListEntry.score) {
               score = data.mediaListEntry.score.toString()
               if (scoring === ('POINT_10_DECIMAL' || 'POINT_10'))
                 score = `${score} / 10`
@@ -157,17 +162,17 @@ module.exports = new Command({
             }
 
             const thirdPage = new EmbedBuilder()
-              .setAuthor({ name: `${seriesTitle(data)} | ${data.mediaListEntry.user.name}'s Stats` })
-              .setThumbnail(data.coverImage.large)
+              .setAuthor({ name: `${data.title?.english || 'N/A'} | ${data.mediaListEntry?.user?.name}'s Stats` })
+
               .addFields(
                 {
                   name: 'Status',
-                  value: data.mediaListEntry?.status.toString() || 'Unknown',
+                  value: data.mediaListEntry?.status?.toString() || 'Unknown',
                   inline: true,
                 },
                 {
                   name: 'Progress',
-                  value: data.chapters ? `${data.mediaListEntry?.progress} chapter(s) out of ${data.chapters}` : `${data.mediaListEntry?.progress} chapter(s)` || 'Unknown',
+                  value: data.episodes ? `${data.mediaListEntry?.progress} episode(s) out of ${data.episodes}` : `${data.mediaListEntry?.progress} episode(s)` || 'Unknown',
                   inline: true,
                 },
                 {
@@ -182,6 +187,9 @@ module.exports = new Command({
               )
               .setColor('Green')
               .setFooter(Footer(headers))
+
+            if (data.coverImage?.large)
+              thirdPage.setThumbnail(data.coverImage.large)
             const pageList = [firstPage, secondPage, thirdPage]
             BuildPagination(interaction, pageList).paginate()
             return
@@ -194,9 +202,9 @@ module.exports = new Command({
           return interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] })
         }
       })
-      .catch((error) => {
+      .catch((error: any) => {
         console.error(error)
         interaction.reply({ embeds: [EmbedError(error, vars)] })
       })
   },
-})
+} satisfies CommandWithHook

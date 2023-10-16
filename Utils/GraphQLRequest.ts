@@ -1,9 +1,8 @@
-import type { AxiosResponse } from "axios";
-import axios from "axios";
+import type { AxiosResponse } from 'axios'
+import axios from 'axios'
 
 // import DocumentNode
 // import print
-import type { GraphQLResponse } from "./types";
 import type {
   ActivityQuery,
   ActivityQueryVariables,
@@ -35,33 +34,35 @@ import type {
   UserQueryVariables,
   ViewerQuery,
   ViewerQueryVariables,
-} from "../GraphQL/types";
-import Queries from "../GraphQL/types/queries";
+} from '../GraphQL/types'
+import Queries from '../GraphQL/types/queries'
+import type { GraphQLResponse } from './types'
 
-type Query = keyof typeof Queries;
+type Query = keyof typeof Queries
 
-const baseUrl = process.env.ANILIST_API || "https://graphql.anilist.co";
+const baseUrl = process.env.ANILIST_API || 'https://graphql.anilist.co'
 
 interface QueryVariables {
-  Airing: [AiringQuery, AiringQueryVariables];
-  Anime: [AnimeQuery, AnimeQueryVariables];
-  GetMediaCollection: [GetMediaCollectiobQuery, GetMediaCollectiobQueryVariables];
-  Manga: [MangaQuery, MangaQueryVariables];
-  MediaList: [MediaListCollection, MediaListCollectionCustomListsArgs];
-  RecentChart: [RecentChartQuery, RecentChartQueryVariables];
-  Recommendations: [RecommendationsQuery, RecommendationsQueryVariables];
-  Staff: [StaffQuery, StaffQueryVariables];
-  Studio: [StudioQuery, StudioQueryVariables];
-  TextActivity: [TextActivity, TextActivityTextArgs];
-  UserCard: [UserCardQuery, UserCardQueryVariables];
-  Activity: [ActivityQuery, ActivityQueryVariables];
-  Character: [CharacterQuery, CharacterQueryVariables];
-  User: [UserQuery, UserQueryVariables];
+  Airing: [AiringQuery, AiringQueryVariables]
+  Anime: [AnimeQuery, AnimeQueryVariables]
+  GetMediaCollection: [GetMediaCollectiobQuery, GetMediaCollectiobQueryVariables]
+  Manga: [MangaQuery, MangaQueryVariables]
+  MediaList: [MediaListCollection, MediaListCollectionCustomListsArgs]
+  RecentChart: [RecentChartQuery, RecentChartQueryVariables]
+  Recommendations: [RecommendationsQuery, RecommendationsQueryVariables]
+  Staff: [StaffQuery, StaffQueryVariables]
+  Studio: [StudioQuery, StudioQueryVariables]
+  TextActivity: [TextActivity, TextActivityTextArgs]
+  UserCard: [UserCardQuery, UserCardQueryVariables]
+  Activity: [ActivityQuery, ActivityQueryVariables]
+  Character: [CharacterQuery, CharacterQueryVariables]
+  User: [UserQuery, UserQueryVariables]
   Viewer: [ViewerQuery, ViewerQueryVariables]
 }
 
 export function GraphQLRequest<QueryKey extends Query>(queryKey: QueryKey, vars: QueryVariables[QueryKey][1], token?: string, url = baseUrl) {
-  if (token && token.length > 1000) axios.defaults.headers.common.Authorization = `Bearer ${token}`;
+  if (token && token.length > 1000)
+    axios.defaults.headers.common.Authorization = `Bearer ${token}`
 
   return new Promise<GraphQLResponse<QueryVariables[QueryKey][0]>>((resolve, reject) => {
     axios
@@ -70,11 +71,11 @@ export function GraphQLRequest<QueryKey extends Query>(queryKey: QueryKey, vars:
         query: Queries[queryKey],
       })
       .then((res: AxiosResponse) => {
-        resolve({ data: res.data.data, headers: res.headers });
+        resolve({ data: res.data.data, headers: res.headers })
       })
       .catch((err: any) => {
-        console.error(err);
-        reject(`GraphQL Request Rejected\n\n${err?.response?.data?.errors?.map((e: any) => `> ${e.message}\n`) || err}`);
-      });
-  });
+        console.error(err)
+        reject(`GraphQL Request Rejected\n\n${err?.response?.data?.errors?.map((e: any) => `> ${e.message}\n`) || err}`)
+      })
+  })
 }

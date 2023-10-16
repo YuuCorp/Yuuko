@@ -1,18 +1,18 @@
-import type { Optional } from "sequelize";
-import { DataTypes, Model } from "sequelize";
+import type { Optional } from 'sequelize'
+import { DataTypes, Model } from 'sequelize'
 
-import { db } from "../db"; // assuming this is the correct path for your db instance
+import { db } from '../db' // assuming this is the correct path for your db instance
 
 interface AnnouncementModelAttributes {
-  date: Date;
-  announcement: string;
+  date: Date
+  announcement: string
 }
 
-interface AnnouncementModelCreationAttributes extends Optional<AnnouncementModelAttributes, "date" | "announcement"> {}
+interface AnnouncementModelCreationAttributes extends Optional<AnnouncementModelAttributes, 'date' | 'announcement'> {}
 
 export class AnnouncementModel extends Model<AnnouncementModelAttributes, AnnouncementModelCreationAttributes> implements AnnouncementModelAttributes {
-  public date!: Date;
-  public announcement!: string;
+  public date!: Date
+  public announcement!: string
 }
 
 AnnouncementModel.init(
@@ -30,6 +30,6 @@ AnnouncementModel.init(
   },
   {
     sequelize: db,
-    tableName: "announcementmodel",
+    tableName: 'announcementmodel',
   },
-);
+)

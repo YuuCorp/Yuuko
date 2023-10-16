@@ -1,10 +1,10 @@
-import { Client } from "./Structures/Client";
+import dotenvFlow from 'dotenv-flow'
+import { Client } from './Structures/Client'
 
-import dotenvFlow from "dotenv-flow";
-dotenvFlow.config();
+dotenvFlow.config()
 
-await import("./Checks/Run");
+await import('./Checks/Run')
 
-const client = new Client();
+const client = new Client()
 
-client.start();
+client.start()
