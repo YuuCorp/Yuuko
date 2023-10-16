@@ -1,8 +1,8 @@
+import { AnilistUser } from '#Models/AnilistUser.ts'
 import type { CommandInteractionOptionResolver } from 'discord.js'
 import { SlashCommandBuilder } from 'discord.js'
-import { EmbedError, Footer, GraphQLRequest, RSACryption, getOptions } from '../Utils'
 import type { Command } from '../Structures'
-import { AnilistUser } from '#Models/AnilistUser.ts'
+import { EmbedError, Footer, GraphQLRequest, RSACryption, getOptions } from '../Utils'
 
 const name = 'auth'
 const usage = 'auth <help | anilist_token | wipe>'
@@ -12,8 +12,8 @@ export default {
   name,
   usage,
   description,
-  type: 'Anilist',
-  slash: new SlashCommandBuilder()
+  commandType: 'Anilist',
+  withBuilder: new SlashCommandBuilder()
     .setName(name)
     .setDescription(description)
     .addSubcommand(subcommand => subcommand.setName('help').setDescription('Shows you info on how to get your AniList token.'))

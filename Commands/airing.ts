@@ -1,8 +1,8 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 import ms from 'ms'
-import type { Command } from '../Structures'
-import { BuildPagination, CommandCategories, EmbedError, Footer, GraphQLRequest, SeriesTitle, getOptions } from '../Utils'
 import { MediaType } from '../GraphQL/types'
+import type { Command } from '../Structures'
+import { BuildPagination, EmbedError, Footer, GraphQLRequest, SeriesTitle, getOptions } from '../Utils'
 
 const name = 'airing'
 const usage = 'airing <?in>'
@@ -12,8 +12,8 @@ export default {
   name,
   usage,
   description,
-  type: CommandCategories.Anilist,
-  slash: new SlashCommandBuilder()
+  commandType: 'Anilist',
+  withBuilder: new SlashCommandBuilder()
     .setName(name)
     .setDescription(description)
     .addStringOption(option => option.setName('user').setDescription('The users whose list you want to use for airing anime.'))

@@ -1,13 +1,13 @@
-const fs = require("node:fs");
-const path = require("node:path");
-const Discord = require("discord.js");
-const { EmbedBuilder, SlashCommandBuilder } = require("discord.js");
-const Command = require("#Structures/Command.js");
-const AnnouncementDB = require("#Models/Announcement.js");
-BuildPagination = require("#Utils/BuildPagination.js");
+import Discord, { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import fs from "fs";
+import path from "path";
+import { AnnouncementModel } from "../Database/Models/Announcement";
+import type { Command } from "../Structures";
+import { BuildPagination } from "../Utils";
+import { CommandCategories } from "../Utils/CommandCategories";
 
-function generateHelpEmbeds(cmdsArr, category) {
-  const embeds = [];
+function generateHelpEmbeds(cmdsArr: Command[][], category: keyof typeof CommandCategories) {
+  const embeds: EmbedBuilder[] = [];
   const iterations = Math.ceil(cmdsArr.join("").length / 1024);
 
   let rowIndex = 0;
@@ -15,13 +15,13 @@ function generateHelpEmbeds(cmdsArr, category) {
     let cmdStr = "";
     let charCount = 0;
     while (true) {
-      if (!cmdsArr[rowIndex]) break;
-
+      const cmdLength = cmdsArr[rowIndex]?.length;
+      if (!cmdLength) break;
       // For some reason if this is left at 1024, it overflows to 1030+
       // in some rare cases.
-      if (charCount + cmdsArr[rowIndex].length < 1000) {
+      if (charCount + cmdLength < 1000) {
         cmdStr += `${cmdsArr[rowIndex]}\n`;
-        charCount = charCount + cmdsArr[rowIndex].length;
+        charCount = charCount + cmdLength;
         rowIndex++;
       } else {
         break;
@@ -46,24 +46,25 @@ function generateHelpEmbeds(cmdsArr, category) {
 const name = "help";
 const description = "Gives you the description of every command and how to use it.";
 
-module.exports = new Command({
+export default {
   name,
   description,
-  slash: new SlashCommandBuilder().setName(name).setDescription(description),
+  withBuilder: new SlashCommandBuilder().setName(name).setDescription(description),
 
-  async run(interaction, args, run) {
+  run: async ({ interaction, client }): Promise<void> => {
     // Require all files from the commands folder and fetch description
-    const cmds = fs.readdirSync(__dirname).filter((x) => x.endsWith(".js") && x != "help.js");
+    const cmds = fs.readdirSync(__dirname).filter((x) => x.endsWith(".ts") && x != "help.ts");
+    console.log(cmds);
     const cmdsDesc = [];
-    const cmdGroups = {};
+    const cmdGroups = {} as any;
     for (const cmd of cmds) {
-      const cmdEntry = require(path.join(__dirname, cmd));
-      if (!cmdGroups[cmdEntry.type]) cmdGroups[cmdEntry.type] = [];
-
-      cmdGroups[cmdEntry.type].push({ usage: cmdEntry.usage, name: cmdEntry.name, description: cmdEntry.description });
+      const cmdEntry = (await import(path.join(__dirname, cmd))).default as Command;
+      if (!cmdGroups[cmdEntry.commandType]) cmdGroups[cmdEntry.commandType] = [];
+      console.log(cmdEntry);
+      cmdGroups[cmdEntry.commandType].push({ usage: cmdEntry.usage, name: cmdEntry.name, description: cmdEntry.description });
     }
     // Send the description to the user
-    const announcements = await AnnouncementDB.findAll({ order: [["date", "DESC"]] }).then((x) => x.slice(0, 5));
+    const announcements = await AnnouncementModel.findAll({ order: [["date", "DESC"]] }).then((x) => x.slice(0, 5));
 
     const helpInfoEmbed = new EmbedBuilder();
     helpInfoEmbed.setTitle(":grey_question: Help");
@@ -77,11 +78,11 @@ module.exports = new Command({
     helpInfoEmbed.setColor("#1873bf");
 
     const pageList = [helpInfoEmbed];
-    for (category of Object.keys(cmdGroups)) {
-      const cmdHelpArr = cmdGroups[category].map((x) => `\`$\` **${x.name}** - \`${x.usage || "No parameters required."}\` \n ${x.description} \n`);
-      pageList.push(...generateHelpEmbeds(cmdHelpArr, category));
+    for (const category of Object.keys(cmdGroups)) {
+      const cmdHelpArr = cmdGroups[category].map((x: any) => `\`$\` **${x.name}** - \`${x.usage || "No parameters required."}\` \n ${x.description} \n`);
+      pageList.push(...generateHelpEmbeds(cmdHelpArr, category as any));
     }
 
     BuildPagination(interaction, pageList).paginate();
   },
-});
+} satisfies Omit<Command, "commandType">;

@@ -4,10 +4,10 @@ import { REST } from '@discordjs/rest'
 import { Collection, Client as DiscordClient, GatewayIntentBits, Routes } from 'discord.js'
 import type { YuukoComponent } from '../Utils/types'
 import { removeExtension } from '../Utils'
-import type { Command } from './Command'
+import type { ClientCommand, Command } from './Command'
 
 export class Client extends DiscordClient {
-  public commands: Collection<string, Command>
+  public commands: Collection<string, ClientCommand>
   public components: Collection<string, YuukoComponent>
   constructor() {
     super({
@@ -21,17 +21,32 @@ export class Client extends DiscordClient {
 
   start() {
     console.log(`Starting Yuuko in ${process.env.NODE_ENV} enviroment.`)
-    const slashCommands: string[] = []
-    fs.readdirSync('./Commands')
-      .filter(file => file.endsWith('.ts'))
-      .forEach(async (file) => {
-        const command: Command = (await import(`#Commands/${file}`)).default
-        console.log(`Command ${command.name} loaded`)
-        this.commands.set(command.name, command)
+    const commandsPath = path.join(__dirname, '..', 'Commands')
+    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.ts'))
+    console.log(`Loading ${commandFiles.length} commands.`)
+    const slashCommands = commandFiles.map((file) => {
+      const cmd = require(path.join(commandsPath, file)).default as Command
+      const builder = cmd?.withBuilder ?? {}
+      
+      delete cmd.withBuilder
+      
+      const data = { ...builder, ...cmd }
+      this.commands.set(data.name, data)
+      return data
+    })
 
-        if (command.slash)
-          slashCommands.push(command.slash)
-      })
+    console.log(`Loaded ${slashCommands.length} slash (/) commands.`)
+    
+    // fs.readdirSync('./Commands')
+    //   .filter(file => file.endsWith('.ts'))
+    //   .forEach(async (file) => {
+    //     const command: Command = (await import(`#Commands/${file}`)).default
+    //     console.log(`Command ${command.name} loaded`)
+    //     this.commands.set(command.name, command)
+
+    //     if (command.slash)
+    //       slashCommands.push(command.slash)
+    //   })
 
     fs.readdirSync('./Components')
       .filter(file => file.endsWith('.ts'))

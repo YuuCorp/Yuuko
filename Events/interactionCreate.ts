@@ -16,7 +16,7 @@ export const run: YuukoEvent<'interactionCreate'> = async (client, interaction) 
       return
     Logging(command, interaction)
     const args = await runMiddlewares(command.middlewares, interaction)
-    command.run<Interaction>({ client, interaction, args })
+    command.run({ interaction: args, client })
 
     // Check for autocomplete
   }

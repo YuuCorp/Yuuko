@@ -1,7 +1,7 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js'
+import { mwGetUserEntry } from '../Middleware/UserEntry'
 import type { Command } from '../Structures'
 import { EmbedError, GraphQLRequest, getOptions } from '../Utils'
-import { mwGetUserEntry } from '../Middleware/UserEntry'
 
 const name = 'activity'
 const usage = 'activity <user>'
@@ -12,8 +12,8 @@ export default {
   usage,
   description,
   middlewares: [mwGetUserEntry],
-  type: 'Anilist',
-  slash: new SlashCommandBuilder()
+  commandType: 'Anilist',
+  withBuilder: new SlashCommandBuilder()
     .setName(name)
     .setDescription(description)
     .addStringOption(option => option.setName('user').setDescription('The user to search for').setRequired(false)),

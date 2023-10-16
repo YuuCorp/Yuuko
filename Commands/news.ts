@@ -1,8 +1,8 @@
-import { EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import axios from 'axios'
-import type { Command } from '../Structures'
 import { EmbedError } from '#Utils/EmbedError.ts'
 import { Footer } from '#Utils/Footer.ts'
+import axios from 'axios'
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js'
+import type { Command } from '../Structures'
 
 const name = 'aninews'
 const usage = '/aninews'
@@ -12,8 +12,8 @@ export default {
   name,
   usage,
   description,
-  type: 'Misc',
-  slash: new SlashCommandBuilder().setName(name).setDescription(description),
+  commandType: 'Misc',
+  withBuilder: new SlashCommandBuilder().setName(name).setDescription(description),
 
   run: async ({ interaction, client }): Promise<void> => {
     if (!interaction.isCommand())

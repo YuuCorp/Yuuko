@@ -1,8 +1,8 @@
 import { execSync } from 'node:child_process'
 
 import { SlashCommandBuilder } from 'discord.js'
-import { CommandCategories, Footer } from '../Utils'
 import type { Command } from '../Structures'
+import { Footer } from '../Utils'
 
 const name = 'changelog'
 const description = 'See what has changed with the recent updates.'
@@ -10,8 +10,8 @@ const description = 'See what has changed with the recent updates.'
 export default {
   name,
   description,
-  type: CommandCategories.Misc,
-  slash: new SlashCommandBuilder().setName(name).setDescription(description),
+  commandType: 'Misc',
+  withBuilder: new SlashCommandBuilder().setName(name).setDescription(description),
   run: async ({ interaction, client }): Promise<void> => {
     if (!interaction.isCommand())
       return

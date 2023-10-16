@@ -1,9 +1,9 @@
+import { UserBirthday } from '#Models/UserBirthday.ts'
+import { BuildPagination } from '#Utils/BuildPagination.ts'
+import { getOptions } from '#Utils/getOptions.ts'
 import type { CommandInteractionOptionResolver } from 'discord.js'
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 import type { Command } from '../Structures'
-import { BuildPagination } from '#Utils/BuildPagination.ts'
-import { UserBirthday } from '#Models/UserBirthday.ts'
-import { getOptions } from '#Utils/getOptions.ts'
 
 const name = 'birthday'
 const usage = 'birthday <user | list | set>'
@@ -13,8 +13,8 @@ export default {
   name,
   usage,
   description,
-  type: 'Misc',
-  slash: new SlashCommandBuilder()
+  commandType: 'Misc',
+  withBuilder: new SlashCommandBuilder()
     .setName(name)
     .setDescription(description)
     .addSubcommand(subcommand =>

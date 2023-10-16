@@ -1,10 +1,8 @@
 // use esm
 
-import type Discord from 'discord.js'
-import { SlashCommandBuilder } from 'discord.js'
 import axios from 'axios'
+import { SlashCommandBuilder } from 'discord.js'
 import type { Command } from '../Structures'
-import { getOptions } from '../Utils'
 import { EmbedError } from '../Utils/EmbedError'
 import AnimeCmd from './anime'
 
@@ -29,16 +27,17 @@ export default {
   name,
   usage,
   description,
-  type: 'Anilist',
-  slash: new SlashCommandBuilder()
+  commandType: 'Anilist',
+  withBuilder: new SlashCommandBuilder()
     .setName(name)
     .setDescription(description)
     .addAttachmentOption(option => option.setName('image').setDescription('Attach the image of the anime.').setRequired(true)),
 
-  run: ({ interaction, client }) => {
-    if (!interaction.isCommand())
-      return
-    const { image } = getOptions<{ image: Discord.Attachment }>(interaction.options, ['image'])
+  run: async({ interaction, client }): Promise<void> => {
+    if (!interaction.isCommand()) return
+    const image = interaction.options.getAttachment('image')
+
+    if(!image) return void interaction.reply({ embeds: [EmbedError('No image attached.')] })
 
     // Send and axios request to trace.moe with an image the user attached
     axios
@@ -49,7 +48,6 @@ export default {
         if (!match)
           return interaction.reply({ embeds: [EmbedError('No results found.', { url: image.url })] })
         const hookdata = {
-          title: match.filename,
           id: match.anilist,
           image: image.url,
           fields: [
@@ -59,12 +57,12 @@ export default {
             { name: 'Video', value: `[Link](${match.video})`, inline: true },
           ],
         }
-        AnimeCmd.run<any>({ interaction, client, args: {}, hook: true, hookdata })
+        AnimeCmd.run({ interaction, client, hook: true, hookdata })
       })
       .catch((error: any) => {
         // ^ log axios request status code and error
         if (error.response)
-          console.log(error.response.data.errors)
+          console.error(error.response.data.errors)
         else console.error(error)
 
         interaction.reply({ embeds: [EmbedError(error, { url: image.url })] })

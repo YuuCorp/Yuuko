@@ -7,8 +7,8 @@ const description = 'Shows you the statistics of the server & bot.'
 export default {
   name,
   description,
-  type: 'Misc',
-  slash: new SlashCommandBuilder().setName(name).setDescription(description),
+  commandType: 'Misc',
+  withBuilder: new SlashCommandBuilder().setName(name).setDescription(description),
 
   run: async ({ interaction, client }): Promise<void> => {
     if (!interaction.isCommand())

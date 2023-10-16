@@ -9,8 +9,8 @@ export default {
   name,
   usage,
   description,
-  type: 'Misc',
-  slash: new SlashCommandBuilder().setName(name).setDescription(description),
+  commandType: 'Misc',
+  withBuilder: new SlashCommandBuilder().setName(name).setDescription(description),
 
   run: async ({ interaction, client }): Promise<void> => {
     if (!interaction.isCommand())
