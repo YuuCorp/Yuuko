@@ -21,15 +21,23 @@
     "lint:fix": "eslint . --fix",
     "gen:gql": "graphql-codegen",
     "gen:queries": "bun run ./Scripts/genQueries.ts",
-    "db:push": "drizzle-kit push:sqlite",
-    "db:generate": "drizzle-kit generate:sqlite"
+    "db:push": "bun drizzle-kit push:sqlite",
+    "db:generate": "bun drizzle-kit generate:sqlite",
+    "db:studio": "bun drizzle-kit studio"
   },
+  "trustedDependencies": [
+    "better-sqlite3",
+    "canvas",
+    "sqlite3",
+    "bindings"
+  ],
   "dependencies": {
     "@acegoal07/discordjs-pagination": "^1.5.0",
     "@discordjs/rest": "^0.3.0",
     "@types/dotenv-flow": "^3.3.1",
     "@types/node-rsa": "^1.1.2",
     "axios": "^0.21.1",
+    "better-sqlite3": "^9.0.0",
     "bun-types": "^1.0.5",
     "canvas": "^2.11.2",
     "discord-api-types": "^0.27.3",
@@ -37,7 +45,6 @@
     "dotenv-flow": "^3.2.0",
     "drizzle-orm": "^0.28.6",
     "humanize-duration": "^3.27.0",
-    "better-sqlite3": "^9.0.0",
     "ms": "^2.1.3",
     "node-rsa": "^1.1.1",
     "nodemon": "^2.0.12",
