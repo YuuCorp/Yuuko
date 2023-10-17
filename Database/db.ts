@@ -1,32 +1,10 @@
-import fs from 'fs'
-import path from 'path'
-import { Sequelize } from 'sequelize'
+import { drizzle, type BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
+import { Database } from "bun:sqlite";
+import * as schema from "./Models/schema";
 
-// If the database does not exist yet,
-// we create it so it can accessed.
-if (!fs.existsSync(path.join(__dirname, 'db.sqlite')))
-  fs.writeFileSync(path.join(__dirname, 'db.sqlite'), '')
-
-export const db = new Sequelize({
-  dialect: 'sqlite',
-  storage: path.join(__dirname, 'db.sqlite'),
-  logging: false,
+export const sqlite = new Database("./Database/db.sqlite");
+export const db: BunSQLiteDatabase<typeof schema> = drizzle(sqlite, {
+  schema,
 });
-// console.log("Hello Sequelize!");
 
-(async () => {
-  try {
-    console.log('Hello Sequelize!')
-    await db.authenticate()
-    console.log('[Sequelize] Database connection has been established successfully.')
-    // User when altering
-    // await db.sync({ alter: true });
-    // User when creating
-    await db.sync()
-    console.log('[Sequelize] Database has been synced.')
-  }
-  catch (error) {
-    console.error('[Sequelize] Unable to connect to the database')
-    throw error
-  }
-})()
+export default db;

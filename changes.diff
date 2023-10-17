@@ -1,0 +1,1193 @@
+diff --git a/Commands/auth.ts b/Commands/auth.ts
+index 7907321..e15803e 100644
+--- a/Commands/auth.ts
++++ b/Commands/auth.ts
+@@ -1,79 +1,80 @@
+-import { AnilistUser } from '#Models/AnilistUser.ts'
+-import type { CommandInteractionOptionResolver } from 'discord.js'
+-import { SlashCommandBuilder } from 'discord.js'
+-import type { Command } from '../Structures'
+-import { EmbedError, Footer, GraphQLRequest, RSACryption, getOptions } from '../Utils'
++import anilistUser from "../Database/Models/AnilistUser";
++import type { CommandInteractionOptionResolver } from "discord.js";
++import { SlashCommandBuilder } from "discord.js";
++import type { Command } from "../Structures";
++import { EmbedError, Footer, GraphQLRequest, RSACryption, getOptions } from "../Utils";
++import db from "../Database/db";
++import { eq } from "drizzle-orm";
+ 
+-const name = 'auth'
+-const usage = 'auth <help | anilist_token | wipe>'
+-const description = 'Binds an existing AniList user to your Discord account in the bot database.'
++const name = "auth";
++const usage = "auth <help | anilistToken | wipe>";
++const description = "Binds an existing AniList user to your Discord account in the bot database.";
+ 
+ export default {
+   name,
+   usage,
+   description,
+-  commandType: 'Anilist',
++  commandType: "Anilist",
+   withBuilder: new SlashCommandBuilder()
+     .setName(name)
+     .setDescription(description)
+-    .addSubcommand(subcommand => subcommand.setName('help').setDescription('Shows you info on how to get your AniList token.'))
+-    .addSubcommand(subcommand => subcommand.setName('wipe').setDescription('Unlink your AniList token from the bot.'))
+-    .addSubcommand(subcommand =>
++    .addSubcommand((subcommand) => subcommand.setName("help").setDescription("Shows you info on how to get your AniList token."))
++    .addSubcommand((subcommand) => subcommand.setName("wipe").setDescription("Unlink your AniList token from the bot."))
++    .addSubcommand((subcommand) =>
+       subcommand
+-        .setName('token')
+-        .setDescription('Use the AniList token here.')
+-        .addStringOption(option => option.setName('token').setDescription('Add the AniList token here.').setMinLength(750).setRequired(true)),
++        .setName("token")
++        .setDescription("Use the AniList token here.")
++        .addStringOption((option) => option.setName("token").setDescription("Add the AniList token here.").setMinLength(750).setRequired(true)),
+     ),
+ 
+   run: async ({ interaction, client }): Promise<void> => {
+-    if (!interaction.isCommand())
+-      return
++    if (!interaction.isCommand()) return;
+ 
+-    const type = (interaction.options as CommandInteractionOptionResolver).getSubcommand()
+-    const { token } = getOptions<{ token: string | undefined }>(interaction.options, ['token'])
++    const type = (interaction.options as CommandInteractionOptionResolver).getSubcommand();
++    const { token } = getOptions<{ token: string | undefined }>(interaction.options, ["token"]);
+ 
+-    if (type === 'token' && !token)
+-      return void interaction.reply({ embeds: [EmbedError(`Please provide a token with this option.`)], ephemeral: true })
++    db.query.anilistUser.findFirst({ where: (user, { eq }) => eq(user.anilistId, Number(interaction.user.id)) });
+ 
+-    if (type === 'help') {
++    if (type === "token" && !token) return void interaction.reply({ embeds: [EmbedError(`Please provide a token with this option.`)], ephemeral: true });
++
++    if (type === "help") {
+       return void (await interaction.reply({
+         embeds: [
+           {
+             title: `Steps to get your AniList Token.`,
+             description:
+-              `To add you as an user you have to [login with AniList](https://anilist.co/api/v2/oauth/authorize?client_id=9020&response_type=token). \n Once you've done that, all you have to do is run the command again with the subcommand `
+-              + '`'
+-              + 'token'
+-              + '`'
+-              + ` and paste the token you received on the site into the token option.`,
++              `To add you as an user you have to [login with AniList](https://anilist.co/api/v2/oauth/authorize?client_id=9020&response_type=token). \n Once you've done that, all you have to do is run the command again with the subcommand ` +
++              "`" +
++              "token" +
++              "`" +
++              ` and paste the token you received on the site into the token option.`,
+             footer: Footer(),
+           },
+         ],
+         ephemeral: true,
+-      }))
++      }));
+     }
+ 
+-    const user = await AnilistUser.findOne({ where: { discord_id: interaction.user.id } })
++    const user = await db.query.anilistUser.findFirst({ where: (user, { eq }) => eq(user.anilistId, Number(interaction.user.id)) });
+ 
+-    if (type === 'wipe') {
+-      if (!user)
+-        return void interaction.reply({ embeds: [EmbedError(`You don't have an AniList account bound to your Discord account.`, null, false)], ephemeral: true })
++    if (type === "wipe") {
++      if (!user) return void interaction.reply({ embeds: [EmbedError(`You don't have an AniList account bound to your Discord account.`, null, false)], ephemeral: true });
+       try {
+-        await AnilistUser.destroy({ where: { discord_id: interaction.user.id } })
++        await db.delete(anilistUser).where(eq(anilistUser.anilistId, Number(interaction.user.id)));
++
+         return void interaction.reply({
+           embeds: [
+             {
+               title: `Successfully wiped your AniList account binding.`,
+               description: `Your Discord-bound AniList account has been wiped from our database.`,
+-              color: 0x00FF00,
++              color: 0x00ff00,
+               footer: Footer(),
+             },
+           ],
+           ephemeral: true,
+-        })
+-      }
+-      catch (error) {
+-        console.error(error)
++        });
++      } catch (error) {
++        console.error(error);
+         return void interaction.reply({
+           embeds: [
+             EmbedError(
+@@ -83,33 +84,36 @@ export default {
+             ),
+           ],
+           ephemeral: true,
+-        })
++        });
+       }
+     }
+ 
+     // Update existing user
+     if (user) {
+       try {
+-        if (!token)
+-          return void interaction.reply({ embeds: [EmbedError(`Please provide a token with this option.`)], ephemeral: true })
+-        const { Viewer: data } = (await GraphQLRequest('Viewer', {}, token)).data
+-        if (!data)
+-          return void interaction.reply({ embeds: [EmbedError(`Invalid token provided.`)], ephemeral: true })
+-        await user.update({ anilist_token: RSACryption(token, false), anilist_id: data.id.toString() })
++        if (!token) return void interaction.reply({ embeds: [EmbedError(`Please provide a token with this option.`)], ephemeral: true });
++
++        const { Viewer: data } = (await GraphQLRequest("Viewer", {}, token)).data;
++
++        if (!data) return void interaction.reply({ embeds: [EmbedError(`Invalid token provided.`)], ephemeral: true });
++        
++        await db
++          .update(anilistUser)
++          .set({ anilistToken: RSACryption(token, false), anilistId: data.id })
++          .where(eq(anilistUser.anilistId, Number(interaction.user.id)));
+         return void interaction.reply({
+           embeds: [
+             {
+               title: `Successfully updated your AniList account binding.`,
+               description: `Your Discord-bound AniList account has been changed to \`${data.name}\`.`,
+-              color: 0x00FF00,
++              color: 0x00ff00,
+               footer: Footer(),
+             },
+           ],
+           ephemeral: true,
+-        })
+-      }
+-      catch (error) {
+-        console.error(error)
++        });
++      } catch (error) {
++        console.error(error);
+         return void interaction.reply({
+           embeds: [
+             EmbedError(
+@@ -119,32 +123,32 @@ export default {
+             ),
+           ],
+           ephemeral: true,
+-        })
++        });
+       }
+     }
+ 
+     // Create new user
+     try {
+-      if (!token)
+-        return void interaction.reply({ embeds: [EmbedError(`Please provide a token with this option.`)], ephemeral: true })
+-      const { Viewer: data } = (await GraphQLRequest('Viewer', {}, token)).data
+-      if (!data)
+-        return void interaction.reply({ embeds: [EmbedError(`Invalid token provided.`)], ephemeral: true })
+-      await AnilistUser.create({ discord_id: interaction.user.id, anilist_token: RSACryption(token, false), anilist_id: data.id.toString() })
++      if (!token) return void interaction.reply({ embeds: [EmbedError(`Please provide a token with this option.`)], ephemeral: true });
++
++      const { Viewer: data } = (await GraphQLRequest("Viewer", {}, token)).data;
++
++      if (!data) return void interaction.reply({ embeds: [EmbedError(`Invalid token provided.`)], ephemeral: true });
++
++      await db.insert(anilistUser).values({ discordId: interaction.user.id, anilistToken: RSACryption(token, false), anilistId: data.id });
+       return void interaction.reply({
+         embeds: [
+           {
+             title: `Successfully bound your AniList account to your Discord account.`,
+             description: `Your AniList account is now \`${data.name}\`.`,
+-            color: 0x00FF00,
++            color: 0x00ff00,
+             footer: Footer(),
+           },
+         ],
+         ephemeral: true,
+-      })
+-    }
+-    catch (error) {
+-      console.error(error)
++      });
++    } catch (error) {
++      console.error(error);
+       return void (await interaction.reply({
+         embeds: [
+           EmbedError(
+@@ -154,7 +158,7 @@ export default {
+           ),
+         ],
+         ephemeral: true,
+-      }))
++      }));
+     }
+   },
+-} satisfies Command
++} satisfies Command;
+diff --git a/Commands/birthday.ts b/Commands/birthday.ts
+index 9cb0916..4c74558 100644
+--- a/Commands/birthday.ts
++++ b/Commands/birthday.ts
+@@ -1,166 +1,152 @@
+-import { UserBirthday } from '#Models/UserBirthday.ts'
+-import { BuildPagination } from '#Utils/BuildPagination.ts'
+-import { getOptions } from '#Utils/getOptions.ts'
+-import type { CommandInteractionOptionResolver } from 'discord.js'
+-import { EmbedBuilder, SlashCommandBuilder } from 'discord.js'
+-import type { Command } from '../Structures'
++import db from "../Database/db";
++import { tables } from "../Database";
++import { BuildPagination } from "#Utils/BuildPagination.ts";
++import { getOptions } from "#Utils/getOptions.ts";
++import type { CommandInteractionOptionResolver } from "discord.js";
++import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
++import type { Command } from "../Structures";
++import { eq, sql } from "drizzle-orm";
+ 
+-const name = 'birthday'
+-const usage = 'birthday <user | list | set>'
+-const description = 'Shows general list of birthdays for BBH server, or shows birthday for specific person.'
++const name = "birthday";
++const usage = "birthday <user | list | set>";
++const description = "Shows general list of birthdays for BBH server, or shows birthday for specific person.";
+ 
+ export default {
+   name,
+   usage,
+   description,
+-  commandType: 'Misc',
++  commandType: "Misc",
+   withBuilder: new SlashCommandBuilder()
+     .setName(name)
+     .setDescription(description)
+-    .addSubcommand(subcommand =>
++    .addSubcommand((subcommand) =>
+       subcommand
+-        .setName('user')
+-        .setDescription('The user to get the birthday of.')
+-        .addUserOption(option => option.setName('user').setDescription('The user to get the birthday of.').setRequired(true)),
++        .setName("user")
++        .setDescription("The user to get the birthday of.")
++        .addUserOption((option) => option.setName("user").setDescription("The user to get the birthday of.").setRequired(true)),
+     )
+-    .addSubcommand(subcommand => subcommand.setName('list').setDescription('List the birthdays of all registered users in this guild.'))
+-    .addSubcommand(subcommand =>
++    .addSubcommand((subcommand) => subcommand.setName("list").setDescription("List the birthdays of all registered users in this guild."))
++    .addSubcommand((subcommand) =>
+       subcommand
+-        .setName('set')
+-        .setDescription('Set your birthday.')
+-        .addStringOption(option => option.setName('date').setDescription('The date of your birthday. Format: YYYY-MM-DD').setMinLength(10).setMaxLength(10).setRequired(true)),
++        .setName("set")
++        .setDescription("Set your birthday.")
++        .addStringOption((option) => option.setName("date").setDescription("The date of your birthday. Format: YYYY-MM-DD").setMinLength(10).setMaxLength(10).setRequired(true)),
+     ),
+ 
+   run: async ({ interaction, client }): Promise<void> => {
+-    if (!interaction.isCommand())
+-      return
+-    if (!interaction.guild)
+-      return void interaction.reply({ content: 'This command can only be used in a server.', ephemeral: true })
+-    const subcommand = (interaction.options as CommandInteractionOptionResolver).getSubcommand()
++    if (!interaction.isCommand()) return;
++    if (!interaction.guild) return void interaction.reply({ content: "This command can only be used in a server.", ephemeral: true });
++    const subcommand = (interaction.options as CommandInteractionOptionResolver).getSubcommand();
+ 
+-    if (subcommand === 'set') {
+-      const { date } = getOptions<{ date: string }>(interaction.options, ['date'])
+-      const birthday = new Date(date)
+-      if (birthday.toString() === 'Invalid Date')
+-        return void interaction.reply({ content: 'Invalid date format. Please use YYYY-MM-DD.', ephemeral: true })
+-      const userBirthday = await UserBirthday.findOne({ where: { user_id: interaction.user.id } })
++    if (subcommand === "set") {
++      const { date } = getOptions<{ date: string }>(interaction.options, ["date"]);
++      const birthday = new Date(date);
++      if (birthday.toString() === "Invalid Date") return void interaction.reply({ content: "Invalid date format. Please use YYYY-MM-DD.", ephemeral: true });
++      const userBirthday = await db.query.userBirthday.findFirst({ where: (birthday, { eq }) => eq(birthday.userId, interaction.user.id) });
+       if (userBirthday) {
+-        userBirthday.birthday = birthday
+-        await userBirthday.save()
++        await db.update(tables.userBirthday).set({ birthday, updatedAt: sql`CURRENT_TIMESTAMP` }).where(eq(tables.userBirthday.userId, interaction.user.id));
++      } else {
++        const data = {userId: interaction.user.id, birthday, guildId: interaction.guild.id}
++        console.log(data)
++        await db.insert(tables.userBirthday).values({ userId: interaction.user.id, birthday, guildId: interaction.guild.id });
+       }
+-      else {
+-        await UserBirthday.create({ user_id: interaction.user.id, birthday, guild_id: interaction.guild.id })
+-      }
+-      return void interaction.reply({ content: `Your birthday has been set to ${getReadableDate(birthday)}.`, ephemeral: true })
++      return void interaction.reply({ content: `Your birthday has been set to ${getReadableDate(birthday)}.`, ephemeral: true });
+     }
+ 
+-    if (subcommand === 'user') {
+-      const user = interaction.options.getUser('user')
+-      if (!user)
+-        return void interaction.reply({ content: 'Please provide a user.', ephemeral: true })
+-      const birthday = await UserBirthday.findOne({ where: { user_id: user.id } })
+-      if (!birthday)
+-        return void interaction.reply({ content: `${user.tag} has not set their birthday.`, ephemeral: true })
+-      const daysLeft = daysLeftUntilBirthday(birthday.birthday)
+-      const age = calculateAge(birthday.birthday)
++    if (subcommand === "user") {
++      const user = interaction.options.getUser("user");
++      if (!user) return void interaction.reply({ content: "Please provide a user.", ephemeral: true });
++      const birthday = await db.query.userBirthday.findFirst({ where: (birthday, { eq }) => eq(birthday.userId, user.id) });
++      if (!birthday) return void interaction.reply({ content: `${user.tag} has not set their birthday.`, ephemeral: true });
++      const daysLeft = daysLeftUntilBirthday(birthday.birthday);
++      const age = calculateAge(birthday.birthday);
+ 
+       const embed = new EmbedBuilder().setTitle(`${user.tag}'s Birthday`).addFields(
+         {
+-          name: 'Birthday',
++          name: "Birthday",
+           value: getReadableDate(birthday.birthday),
+         },
+         {
+-          name: 'Age',
++          name: "Age",
+           value: age.toString(),
+         },
+         {
+-          name: 'Days Left',
++          name: "Days Left",
+           value: daysLeft.toString(),
+         },
+-      )
+-      return void interaction.reply({ embeds: [embed] })
++      );
++      return void interaction.reply({ embeds: [embed] });
+     }
+ 
+-    if (subcommand === 'list') {
+-      const birthdays = await UserBirthday.findAll({ where: { guild_id: interaction.guild.id } })
+-      if (birthdays.length === 0)
+-        return void interaction.reply({ content: 'There are no birthdays registered for this server.', ephemeral: true })
+-      const embeds = []
+-      let currentEmbed = new EmbedBuilder().setTitle('Birthdays')
+-      let currentEmbedIndex = 0
+-      let currentEmbedField = 0
+-      let embedDescription = ''
++    if (subcommand === "list") {
++      const birthdays = await db.query.userBirthday.findMany({ where: (birthday, { eq }) => eq(birthday.guildId, interaction.guild!.id) });
++      if (birthdays.length === 0) return void interaction.reply({ content: "There are no birthdays registered for this server.", ephemeral: true });
++      const embeds = [];
++      let currentEmbed = new EmbedBuilder().setTitle("Birthdays");
++      let currentEmbedIndex = 0;
++      let currentEmbedField = 0;
++      let embedDescription = "";
+ 
+-      // Co-authored by Github Copilot
+       const sortedBirthdays = birthdays.sort((a, b) => {
+-        const aDate = new Date(a.birthday)
+-        const bDate = new Date(b.birthday)
+-        if (aDate.getMonth() === bDate.getMonth())
+-          return aDate.getDate() - bDate.getDate()
+-        return aDate.getMonth() - bDate.getMonth()
+-      })
++        const aDate = new Date(a.birthday);
++        const bDate = new Date(b.birthday);
++        if (aDate.getMonth() === bDate.getMonth()) return aDate.getDate() - bDate.getDate();
++        return aDate.getMonth() - bDate.getMonth();
++      });
+ 
+       for (const birthday of sortedBirthdays) {
+-        const userBirthday = birthday.getDataValue('birthday');
+-        const daysLeft = daysLeftUntilBirthday(userBirthday)
+-        const age = calculateAge(userBirthday)
+-        currentEmbedField++
+-        if (daysLeft > 0)
+-          embedDescription += `<@${birthday.getDataValue('user_id')}> ${getReadableDate(userBirthday)} (${age} years old, ${daysLeft} days left)\n\n`
+-        else embedDescription += `<@${birthday.getDataValue('user_id')}> ${getReadableDate(userBirthday)} (${age} years old, **Birthday Today!**)\n\n`
++        const userBirthday = birthday.birthday;
++        const daysLeft = daysLeftUntilBirthday(userBirthday);
++        const age = calculateAge(userBirthday);
++        currentEmbedField++;
++        if (daysLeft > 0) embedDescription += `<@${birthday.userId}> ${getReadableDate(userBirthday)} (${age} years old, ${daysLeft} days left)\n\n`;
++        else embedDescription += `<@${birthday.userId}> ${getReadableDate(userBirthday)} (${age} years old, **Birthday Today!**)\n\n`;
+         if (currentEmbedField === 10 && birthdays.length > 10) {
+-          currentEmbed.setDescription(embedDescription)
+-          embeds.push(currentEmbed)
+-          currentEmbed = new EmbedBuilder().setTitle('Birthdays')
+-          currentEmbedIndex++
+-          currentEmbedField = 0
+-          embedDescription = ''
+-        }
+-        else if (currentEmbedField === birthdays.length) {
+-          currentEmbed.setDescription(embedDescription)
+-          embeds.push(currentEmbed)
++          currentEmbed.setDescription(embedDescription);
++          embeds.push(currentEmbed);
++          currentEmbed = new EmbedBuilder().setTitle("Birthdays");
++          currentEmbedIndex++;
++          currentEmbedField = 0;
++          embedDescription = "";
++        } else if (currentEmbedField === birthdays.length) {
++          currentEmbed.setDescription(embedDescription);
++          embeds.push(currentEmbed);
+         }
+       }
+-      BuildPagination(interaction, embeds).paginate()
++      BuildPagination(interaction, embeds).paginate();
+     }
+ 
+     function daysLeftUntilBirthday(date: Date) {
+-      const today = new Date()
+-      today.setHours(0, 0, 0, 0)
+-      const nextBirthday = new Date(today.getFullYear(), date.getMonth(), date.getDate())
+-      if (today > nextBirthday)
+-        nextBirthday.setFullYear(nextBirthday.getFullYear() + 1)
+-      const daysLeft = Math.ceil((nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+-      return daysLeft
++      const today = new Date();
++      today.setHours(0, 0, 0, 0);
++      const nextBirthday = new Date(today.getFullYear(), date.getMonth(), date.getDate());
++      if (today > nextBirthday) nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
++      const daysLeft = Math.ceil((nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
++      return daysLeft;
+     }
+ 
+     function getReadableDate(date: Date) {
+-      const day = date.getDate()
+-      const month = date.toLocaleString('default', { month: 'long' })
+-      const year = date.getFullYear()
+-      return `${day}${getDaySuffix(day)} of ${month}, ${year}`
++      const day = date.getDate();
++      const month = date.toLocaleString("default", { month: "long" });
++      const year = date.getFullYear();
++      return `${day}${getDaySuffix(day)} of ${month}, ${year}`;
+     }
+ 
+     function getDaySuffix(day: number) {
+-      if (day > 3 && day < 21)
+-        return 'th'
+-      const lastDigit = day % 10
+-      if (lastDigit === 1)
+-        return 'st'
+-      if (lastDigit === 2)
+-        return 'nd'
+-      if (lastDigit === 3)
+-        return 'rd'
+-      return 'th'
++      if (day > 3 && day < 21) return "th";
++      const lastDigit = day % 10;
++      if (lastDigit === 1) return "st";
++      if (lastDigit === 2) return "nd";
++      if (lastDigit === 3) return "rd";
++      return "th";
+     }
+ 
+     function calculateAge(date: Date) {
+-      const today = new Date()
+-      const m = today.getMonth() - date.getMonth()
+-      let age = today.getFullYear() - date.getFullYear()
+-      if (m < 0 || (m === 0 && today.getDate() < date.getDate()))
+-        age--
+-      return age
++      const today = new Date();
++      const m = today.getMonth() - date.getMonth();
++      let age = today.getFullYear() - date.getFullYear();
++      if (m < 0 || (m === 0 && today.getDate() < date.getDate())) age--;
++      return age;
+     }
+   },
+-} satisfies Command
++} satisfies Command;
+diff --git a/Commands/character.ts b/Commands/character.ts
+index c22e428..afd3197 100644
+--- a/Commands/character.ts
++++ b/Commands/character.ts
+@@ -19,7 +19,6 @@ export default {
+   run: async ({ interaction, client }): Promise<void> => {
+     if (!interaction.isCommand()) return;
+ 
+-    //const vars = { charName: interaction.options.getString('query') }
+     const { query: charName } = getOptions<{ query: string }>(interaction.options, ["query"]);
+ 
+     GraphQLRequest("Character", { charName })
+@@ -38,7 +37,6 @@ export default {
+           const embedDate = new Date();
+           for (let i = 0; i < Math.ceil(description.length / 4093); i++) {
+             // ^ Fix the description by replacing and converting HTML tags
+-            // console.log(data.dateOfBirth.day || 'no' + data.dateOfBirth.month + data.dateOfBirth.year)
+             const charEmbed = new EmbedBuilder()
+               .setDescription(`${description.substring(i * 4093, (i + 1) * 4093)}...` || "No description available.")
+               .addFields({
+diff --git a/Commands/help.ts b/Commands/help.ts
+index 732c74f..2b5476e 100644
+--- a/Commands/help.ts
++++ b/Commands/help.ts
+@@ -1,10 +1,11 @@
+ import Discord, { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+ import fs from "fs";
+ import path from "path";
+-import { AnnouncementModel } from "../Database/Models/Announcement";
++import { db, tables } from "../Database";
+ import type { Command } from "../Structures";
+ import { BuildPagination } from "../Utils";
+ import { CommandCategories } from "../Utils/CommandCategories";
++import { desc } from "drizzle-orm";
+ 
+ function generateHelpEmbeds(cmdsArr: Command[][], category: keyof typeof CommandCategories) {
+   const embeds: EmbedBuilder[] = [];
+@@ -64,7 +65,7 @@ export default {
+       cmdGroups[cmdEntry.commandType].push({ usage: cmdEntry.usage, name: cmdEntry.name, description: cmdEntry.description });
+     }
+     // Send the description to the user
+-    const announcements = await AnnouncementModel.findAll({ order: [["date", "DESC"]] }).then((x) => x.slice(0, 5));
++    const announcements = await db.query.announcementModel.findMany({ orderBy: desc(tables.announcementModel.date), limit: 5 });
+ 
+     const helpInfoEmbed = new EmbedBuilder();
+     helpInfoEmbed.setTitle(":grey_question: Help");
+diff --git a/Commands/makeactivity.ts b/Commands/makeactivity.ts
+index 5da081f..069b86d 100644
+--- a/Commands/makeactivity.ts
++++ b/Commands/makeactivity.ts
+@@ -1,8 +1,8 @@
+ import { EmbedError, Footer, GraphQLRequest, SeriesTitle, getOptions } from "../Utils";
+ import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+ import { mwRequireALToken } from "../Middleware/ALToken";
+-import { AnilistUser } from "#Models/AnilistUser.ts";
+ import type { Command } from "../Structures";
++import db from "../Database/db";
+ 
+ const name = "makeactivity";
+ const usage = "makeactivity <list | status>";
+@@ -53,28 +53,28 @@ export default {
+     if (!interaction.isAutocomplete()) return;
+     try {
+       // Get the users media lists
+-      const alUser = await AnilistUser.findOne({ where: { discord_id: interaction.user.id } });
++      const alUser = await db.query.anilistUser.findFirst({ where: (user, { eq }) => eq(user.anilistId, Number(interaction.user.id)) });
+       if (!alUser) return interaction.respond([{ name: "No Anilist account linked", value: "No Anilist account linked" }]);
+ 
+-      const vars = { userId: +alUser.anilist_id };
++      const vars = { userId: +alUser.anilistId };
+       const response = (await GraphQLRequest("ListQuery", vars)).data;
+       if (!response.User || !response.User.mediaListOptions) return interaction.respond([{ name: "No Anilist account linked", value: "No Anilist account linked" }]);
+       let animeLists: {
+         name: string;
+-        value: string; 
++        value: string;
+       }[] = [];
+       let mangaLists: {
+         name: string;
+         value: string;
+-      }[]  = [];
++      }[] = [];
+       if (response.User.mediaListOptions) {
+-        if(response.User.mediaListOptions.animeList?.customLists)
++        if (response.User.mediaListOptions.animeList?.customLists)
+           animeLists = response?.User.mediaListOptions.animeList.customLists.map((list) => {
+             return { name: `${list} (Anime)`, value: list! };
+           });
+-        if(response.User.mediaListOptions.mangaList?.customLists)
++        if (response.User.mediaListOptions.mangaList?.customLists)
+           mangaLists = response?.User.mediaListOptions!.mangaList.customLists.map((list) => {
+-            return { name: `${list} (Manga)`, value: list! }
++            return { name: `${list} (Manga)`, value: list! };
+           });
+       }
+       const lists = animeLists.concat(mangaLists);
+@@ -97,7 +97,7 @@ export default {
+           const data = response.data.SaveTextActivity;
+           const userName = data!.user?.name || "Unknown";
+           const userText = data!.text || "Unknown";
+-          if(!userName || !userText) return;
++          if (!userName || !userText) return;
+ 
+           const statusActivity = new EmbedBuilder()
+             .setURL(data?.siteUrl || "https://anilist.co")
+@@ -116,18 +116,17 @@ export default {
+     if (type === "list") {
+       const listOptions = ["mediaid", "status", "hide", "private", "lists", "score", "progress"].filter((x) => interaction.options.get(x));
+       const vars: { [key: string]: any } = {};
+-      for (const option of listOptions)
+-        vars[option] = interaction.options.get(option)?.value;
++      for (const option of listOptions) vars[option] = interaction.options.get(option)?.value;
+ 
+-      GraphQLRequest('SaveMediaList', vars, interaction.ALtoken)
++      GraphQLRequest("SaveMediaList", vars, interaction.ALtoken)
+         .then((response) => {
+           const data = response.data.SaveMediaListEntry;
+-          if(!data) return interaction.reply({ embeds: [EmbedError("Something went wrong while making the activity.")] });
++          if (!data) return interaction.reply({ embeds: [EmbedError("Something went wrong while making the activity.")] });
+           const mediaListActivity = new EmbedBuilder()
+             .setURL(`https://anilist.co/${data?.media?.type || ""}/${data?.mediaId || ""}`)
+             .setTitle(`${data.user?.name || "Unknown"} added ${data?.media?.title?.userPreferred || "Unknown"} to ${data?.status || "Unknown"}!`)
+             .setFooter(Footer(response.headers));
+-          if(data.media && data.media.bannerImage) mediaListActivity.setImage(data.media.bannerImage);
++          if (data.media && data.media.bannerImage) mediaListActivity.setImage(data.media.bannerImage);
+ 
+           return interaction.reply({ embeds: [mediaListActivity] });
+         })
+diff --git a/Commands/recent.js b/Commands/recent.js
+deleted file mode 100644
+index 4ffd409..0000000
+--- a/Commands/recent.js
++++ /dev/null
+@@ -1,125 +0,0 @@
+-const Discord = require('discord.js')
+-const { EmbedBuilder, SlashCommandBuilder, AttachmentBuilder } = require('discord.js')
+-const Canvas = require('canvas')
+-const { mwGetUserEntry } = require('#Middleware/UserEntry.js')
+-const Command = require('#Structures/Command.js')
+-const EmbedError = require('#Utils/EmbedError.js')
+-const SeriesTitle = require('#Utils/SeriesTitle.js')
+-const CommandCategories = require('#Utils/CommandCategories.js')
+-const GraphQLRequest = require('#Utils/GraphQLRequest.js')
+-const GraphQLQueries = require('#Utils/GraphQLQueries.js')
+-
+-const name = 'recent'
+-const usage = 'recent'
+-const description = 'Shows the 9 most recent watched/read media of the user in a image grid.'
+-
+-module.exports = new Command({
+-  name,
+-  usage,
+-  description,
+-  middlewares: [mwGetUserEntry],
+-  type: CommandCategories.Anilist,
+-  slash: new SlashCommandBuilder()
+-    .setName(name)
+-    .setDescription(description)
+-    .addStringOption(option => option.setName('type').setDescription('The type of media to search for').addChoices({ name: 'Anime', value: 'ANIME' }, { name: 'Manga', value: 'MANGA' }).setRequired(true))
+-    .addStringOption(option => option.setName('user').setDescription('The user to search for').setRequired(false)),
+-
+-  async run(interaction, args, run) {
+-    const userName = interaction.options.getString('user')
+-    const mediaType = interaction.options.getString('type')
+-
+-    const vars = {
+-      perPage: 9,
+-      type: mediaType,
+-    }
+-
+-    if (!userName) {
+-      // We try to use the one the user set
+-      try {
+-        vars.userId = interaction.alID
+-      }
+-      catch (error) {
+-        console.error(error)
+-        return interaction.reply({ embeds: [EmbedError(`You have yet to set an AniList token.`)] })
+-      }
+-    }
+-    else {
+-      vars.user = userName
+-    }
+-
+-    try {
+-      let data = await GraphQLRequest(GraphQLQueries.RecentChart, vars)
+-      data = data.Page.mediaList
+-
+-      if (!data)
+-        return interaction.reply({ embeds: [EmbedError('Unable to find specified user', vars)] })
+-
+-      const canvas = Canvas.createCanvas(1000, 1000)
+-      const ctx = canvas.getContext('2d')
+-
+-      let x = 0
+-      let y = 0
+-
+-      for (item of data) {
+-        const cover = item.media.coverImage?.extraLarge || 'https://i.imgur.com/Hx8474m.png' // Placeholder image
+-        const canvasImage = await Canvas.loadImage(cover)
+-
+-        const width = 1000 / Math.ceil(data.length / 3)
+-        const height = (width / canvasImage.width) * canvasImage.height
+-
+-        ctx.drawImage(canvasImage, x, y, width, height)
+-
+-        ctx.fillStyle = 'rgba(0, 0, 0, 0.75)'
+-        ctx.fillRect(x, y + width - 40, width, 40)
+-
+-        ctx.font = '17px Arial'
+-        ctx.fillStyle = 'white'
+-        ctx.textAlign = 'center'
+-        const title = SeriesTitle(item.media)
+-        const status = parseStatus(item, mediaType)
+-        ctx.fillText(status, x + width / 2, y + width - 24)
+-        ctx.fillText(title, x + width / 2, y + width - 5)
+-        x += width
+-        if (x >= 999) {
+-          x = 0
+-          y += width
+-        }
+-      }
+-
+-      const canvasResult = canvas.toBuffer()
+-      if (!canvasResult)
+-        return interaction.reply({ embeds: [EmbedError('Encountered an error whilst trying to create the image.', vars)] })
+-      const attachment = new AttachmentBuilder(canvasResult)
+-      interaction.reply({ files: [attachment] })
+-    }
+-    catch (error) {
+-      interaction.reply({ embeds: [EmbedError(error, vars)] })
+-    }
+-  },
+-})
+-
+-function parseStatus(data, mediaType) {
+-  if (!data.status)
+-    return 'Unknown'
+-  switch (data.status) {
+-    case 'CURRENT':
+-      if (mediaType === 'ANIME')
+-        return `Watched Episode ${data.progress} of`
+-      else return `Read Chapter ${data.progress} of`
+-    case 'PLANNING':
+-      if (mediaType === 'ANIME')
+-        return `Planning to Watch`
+-      else return `Planning to Read`
+-    case 'COMPLETED':
+-      return `Completed`
+-    case 'PAUSED':
+-      return `Paused`
+-    case 'DROPPED':
+-      return `Dropped`
+-    case 'REPEATING':
+-      if (mediaType === 'ANIME')
+-        return `Re-watching`
+-      else return `Re-reading`
+-  }
+-}
+diff --git a/Components/annModal.ts b/Components/annModal.ts
+index 6471e6a..cbb1183 100644
+--- a/Components/annModal.ts
++++ b/Components/annModal.ts
+@@ -1,5 +1,8 @@
+ import type { YuukoComponent } from '../Utils/types'
+-import { AnnouncementModel } from '#Models/Announcement.ts'
++
++import announcementModel from '../Database/Models/Announcement'
++
++import db from '../Database/db'
+ 
+ export default {
+   name: 'annModal',
+@@ -7,7 +10,8 @@ export default {
+     if (!interaction.isModalSubmit())
+       return
+     const annInput = interaction.fields.getTextInputValue('annInput')
+-    await AnnouncementModel.create({ date: new Date(), announcement: annInput })
++    // await announcementModel.create({ date: new Date(), announcement: annInput })
++    db.insert(announcementModel).values({ announcement: annInput })
+     return interaction.reply({ content: 'Announcement created!', ephemeral: true })
+   },
+ } satisfies YuukoComponent
+diff --git a/Database/Models/AnilistUser.ts b/Database/Models/AnilistUser.ts
+index 84fa9ad..8d85054 100644
+--- a/Database/Models/AnilistUser.ts
++++ b/Database/Models/AnilistUser.ts
+@@ -1,48 +1,31 @@
+-import type { Optional } from 'sequelize'
+-import { DataTypes, Model } from 'sequelize'
++import { relations, sql } from "drizzle-orm";
++import { sqliteTable, text, numeric, integer } from "drizzle-orm/sqlite-core";
++import { userBirthday } from ".";
+ 
+-import { db } from '../db' // assuming this is the correct path for your db instance
++export const anilistUser = sqliteTable("anilistuser", {
++  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+ 
+-interface AnilistUserAttributes {
+-  discord_id: string
+-  anilist_token: string
+-  anilist_id: number
+-}
++  discordId: text("discord_id", {
++    length: 18,
++  })
++    .notNull()
++    .unique(),
++  anilistToken: text("anilist_token", {
++    length: 3000,
++  })
++    .notNull()
++    .unique(),
++  anilistId: integer("anilist_id").notNull().unique(),
++  createdAt: integer("createdAt", { mode: "timestamp" })
++    .notNull()
++    .default(sql`CURRENT_TIMESTAMP`),
++  updatedAt: integer("updatedAt", { mode: "timestamp" })
++    .notNull()
++    .default(sql`CURRENT_TIMESTAMP`),
++});
+ 
+-interface AnilistUserCreationAttributes extends Optional<AnilistUserAttributes, 'discord_id' | 'anilist_token' | 'anilist_id'> {}
++export const anilistUserRelations = relations(anilistUser, ({one}) => ({
++  birthday: one(userBirthday)
++}))
+ 
+-export class AnilistUser extends Model<AnilistUserAttributes, AnilistUserCreationAttributes> implements AnilistUserAttributes {
+-  declare discord_id: string
+-  declare anilist_token: string
+-  declare anilist_id: number
+-}
+-
+-AnilistUser.init(
+-  {
+-    discord_id: {
+-      type: DataTypes.STRING(18),
+-      allowNull: false,
+-      unique: true,
+-    },
+-    anilist_token: {
+-      type: DataTypes.STRING(3000),
+-      allowNull: false,
+-      unique: true,
+-      validate: {
+-        len: [1, 3000],
+-      },
+-    },
+-    anilist_id: {
+-      type: DataTypes.NUMBER(),
+-      allowNull: false,
+-      unique: true,
+-      validate: {
+-        len: [1, 32],
+-      },
+-    },
+-  },
+-  {
+-    sequelize: db,
+-    tableName: 'anilistuser',
+-  },
+-)
++export default anilistUser;
+diff --git a/Database/Models/Announcement.ts b/Database/Models/Announcement.ts
+index 1c0a88b..df7530f 100644
+--- a/Database/Models/Announcement.ts
++++ b/Database/Models/Announcement.ts
+@@ -1,35 +1,21 @@
+-import type { Optional } from 'sequelize'
+-import { DataTypes, Model } from 'sequelize'
++import { sql } from "drizzle-orm";
++import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+ 
+-import { db } from '../db' // assuming this is the correct path for your db instance
++export const announcementModel = sqliteTable("announcementmodel", {
++  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+ 
+-interface AnnouncementModelAttributes {
+-  date: Date
+-  announcement: string
+-}
++  date: integer("date", { mode: "timestamp" })
++    .notNull()
++    .default(sql`CURRENT_TIMESTAMP`),
++  announcement: text("announcement", {
++    length: 128,
++  }).notNull(),
++  createdAt: integer("createdAt", { mode: "timestamp" })
++    .notNull()
++    .default(sql`CURRENT_TIMESTAMP`),
++  updatedAt: integer("updatedAt", { mode: "timestamp" })
++    .notNull()
++    .default(sql`CURRENT_TIMESTAMP`),
++});
+ 
+-interface AnnouncementModelCreationAttributes extends Optional<AnnouncementModelAttributes, 'date' | 'announcement'> {}
+-
+-export class AnnouncementModel extends Model<AnnouncementModelAttributes, AnnouncementModelCreationAttributes> implements AnnouncementModelAttributes {
+-  declare date: Date
+-  declare announcement: string
+-}
+-
+-AnnouncementModel.init(
+-  {
+-    date: {
+-      type: DataTypes.DATE,
+-      allowNull: false,
+-      unique: false,
+-    },
+-    announcement: {
+-      type: DataTypes.STRING(128),
+-      allowNull: false,
+-      unique: false,
+-    },
+-  },
+-  {
+-    sequelize: db,
+-    tableName: 'announcementmodel',
+-  },
+-)
++export default announcementModel;
+diff --git a/Database/Models/Cache.ts b/Database/Models/Cache.ts
+deleted file mode 100644
+index 6f60283..0000000
+--- a/Database/Models/Cache.ts
++++ /dev/null
+@@ -1,47 +0,0 @@
+-import type { Optional } from 'sequelize'
+-import { DataTypes, Model } from 'sequelize'
+-
+-import { db } from '../db' // assuming this is the correct path for your db instance
+-
+-interface CacheModelAttributes {
+-  type: string
+-  cacheID: string
+-  keywords: Text
+-  data: Text
+-}
+-
+-interface CacheModelCreationAttributes extends Optional<CacheModelAttributes, 'type' | 'cacheID' | 'keywords' | 'data'> {}
+-
+-export class CacheModel extends Model<CacheModelAttributes, CacheModelCreationAttributes> implements CacheModelAttributes {
+-  declare type: string
+-  declare cacheID: string
+-  declare keywords: Text
+-  declare data: Text
+-}
+-
+-CacheModel.init(
+-  {
+-    type: {
+-      type: DataTypes.STRING(32),
+-      allowNull: false,
+-      unique: true,
+-    },
+-    cacheID: {
+-      type: DataTypes.STRING(),
+-      allowNull: false,
+-      unique: true,
+-    },
+-    keywords: {
+-      type: DataTypes.TEXT(),
+-      allowNull: false,
+-    },
+-    data: {
+-      type: DataTypes.TEXT(),
+-      allowNull: false,
+-    },
+-  },
+-  {
+-    sequelize: db,
+-    tableName: 'cachemodel',
+-  },
+-)
+diff --git a/Database/Models/UserBirthday.ts b/Database/Models/UserBirthday.ts
+index 883ff72..07b22e0 100644
+--- a/Database/Models/UserBirthday.ts
++++ b/Database/Models/UserBirthday.ts
+@@ -1,48 +1,23 @@
+-import type { Optional } from 'sequelize'
+-import { DataTypes, Model } from 'sequelize'
++import { sql } from "drizzle-orm";
++import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+ 
+-import { db } from '../db' // assuming this is the correct path for your db instance
++export const userBirthday = sqliteTable("userbirthday", {
++  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+ 
+-interface UserBirthdayAttributes {
+-  guild_id: string
+-  user_id: string
+-  birthday: Date
+-}
++  guildId: text("guild_id", {
++    length: 18,
++  }).notNull(),
++  userId: text("user_id", {
++    length: 18,
++  }).notNull(),
++  birthday: integer("birthday", { mode: "timestamp" })
++  .notNull(),
+ 
+-interface UserBirthdayCreationAttributes extends Optional<UserBirthdayAttributes, 'guild_id' | 'user_id' | 'birthday'> {}
++  createdAt: integer("createdAt", { mode: "timestamp" })
++    .notNull()
++    .default(sql`CURRENT_TIMESTAMP`),
++  updatedAt: integer("updatedAt", { mode: "timestamp" })
++    .default(sql`CURRENT_TIMESTAMP`),
++});
+ 
+-export class UserBirthday extends Model<UserBirthdayAttributes, UserBirthdayCreationAttributes> implements UserBirthdayAttributes {
+-  declare guild_id: string
+-  declare user_id: string
+-  declare birthday: Date
+-}
+-
+-UserBirthday.init(
+-  {
+-    guild_id: {
+-      type: DataTypes.STRING(18),
+-      allowNull: false,
+-      unique: false,
+-      validate: {
+-        len: [1, 18],
+-      },
+-    },
+-    user_id: {
+-      type: DataTypes.STRING(18),
+-      allowNull: false,
+-      unique: true,
+-      validate: {
+-        len: [1, 18],
+-      },
+-    },
+-    birthday: {
+-      type: DataTypes.DATE,
+-      allowNull: false,
+-      unique: false,
+-    },
+-  },
+-  {
+-    sequelize: db,
+-    tableName: 'userbirthday',
+-  },
+-)
++export default userBirthday
+diff --git a/Database/db.ts b/Database/db.ts
+index 29f5279..e2e6b9c 100644
+--- a/Database/db.ts
++++ b/Database/db.ts
+@@ -1,32 +1,11 @@
+-import fs from 'fs'
+-import path from 'path'
+-import { Sequelize } from 'sequelize'
++import { drizzle, type BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
++import { Database } from "bun:sqlite";
++import * as schema from "./Models/schema";
+ 
+-// If the database does not exist yet,
+-// we create it so it can accessed.
+-if (!fs.existsSync(path.join(__dirname, 'db.sqlite')))
+-  fs.writeFileSync(path.join(__dirname, 'db.sqlite'), '')
+-
+-export const db = new Sequelize({
+-  dialect: 'sqlite',
+-  storage: path.join(__dirname, 'db.sqlite'),
+-  logging: false,
++export const sqlite = new Database("./Database/db.sqlite");
++export const db: BunSQLiteDatabase<typeof schema> = drizzle(sqlite, {
++  logger: true,
++  schema,
+ });
+-// console.log("Hello Sequelize!");
+ 
+-(async () => {
+-  try {
+-    console.log('Hello Sequelize!')
+-    await db.authenticate()
+-    console.log('[Sequelize] Database connection has been established successfully.')
+-    // User when altering
+-    // await db.sync({ alter: true });
+-    // User when creating
+-    await db.sync()
+-    console.log('[Sequelize] Database has been synced.')
+-  }
+-  catch (error) {
+-    console.error('[Sequelize] Unable to connect to the database')
+-    throw error
+-  }
+-})()
++export default db;
+diff --git a/Middleware/ALToken.ts b/Middleware/ALToken.ts
+index ece27e4..7f1e0fd 100644
+--- a/Middleware/ALToken.ts
++++ b/Middleware/ALToken.ts
+@@ -1,5 +1,5 @@
+ import type { Interaction } from 'discord.js'
+-import { AnilistUser } from '../Database/Models/AnilistUser'
++import { db, tables } from '../Database'
+ import { RSACryption } from '../Utils/RSACryption'
+ 
+ import { Middleware } from '../Structures/Middleware'
+@@ -7,20 +7,20 @@ import { Middleware } from '../Structures/Middleware'
+ async function requireALToken(interaction: Interaction) {
+   // We can be sure we are passing a valid one;
+   const id = interaction.user.id
+-  const alUser = await AnilistUser.findOne({ where: { discord_id: id } })
+-  if (!alUser || !alUser.getDataValue('anilist_token'))
++  const alUser = await db.query.anilistUser.findFirst({ where: (user, { eq }) => eq(user.discordId, id) })
++  if (!alUser || !alUser.anilistToken)
+     throw new Error('You must have an AniList token set to use this action.')
+ 
+   // @ts-expect-error
+-  interaction.ALtoken = RSACryption(alUser.getDataValue('anilist_token'))
++  interaction.ALtoken = RSACryption(alUser.anilistToken)
+ }
+ 
+ async function optionalALToken(interaction: Interaction) {
+   const id = interaction.user.id
+-  const alUser = await AnilistUser.findOne({ where: { discord_id: id } })
+-  if (alUser && alUser.getDataValue('anilist_token')) {
++  const alUser = await db.query.anilistUser.findFirst({ where: (user, { eq }) => eq(user.discordId, id) })
++  if (alUser && alUser.anilistToken) {
+     // @ts-expect-error
+-    interaction.ALtoken = RSACryption(alUser.getDataValue('anilist_token'))
++    interaction.ALtoken = RSACryption(alUser.anilistToken)
+   }
+ }
+ 
+diff --git a/Middleware/UserEntry.ts b/Middleware/UserEntry.ts
+index 31f50d9..c3b476b 100644
+--- a/Middleware/UserEntry.ts
++++ b/Middleware/UserEntry.ts
+@@ -1,18 +1,14 @@
+-import type { Interaction } from 'discord.js'
+-import { Middleware } from '../Structures/Middleware'
+-import { AnilistUser } from '../Database/Models/AnilistUser'
+-
+-async function getUserEntry(interaction: Interaction) {
+-  const id = interaction.user.id
+-  const alUser = await AnilistUser.findOne({ where: { discord_id: id } })
+-  if (alUser && alUser.getDataValue('anilist_id')) {
+-    // @ts-expect-error | This is a valid property
+-    interaction.alID = alUser.getDataValue('anilist_id');
+-  }
+-}
++import { Middleware } from "../Structures/Middleware";
++import db from "../Database/db";
+ 
+ export const mwGetUserEntry = new Middleware({
+-  name: 'Require AniList Token',
+-  description: 'This middleware gets you the user\'s AniList ID and add\'s it to the interaction object.',
+-  run: getUserEntry,
+-})
++  name: "Require AniList Token",
++  description: "This middleware gets you the user's AniList ID and add's it to the interaction object.",
++  run: async (interaction) => {
++    const id = interaction.user.id;
++    const alUser = await db.query.anilistUser.findFirst({ where: (user, { eq }) => eq(user.discordId, id) });
++    if (alUser && alUser.anilistId) {
++      interaction.alID = alUser.anilistId;
++    }
++  },
++});
+diff --git a/Structures/Command.ts b/Structures/Command.ts
+index 6d97573..13a36d0 100644
+--- a/Structures/Command.ts
++++ b/Structures/Command.ts
+@@ -24,10 +24,12 @@ export type Prettify<T> = {
+ 
+ export interface RunOptions<Args = any> {
+   client: Client;
+-  interaction: Interaction & { alID?: number; ALtoken?: string };
++  interaction: UsableInteraction;
+   args?: Args;
+ }
+ 
++export type UsableInteraction = Interaction & { alID?: number, ALtoken?: string }
++
+ interface CommandStringOption {
+   name: string;
+   description: string;
+diff --git a/Structures/Middleware.ts b/Structures/Middleware.ts
+index 2bc6b99..f89f494 100644
+--- a/Structures/Middleware.ts
++++ b/Structures/Middleware.ts
+@@ -1,7 +1,8 @@
+ import type { Interaction } from 'discord.js'
++import type { UsableInteraction } from '.'
+ 
+-type InteractionRunner = (interaction: Interaction) => void
+-type AsyncInteractionRunner = (interaction: Interaction) => Promise<void>
++type InteractionRunner = (interaction: UsableInteraction) => void
++type AsyncInteractionRunner = (interaction: UsableInteraction) => Promise<void>
+ export interface MiddlewareOptions {
+   name: string
+   description: string

@@ -1,5 +1,8 @@
 import type { YuukoComponent } from '../Utils/types'
-import { AnnouncementModel } from '#Models/Announcement.ts'
+
+import announcementModel from '../Database/Models/Announcement'
+
+import db from '../Database/db'
 
 export default {
   name: 'annModal',
@@ -7,7 +10,8 @@ export default {
     if (!interaction.isModalSubmit())
       return
     const annInput = interaction.fields.getTextInputValue('annInput')
-    await AnnouncementModel.create({ date: new Date(), announcement: annInput })
+    // await announcementModel.create({ date: new Date(), announcement: annInput })
+    db.insert(announcementModel).values({ announcement: annInput })
     return interaction.reply({ content: 'Announcement created!', ephemeral: true })
   },
 } satisfies YuukoComponent

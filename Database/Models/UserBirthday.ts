@@ -1,48 +1,23 @@
-import type { Optional } from 'sequelize'
-import { DataTypes, Model } from 'sequelize'
+import { sql } from "drizzle-orm";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
-import { db } from '../db' // assuming this is the correct path for your db instance
+export const userBirthday = sqliteTable("userbirthday", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
 
-interface UserBirthdayAttributes {
-  guild_id: string
-  user_id: string
-  birthday: Date
-}
+  guildId: text("guild_id", {
+    length: 18,
+  }).notNull(),
+  userId: text("user_id", {
+    length: 18,
+  }).notNull(),
+  birthday: integer("birthday", { mode: "timestamp" })
+  .notNull(),
 
-interface UserBirthdayCreationAttributes extends Optional<UserBirthdayAttributes, 'guild_id' | 'user_id' | 'birthday'> {}
+  createdAt: integer("createdAt", { mode: "timestamp" })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer("updatedAt", { mode: "timestamp" })
+    .default(sql`CURRENT_TIMESTAMP`),
+});
 
-export class UserBirthday extends Model<UserBirthdayAttributes, UserBirthdayCreationAttributes> implements UserBirthdayAttributes {
-  declare guild_id: string
-  declare user_id: string
-  declare birthday: Date
-}
-
-UserBirthday.init(
-  {
-    guild_id: {
-      type: DataTypes.STRING(18),
-      allowNull: false,
-      unique: false,
-      validate: {
-        len: [1, 18],
-      },
-    },
-    user_id: {
-      type: DataTypes.STRING(18),
-      allowNull: false,
-      unique: true,
-      validate: {
-        len: [1, 18],
-      },
-    },
-    birthday: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      unique: false,
-    },
-  },
-  {
-    sequelize: db,
-    tableName: 'userbirthday',
-  },
-)
+export default userBirthday

@@ -1,7 +1,8 @@
 import type { Interaction } from 'discord.js'
+import type { UsableInteraction } from '.'
 
-type InteractionRunner = (interaction: Interaction) => void
-type AsyncInteractionRunner = (interaction: Interaction) => Promise<void>
+type InteractionRunner = (interaction: UsableInteraction) => void
+type AsyncInteractionRunner = (interaction: UsableInteraction) => Promise<void>
 export interface MiddlewareOptions {
   name: string
   description: string

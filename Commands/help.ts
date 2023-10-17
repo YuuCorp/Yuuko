@@ -1,10 +1,11 @@
 import Discord, { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import fs from "fs";
 import path from "path";
-import { AnnouncementModel } from "../Database/Models/Announcement";
+import { db, tables } from "../Database";
 import type { Command } from "../Structures";
 import { BuildPagination } from "../Utils";
 import { CommandCategories } from "../Utils/CommandCategories";
+import { desc } from "drizzle-orm";
 
 function generateHelpEmbeds(cmdsArr: Command[][], category: keyof typeof CommandCategories) {
   const embeds: EmbedBuilder[] = [];
@@ -64,7 +65,7 @@ export default {
       cmdGroups[cmdEntry.commandType].push({ usage: cmdEntry.usage, name: cmdEntry.name, description: cmdEntry.description });
     }
     // Send the description to the user
-    const announcements = await AnnouncementModel.findAll({ order: [["date", "DESC"]] }).then((x) => x.slice(0, 5));
+    const announcements = await db.query.announcementModel.findMany({ orderBy: desc(tables.announcementModel.date), limit: 5 });
 
     const helpInfoEmbed = new EmbedBuilder();
     helpInfoEmbed.setTitle(":grey_question: Help");

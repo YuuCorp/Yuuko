@@ -1,35 +1,21 @@
-import type { Optional } from 'sequelize'
-import { DataTypes, Model } from 'sequelize'
+import { sql } from "drizzle-orm";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
-import { db } from '../db' // assuming this is the correct path for your db instance
+export const announcementModel = sqliteTable("announcementmodel", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
 
-interface AnnouncementModelAttributes {
-  date: Date
-  announcement: string
-}
+  date: integer("date", { mode: "timestamp" })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  announcement: text("announcement", {
+    length: 128,
+  }).notNull(),
+  createdAt: integer("createdAt", { mode: "timestamp" })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer("updatedAt", { mode: "timestamp" })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+});
 
-interface AnnouncementModelCreationAttributes extends Optional<AnnouncementModelAttributes, 'date' | 'announcement'> {}
-
-export class AnnouncementModel extends Model<AnnouncementModelAttributes, AnnouncementModelCreationAttributes> implements AnnouncementModelAttributes {
-  declare date: Date
-  declare announcement: string
-}
-
-AnnouncementModel.init(
-  {
-    date: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      unique: false,
-    },
-    announcement: {
-      type: DataTypes.STRING(128),
-      allowNull: false,
-      unique: false,
-    },
-  },
-  {
-    sequelize: db,
-    tableName: 'announcementmodel',
-  },
-)
+export default announcementModel;

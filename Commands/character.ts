@@ -19,7 +19,6 @@ export default {
   run: async ({ interaction, client }): Promise<void> => {
     if (!interaction.isCommand()) return;
 
-    //const vars = { charName: interaction.options.getString('query') }
     const { query: charName } = getOptions<{ query: string }>(interaction.options, ["query"]);
 
     GraphQLRequest("Character", { charName })
@@ -38,7 +37,6 @@ export default {
           const embedDate = new Date();
           for (let i = 0; i < Math.ceil(description.length / 4093); i++) {
             // ^ Fix the description by replacing and converting HTML tags
-            // console.log(data.dateOfBirth.day || 'no' + data.dateOfBirth.month + data.dateOfBirth.year)
             const charEmbed = new EmbedBuilder()
               .setDescription(`${description.substring(i * 4093, (i + 1) * 4093)}...` || "No description available.")
               .addFields({

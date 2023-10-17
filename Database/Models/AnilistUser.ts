@@ -1,48 +1,31 @@
-import type { Optional } from 'sequelize'
-import { DataTypes, Model } from 'sequelize'
+import { relations, sql } from "drizzle-orm";
+import { sqliteTable, text, numeric, integer } from "drizzle-orm/sqlite-core";
+import { userBirthday } from ".";
 
-import { db } from '../db' // assuming this is the correct path for your db instance
+export const anilistUser = sqliteTable("anilistuser", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
 
-interface AnilistUserAttributes {
-  discord_id: string
-  anilist_token: string
-  anilist_id: number
-}
+  discordId: text("discord_id", {
+    length: 18,
+  })
+    .notNull()
+    .unique(),
+  anilistToken: text("anilist_token", {
+    length: 3000,
+  })
+    .notNull()
+    .unique(),
+  anilistId: integer("anilist_id").notNull().unique(),
+  createdAt: integer("createdAt", { mode: "timestamp" })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer("updatedAt", { mode: "timestamp" })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+});
 
-interface AnilistUserCreationAttributes extends Optional<AnilistUserAttributes, 'discord_id' | 'anilist_token' | 'anilist_id'> {}
+export const anilistUserRelations = relations(anilistUser, ({one}) => ({
+  birthday: one(userBirthday)
+}))
 
-export class AnilistUser extends Model<AnilistUserAttributes, AnilistUserCreationAttributes> implements AnilistUserAttributes {
-  declare discord_id: string
-  declare anilist_token: string
-  declare anilist_id: number
-}
-
-AnilistUser.init(
-  {
-    discord_id: {
-      type: DataTypes.STRING(18),
-      allowNull: false,
-      unique: true,
-    },
-    anilist_token: {
-      type: DataTypes.STRING(3000),
-      allowNull: false,
-      unique: true,
-      validate: {
-        len: [1, 3000],
-      },
-    },
-    anilist_id: {
-      type: DataTypes.NUMBER(),
-      allowNull: false,
-      unique: true,
-      validate: {
-        len: [1, 32],
-      },
-    },
-  },
-  {
-    sequelize: db,
-    tableName: 'anilistuser',
-  },
-)
+export default anilistUser;

@@ -1,8 +1,8 @@
 import { EmbedError, Footer, GraphQLRequest, SeriesTitle, getOptions } from "../Utils";
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { mwRequireALToken } from "../Middleware/ALToken";
-import { AnilistUser } from "#Models/AnilistUser.ts";
 import type { Command } from "../Structures";
+import db from "../Database/db";
 
 const name = "makeactivity";
 const usage = "makeactivity <list | status>";
@@ -53,28 +53,28 @@ export default {
     if (!interaction.isAutocomplete()) return;
     try {
       // Get the users media lists
-      const alUser = await AnilistUser.findOne({ where: { discord_id: interaction.user.id } });
+      const alUser = await db.query.anilistUser.findFirst({ where: (user, { eq }) => eq(user.anilistId, Number(interaction.user.id)) });
       if (!alUser) return interaction.respond([{ name: "No Anilist account linked", value: "No Anilist account linked" }]);
 
-      const vars = { userId: +alUser.anilist_id };
+      const vars = { userId: +alUser.anilistId };
       const response = (await GraphQLRequest("ListQuery", vars)).data;
       if (!response.User || !response.User.mediaListOptions) return interaction.respond([{ name: "No Anilist account linked", value: "No Anilist account linked" }]);
       let animeLists: {
         name: string;
-        value: string; 
+        value: string;
       }[] = [];
       let mangaLists: {
         name: string;
         value: string;
-      }[]  = [];
+      }[] = [];
       if (response.User.mediaListOptions) {
-        if(response.User.mediaListOptions.animeList?.customLists)
+        if (response.User.mediaListOptions.animeList?.customLists)
           animeLists = response?.User.mediaListOptions.animeList.customLists.map((list) => {
             return { name: `${list} (Anime)`, value: list! };
           });
-        if(response.User.mediaListOptions.mangaList?.customLists)
+        if (response.User.mediaListOptions.mangaList?.customLists)
           mangaLists = response?.User.mediaListOptions!.mangaList.customLists.map((list) => {
-            return { name: `${list} (Manga)`, value: list! }
+            return { name: `${list} (Manga)`, value: list! };
           });
       }
       const lists = animeLists.concat(mangaLists);
@@ -97,7 +97,7 @@ export default {
           const data = response.data.SaveTextActivity;
           const userName = data!.user?.name || "Unknown";
           const userText = data!.text || "Unknown";
-          if(!userName || !userText) return;
+          if (!userName || !userText) return;
 
           const statusActivity = new EmbedBuilder()
             .setURL(data?.siteUrl || "https://anilist.co")
@@ -116,18 +116,17 @@ export default {
     if (type === "list") {
       const listOptions = ["mediaid", "status", "hide", "private", "lists", "score", "progress"].filter((x) => interaction.options.get(x));
       const vars: { [key: string]: any } = {};
-      for (const option of listOptions)
-        vars[option] = interaction.options.get(option)?.value;
+      for (const option of listOptions) vars[option] = interaction.options.get(option)?.value;
 
-      GraphQLRequest('SaveMediaList', vars, interaction.ALtoken)
+      GraphQLRequest("SaveMediaList", vars, interaction.ALtoken)
         .then((response) => {
           const data = response.data.SaveMediaListEntry;
-          if(!data) return interaction.reply({ embeds: [EmbedError("Something went wrong while making the activity.")] });
+          if (!data) return interaction.reply({ embeds: [EmbedError("Something went wrong while making the activity.")] });
           const mediaListActivity = new EmbedBuilder()
             .setURL(`https://anilist.co/${data?.media?.type || ""}/${data?.mediaId || ""}`)
             .setTitle(`${data.user?.name || "Unknown"} added ${data?.media?.title?.userPreferred || "Unknown"} to ${data?.status || "Unknown"}!`)
             .setFooter(Footer(response.headers));
-          if(data.media && data.media.bannerImage) mediaListActivity.setImage(data.media.bannerImage);
+          if (data.media && data.media.bannerImage) mediaListActivity.setImage(data.media.bannerImage);
 
           return interaction.reply({ embeds: [mediaListActivity] });
         })

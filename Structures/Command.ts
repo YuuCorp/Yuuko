@@ -24,9 +24,11 @@ export type Prettify<T> = {
 
 export interface RunOptions<Args = any> {
   client: Client;
-  interaction: Interaction & { alID?: number; ALtoken?: string };
+  interaction: UsableInteraction;
   args?: Args;
 }
+
+export type UsableInteraction = Interaction & { alID?: number, ALtoken?: string }
 
 interface CommandStringOption {
   name: string;

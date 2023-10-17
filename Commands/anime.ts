@@ -38,14 +38,7 @@ export default {
     } else {
       return void interaction.reply({ embeds: [EmbedError(`AnimeCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)] });
     }
-    console.log(hookdata, "hookdata");
-    console.log(vars, "vars");
 
-    // if (hookdata && hookdata?.id) {
-    //     GraphQLQueries.Anime = GraphQLQueries.Anime.replace("$query: String", "$query: Int");
-    //     GraphQLQueries.Anime = GraphQLQueries.Anime.replace("search:", "id:");
-    // }
-    // ^ Make the HTTP Api request
     GraphQLRequest(
       "Anime",
       {

@@ -1,5 +1,5 @@
 import type { Interaction } from 'discord.js'
-import { AnilistUser } from '../Database/Models/AnilistUser'
+import { db, tables } from '../Database'
 import { RSACryption } from '../Utils/RSACryption'
 
 import { Middleware } from '../Structures/Middleware'
@@ -7,20 +7,20 @@ import { Middleware } from '../Structures/Middleware'
 async function requireALToken(interaction: Interaction) {
   // We can be sure we are passing a valid one;
   const id = interaction.user.id
-  const alUser = await AnilistUser.findOne({ where: { discord_id: id } })
-  if (!alUser || !alUser.getDataValue('anilist_token'))
+  const alUser = await db.query.anilistUser.findFirst({ where: (user, { eq }) => eq(user.discordId, id) })
+  if (!alUser || !alUser.anilistToken)
     throw new Error('You must have an AniList token set to use this action.')
 
   // @ts-expect-error
-  interaction.ALtoken = RSACryption(alUser.getDataValue('anilist_token'))
+  interaction.ALtoken = RSACryption(alUser.anilistToken)
 }
 
 async function optionalALToken(interaction: Interaction) {
   const id = interaction.user.id
-  const alUser = await AnilistUser.findOne({ where: { discord_id: id } })
-  if (alUser && alUser.getDataValue('anilist_token')) {
+  const alUser = await db.query.anilistUser.findFirst({ where: (user, { eq }) => eq(user.discordId, id) })
+  if (alUser && alUser.anilistToken) {
     // @ts-expect-error
-    interaction.ALtoken = RSACryption(alUser.getDataValue('anilist_token'))
+    interaction.ALtoken = RSACryption(alUser.anilistToken)
   }
 }
 
