@@ -48,7 +48,7 @@ export class Client extends DiscordClient {
     //       slashCommands.push(command.slash)
     //   })
 
-    fs.readdirSync('./Components')
+    fs.readdirSync('./src/Components')
       .filter(file => file.endsWith('.ts'))
       .forEach(async (file) => {
         const comp: YuukoComponent = (await import(`#Components/${file}`)).default
