@@ -1,8 +1,7 @@
-import { relations, sql } from "drizzle-orm";
-import { sqliteTable, text, numeric, integer } from "drizzle-orm/sqlite-core";
-import { userBirthday } from ".";
+import { sql } from "drizzle-orm";
+import { sqliteTable, text, integer,  } from "drizzle-orm/sqlite-core";
 
-export const anilistUser = sqliteTable("anilistuser", {
+export const anilistUser = sqliteTable("anilistusers", {
   id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
 
   discordId: text("discord_id", {

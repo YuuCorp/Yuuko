@@ -1,4 +1,4 @@
-import { Check } from '#Structures/Check.ts'
+import { Check } from '../Structures/Check'
 
 const tokenCheck = new Check({
   name: 'Token Check',

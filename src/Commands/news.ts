@@ -1,5 +1,5 @@
-import { EmbedError } from '#Utils/EmbedError.ts'
-import { Footer } from '#Utils/Footer.ts'
+import { EmbedError } from '../Utils/EmbedError'
+import { Footer } from '../Utils/Footer'
 import axios from 'axios'
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 import type { Command } from '../Structures'

@@ -10,7 +10,7 @@ export const userBirthday = sqliteTable("userbirthday", {
   userId: text("user_id", {
     length: 18,
   }).notNull(),
-  birthday: integer("birthday", { mode: "timestamp" })
+  birthday: text("birthday")
   .notNull(),
 
   createdAt: integer("createdAt", { mode: "timestamp" })

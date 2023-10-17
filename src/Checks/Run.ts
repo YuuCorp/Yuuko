@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import type { Check } from '#Structures/Check.ts'
+import type { Check } from '../Structures/Check'
 
 // Flatten the array of checks
 const checks: Check[] = (

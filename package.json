@@ -11,16 +11,17 @@
     "anime",
     "suggest"
   ],
-  "main": "app.js",
+  "main": "src/app.js",
   "scripts": {
     "start": "pm2 start ecosystem.config.js --env production",
-    "dev": "bun run --watch app.ts",
+    "dev": "bun run --watch ./src/app.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "prettier --write .",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint:fix": "eslint . --fix", 
     "gen:gql": "graphql-codegen",
-    "gen:queries": "bun run ./Scripts/genQueries.ts"
+    "gen:queries": "bun run ./Scripts/genQueries.ts",
+    "db:push": "bunx drizzle-kit push:sqlite"
   },
   "dependencies": {
     "@acegoal07/discordjs-pagination": "^1.5.0",
@@ -28,6 +29,7 @@
     "@types/dotenv-flow": "^3.3.1",
     "@types/node-rsa": "^1.1.2",
     "axios": "^0.21.1",
+    "better-sqlite3": "^9.0.0",
     "bun-types": "^1.0.5",
     "canvas": "^2.11.2",
     "discord-api-types": "^0.27.3",
@@ -39,37 +41,36 @@
     "node-rsa": "^1.1.1",
     "nodemon": "^2.0.12",
     "sequelize": "^6.17.0",
-    "sqlite3": "^5.1.6",
     "turndown": "^7.1.1",
     "yarn": "^1.22.11"
   },
   "imports": {
     "#Utils/*": [
-      "./Utils/*"
+      "./src/Utils/*"
     ],
     "#Commands/*": [
-      "./Commands/*"
+      "./src/Commands/*"
     ],
     "#Structures/*": [
-      "./Structures/*"
+      "./src/Structures/*"
     ],
     "#GraphQL/*": [
-      "./GraphQL/*"
+      "./src/GraphQL/*"
     ],
     "#Models/*": [
-      "./Database/Models/*"
+      "./src/Database/Models/*"
     ],
     "#Caching/*": [
-      "./Caching/*"
+      "./src/Caching/*"
     ],
     "#RSA/*": [
-      "./RSA/*"
+      "./src/RSA/*"
     ],
     "#Middleware/*": [
-      "./Middleware/*"
+      "./src/Middleware/*"
     ],
     "#Components/*": [
-      "./Components/*"
+      "./src/Components/*"
     ]
   },
   "devDependencies": {
@@ -80,7 +81,6 @@
     "@graphql-codegen/typescript-resolvers": "^4.0.1",
     "@types/humanize-duration": "^3.27.1",
     "@types/node": "^20.6.3",
-    "drizzle-kit": "^0.19.13",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "prettier-eslint": "^15.0.1",

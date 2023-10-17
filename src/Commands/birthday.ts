@@ -1,7 +1,7 @@
 import db from "../Database/db";
 import { tables } from "../Database";
-import { BuildPagination } from "#Utils/BuildPagination.ts";
-import { getOptions } from "#Utils/getOptions.ts";
+import { BuildPagination } from "../Utils/BuildPagination";
+import { getOptions } from "../Utils/getOptions";
 import type { CommandInteractionOptionResolver } from "discord.js";
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import type { Command } from "../Structures";
@@ -40,7 +40,7 @@ export default {
 
     if (subcommand === "set") {
       const { date } = getOptions<{ date: string }>(interaction.options, ["date"]);
-      const birthday = new Date(date);
+      const birthday = new Date(date).toLocaleString();
       if (birthday.toString() === "Invalid Date") return void interaction.reply({ content: "Invalid date format. Please use YYYY-MM-DD.", ephemeral: true });
       const userBirthday = await db.query.userBirthday.findFirst({ where: (birthday, { eq }) => eq(birthday.userId, interaction.user.id) });
       if (userBirthday) {
@@ -58,13 +58,14 @@ export default {
       if (!user) return void interaction.reply({ content: "Please provide a user.", ephemeral: true });
       const birthday = await db.query.userBirthday.findFirst({ where: (birthday, { eq }) => eq(birthday.userId, user.id) });
       if (!birthday) return void interaction.reply({ content: `${user.tag} has not set their birthday.`, ephemeral: true });
-      const daysLeft = daysLeftUntilBirthday(birthday.birthday);
-      const age = calculateAge(birthday.birthday);
+      const userBirthday = new Date(birthday.birthday);
+      const daysLeft = daysLeftUntilBirthday(userBirthday);
+      const age = calculateAge(userBirthday);
 
       const embed = new EmbedBuilder().setTitle(`${user.tag}'s Birthday`).addFields(
         {
           name: "Birthday",
-          value: getReadableDate(birthday.birthday),
+          value: getReadableDate(userBirthday),
         },
         {
           name: "Age",
@@ -80,6 +81,7 @@ export default {
 
     if (subcommand === "list") {
       const birthdays = await db.query.userBirthday.findMany({ where: (birthday, { eq }) => eq(birthday.guildId, interaction.guild!.id) });
+      console.log(birthdays)
       if (birthdays.length === 0) return void interaction.reply({ content: "There are no birthdays registered for this server.", ephemeral: true });
       const embeds = [];
       let currentEmbed = new EmbedBuilder().setTitle("Birthdays");
@@ -95,7 +97,7 @@ export default {
       });
 
       for (const birthday of sortedBirthdays) {
-        const userBirthday = birthday.birthday;
+        const userBirthday = new Date(birthday.birthday);
         const daysLeft = daysLeftUntilBirthday(userBirthday);
         const age = calculateAge(userBirthday);
         currentEmbedField++;

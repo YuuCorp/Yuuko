@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { RSACryption } from '#Utils/RSACryption.ts'
-import { Check } from '#Structures/Check.ts'
+import { RSACryption } from '../Utils/RSACryption'
+import { Check } from '../Structures/Check'
 
 const rsaPublicCheck = new Check({
   name: 'RSA Public Key Check',
