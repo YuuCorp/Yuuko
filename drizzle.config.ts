@@ -1,11 +1,11 @@
 import type { Config } from "drizzle-kit";
 
 export default {
-  schema: "./src/Database/schema.ts",
+  schema: "src/Database/schema.ts",
   out: "./src/Database/drizzle",
   driver: "better-sqlite",
   dbCredentials: {
-    url: "db.sqlite",
+    url: "src/Database/db.sqlite",
   },
   verbose: true,
   strict: true,
