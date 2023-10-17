@@ -24,8 +24,4 @@ export const anilistUser = sqliteTable("anilistuser", {
     .default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const anilistUserRelations = relations(anilistUser, ({one}) => ({
-  birthday: one(userBirthday)
-}))
-
 export default anilistUser;

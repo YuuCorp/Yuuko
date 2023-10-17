@@ -33,7 +33,7 @@ export default {
     const type = (interaction.options as CommandInteractionOptionResolver).getSubcommand();
     const { token } = getOptions<{ token: string | undefined }>(interaction.options, ["token"]);
 
-    db.query.anilistUser.findFirst({ where: (user, { eq }) => eq(user.anilistId, Number(interaction.user.id)) });
+    db.query.anilistUser.findFirst({ where: (user, { eq }) => eq(user.discordId, interaction.user.id) });
 
     if (type === "token" && !token) return void interaction.reply({ embeds: [EmbedError(`Please provide a token with this option.`)], ephemeral: true });
 
@@ -55,12 +55,12 @@ export default {
       }));
     }
 
-    const user = await db.query.anilistUser.findFirst({ where: (user, { eq }) => eq(user.anilistId, Number(interaction.user.id)) });
+    const user = await db.query.anilistUser.findFirst({ where: (user, { eq }) => eq(user.discordId, interaction.user.id) });
 
     if (type === "wipe") {
       if (!user) return void interaction.reply({ embeds: [EmbedError(`You don't have an AniList account bound to your Discord account.`, null, false)], ephemeral: true });
       try {
-        await db.delete(anilistUser).where(eq(anilistUser.anilistId, Number(interaction.user.id)));
+        await db.delete(anilistUser).where(eq(anilistUser.discordId, interaction.user.id));
 
         return void interaction.reply({
           embeds: [
@@ -100,7 +100,7 @@ export default {
         await db
           .update(anilistUser)
           .set({ anilistToken: RSACryption(token, false), anilistId: data.id })
-          .where(eq(anilistUser.anilistId, Number(interaction.user.id)));
+          .where(eq(anilistUser.discordId, interaction.user.id));
         return void interaction.reply({
           embeds: [
             {
