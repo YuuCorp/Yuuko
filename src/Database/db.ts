@@ -1,5 +1,5 @@
-import Database from 'better-sqlite3';
-import { drizzle, type BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+import { drizzle } from "drizzle-orm/bun-sqlite";
+import { Database } from "bun:sqlite";
 
 import anilistUser from "./Models/AnilistUser";
 import announcementModel from "./Models/Announcement";
@@ -12,7 +12,7 @@ export const tables = {
 };
 
 export const sqlite = new Database("./src/Database/db.sqlite");
-export const db: BetterSQLite3Database<typeof tables> = drizzle(sqlite, {
+export const db = drizzle(sqlite, {
   schema: tables,
 });
 
