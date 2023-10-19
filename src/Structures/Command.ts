@@ -41,15 +41,17 @@ interface CommandStringOption {
   }[];
 }
 
+export type HookData = {
+  fields: APIEmbedField[];
+  title?: string;
+  id: number;
+  image: string;
+}
+
 export type RunOptionsWithHooks<Args = any> = RunOptions<Args> &
   Partial<{
     hook: boolean;
-    hookdata: {
-      fields: APIEmbedField[];
-      title?: string;
-      id: number;
-      image: string;
-    };
+    hookdata: HookData;
   }>;
 
 export type CommonCommandWithHook = Omit<CommonCommand, "run"> & {

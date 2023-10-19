@@ -22,6 +22,8 @@ export interface YuukoComponent {
   middlewares?: Middleware[]
 }
 
+export type AlwaysExist<T> = T extends undefined | null ? never : T;
+
 export interface Headers {
   [key: string]: string
 }
