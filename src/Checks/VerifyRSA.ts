@@ -1,7 +1,8 @@
-import fs from 'node:fs'
-import path from 'node:path'
+import fs from 'fs'
+import path from 'path'
 import { RSACryption } from '../Utils/RSACryption'
 import { Check } from '../Structures/Check'
+console.log(path.join(__dirname, '..', 'RSA', 'id_rsa.pub'))
 
 const rsaPublicCheck = new Check({
   name: 'RSA Public Key Check',
