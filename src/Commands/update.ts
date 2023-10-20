@@ -1,25 +1,24 @@
-// TODO: Fix
-const { spawn, execSync } = require('node:child_process')
-const path = require('node:path')
-const fs = require('node:fs')
-const { EmbedBuilder, SlashCommandBuilder } = require('discord.js')
-const CommandCategories = require('#Utils/CommandCategories.js')
-const Command = require('#Structures/Command.js')
+import { spawn, execSync } from "child_process"
+import { SlashCommandBuilder } from "discord.js"
+import fs from "fs"
+import path from "path"
+import type { Command } from "../Structures"
 
 const name = 'update'
 const description = 'Checks for the latest update, and restarts the bot if any are found. (Trusted users only)'
 
-module.exports = new Command({
+export default {
   name,
   description,
-  type: CommandCategories.Misc,
-  slash: new SlashCommandBuilder().setName(name).setDescription(description),
+  commandType: "Misc",
+  withBuilder: new SlashCommandBuilder().setName(name).setDescription(description),
 
-  async run(interaction, args, run) {
+  run: async ({ interaction, client }): Promise<void> => {
+    if(!interaction.isCommand()) return;
     try {
-      if (JSON.parse(process.env.TRUSTED_USERS).includes(interaction.user.id) /* && process.env.NODE_ENV === "production" */) {
+      if (process.env.TRUSTED_USERS.includes(interaction.user.id) /* && process.env.NODE_ENV === "production" */) {
         const updateMessage = await interaction.reply({ content: 'Updating...', fetchReply: true })
-        const editMessage = async (content) => {
+        const editMessage = async (content: string) => {
           await interaction.editReply(`\`\`\`sh\n${content}\`\`\``)
         }
 
@@ -71,4 +70,4 @@ module.exports = new Command({
       console.error(error)
     }
   },
-})
+} satisfies Command

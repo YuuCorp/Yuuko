@@ -32,19 +32,20 @@ export default {
     const vars: Partial<{
       query: string;
       aID: number;
-    }> = {
-    };
-    // ^ Hook data is passed in if this command is called from another command
+    }> = {};
+    // ^ Hook data  is passed in if this command is called from another command
     if (!hook) {
       if (query.length < 3) return void interaction.reply({ embeds: [EmbedError(`Please enter a search query of at least 3 characters.`, null, false)] });
-
       vars.query = query;
-    } else if (hook) {
-      if (hookdata?.id) {
+    } else if (hook && hookdata) {
+      if (hookdata.id) {
         console.log(`[AnimeCmd] Hookdata Anime ID: ${hookdata.id}`);
         vars.aID = hookdata.id;
-      } else return void interaction.reply({ embeds: [EmbedError(`AnimeCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)] });
-    }
+      } else if (hookdata.title) {
+        vars.query = hookdata.title;
+        normalizedQuery = normalize(hookdata.title);
+      }
+    } else return void interaction.reply({ embeds: [EmbedError(`AnimeCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)] });
 
     console.log(`[AnimeCmd] Anime ID: ${vars.aID}`);
 
@@ -57,24 +58,25 @@ export default {
         console.log(`[AnimeCmd] Querying for ${normalizedQuery} with ID ${vars.aID}`);
       }
     }
-    console.log(`[AnimeCmd] Querying Redis with hook animeId ${vars.aID}`)
+
+    console.log(`[AnimeCmd] Querying Redis with hook animeId ${vars.aID}`);
     const cacheData = await redis.json.get(`_anime-${vars.aID}`);
 
-    if (cacheData){
+    if (cacheData) {
       console.log("[AnimeCmd] Found cache data, returning data...");
       return void handleData({ anime: cacheData }, interaction);
-    }  
+    }
     console.log("[AnimeCmd] No cache found, fetching from CringeQL");
-    GraphQLRequest(
-      "Anime",
-      vars,
-      interaction.ALtoken,
-    )
+    GraphQLRequest("Anime", vars, interaction.ALtoken)
       .then((response) => {
         const data = response.data.Media;
         if (data) {
           if (!animeIdFound) redis.set(`_animeId-${normalizedQuery}`, data.id);
           redis.json.set(`_anime-${data.id}`, "$", data);
+          if (data.nextAiringEpisode?.airingAt) {
+            console.log(`[AnimeCmd] Expiring anime-${data.id} at ${data.nextAiringEpisode.airingAt}`);
+            redis.expireat(`_anime-${data.id}`, data.nextAiringEpisode.airingAt);
+          }
           return void handleData({ anime: data, headers: response.headers }, interaction, hookdata);
         } else {
           return interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });

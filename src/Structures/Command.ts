@@ -41,12 +41,12 @@ interface CommandStringOption {
   }[];
 }
 
-export type HookData = {
+export type HookData = Partial<{
   fields: APIEmbedField[];
-  title?: string;
+  title: string;
   id: number;
   image: string;
-}
+}>
 
 export type RunOptionsWithHooks<Args = any> = RunOptions<Args> &
   Partial<{

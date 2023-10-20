@@ -13,8 +13,8 @@ export const run: YuukoEvent<'ready'> = (client) => {
   console.log(`${client.user.tag} is ready!`)
 
   // React to update command output if exists
-  if (fs.existsSync('./Local/updatemsg.json')) {
-    const updatemsg = JSON.parse(fs.readFileSync('./Local/updatemsg.json').toString())
+  if (fs.existsSync('./src/Local/updatemsg.json')) {
+    const updatemsg = JSON.parse(fs.readFileSync('./src/Local/updatemsg.json').toString())
     try {
       const channel = client.channels.cache.get(updatemsg.channelId)
       // TODO: Actually check if this works
@@ -24,7 +24,7 @@ export const run: YuukoEvent<'ready'> = (client) => {
           console.log('Heartbeat sent to update output.')
         })
       }
-      fs.unlink('./Local/updatemsg.json', (err) => {
+      fs.unlink('./src/Local/updatemsg.json', (err) => {
         if (err)
           throw err
         else console.log('Deleted updatemsg.json')
