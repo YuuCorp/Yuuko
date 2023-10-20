@@ -18,11 +18,11 @@ export default {
     if (!interaction.isCommand())
       return
     if (JSON.parse(process.env.TRUSTED_USERS).includes(interaction.user.id) /* && process.env.NODE_ENV === "production" */) {
-      if (!fs.existsSync(path.join(__dirname, '../Logging', 'logs.txt')))
+      if (!fs.existsSync(path.join(__dirname, '..', 'Logging', 'logs.txt')))
         return void interaction.reply(`\`There are no logs to view.\``)
 
       const logs = fs
-        .readFileSync(path.join(__dirname, '../Logging', 'logs.txt'), 'utf8')
+        .readFileSync(path.join(__dirname, '..', 'Logging', 'logs.txt'), 'utf8')
         .split('\n')
         .reverse()
         .slice(0, 25)

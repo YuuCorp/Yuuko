@@ -24,7 +24,8 @@ export default {
   run: async ({ interaction, client, hook = false, hookdata = null }): Promise<void> => {
     if (!interaction.isCommand()) return;
     const { query } = getOptions<{ query: string }>(interaction.options, ["query"]);
-    const normalizedQuery = normalize(hookdata?.title || query);
+    let normalizedQuery = "";
+    if (query) normalizedQuery = normalize(query);
 
     let animeIdFound = false;
 
@@ -32,7 +33,6 @@ export default {
       query: string;
       aID: number;
     }> = {
-      query: "",
     };
     // ^ Hook data is passed in if this command is called from another command
     if (!hook) {
@@ -40,15 +40,13 @@ export default {
 
       vars.query = query;
     } else if (hook) {
-      if (hookdata?.title) {
-        vars.query = hookdata.title;
-      }
       if (hookdata?.id) {
+        console.log(`[AnimeCmd] Hookdata Anime ID: ${hookdata.id}`);
         vars.aID = hookdata.id;
-      }
-    } else {
-      return void interaction.reply({ embeds: [EmbedError(`AnimeCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)] });
+      } else return void interaction.reply({ embeds: [EmbedError(`AnimeCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)] });
     }
+
+    console.log(`[AnimeCmd] Anime ID: ${vars.aID}`);
 
     if (!vars.aID) {
       const cachedId = await redis.get<string>(`_animeId-${normalizedQuery}`);
@@ -56,20 +54,20 @@ export default {
         animeIdFound = true;
         vars.aID = parseInt(cachedId);
         console.log(`[AnimeCmd] Found cached ID for ${normalizedQuery} : ${vars.aID}`);
+        console.log(`[AnimeCmd] Querying for ${normalizedQuery} with ID ${vars.aID}`);
       }
     }
-    console.log(`[AnimeCmd] Querying for ${normalizedQuery}...`);
-    console.log(`[AnimeCmd] ID: ${vars.aID}`);
+    console.log(`[AnimeCmd] Querying Redis with hook animeId ${vars.aID}`)
     const cacheData = await redis.json.get(`_anime-${vars.aID}`);
 
-    if (cacheData) return void handleData({ anime: cacheData }, interaction);
-    console.log("[AnimeCmd] No cache found, fetching from Cringe*L");
+    if (cacheData){
+      console.log("[AnimeCmd] Found cache data, returning data...");
+      return void handleData({ anime: cacheData }, interaction);
+    }  
+    console.log("[AnimeCmd] No cache found, fetching from CringeQL");
     GraphQLRequest(
       "Anime",
-      {
-        query: vars.query,
-        aID: vars.aID,
-      },
+      vars,
       interaction.ALtoken,
     )
       .then((response) => {

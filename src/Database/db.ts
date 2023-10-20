@@ -12,6 +12,9 @@ export const tables = {
 };
 
 export const sqlite = new Database("./src/Database/db.sqlite");
+
+sqlite.exec("PRAGMA joural_mode = WAL;")
+
 export const db = drizzle(sqlite, {
   schema: tables,
 });
