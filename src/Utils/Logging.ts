@@ -9,7 +9,11 @@ export function Logging(command: Command, interaction: Interaction) {
     const currentDate = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
     if (!fs.existsSync(path.join(__dirname, '..', 'Logging'))) {
       fs.mkdirSync(path.join(__dirname, '..', 'Logging'))
-      fs.writeFileSync(logPath, 'Initiating log!')
+      // check if logPath exists
+      if (!fs.existsSync(logPath)) {
+        // create logPath 
+        fs.writeFileSync(logPath, 'Initiating log!')
+      }
     }
     if (!interaction.isCommand()) return
     const subcommand = (interaction.options as CommandInteractionOptionResolver).getSubcommand(false)

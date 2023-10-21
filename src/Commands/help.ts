@@ -61,7 +61,6 @@ export default {
     for (const cmd of cmds) {
       const cmdEntry = (await import(path.join(__dirname, cmd))).default as Command;
       if (!cmdGroups[cmdEntry.commandType]) cmdGroups[cmdEntry.commandType] = [];
-      console.log(cmdEntry);
       cmdGroups[cmdEntry.commandType].push({ usage: cmdEntry.usage, name: cmdEntry.name, description: cmdEntry.description });
     }
     // Send the description to the user

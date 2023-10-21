@@ -40,15 +40,24 @@ export default {
 
     if (subcommand === "set") {
       const { date } = getOptions<{ date: string }>(interaction.options, ["date"]);
-      const birthday = new Date(date).toLocaleString();
+      const birthday = new Date(date);
       if (birthday.toString() === "Invalid Date") return void interaction.reply({ content: "Invalid date format. Please use YYYY-MM-DD.", ephemeral: true });
       const userBirthday = await db.query.userBirthday.findFirst({ where: (birthday, { eq }) => eq(birthday.userId, interaction.user.id) });
       if (userBirthday) {
+        console.log('[/birthday set] userBirthday exists, updating...')
         await db.update(tables.userBirthday).set({ birthday, updatedAt: sql`CURRENT_TIMESTAMP` }).where(eq(tables.userBirthday.userId, interaction.user.id));
       } else {
+        console.log('[/birthday set] userBirthday does not exist, inserting...')
         const data = {userId: interaction.user.id, birthday, guildId: interaction.guild.id}
         console.log(data)
-        await db.insert(tables.userBirthday).values({ userId: interaction.user.id, birthday, guildId: interaction.guild.id });
+        const bOpt = {
+          birthday,
+          userId: interaction.user.id,
+          guildId: interaction.guild.id,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
+        await db.insert(tables.userBirthday).values(bOpt);
       }
       return void interaction.reply({ content: `Your birthday has been set to ${getReadableDate(birthday)}.`, ephemeral: true });
     }

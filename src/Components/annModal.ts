@@ -11,7 +11,8 @@ export default {
       return
     const annInput = interaction.fields.getTextInputValue('annInput')
     // await announcementModel.create({ date: new Date(), announcement: annInput })
-    db.insert(announcementModel).values({ announcement: annInput })
+    await db.insert(announcementModel).values({ announcement: annInput, date: new Date() })
+
     return interaction.reply({ content: 'Announcement created!', ephemeral: true })
   },
 } satisfies YuukoComponent
