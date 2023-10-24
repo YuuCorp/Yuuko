@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { SlashCommandBuilder } from 'discord.js'
 
+import { mwTrustedUser } from '../Middleware/TrustedUser'
 import { Footer } from '../Utils'
 import type { Command } from '../Structures'
 
@@ -11,13 +12,14 @@ const description = 'Allows you to see the 25 most recent logs of the bot. (Trus
 export default {
   name,
   description,
-  commandType: 'Misc',
+  commandType: 'Internal',
+  middlewares: [mwTrustedUser],
   withBuilder: new SlashCommandBuilder().setName(name).setDescription(description),
 
   run: async ({ interaction, client }): Promise<void> => {
     if (!interaction.isCommand())
       return
-    if (JSON.parse(process.env.TRUSTED_USERS).includes(interaction.user.id) /* && process.env.NODE_ENV === "production" */) {
+
       if (!fs.existsSync(path.join(__dirname, '..', 'Logging', 'logs.txt')))
         return void interaction.reply(`\`There are no logs to view.\``)
 
@@ -42,6 +44,5 @@ export default {
           },
         ],
       })
-    }
   },
 } satisfies Command

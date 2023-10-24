@@ -60,6 +60,7 @@ export default {
     const cmdGroups = {} as any;
     for (const cmd of cmds) {
       const cmdEntry = (await import(path.join(__dirname, cmd))).default as Command;
+      if(cmdEntry.commandType === "Internal") continue;
       if (!cmdGroups[cmdEntry.commandType]) cmdGroups[cmdEntry.commandType] = [];
       cmdGroups[cmdEntry.commandType].push({ usage: cmdEntry.usage, name: cmdEntry.name, description: cmdEntry.description });
     }

@@ -1,15 +1,14 @@
 import db from "../Database/db";
 import { tables } from "../Database";
-import { BuildPagination } from "../Utils/BuildPagination";
-import { getOptions } from "../Utils/getOptions";
+import { getOptions, BuildPagination, EmbedError, Footer } from "../Utils/";
 import type { CommandInteractionOptionResolver } from "discord.js";
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import type { Command } from "../Structures";
 import { eq, sql } from "drizzle-orm";
 
 const name = "birthday";
-const usage = "birthday <user | list | set>";
-const description = "Shows general list of birthdays for BBH server, or shows birthday for specific person.";
+const usage = "birthday <user | list | set | wipe>";
+const description = "Shows general list of birthdays for your server, or shows birthday for specific person.";
 
 export default {
   name,
@@ -26,6 +25,7 @@ export default {
         .addUserOption((option) => option.setName("user").setDescription("The user to get the birthday of.").setRequired(true)),
     )
     .addSubcommand((subcommand) => subcommand.setName("list").setDescription("List the birthdays of all registered users in this guild."))
+    .addSubcommand((subcommand) => subcommand.setName("wipe").setDescription("Remove your birthday from this guild."))
     .addSubcommand((subcommand) =>
       subcommand
         .setName("set")
@@ -65,7 +65,8 @@ export default {
     if (subcommand === "user") {
       const user = interaction.options.getUser("user");
       if (!user) return void interaction.reply({ content: "Please provide a user.", ephemeral: true });
-      const birthday = await db.query.userBirthday.findFirst({ where: (birthday, { eq }) => eq(birthday.userId, user.id) });
+      const birthday = (await db.select().from(tables.userBirthday).where(eq(tables.userBirthday.userId, user.id)).limit(1))[0]
+      console.log(birthday);
       if (!birthday) return void interaction.reply({ content: `${user.tag} has not set their birthday.`, ephemeral: true });
       const userBirthday = new Date(birthday.birthday);
       const daysLeft = daysLeftUntilBirthday(userBirthday);
@@ -125,6 +126,36 @@ export default {
         }
       }
       BuildPagination(interaction, embeds).paginate();
+    }
+
+    if(subcommand === "wipe") {
+      const birthday = (await db.query.userBirthday.findFirst({ where: (birthday, { eq }) => eq(birthday.userId, interaction.user.id) }));
+      if(!birthday) return void interaction.reply({ content: "You have not set your birthday.", ephemeral: true });
+      try {
+        await db.delete(tables.userBirthday).where(eq(tables.userBirthday.userId, interaction.user.id));
+        return void interaction.reply({
+          embeds: [
+            {
+              title: `Successfully wiped your birthday.`,
+              description: `Your birthday has been wiped from our database.`,
+              color: 0x00ff00,
+              footer: Footer(),
+            },
+          ],
+          ephemeral: true,
+        })
+      } catch (error) {
+        console.error(error);
+        return void interaction.reply({
+          embeds: [
+            EmbedError(
+              `An error occurred while updating your AniList account binding:\n\n${error}`,
+              null,
+            ),
+          ],
+          ephemeral: true,
+        });
+      }
     }
 
     function daysLeftUntilBirthday(date: Date) {

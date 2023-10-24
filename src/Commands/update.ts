@@ -1,3 +1,4 @@
+import { mwTrustedUser } from "../Middleware/TrustedUser"
 import { spawn, execSync } from "child_process"
 import { SlashCommandBuilder } from "discord.js"
 import fs from "fs"
@@ -10,7 +11,8 @@ const description = 'Checks for the latest update, and restarts the bot if any a
 export default {
   name,
   description,
-  commandType: "Misc",
+  commandType: "Internal",
+  middlewares: [mwTrustedUser],
   withBuilder: new SlashCommandBuilder().setName(name).setDescription(description),
 
   run: async ({ interaction, client }): Promise<void> => {
