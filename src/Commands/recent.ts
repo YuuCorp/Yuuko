@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, AttachmentBuilder } from "discord.js";
 import { mwGetUserEntry } from "../Middleware/UserEntry";
-import Canvas from "canvas";
+import Jimp from "jimp";
 import type { Command } from "../Structures";
 import { CommandCategories, EmbedError, GraphQLRequest, SeriesTitle, getOptions } from "../Utils";
 import type { MediaList, MediaType } from "../GraphQL/types";
@@ -40,6 +40,7 @@ export default {
     if (!userName) {
       // We try to use the one the user set
       try {
+        if(!interaction.alID) return void interaction.reply({ embeds: [EmbedError(`You have yet to set an AniList token.`)] });
         vars.userId = interaction.alID;
       } catch (error) {
         console.error(error);
@@ -50,38 +51,39 @@ export default {
     }
 
     try {
-      const gqlRes = await GraphQLRequest("RecentChart", vars);
-      const data = gqlRes.data?.Page?.mediaList;
-
+      const data = (await GraphQLRequest("RecentChart", vars)).data?.Page?.mediaList;
       if (!data) return void interaction.reply({ embeds: [EmbedError("Unable to find specified user", vars)] });
-
-      const canvas = Canvas.createCanvas(1000, 1000);
-      const ctx = canvas.getContext("2d");
+      interaction.reply({ embeds: [{ description: "Creating image..." }]})
+      const canvas = new Jimp(999, 999);
 
       let x = 0;
       let y = 0;
 
-      for (let item of data) {
+      const infoRectangleArray: {
+        x: number,
+        y: number,
+        rect: Jimp
+      }[] = [];
+
+      for (const item of data) {
         const media = item?.media;
         if (!media || !item) continue;
         const cover = media.coverImage?.extraLarge || "https://i.imgur.com/Hx8474m.png"; // Placeholder image
-        const canvasImage = await Canvas.loadImage(cover);
+        const canvasImage = await Jimp.read(cover);
 
-        const width = 1000 / Math.ceil(data.length / 3);
-        const height = (width / canvasImage.width) * canvasImage.height;
+        const width = 333;
+        const height = (width / canvasImage.getWidth()) * canvasImage.getHeight();
+        canvasImage.resize(width, height);
+        const infoRectangle = new Jimp(width, 60, "#000000bf");
 
-        ctx.drawImage(canvasImage, x, y, width, height);
+        const useFont = await Jimp.loadFont(Jimp.FONT_SANS_16_WHITE);
 
-        ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
-        ctx.fillRect(x, y + width - 40, width, 40);
-
-        ctx.font = "17px Arial";
-        ctx.fillStyle = "white";
-        ctx.textAlign = "center";
         const title = SeriesTitle(media.title || undefined);
         const status = parseStatus(item, type);
-        if (status) ctx.fillText(status, x + width / 2, y + width - 24);
-        ctx.fillText(title, x + width / 2, y + width - 5);
+        if (status) infoRectangle.print(useFont, 0, 0, { text: status, alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER, alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE }, width, 40);
+        infoRectangle.print(useFont, 0, 20, { text: title, alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER, alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE }, width, 40)
+        infoRectangleArray.push({ x, y: y + width - 60, rect: infoRectangle });
+        canvas.composite(canvasImage, x, y);
         x += width;
         if (x >= 999) {
           x = 0;
@@ -89,17 +91,21 @@ export default {
         }
       }
 
-      const canvasResult = canvas.toBuffer();
-      if (!canvasResult) return void interaction.reply({ embeds: [EmbedError("Encountered an error whilst trying to create the image.", vars)] });
-      const attachment = new AttachmentBuilder(canvasResult);
-      interaction.reply({ files: [attachment] });
+      for (const infoRectangle of infoRectangleArray) {
+        canvas.composite(infoRectangle.rect, infoRectangle.x, infoRectangle.y);
+      }
+
+      const canvasResult = await canvas.getBufferAsync(Jimp.MIME_PNG);
+      if (!canvasResult) return void interaction.editReply({ embeds: [EmbedError("Encountered an error whilst trying to create the image.", vars)] });
+      const attachment = new AttachmentBuilder(canvasResult, { name: "recent.png" });
+      return void interaction.editReply({ files: [attachment], embeds: [] })
     } catch (error: any) {
-      interaction.reply({ embeds: [EmbedError(error, vars)] });
+      return void interaction.reply({ embeds: [EmbedError(error, vars)] });
     }
   },
 } satisfies Command;
 
-function parseStatus(data: MediaList, mediaType: MediaType) {
+function parseStatus(data: Pick<MediaList, "progress" | "status">, mediaType: MediaType) {
   if (!data.status) return "Unknown";
   switch (data.status) {
     case "CURRENT":
