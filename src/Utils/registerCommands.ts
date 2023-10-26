@@ -4,7 +4,7 @@ import { Client, type Command } from "../Structures";
 import { REST, Routes } from "discord.js";
 
 export async function registerCommands(client: Client) {
-  console.log(`Starting Yuuko in ${process.env.NODE_ENV} enviroment.`);
+  client.log(`Starting Yuuko in ${process.env.NODE_ENV} enviroment.`);
   const commandsPath = path.join(__dirname, "..", "Commands");
   const commandFiles = fs.readdirSync(commandsPath).filter((file) => file.endsWith(".ts"));
   client.log(`Loading ${commandFiles.length} commands.`);

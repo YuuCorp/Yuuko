@@ -1,11 +1,11 @@
-import dotenvFlow from "dotenv-flow";
+import dotenvFlow, { config } from "dotenv-flow";
 import { Client } from "./Structures/Client";
 import { GatewayIntentBits } from "discord.js";
 import { registerEvents } from "./Utils";
 import path from "path";
 import fs from "fs";
 
-dotenvFlow.config();
+dotenvFlow.config({ silent: true });
 
 const client = new Client({ intents: [GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildEmojisAndStickers, GatewayIntentBits.DirectMessages, GatewayIntentBits.Guilds], allowedMentions: { repliedUser: false } });
 
