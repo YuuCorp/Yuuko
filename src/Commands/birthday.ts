@@ -5,6 +5,7 @@ import type { CommandInteractionOptionResolver } from "discord.js";
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import type { Command } from "../Structures";
 import { eq, sql } from "drizzle-orm";
+import getSubcommand from "../Utils/getSubcommand";
 
 const name = "birthday";
 const usage = "birthday <user | list | set | wipe>";
@@ -36,7 +37,7 @@ export default {
   run: async ({ interaction, client }): Promise<void> => {
     if (!interaction.isCommand()) return;
     if (!interaction.guild) return void interaction.reply({ content: "This command can only be used in a server.", ephemeral: true });
-    const subcommand = (interaction.options as CommandInteractionOptionResolver).getSubcommand();
+    const subcommand= getSubcommand<["user", "list", "set", "wipe"]>(interaction.options)
 
     if (subcommand === "set") {
       const { date } = getOptions<{ date: string }>(interaction.options, ["date"]);

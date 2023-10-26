@@ -5,6 +5,7 @@ import type { Command } from "../Structures";
 import { EmbedError, Footer, GraphQLRequest, RSACryption, getOptions } from "../Utils";
 import db from "../Database/db";
 import { eq } from "drizzle-orm";
+import getSubcommand from "../Utils/getSubcommand";
 
 const name = "auth";
 const usage = "auth <help | anilistToken | wipe>";
@@ -30,7 +31,8 @@ export default {
   run: async ({ interaction, client }): Promise<void> => {
     if (!interaction.isCommand()) return;
 
-    const type = (interaction.options as CommandInteractionOptionResolver).getSubcommand();
+    // const type = (interaction.options as CommandInteractionOptionResolver).getSubcommand();
+    const type = getSubcommand<["token", "help", "wipe"]>(interaction.options)
     const { token } = getOptions<{ token: string | undefined }>(interaction.options, ["token"]);
 
     db.query.anilistUser.findFirst({ where: (user, { eq }) => eq(user.discordId, interaction.user.id) });

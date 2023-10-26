@@ -3,6 +3,7 @@ import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { mwRequireALToken } from "../Middleware/ALToken";
 import type { Command } from "../Structures";
 import db from "../Database/db";
+import getSubcommand from "../Utils/getSubcommand";
 
 const name = "makeactivity";
 const usage = "makeactivity <list | status>";
@@ -87,7 +88,7 @@ export default {
   run: async ({ interaction, client }): Promise<void> => {
     if (!interaction.isChatInputCommand()) return;
     // const type = (interaction.options as CommandInteractionOptionResolver).getSubcommand() <- from auth command
-    const type = interaction.options.getSubcommand();
+    const type = getSubcommand<["list", "status"]>(interaction.options);
     if (!type || (type != "status" && type != "list")) return void interaction.reply({ embeds: [EmbedError(`Please use either the status or list subcommand. (Yours was "${type}")`, null, false)], ephemeral: true });
 
     if (type === "status") {
