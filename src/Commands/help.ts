@@ -2,12 +2,12 @@ import Discord, { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import fs from "fs";
 import path from "path";
 import { db, tables } from "../Database";
-import type { Command } from "../Structures";
+import type { Command, CommandType } from "../Structures";
 import { BuildPagination } from "../Utils";
 import { CommandCategories } from "../Utils/CommandCategories";
 import { desc } from "drizzle-orm";
 
-function generateHelpEmbeds(cmdsArr: Command[][], category: keyof typeof CommandCategories) {
+function generateHelpEmbeds(cmdsArr: string[], category: keyof typeof CommandCategories) {
   const embeds: EmbedBuilder[] = [];
   const iterations = Math.ceil(cmdsArr.join("").length / 1024);
 
@@ -57,7 +57,13 @@ export default {
     const cmds = fs.readdirSync(__dirname).filter((x) => x.endsWith(".ts") && x != "help.ts");
     console.log(cmds);
     const cmdsDesc = [];
-    const cmdGroups = {} as any;
+    const cmdGroups: Record<CommandType, Partial<Command>[]> = { 
+      "User": [],
+      "Anilist": [],
+      "Utils": [],
+      "Internal": [],
+      "Misc": [],
+    };
     for (const cmd of cmds) {
       const cmdEntry = (await import(path.join(__dirname, cmd))).default as Command;
       if(cmdEntry.commandType === "Internal") continue;
@@ -80,8 +86,9 @@ export default {
 
     const pageList = [helpInfoEmbed];
     for (const category of Object.keys(cmdGroups)) {
-      const cmdHelpArr = cmdGroups[category].map((x: any) => `\`$\` **${x.name}** - \`${x.usage || "No parameters required."}\` \n ${x.description} \n`);
-      pageList.push(...generateHelpEmbeds(cmdHelpArr, category as any));
+      const _category = category as keyof typeof CommandCategories;
+      const cmdHelpArr = cmdGroups[_category].map((x: any) => `\`$\` **${x.name}** - \`${x.usage || "No parameters required."}\` \n ${x.description} \n`);
+      pageList.push(...generateHelpEmbeds(cmdHelpArr, _category));
     }
 
     BuildPagination(interaction, pageList).paginate();

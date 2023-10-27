@@ -74,6 +74,7 @@ export default {
             if (profileColor === "pink") userColor = "LuminousVividPink";
             if (profileColor === "gray") userColor = "Grey";
             // this is just cancer
+            // re: yeah, this is cancer
             titleEmbed.setColor(userColor as any);
           }
           interaction.reply({ embeds: [titleEmbed] });

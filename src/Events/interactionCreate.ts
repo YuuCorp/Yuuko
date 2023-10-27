@@ -44,8 +44,8 @@ async function runMiddlewares(middlewares: Middleware[] | undefined, interaction
     return interaction
   if (!middlewares)
     return interaction
-  await Promise.all(middlewares.map(mw => mw.run(interaction))).catch((e) => {
-    interaction.reply({ embeds: [EmbedError(e as any)] })
+  await Promise.all(middlewares.map(mw => mw.run(interaction))).catch((e: any) => {
+    interaction.reply({ embeds: [EmbedError(e)] })
   })
   return interaction
 }

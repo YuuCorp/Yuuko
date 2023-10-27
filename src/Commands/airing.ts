@@ -55,9 +55,8 @@ export default {
 
     if (username) {
       const tempVars = { userName: username, type: 'ANIME' }
-      // const response = await GraphQLRequest(GraphQLQueries.GetMediaCollection, tempVars);
-      const repsonse = await GraphQLRequest('GetMediaCollection', { type: MediaType.Anime, userName: username })
-      const data = repsonse.data.MediaListCollection
+      const response = await GraphQLRequest('GetMediaCollection', { type: MediaType.Anime, userName: username })
+      const data = response.data.MediaListCollection
       
       if (data?.lists) {
         for (let i = 0; i < data.lists.length; i++) {
@@ -120,7 +119,9 @@ export default {
             return 0
           })
 
-          for (let i = 0; i < airingSchedules.length; i += chunkSize) fields.push(airingSchedules.slice(i, i + chunkSize))
+          for (let i = 0; i < airingSchedules.length; i += chunkSize) {
+            fields.push(airingSchedules.slice(i, i + chunkSize))
+          }
 
           // ^ Create pages with 5 airing anime per page and then make them into embeds
           const pageList: EmbedBuilder[] = []
@@ -131,13 +132,11 @@ export default {
             embed.setFooter(Footer(response.headers))
 
             fieldSet.forEach((field) => {
-              if (!field)
-                return
+              if (!field) return
               const { media, episode, airingAt } = field
 
               const title = media?.title
-              if (!title)
-                return
+              if (!title) return
               embed.addFields({
                 name: `${SeriesTitle(title)}`,
                 value: `> **[EP - ${episode}]** :airplane: ${new Date(airingAt * 1000) > new Date() ? `Going to air <t:${airingAt}:R>` : `Aired <t:${airingAt}:R>`}`,

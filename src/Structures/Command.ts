@@ -58,11 +58,13 @@ export type CommonCommandWithHook = Omit<CommonCommand, "run"> & {
   run: <Args = any>(o: RunOptionsWithHooks<Args>) => MaybePromise<void>;
 };
 
+export type CommandType = (typeof CommandCategories)[keyof typeof CommandCategories];
+
 export interface CommonCommand {
   name: string;
   description: string;
   usage?: string;
-  commandType: (typeof CommandCategories)[keyof typeof CommandCategories];
+  commandType: CommandType;
   run: <Args = any>(o: RunOptions<Args>) => MaybePromise<void>;
   guildOnly?: boolean;
   middlewares?: Middleware[];

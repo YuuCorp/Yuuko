@@ -4,7 +4,7 @@ import path from 'node:path';
 (async () => {
   const fileNames = fs.readdirSync('./src/GraphQL').filter(x => x.endsWith('.gql'))
 
-  const out = {} as any
+  const out: Record<string, string> = {};
 
   fileNames.forEach((file) => {
     const queryStr = fs.readFileSync(`./src/GraphQL/${file}`, 'utf8')

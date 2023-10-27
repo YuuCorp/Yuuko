@@ -33,7 +33,6 @@ export default {
       query: string;
       aID: number;
     }> = {};
-    // ^ Hook data  is passed in if this command is called from another command
     if (!hook) {
       if (query.length < 3) return void interaction.reply({ embeds: [EmbedError(`Please enter a search query of at least 3 characters.`, null, false)] });
       vars.query = query;
