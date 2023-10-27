@@ -1,0 +1,17 @@
+query Studio($query: String) {
+  Studio(search: $query) {
+    isAnimationStudio
+    siteUrl
+    name
+    favourites
+    media {
+      nodes {
+        id
+        title {
+          romaji
+          english
+        }
+      }
+    }
+  }
+}

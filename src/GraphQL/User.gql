@@ -1,0 +1,26 @@
+query User($username: String, $userid: Int) {
+  User(name: $username, id: $userid) {
+    id
+    name
+    avatar {
+      large
+      medium
+    }
+    bannerImage
+    siteUrl
+    createdAt
+    options {
+      profileColor
+    }
+    statistics {
+      anime {
+        count
+        meanScore
+      }
+      manga {
+        count
+        meanScore
+      }
+    }
+  }
+}

@@ -1,9 +1,0 @@
-mutation SaveTextActivity($text: String) {
-  SaveTextActivity(text: $text) {
-    siteUrl
-    user {
-      name
-    }
-    text
-  }
-}

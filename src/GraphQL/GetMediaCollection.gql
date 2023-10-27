@@ -1,0 +1,17 @@
+query GetMediaCollectiob($type: MediaType, $userName: String) {
+  MediaListCollection(userName: $userName, type: $type) {
+    lists {
+      entries {
+        media {
+          id
+          title {
+            english
+          }
+          genres
+        }
+        score
+      }
+      name
+    }
+  }
+}

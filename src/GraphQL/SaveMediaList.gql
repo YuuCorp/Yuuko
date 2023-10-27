@@ -1,0 +1,16 @@
+mutation SaveMediaListEntry($mediaid: Int, $status: MediaListStatus, $score: Float, $progress: Int, $hide: Boolean, $lists: [String], $private: Boolean) {
+  SaveMediaListEntry(mediaId: $mediaid, status: $status, score: $score, progress: $progress, hiddenFromStatusLists: $hide, customLists: $lists, private: $private) {
+    mediaId
+    media {
+      bannerImage
+      type
+      title {
+        userPreferred
+      }
+    }
+    user {
+      name
+    }
+    status
+  }
+}
