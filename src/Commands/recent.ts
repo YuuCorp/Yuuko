@@ -59,12 +59,6 @@ export default {
       let x = 0;
       let y = 0;
 
-      const infoRectangleArray: {
-        x: number,
-        y: number,
-        rect: Jimp
-      }[] = [];
-
       for (const item of data) {
         const media = item?.media;
         if (!media || !item) continue;
@@ -82,17 +76,13 @@ export default {
         const status = parseStatus(item, type);
         if (status) infoRectangle.print(useFont, 0, 0, { text: status, alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER, alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE }, width, 40);
         infoRectangle.print(useFont, 0, 20, { text: title, alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER, alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE }, width, 40)
-        infoRectangleArray.push({ x, y: y + width - 60, rect: infoRectangle });
         canvas.composite(canvasImage, x, y);
+        canvas.composite(infoRectangle, x, y + width - 60);
         x += width;
         if (x >= 999) {
           x = 0;
           y += width;
         }
-      }
-
-      for (const infoRectangle of infoRectangleArray) {
-        canvas.composite(infoRectangle.rect, infoRectangle.x, infoRectangle.y);
       }
 
       const canvasResult = await canvas.getBufferAsync(Jimp.MIME_PNG);
