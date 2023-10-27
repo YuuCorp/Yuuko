@@ -44,8 +44,14 @@ $ bun i
 ```bash
 $ cp .env .env.local
 ```
-5. Create an [Upstash Redis database](https://console.upstash.com/) and update the `.env.local` file with the url and token
-6. Start the bot
+5. Create an [Upstash Redis database](https://console.upstash.com/) and update the `.env.local` file
+6. Create the sqlite queries and make an empty db
+```bash
+$ bun db:generate
+$ bun db:push
+``` 
+$ 
+7. Start the bot
 ```bash
 $ bun run dev
 ```
