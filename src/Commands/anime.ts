@@ -73,6 +73,10 @@ export default {
         if (data) {
           if (!animeIdFound) redis.set(`_animeId-${normalizedQuery}`, data.id);
           redis.json.set(`_anime-${data.id}`, "$", data);
+          for (const synonym of data.synonyms || []) {
+            if (!synonym) continue;
+            redis.set(`_animeId-${normalize(synonym)}`, data.id);
+          }
           if (data.nextAiringEpisode?.airingAt) {
             console.log(`[AnimeCmd] Expiring anime-${data.id} at ${data.nextAiringEpisode.airingAt}`);
             redis.expireat(`_anime-${data.id}`, data.nextAiringEpisode.airingAt);

@@ -1,6 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js'
 import type { Command } from '../Structures'
-import { CommandCategories } from '../Utils'
 
 const name = 'ping'
 const usage = '/ping'
@@ -14,7 +13,6 @@ export default {
   withBuilder: new SlashCommandBuilder().setName(name).setDescription(description),
 
   run: async ({ interaction, client }): Promise<void> => {
-    console.log(interaction)
     if (!interaction.isCommand())
       return
     interaction.reply(`Ping: ${client.ws.ping} ms.`)

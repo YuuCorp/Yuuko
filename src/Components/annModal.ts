@@ -11,7 +11,7 @@ export default {
       return
     const annInput = interaction.fields.getTextInputValue('annInput')
     // await announcementModel.create({ date: new Date(), announcement: annInput })
-    await db.insert(announcementModel).values({ announcement: annInput, date: new Date() })
+    await db.insert(announcementModel).values({ announcement: annInput, date: new Date(), createdAt: new Date(), updatedAt: new Date() })
 
     return interaction.reply({ content: 'Announcement created!', ephemeral: true })
   },

@@ -58,7 +58,7 @@ export default {
       // const response = await GraphQLRequest(GraphQLQueries.GetMediaCollection, tempVars);
       const repsonse = await GraphQLRequest('GetMediaCollection', { type: MediaType.Anime, userName: username })
       const data = repsonse.data.MediaListCollection
-      console.log(data, 'data')
+      
       if (data?.lists) {
         for (let i = 0; i < data.lists.length; i++) {
           if (!data.lists[i]?.entries)
@@ -82,7 +82,7 @@ export default {
     vars.dateStart = Math.floor(day.getTime() / 1000)
     vars.nextDay = Math.floor(nextWeek.getTime() / 1000)
     // ^ Make the HTTP Api request
-    console.log(vars, 'vars')
+
     GraphQLRequest('Airing', { nextDay: vars.nextDay, dateStart: vars.dateStart })
       .then((response) => {
         const data = response.data.Page

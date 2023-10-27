@@ -32,16 +32,14 @@ export default {
           console.log(`Processing ${i}...`)
           let content: string = rss.items[i].content
           /*
-            .replace(/<img .*?>/g, "") // Remove image tags
+            .replace(/<img .*?>/g, "") // Remove image tjags
             .replace(/(<br\ ?\/?>)+/g, "\n"); // Replace line breaks with newlines
             */ // New RSS feed doesn't include HTML tags
 
           if (content.length > 1024)
-            content = `${content.substring(0, 1024)}...`
+            content = `${content.substring(0, 1015)}...`
 
-          // ! BEWARE: There is an invisible character in the p tag as an embed spacer
           if (i != (process.env.RSS_LIMIT || 5) - 1)
-            content += '<p>‎</p>'
           embed.addFields({ name: `:newspaper:  ${rss.items[i].title}`, value: content })
         }
 
