@@ -1,13 +1,15 @@
 import type { YuukoComponent } from ".";
 import type { Client } from "../Structures";
+import path from "path";
 import fs from "fs";
 
 export async function registerComponents(client: Client) {
-  fs.readdirSync("./src/Components")
+  const compPath = path.join(import.meta.dir, "..", "Components");
+  fs.readdirSync(compPath)
     .filter((file) => file.endsWith(".ts"))
-    .forEach(async (file) => {
-      const comp: YuukoComponent = (await import(`#Components/${file}`)).default;
-      client.log(`Component ${comp.name} loaded`);
-      client.components.set(comp.name, comp);
+    .forEach(file => {
+      const component = require(path.join(compPath, file)).default as YuukoComponent;
+      client.log(`Component ${component.name} loaded`);
+      client.components.set(component.name, component);
     });
 }
