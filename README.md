@@ -34,7 +34,7 @@ $ git clone https://github.com/YuuCorp/Yuuko.git
 ```
 2. Generate an rsa keypair
 ```bash
-$ mkdir -p ./src/RSA & ssh-keygen -t rsa -f ./src/RSA/id_rsa -C id_rsa
+$ mkdir -p ./src/RSA && ssh-keygen -m PEM -t rsa -f ./src/RSA/id_rsa -C id_rsa
 ```
 3. Install all the dependencies ([install bun](https://bun.sh/))
 ```bash
