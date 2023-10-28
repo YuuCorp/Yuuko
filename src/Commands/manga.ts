@@ -32,7 +32,7 @@ export default {
       mID: number;
     }> = {};
 
-    let mangaIdFound = false;
+    // let mangaIdFound = false;
 
     if (!hook) {
       if (manga.length < 3) return void interaction.reply({ embeds: [EmbedError(`Please enter a search query of at least 3 characters.`, null, false)] });
@@ -40,38 +40,38 @@ export default {
     } else if (hook && hookdata) {
       if (hookdata.title) {
         vars.query = hookdata.title;
-        normalizedQuery = normalize(hookdata.title);
+        // normalizedQuery = normalize(hookdata.title);
       }
     } else return void interaction.reply({ embeds: [EmbedError(`MangaCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)] });
 
-    if (!vars.mID) {
-      const mangaId = await redis.get<string>(`_mangaId-${normalizedQuery}`);
-      if (mangaId) {
-        mangaIdFound = true;
-        vars.mID = parseInt(mangaId);
-        console.log(`[MangaCmd] Found cached ID for ${normalizedQuery} : ${vars.mID}`);
-        console.log(`[MangaCmd] Querying for ${normalizedQuery} with ID ${vars.mID}`);
-      }
-    }
+    // if (!vars.mID) {
+    //   const mangaId = await redis.get<string>(`_mangaId-${normalizedQuery}`);
+    //   if (mangaId) {
+    //     mangaIdFound = true;
+    //     vars.mID = parseInt(mangaId);
+    //     console.log(`[MangaCmd] Found cached ID for ${normalizedQuery} : ${vars.mID}`);
+    //     console.log(`[MangaCmd] Querying for ${normalizedQuery} with ID ${vars.mID}`);
+    //   }
+    // }
 
-    const cacheData = await redis.json.get(`_manga-${vars.mID}`);
+    // const cacheData = await redis.json.get(`_manga-${vars.mID}`);
 
-    if (cacheData) {
-      console.log("[MangaCmd] Found cache data, returning data...");
-      return void handleData({ manga: cacheData }, interaction);
-    }
+    // if (cacheData) {
+    //   console.log("[MangaCmd] Found cache data, returning data...");
+    //   return void handleData({ manga: cacheData }, interaction);
+    // }
 
     console.log("[MangaCmd] No cache found, fetching from CringeQL");
     GraphQLRequest("Manga", vars, interaction.ALtoken)
       .then((response) => {
         const data = response.data.Media;
         if (data) {
-          if (!mangaIdFound) redis.set(`_mangaId-${normalizedQuery}`, data.id);
-          redis.json.set(`_manga-${data.id}`, "$", data);
-          for(const synonym of data.synonyms || []) {
-            if(!synonym) continue;
-            redis.set(`_mangaId-${normalize(synonym)}`, data.id.toString());
-          }
+          // if (!mangaIdFound) redis.set(`_mangaId-${normalizedQuery}`, data.id);
+          // redis.json.set(`_manga-${data.id}`, "$", data);
+          // for(const synonym of data.synonyms || []) {
+          //   if(!synonym) continue;
+          //   redis.set(`_mangaId-${normalize(synonym)}`, data.id.toString());
+          // }
           return void handleData({ manga: data, headers: response.headers}, interaction, hookdata)
         } else {
           return void interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
