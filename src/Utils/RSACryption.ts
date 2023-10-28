@@ -1,24 +1,30 @@
 import fs from 'fs'
 import path from 'path'
-import crypto from 'crypto'
+import NodeRSA from 'node-rsa';
 
-export function RSACryption(item: string, type?: boolean): string {
-  const privateKey = fs.readFileSync(path.join(__dirname, "..", "RSA", "id_rsa"), 'utf8');
-  if(!privateKey) throw new Error('Missing one of the RSA key.');
-  if(type) 
-    return crypto.privateDecrypt(privateKey, Buffer.from(item, "base64")).toString("utf8");
+/**
+ *
+ * @param item The item to decrypt/encrypt.
+ * @param type If true decrypts it, if false it encrypts it. By default is true.
+ */
+export function RSACryption(item: string, type = true): string {
+  if (type === true) {
+    const itemContent = path.join(__dirname, "..", "RSA", "id_rsa")
 
-  const itemBuffer = Buffer.from(item);
-  // 245 is the max length of the data that can be encrypted with RSA
-  if(itemBuffer.byteLength > 245) {
-    const chunks = [];
-    for(let i = 0; i < itemBuffer.byteLength; i += 245)
-      chunks.push(itemBuffer.subarray(i, i + 245));
+    if (!fs.existsSync(itemContent))
+      throw new Error('Missing Private RSA key.')
+    const decryptitem = new NodeRSA(fs.readFileSync(itemContent).toString())
+    return decryptitem.decrypt(item, 'utf8')
+  }
+  else if (type === false) {
+    const itemContent = path.join(__dirname, "..", "RSA", "id_rsa.pub")
+    if (!fs.existsSync(itemContent))
+      throw new Error('Missing public RSA key.')
 
-    // TODO: Make it faster somehow
-    const encryptedChunks = chunks.map(chunk => crypto.privateEncrypt(privateKey, chunk));
-    return Buffer.concat(encryptedChunks).toString("base64");
-
-  } else
-    return crypto.privateEncrypt(privateKey, itemBuffer).toString("base64");
+    const encryptitem = new NodeRSA(fs.readFileSync(itemContent).toString())
+    return encryptitem.encrypt(item, 'base64')
+  }
+  else {
+    throw new Error('Invalid type.')
+  }
 }
