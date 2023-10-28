@@ -5,10 +5,10 @@ import type { Command } from '../Structures/Command'
 
 export function Logging(command: Command, interaction: Interaction) {
   try {
-    const logPath = path.join(__dirname, '..', 'src', 'Logging/logs.txt')
+    const logPath = path.join(__dirname, '..', 'Logging/logs.txt')
     const currentDate = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
-    if (!fs.existsSync(path.join(__dirname, '..', 'src', 'Logging'))) {
-      fs.mkdirSync(path.join(__dirname, '..', 'src', 'Logging'))
+    if (!fs.existsSync(path.join(__dirname, '..', 'Logging'))) {
+      fs.mkdirSync(path.join(__dirname, '..', 'Logging'))
       // check if logPath exists
       if (!fs.existsSync(logPath)) {
         // create logPath 
