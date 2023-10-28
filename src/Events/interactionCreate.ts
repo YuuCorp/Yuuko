@@ -13,10 +13,13 @@ export const run: YuukoEvent<'interactionCreate'> = async (client, interaction) 
     // We run the command based on the interaction
     const command = client.commands.find(cmd => cmd.name == interaction.commandName)
     if (!command)
-      return
-    Logging(command, interaction)
-    const args = await runMiddlewares(command.middlewares, interaction)
+    return
+  Logging(command, interaction)
+  client.log(`Interaction received in: ${Date.now() - interaction.createdTimestamp}ms`)
+  const args = await runMiddlewares(command.middlewares, interaction)
+  client.log(`Ran middleware in: ${Date.now() - interaction.createdTimestamp}ms`)
     command.run({ interaction: args, client })
+  client.log(`Ran command in: ${Date.now() - interaction.createdTimestamp}ms`)
 
     // Check for autocomplete
   }

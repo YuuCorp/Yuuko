@@ -14,9 +14,11 @@ async function requireALToken(interaction: UsableInteraction) {
 async function optionalALToken(interaction: UsableInteraction) {
   const id = interaction.user.id;
   const alUser = await getAnilistUser(id);
+  console.log(`Fetched user in: ${Date.now() - interaction.createdTimestamp}ms`)
   if (alUser && alUser.anilistToken) {
 
     interaction.ALtoken = RSACryption(alUser.anilistToken);
+    console.log(`Decrypted in: ${Date.now() - interaction.createdTimestamp}ms`)
   }
 }
 

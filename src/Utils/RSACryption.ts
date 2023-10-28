@@ -13,13 +13,11 @@ export function RSACryption(item: string, type = true): string {
 
     if (!fs.existsSync(itemContent))
       throw new Error('Missing Private RSA key.')
-
     const decryptitem = new NodeRSA(fs.readFileSync(itemContent).toString())
     return decryptitem.decrypt(item, 'utf8')
   }
   else if (type === false) {
     const itemContent = path.join(__dirname, "..", "RSA", "id_rsa.pub")
-
     if (!fs.existsSync(itemContent))
       throw new Error('Missing public RSA key.')
 

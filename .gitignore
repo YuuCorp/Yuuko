@@ -139,5 +139,6 @@ dist
 /temp
 commit.hash
 Database/db.sqlite
+db.sqlite-*
 
 src/Local
