@@ -81,8 +81,7 @@ web_modules/
 *.sqlite
 
 # ignore RSA keys
-id_rsa
-id_rsa.pub
+id_rsa*
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache

@@ -14,7 +14,7 @@ async function start(token: string | undefined) {
 
   client.login(token);
 
-  if (!fs.existsSync(path.join(__dirname, "../Logging"))) fs.mkdirSync(path.join(__dirname, "../Logging"));
+  if (!fs.existsSync(path.join(__dirname, "Logging"))) fs.mkdirSync(path.join(__dirname, "Logging"));
   process.env.UPTIME = Date.now();
 }
 start(process.env.TOKEN);
