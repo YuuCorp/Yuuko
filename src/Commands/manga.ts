@@ -35,14 +35,14 @@ export default {
     // let mangaIdFound = false;
 
     if (!hook) {
-      if (manga.length < 3) return void interaction.reply({ embeds: [EmbedError(`Please enter a search query of at least 3 characters.`, null, false)] });
+      if (manga.length < 3) return void interaction.editReply({ embeds: [EmbedError(`Please enter a search query of at least 3 characters.`, null, false)] });
       vars.query = manga;
     } else if (hook && hookdata) {
       if (hookdata.title) {
         vars.query = hookdata.title;
         // normalizedQuery = normalize(hookdata.title);
       }
-    } else return void interaction.reply({ embeds: [EmbedError(`MangaCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)] });
+    } else return void interaction.editReply({ embeds: [EmbedError(`MangaCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)] });
 
     // if (!vars.mID) {
     //   const mangaId = await redis.get<string>(`_mangaId-${normalizedQuery}`);
@@ -74,12 +74,12 @@ export default {
           // }
           return void handleData({ manga: data, headers: response.headers}, interaction, hookdata)
         } else {
-          return void interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
+          return void interaction.editReply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
         } // wanna attempt? hell yeah
       })
       .catch((error) => {
         console.error(error);
-        return void interaction.reply({ embeds: [EmbedError(error, vars)] });
+        return void interaction.editReply({ embeds: [EmbedError(error, vars)] });
       });
   },
 } satisfies CommandWithHook;

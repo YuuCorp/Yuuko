@@ -21,6 +21,7 @@ export default {
 
   run: async ({ interaction, client, hook = false, hookdata = null }): Promise<void> => {
     if (!interaction.isCommand()) return;
+    await interaction.deferReply()
     const { query } = getOptions<{ query: string }>(interaction.options, ["query"]);
     // let normalizedQuery = "";
     // if (query) normalizedQuery = normalize(query);
@@ -32,7 +33,7 @@ export default {
       aID: number;
     }> = {};
     if (!hook) {
-      if (query.length < 3) return void interaction.reply({ embeds: [EmbedError(`Please enter a search query of at least 3 characters.`, null, false)] });
+      if (query.length < 3) return void interaction.editReply({ embeds: [EmbedError(`Please enter a search query of at least 3 characters.`, null, false)] });
       vars.query = query;
     } else if (hook && hookdata) {
       if (hookdata.id) {
@@ -42,7 +43,7 @@ export default {
         vars.query = hookdata.title;
         // normalizedQuery = normalize(hookdata.title);
       }
-    } else return void interaction.reply({ embeds: [EmbedError(`AnimeCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)] });
+    } else return void interaction.editReply({ embeds: [EmbedError(`AnimeCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)] });
 
     console.log(`[AnimeCmd] Anime ID: ${vars.aID}`);
 
@@ -80,12 +81,12 @@ export default {
           // }
           return void handleData({ anime: data, headers: response.headers }, interaction, hookdata);
         } else {
-          return interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
+          return void interaction.editReply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
         }
       })
       .catch((error: any) => {
         console.error(error);
-        interaction.reply({ embeds: [EmbedError(error, vars)] });
+        interaction.editReply({ embeds: [EmbedError(error, vars)] });
       });
   },
 } satisfies CommandWithHook;
