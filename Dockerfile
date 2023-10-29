@@ -1,6 +1,9 @@
-FROM node:16
+FROM oven/bun:latest
 WORKDIR /usr/src/Yuuko
-COPY package*.json ./
-RUN yarn install --frozen-lockfile
+COPY package.json ./
+COPY bun.lockb ./
+RUN bun install --frozen-lockfile
 COPY . .
-CMD [ "node", "app.js" ]
+RUN mkdir -p ./src/RSA && \
+    [ ! -f ./src/RSA/id_rsa ] && ssh-keygen -m PEM -t rsa -f ./src/RSA/id_rsa -C id_rsa || echo "RSA keys already exist"
+CMD [ "bun" ,"run" ,"app.ts"]
