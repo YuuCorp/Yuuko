@@ -40,11 +40,11 @@ export default {
     if (!userName) {
       // We try to use the one the user set
       try {
-        if(!interaction.alID) return void interaction.reply({ embeds: [EmbedError(`You have yet to set an AniList token.`)] });
+        if(!interaction.alID) return void interaction.editReply({ embeds: [EmbedError(`You have yet to set an AniList token.`)] });
         vars.userId = interaction.alID;
       } catch (error) {
         console.error(error);
-        return void interaction.reply({ embeds: [EmbedError(`You have yet to set an AniList token.`)] });
+        return void interaction.editReply({ embeds: [EmbedError(`You have yet to set an AniList token.`)] });
       }
     } else {
       vars.user = userName;
@@ -52,8 +52,8 @@ export default {
 
     try {
       const data = (await GraphQLRequest("RecentChart", vars)).data?.Page?.mediaList;
-      if (!data) return void interaction.reply({ embeds: [EmbedError("Unable to find specified user", vars)] });
-      interaction.reply({ embeds: [{ description: "Creating image..." }]})
+      if (!data) return void interaction.editReply({ embeds: [EmbedError("Unable to find specified user", vars)] });
+      interaction.editReply({ embeds: [{ description: "Creating image..." }]})
       const canvas = new Jimp(999, 999);
 
       let x = 0;
@@ -90,7 +90,7 @@ export default {
       const attachment = new AttachmentBuilder(canvasResult, { name: "recent.png" });
       return void interaction.editReply({ files: [attachment], embeds: [] })
     } catch (error: any) {
-      return void interaction.reply({ embeds: [EmbedError(error, vars)] });
+      return void interaction.editReply({ embeds: [EmbedError(error, vars)] });
     }
   },
 } satisfies Command;

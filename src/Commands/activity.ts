@@ -33,7 +33,7 @@ export default {
     }
 
     if (!interaction.options.get('user') && !vars.userid)
-      return void interaction.reply({ embeds: [EmbedError(`You have yet to set an AniList token. You can see the instructions with /auth help`)] })
+      return void interaction.editReply({ embeds: [EmbedError(`You have yet to set an AniList token. You can see the instructions with /auth help`)] })
     
     if(vars.username) {
       try {
@@ -48,7 +48,7 @@ export default {
       }
       catch (error: any) {
         console.error(error)
-        interaction.reply({ embeds: [EmbedError(error, vars)] })
+        interaction.editReply({ embeds: [EmbedError(error, vars)] })
       }
     }
 
@@ -87,20 +87,20 @@ export default {
                 .setThumbnail(data?.user?.avatar?.large!)
                 .setFooter({ text: `${data?.likeCount | 0} ♥  ${data?.replyCount | 0} 💬` })
 
-              return void interaction.reply({ embeds: [embed] })
+              return void interaction.editReply({ embeds: [embed] })
 
             case 'MessageActivity':
               break
           }
-          return interaction.reply({ embeds: [embed] })
+          return interaction.editReply({ embeds: [embed] })
         }
         else {
-          return interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] })
+          return interaction.editReply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] })
         }
       })
       .catch((error) => {
         console.error(error)
-        interaction.reply({ embeds: [EmbedError(error, vars)] })
+        interaction.editReply({ embeds: [EmbedError(error, vars)] })
       })
   },
 } satisfies Command

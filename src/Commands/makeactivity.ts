@@ -89,7 +89,7 @@ export default {
     if (!interaction.isChatInputCommand()) return;
     // const type = (interaction.options as CommandInteractionOptionResolver).getSubcommand() <- from auth command
     const type = getSubcommand<["list", "status"]>(interaction.options);
-    if (!type || (type != "status" && type != "list")) return void interaction.reply({ embeds: [EmbedError(`Please use either the status or list subcommand. (Yours was "${type}")`, null, false)], ephemeral: true });
+    if (!type || (type != "status" && type != "list")) return void interaction.editReply({ embeds: [EmbedError(`Please use either the status or list subcommand. (Yours was "${type}")`, null, false)] });
 
     if (type === "status") {
       const vars = { text: getEmojis(interaction.options.getString("text", true)), asHtml: true };
@@ -106,11 +106,11 @@ export default {
             .setDescription(userText)
             .setFooter(Footer(response.headers));
 
-          return interaction.reply({ embeds: [statusActivity] });
+          return interaction.editReply({ embeds: [statusActivity] });
         })
         .catch((error) => {
           console.error(error);
-          interaction.reply({ embeds: [EmbedError(error, vars)] });
+          interaction.editReply({ embeds: [EmbedError(error, vars)] });
         });
     }
 
@@ -122,18 +122,18 @@ export default {
       GraphQLRequest("SaveMediaList", vars, interaction.ALtoken)
         .then((response) => {
           const data = response.data.SaveMediaListEntry;
-          if (!data) return interaction.reply({ embeds: [EmbedError("Something went wrong while making the activity.")] });
+          if (!data) return interaction.editReply({ embeds: [EmbedError("Something went wrong while making the activity.")] });
           const mediaListActivity = new EmbedBuilder()
             .setURL(`https://anilist.co/${data?.media?.type || ""}/${data?.mediaId || ""}`)
             .setTitle(`${data.user?.name || "Unknown"} added ${data?.media?.title?.userPreferred || "Unknown"} to ${data?.status || "Unknown"}!`)
             .setFooter(Footer(response.headers));
           if (data.media && data.media.bannerImage) mediaListActivity.setImage(data.media.bannerImage);
 
-          return interaction.reply({ embeds: [mediaListActivity] });
+          return interaction.editReply({ embeds: [mediaListActivity] });
         })
         .catch((error) => {
           console.error(error);
-          interaction.reply({ embeds: [EmbedError(error, vars)] });
+          interaction.editReply({ embeds: [EmbedError(error, vars)] });
         });
     }
   },

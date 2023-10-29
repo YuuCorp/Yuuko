@@ -1,7 +1,6 @@
 import db from "../Database/db";
 import { tables } from "../Database";
 import { getOptions, BuildPagination, EmbedError, Footer } from "../Utils/";
-import type { CommandInteractionOptionResolver } from "discord.js";
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import type { Command } from "../Structures";
 import { eq, sql } from "drizzle-orm";
