@@ -2,7 +2,7 @@ FROM oven/bun:latest
 WORKDIR /usr/src/Yuuko
 COPY package.json ./
 COPY yarn.lock ./
-RUN yarn install --frozen-lockfile
+RUN yarn install --ignore-engines
 COPY . .
 RUN mkdir -p ./src/RSA && \
     [ ! -f ./src/RSA/id_rsa ] && ssh-keygen -m PEM -t rsa -f ./src/RSA/id_rsa -C id_rsa || echo "RSA keys already exist"
