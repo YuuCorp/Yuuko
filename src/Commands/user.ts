@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, EmbedBuilder, type ColorResolvable } from "discord.js";
 import { mwGetUserEntry } from "../Middleware/UserEntry";
 import type { Command } from "../Structures";
-import { CommandCategories, EmbedError, GraphQLRequest, Footer, getOptions } from "../Utils";
+import { EmbedError, GraphQLRequest, Footer, getOptions } from "../Utils";
 
 const name = "user";
 const usage = "user <?anilist name>";
@@ -16,7 +16,7 @@ export default {
   withBuilder: new SlashCommandBuilder()
     .setName(name)
     .setDescription(description)
-    .addStringOption((option) => option.setName("query").setRequired(false).setDescription("The query to search for")),
+    .addStringOption((option) => option.setName("query").setRequired(false).setDescription("The user to search for")),
   // .setRequired(true)),
 
   run: async ({ interaction, client }): Promise<void> => {
@@ -24,23 +24,20 @@ export default {
 
     const { query: anilistUser } = getOptions<{ query: string }>(interaction.options, ["query"]);
 
-    console.log(interaction.alID)
-
     let vars: Partial<{
       username: string;
       userid: number;
     }> = {
       username: anilistUser,
     };
-
+    
     // If the user hasn't provided a user
     if (!anilistUser) {
       // We try to use the one the user set
-      try {
+      if (interaction.alID) {
         vars = { userid: interaction.alID };
-      } catch (error) {
-        console.error(error);
-        return void interaction.reply({ embeds: [EmbedError(`You have yet to set an AniList token.`)] });
+      } else {
+        return void interaction.editReply({ embeds: [EmbedError(`You have yet to set an AniList token.`)] });
       }
     }
     // Make the HTTP Api request
@@ -77,14 +74,14 @@ export default {
             // re: yeah, this is cancer
             titleEmbed.setColor(userColor as any);
           }
-          interaction.reply({ embeds: [titleEmbed] });
+          interaction.editReply({ embeds: [titleEmbed] });
         } else {
-          return interaction.reply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
+          return interaction.editReply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
         }
       })
       .catch((error) => {
         console.error(error);
-        interaction.reply({ embeds: [EmbedError(error, vars)] });
+        interaction.editReply({ embeds: [EmbedError(error, vars)] });
       });
   },
 } satisfies Command;

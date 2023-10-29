@@ -1,5 +1,4 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
-import { redis } from "../Caching/redis";
 import { mwOptionalALToken } from "../Middleware/ALToken";
 import type { CommandWithHook, HookData, UsableInteraction } from "../Structures";
 import { normalize, EmbedError, GraphQLRequest, Footer, BuildPagination, getOptions, SeriesTitle, type AlwaysExist, type GraphQLResponse } from "../Utils";

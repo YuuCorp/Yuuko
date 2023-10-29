@@ -26,10 +26,12 @@ export const mwRequireALToken = new Middleware({
   name: "Require AniList Token",
   description: "This middleware enforces the presence of an AniList Token for a given Discord user ID and makes it available for the interaction object",
   run: requireALToken,
+  defer: true,
 });
 
 export const mwOptionalALToken = new Middleware({
   name: "Optional AniList Token",
   description: "This middleware makes an AniList token available on the interaction object if present",
   run: optionalALToken,
+  defer: true,
 });

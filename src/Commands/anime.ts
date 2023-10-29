@@ -21,7 +21,6 @@ export default {
 
   run: async ({ interaction, client, hook = false, hookdata = null }): Promise<void> => {
     if (!interaction.isCommand()) return;
-    await interaction.deferReply()
     const { query } = getOptions<{ query: string }>(interaction.options, ["query"]);
     // let normalizedQuery = "";
     // if (query) normalizedQuery = normalize(query);

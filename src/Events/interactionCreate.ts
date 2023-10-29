@@ -43,10 +43,9 @@ export const run: YuukoEvent<'interactionCreate'> = async (client, interaction) 
 }
 
 async function runMiddlewares(middlewares: Middleware[] | undefined, interaction: Interaction): Promise<Interaction> {
-  if (!interaction.isChatInputCommand())
-    return interaction
-  if (!middlewares)
-    return interaction
+  if (!interaction.isChatInputCommand()) return interaction
+  if (!middlewares) return interaction
+  if (middlewares.some(mw => mw.defer)) await interaction.deferReply()
   await Promise.all(middlewares.map(mw => mw.run(interaction))).catch((e: any) => {
     interaction.reply({ embeds: [EmbedError(e)] })
   })
