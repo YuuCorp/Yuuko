@@ -1,4 +1,11 @@
-FROM oven/bun:latest
+FROM NODE:16
+# install bun from here curl -fsSL https://bun.sh/install | bash
+RUN apt-get update && apt-get install -y curl && \
+    curl -fsSL https://bun.sh/install | bash && \
+    apt-get remove -y curl && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 WORKDIR /usr/src/Yuuko
 COPY package.json ./
 COPY yarn.lock ./
