@@ -1,4 +1,4 @@
-import { GraphQLRequest, type AlwaysExist, type GraphQLResponse, type Media, type CacheEntry, EmbedError } from "../Utils";
+import { GraphQLRequest, type AlwaysExist, type GraphQLResponse, type Media, type CacheEntry, EmbedError, getSubcommand } from "../Utils";
 import { MediaType, type GetMediaCollectionQuery } from "../GraphQL/types";
 import type { Command, UsableInteraction } from "../Structures";
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
@@ -17,31 +17,51 @@ export default {
   cooldown,
   middlewares: [mwRequireALToken],
   commandType: "Anilist",
+  withBuilder: new SlashCommandBuilder()
+    .setName(name)
+    .setDescription(description)
+    .addSubcommand((subcommand) => subcommand.setName("sync").setDescription("Sync your lists with our bot."))
+    .addSubcommand((subcommand) => subcommand.setName("wipe").setDescription("Wipe your lists from our bot. (This will not wipe your AniList lists.)")),
   run: async ({ interaction, client }): Promise<void> => {
     if (!interaction.isCommand()) return;
-    interaction.editReply(`Syncing your lists...`);
-    try {
-      const { data: animeData } = await GraphQLRequest("GetMediaCollection", {
-        userId: interaction.alID,
-        type: MediaType.Anime,
-      });
-      if (animeData) handleData({ media: animeData }, interaction, MediaType.Anime);
+    const subcommand = getSubcommand<["sync", "wipe"]>(interaction.options);
 
-      const { data: mangaData } = await GraphQLRequest("GetMediaCollection", {
-        userId: interaction.alID,
-        type: MediaType.Manga,
-      });
+    if (subcommand === "wipe") {
+      interaction.editReply(`Wiping your lists...`);
+      try {
+        const dbExists = redis.exists(`_user${interaction.alID}-${MediaType.Anime}`);
+        if (!dbExists) return void interaction.editReply(`You have not synced your lists!`);
+        redis.del(`_user${interaction.alID}-${MediaType.Anime}`);
+        redis.del(`_user${interaction.alID}-${MediaType.Manga}`);
+        return void interaction.editReply(`Successfully wiped your lists!`);
+      } catch (e: any) {
+        console.error(e);
+        return void interaction.editReply({ embeds: [EmbedError(e)] });
+      }
+    } else if (subcommand === "sync") {
+      interaction.editReply(`Syncing your lists...`);
+      try {
+        const { data: animeData } = await GraphQLRequest("GetMediaCollection", {
+          userId: interaction.alID,
+          type: MediaType.Anime,
+        });
+        if (animeData) handleData({ media: animeData }, interaction, MediaType.Anime);
 
-      if (mangaData) handleData({ media: mangaData }, interaction, MediaType.Manga);
+        const { data: mangaData } = await GraphQLRequest("GetMediaCollection", {
+          userId: interaction.alID,
+          type: MediaType.Manga,
+        });
 
-      const commandCooldown = client.cooldowns.get(name);
-      if (commandCooldown)
-        commandCooldown.set(interaction.user.id, Date.now() + cooldown * 1000);
+        if (mangaData) handleData({ media: mangaData }, interaction, MediaType.Manga);
 
-      return void interaction.editReply(`Successfully synced your lists!`);
-    } catch (e: any) {
-      console.error(e);
-      return void interaction.editReply({ embeds: [EmbedError(e)] });
+        const commandCooldown = client.cooldowns.get(name);
+        if (commandCooldown) commandCooldown.set(interaction.user.id, Date.now() + cooldown * 1000);
+
+        return void interaction.editReply(`Successfully synced your lists!`);
+      } catch (e: any) {
+        console.error(e);
+        return void interaction.editReply({ embeds: [EmbedError(e)] });
+      }
     }
   },
 } satisfies Command;
