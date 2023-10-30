@@ -64,29 +64,30 @@ export default {
     //   return void handleData({ anime: cacheData }, interaction);
     // }
     console.log("[AnimeCmd] No cache found, fetching from CringeQL");
-    GraphQLRequest("Anime", vars, interaction.ALtoken)
-      .then((response) => {
-        const data = response.data.Media;
-        if (data) {
-          // if (!animeIdFound) redis.set(`_animeId-${normalizedQuery}`, data.id);
-          // redis.json.set(`_anime-${data.id}`, "$", data);
-          // for (const synonym of data.synonyms || []) {
-          //   if (!synonym) continue;
-          //   redis.set(`_animeId-${normalize(synonym)}`, data.id);
-          // }
-          // if (data.nextAiringEpisode?.airingAt) {
-          //   console.log(`[AnimeCmd] Expiring anime-${data.id} at ${data.nextAiringEpisode.airingAt}`);
-          //   redis.expireat(`_anime-${data.id}`, data.nextAiringEpisode.airingAt);
-          // }
-          return void handleData({ anime: data, headers: response.headers }, interaction, hookdata);
-        } else {
-          return void interaction.editReply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
-        }
-      })
-      .catch((error: any) => {
-        console.error(error);
-        interaction.editReply({ embeds: [EmbedError(error, vars)] });
-      });
+    try {
+      const {
+        data: { Media: data },
+        headers,
+      } = await GraphQLRequest("Anime", vars, interaction.ALtoken);
+      if (data) {
+        // if (!animeIdFound) redis.set(`_animeId-${normalizedQuery}`, data.id);
+        // redis.json.set(`_anime-${data.id}`, "$", data);
+        // for (const synonym of data.synonyms || []) {
+        //   if (!synonym) continue;
+        //   redis.set(`_animeId-${normalize(synonym)}`, data.id);
+        // }
+        // if (data.nextAiringEpisode?.airingAt) {
+        //   console.log(`[AnimeCmd] Expiring anime-${data.id} at ${data.nextAiringEpisode.airingAt}`);
+        //   redis.expireat(`_anime-${data.id}`, data.nextAiringEpisode.airingAt);
+        // }
+        return void handleData({ anime: data, headers: headers }, interaction, hookdata);
+      } else {
+        return void interaction.editReply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
+      }
+    } catch (e: any) {
+      console.error(e);
+      interaction.editReply({ embeds: [EmbedError(e, vars)] });
+    }
   },
 } satisfies CommandWithHook;
 
