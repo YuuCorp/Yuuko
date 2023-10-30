@@ -30,7 +30,7 @@ export default {
     }> = {
       username: anilistUser,
     };
-    
+
     // If the user hasn't provided a user
     if (!anilistUser) {
       // We try to use the one the user set
@@ -41,47 +41,46 @@ export default {
       }
     }
     // Make the HTTP Api request
-    GraphQLRequest("User", vars)
-      .then((response) => {
-        const data = response.data.User;
-        if (data) {
-          const titleEmbed = new EmbedBuilder()
-            // TODO: Fix depricated function calls 101
-            .setAuthor({ name: data.name, iconURL: "https://anilist.co/img/icons/android-chrome-512x512.png", url: data.siteUrl || "https://anilist.co" })
-            .setFooter(Footer(response.headers));
+    try {
+      const { data, headers } = await GraphQLRequest("User", vars);
+      const response = data.User;
+      if (response) {
+        const titleEmbed = new EmbedBuilder()
+          // TODO: Fix depricated function calls 101
+          .setAuthor({ name: response.name, iconURL: "https://anilist.co/img/icons/android-chrome-512x512.png", url: response.siteUrl || "https://anilist.co" })
+          .setFooter(Footer(headers));
 
-          if (data.avatar?.large) titleEmbed.setThumbnail(data.avatar.large);
-          if (data.bannerImage) titleEmbed.setImage(data.bannerImage);
+        if (response.avatar?.large) titleEmbed.setThumbnail(response.avatar.large);
+        if (response.bannerImage) titleEmbed.setImage(response.bannerImage);
 
-          const statistics = data.statistics;
+        const statistics = response.statistics;
 
-          if (statistics) {
-            titleEmbed.addFields(
-              { name: "< Anime >\n\n", value: `**Watched:** ${statistics.anime?.count.toString()}\n**Average score**: ${statistics.anime?.meanScore.toString()}`, inline: true },
-              { name: "< Manga >\n\n", value: `**Read:** ${statistics.manga?.count.toString()}\n**Average score**: ${statistics.manga?.meanScore.toString()}`, inline: true },
-            );
-          }
-
-          let userColor: ColorResolvable | null;
-          const profileColor = data.options?.profileColor;
-
-          if (profileColor) {
-            userColor = profileColor.charAt(0).toUpperCase() + profileColor.slice(1);
-
-            if (profileColor === "pink") userColor = "LuminousVividPink";
-            if (profileColor === "gray") userColor = "Grey";
-            // this is just cancer
-            // re: yeah, this is cancer
-            titleEmbed.setColor(userColor as any);
-          }
-          interaction.editReply({ embeds: [titleEmbed] });
-        } else {
-          return interaction.editReply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
+        if (statistics) {
+          titleEmbed.addFields(
+            { name: "< Anime >\n\n", value: `**Watched:** ${statistics.anime?.count.toString()}\n**Average score**: ${statistics.anime?.meanScore.toString()}`, inline: true },
+            { name: "< Manga >\n\n", value: `**Read:** ${statistics.manga?.count.toString()}\n**Average score**: ${statistics.manga?.meanScore.toString()}`, inline: true },
+          );
         }
-      })
-      .catch((error) => {
-        console.error(error);
-        interaction.editReply({ embeds: [EmbedError(error, vars)] });
-      });
+
+        let userColor: ColorResolvable | null;
+        const profileColor = response.options?.profileColor;
+
+        if (profileColor) {
+          userColor = profileColor.charAt(0).toUpperCase() + profileColor.slice(1);
+
+          if (profileColor === "pink") userColor = "LuminousVividPink";
+          if (profileColor === "gray") userColor = "Grey";
+          // this is just cancer
+          // re: yeah, this is cancer
+          titleEmbed.setColor(userColor as any);
+        }
+        interaction.editReply({ embeds: [titleEmbed] });
+      } else {
+        return void interaction.editReply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
+      }
+    } catch (e: any) {
+      console.error(e);
+      interaction.editReply({ embeds: [EmbedError(e, vars)] });
+    }
   },
 } satisfies Command;
