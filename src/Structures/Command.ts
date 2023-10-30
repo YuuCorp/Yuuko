@@ -64,6 +64,7 @@ export interface CommonCommand {
   name: string;
   description: string;
   usage?: string;
+  cooldown?: number;
   commandType: CommandType;
   run: <Args = any>(o: RunOptions<Args>) => MaybePromise<void>;
   guildOnly?: boolean;

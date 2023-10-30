@@ -8,11 +8,13 @@ import { redis } from "../Caching/redis";
 const name = "synclists";
 const usage = "/synclists";
 const description = "Syncs your AniList lists with our bot, allowing for quick access to your lists!";
+const cooldown = 7200; // 2 hours in seconds;
 
 export default {
   name,
   usage,
   description,
+  cooldown,
   middlewares: [mwRequireALToken],
   commandType: "Anilist",
   run: async ({ interaction, client }): Promise<void> => {
@@ -32,10 +34,14 @@ export default {
 
       if (mangaData) handleData({ media: mangaData }, interaction, MediaType.Manga);
 
+      const commandCooldown = client.cooldowns.get(name);
+      if (commandCooldown)
+        commandCooldown.set(interaction.user.id, Date.now() + cooldown * 1000);
+
       return void interaction.editReply(`Successfully synced your lists!`);
     } catch (e: any) {
       console.error(e);
-      return void interaction.editReply({ embeds: [EmbedError(e)]});
+      return void interaction.editReply({ embeds: [EmbedError(e)] });
     }
   },
 } satisfies Command;

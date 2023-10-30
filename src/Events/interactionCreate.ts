@@ -1,9 +1,9 @@
-import type { Interaction } from "discord.js";
+import { type Interaction, Collection, time } from "discord.js";
 
 import { EmbedError } from "../Utils/EmbedError";
 import { Logging } from "../Utils/Logging";
 import type { Middleware } from "../Structures/Middleware";
-import type { YuukoEvent } from "../Structures";
+import type { Client, ClientCommand, UsableInteraction, YuukoEvent } from "../Structures";
 
 /* discord doesn't have the commands property in their class for somea reason */
 export const run: YuukoEvent<"interactionCreate"> = async (client, interaction) => {
@@ -16,6 +16,7 @@ export const run: YuukoEvent<"interactionCreate"> = async (client, interaction) 
       if (!command) return;
       Logging(command, interaction);
       client.log(`Interaction received in: ${Date.now() - interaction.createdTimestamp}ms`);
+      checkCooldown(client, command, interaction);  // yeah uh at this point i think we should 
       const args = await runMiddlewares(command.middlewares, interaction);
       client.log(`Ran middleware in: ${Date.now() - interaction.createdTimestamp}ms`);
       command.run({ interaction: args, client });
@@ -38,7 +39,10 @@ export const run: YuukoEvent<"interactionCreate"> = async (client, interaction) 
   } catch (e: any) {
     if (!interaction.isCommand()) return;
     console.error(e);
-    return void interaction.editReply({ embeds: [EmbedError(e)] });
+    if(interaction.deferred)
+      return void interaction.editReply({ embeds: [EmbedError(e, null, e?.cause || null)] });
+    else 
+      return void interaction.reply({ embeds: [EmbedError(e, null, e?.cause || null)] });
   }
 };
 
@@ -49,5 +53,24 @@ async function runMiddlewares(middlewares: Middleware[] | undefined, interaction
   await Promise.all(middlewares.map((mw) => mw.run(interaction))).catch((e: any) => {
     throw e;
   });
+  return interaction;
+}
+
+
+function checkCooldown(client: Client, command: ClientCommand, interaction: UsableInteraction): UsableInteraction {
+  if (!interaction.isChatInputCommand()) return interaction;
+  const commandCooldown = client.cooldowns.get(command.name);
+  if (!commandCooldown) {
+    client.cooldowns.set(command.name, new Collection());
+    return interaction;
+  }
+  if (commandCooldown.has(interaction.user.id)) {
+    const cooldownExpires = commandCooldown.get(interaction.user.id);
+    console.log(cooldownExpires);
+    if (!cooldownExpires) return interaction;
+    if (cooldownExpires > Date.now()) {
+      throw new Error(`User ${interaction.user.tag} is on cooldown for command ${command.name}`, { cause: `Cooldown expires on ${time(Math.ceil(cooldownExpires / 1000), "f")} (${time(Math.ceil(cooldownExpires / 1000), "R")})` });
+    }
+  }
   return interaction;
 }

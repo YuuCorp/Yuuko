@@ -1,4 +1,5 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
+import { redis } from "../Caching/redis";
 import { mwOptionalALToken } from "../Middleware/ALToken";
 import type { CommandWithHook, HookData, UsableInteraction } from "../Structures";
 import { normalize, EmbedError, GraphQLRequest, Footer, BuildPagination, getOptions, SeriesTitle, type AlwaysExist, type GraphQLResponse } from "../Utils";
@@ -24,14 +25,14 @@ export default {
 
     const { query: manga } = getOptions<{ query: string }>(interaction.options, ["query"]);
     let normalizedQuery = "";
-    if (manga) normalizedQuery = normalize(manga); // we got ghosts in code fr
+    if (manga) normalizedQuery = normalize(manga);
 
     const vars: Partial<{
       query: string;
       mID: number;
     }> = {};
 
-    // let mangaIdFound = false;
+    let mangaIdFound = false;
 
     if (!hook) {
       if (manga.length < 3) return void interaction.editReply({ embeds: [EmbedError(`Please enter a search query of at least 3 characters.`, null, false)] });
@@ -39,26 +40,30 @@ export default {
     } else if (hook && hookdata) {
       if (hookdata.title) {
         vars.query = hookdata.title;
-        // normalizedQuery = normalize(hookdata.title);
+        normalizedQuery = normalize(hookdata.title);
       }
     } else return void interaction.editReply({ embeds: [EmbedError(`MangaCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)] });
 
-    // if (!vars.mID) {
-    //   const mangaId = await redis.get<string>(`_mangaId-${normalizedQuery}`);
-    //   if (mangaId) {
-    //     mangaIdFound = true;
-    //     vars.mID = parseInt(mangaId);
-    //     console.log(`[MangaCmd] Found cached ID for ${normalizedQuery} : ${vars.mID}`);
-    //     console.log(`[MangaCmd] Querying for ${normalizedQuery} with ID ${vars.mID}`);
-    //   }
-    // }
+    if (!vars.mID) {
+      const mangaId = await redis.get<string>(`_mangaId-${normalizedQuery}`);
+      if (mangaId) {
+        mangaIdFound = true;
+        vars.mID = parseInt(mangaId);
+        console.log(`[MangaCmd] Found cached ID for ${normalizedQuery} : ${vars.mID}`);
+        console.log(`[MangaCmd] Querying for ${normalizedQuery} with ID ${vars.mID}`);
+      }
+    }
 
-    // const cacheData = await redis.json.get(`_manga-${vars.mID}`);
+    const cacheData = await redis.json.get(`_manga-${vars.mID}`);
 
-    // if (cacheData) {
-    //   console.log("[MangaCmd] Found cache data, returning data...");
-    //   return void handleData({ manga: cacheData }, interaction);
-    // }
+    if (cacheData) {
+      if(interaction.alID) {
+        const mediaListEntry = await redis.json.get(`_user${interaction.alID}-MANGA`, {}, `$.${vars.mID}`); 
+        if(mediaListEntry) cacheData.mediaListEntry = mediaListEntry[0];
+     }
+      console.log("[MangaCmd] Found cache data, returning data...");
+      return void handleData({ manga: cacheData }, interaction);
+    }
 
     console.log("[MangaCmd] No cache found, fetching from CringeQL");
     try {
@@ -67,12 +72,13 @@ export default {
         headers,
       } = await GraphQLRequest("Manga", vars, interaction.ALtoken);
       if (data) {
-        // if (!mangaIdFound) redis.set(`_mangaId-${normalizedQuery}`, data.id);
-        // redis.json.set(`_manga-${data.id}`, "$", data);
-        // for(const synonym of data.synonyms || []) {
-        //   if(!synonym) continue;
-        //   redis.set(`_mangaId-${normalize(synonym)}`, data.id.toString());
-        // }
+        if (!mangaIdFound) redis.set(`_mangaId-${normalizedQuery}`, data.id);
+        const { mediaListEntry, ...redisData } = data;
+        redis.json.set(`_manga-${data.id}`, "$", redisData);
+        for(const synonym of redisData.synonyms || []) {
+          if(!synonym) continue;
+          redis.set(`_mangaId-${normalize(synonym)}`, data.id.toString());
+        }
         return void handleData({ manga: data, headers: headers }, interaction, hookdata);
       } else {
         return void interaction.editReply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });

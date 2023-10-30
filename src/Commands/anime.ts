@@ -62,8 +62,8 @@ export default {
 
     if (cacheData) {
        if(interaction.alID) {
-          const mediaListEntry = await redis.json.get(`_user${interaction.alID}-${vars.aID}`); 
-          if(mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
+          const mediaListEntry = await redis.json.get(`_user${interaction.alID}-ANIME`, {}, `$.${vars.aID}`); 
+          if(mediaListEntry) cacheData.mediaListEntry = mediaListEntry[0];
        }
       console.log("[AnimeCmd] Found cache data, returning data...");
       return void handleData({ anime: cacheData }, interaction);
@@ -86,8 +86,6 @@ export default {
           console.log(`[AnimeCmd] Expiring anime-${redisData.id} at ${redisData.nextAiringEpisode.airingAt}`);
           redis.expireat(`_anime-${data.id}`, redisData.nextAiringEpisode.airingAt);
         }
-        if(mediaListEntry)
-          redis.json.set(`_user${mediaListEntry.user?.id}-${redisData.id}`, "$", mediaListEntry);
         return void handleData({ anime: data, headers: headers }, interaction, hookdata);
       } else {
         return void interaction.editReply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
