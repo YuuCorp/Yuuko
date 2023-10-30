@@ -15,3 +15,4 @@ export * from './registerEvents'
 export * from './registerComponents'
 export * from './getAnilistUser'
 export * from './normalize';
+export * from './getSubcommand';
