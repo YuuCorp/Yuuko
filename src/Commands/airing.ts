@@ -1,4 +1,4 @@
-import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { EmbedBuilder, SlashCommandBuilder, TimestampStyles, time } from "discord.js";
 import ms from "ms";
 import { MediaType } from "../GraphQL/types";
 import type { Command } from "../Structures";
@@ -91,24 +91,7 @@ export default {
         const fields = [];
         // Sort the airing anime alphabetically by title
         if (!airingSchedules) return void interaction.reply({ embeds: [EmbedError("No airing anime found.")] });
-        airingSchedules.sort((a, b) => {
-          if (!a || !b) return 0;
-          if (!a.media || !b.media) return 0;
-
-          const aMedia = a.media.title;
-          const bMedia = b.media.title;
-
-          const aTitle = aMedia?.english || aMedia?.romaji || aMedia?.native;
-          const bTitle = bMedia?.english || bMedia?.romaji || bMedia?.native;
-
-          if (!aTitle || !bTitle) return 0;
-
-          if (aTitle < bTitle) return -1;
-
-          if (aTitle > bTitle) return 1;
-
-          return 0;
-        });
+        airingSchedules.sort((a, b) => (a?.timeUntilAiring || 0) - (b?.timeUntilAiring || 0));
 
         for (let i = 0; i < airingSchedules.length; i += chunkSize) {
           fields.push(airingSchedules.slice(i, i + chunkSize));
@@ -126,11 +109,9 @@ export default {
             if (!field) return;
             const { media, episode, airingAt } = field;
 
-            const title = media?.title;
-            if (!title) return;
             embed.addFields({
-              name: `${SeriesTitle(title)}`,
-              value: `> **[EP - ${episode}]** :airplane: ${new Date(airingAt * 1000) > new Date() ? `Going to air <t:${airingAt}:R>` : `Aired <t:${airingAt}:R>`}`,
+              name: `${SeriesTitle(media?.title || undefined)}`,
+              value: `> **[EP - ${episode}]** :airplane: ${(new Date(airingAt * 1000) > new Date() ? `Going to air ` : `Aired` ) + time(airingAt, TimestampStyles.RelativeTime)}`,
               inline: false,
             });
           });

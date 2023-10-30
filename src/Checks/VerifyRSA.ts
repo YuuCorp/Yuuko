@@ -2,7 +2,6 @@ import fs from 'fs'
 import path from 'path'
 import { RSACryption } from '../Utils/RSACryption'
 import { Check } from '../Structures/Check'
-console.log(path.join(__dirname, '..', 'RSA', 'id_rsa.pub'))
 
 const rsaPublicCheck = new Check({
   name: 'RSA Public Key Check',
@@ -29,7 +28,7 @@ const rsaCryptionCheck = new Check({
   description: 'Ensure that the RSA key\'s are valid by encryping & decrypting them seperately using public & private keys.',
   optional: false,
   run: () => {
-    if (RSACryption(RSACryption('hello', false)) !== 'hello')
+    if (RSACryption(RSACryption('hello', true)) !== 'hello')
       throw new Error('Public & Private RSA keys don\'t match.')
   },
 })
