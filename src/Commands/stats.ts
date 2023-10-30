@@ -11,10 +11,8 @@ export default {
   withBuilder: new SlashCommandBuilder().setName(name).setDescription(description),
 
   run: async ({ interaction, client }): Promise<void> => {
-    if (!interaction.isCommand())
-      return
-    if (!interaction.guild)
-      return
+    if (!interaction.isCommand()) return
+    if (!interaction.guild) return
 
     const uptime = Date.now() - process.env.UPTIME
     const hours = Math.floor(uptime / 3600000)
