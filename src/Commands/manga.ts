@@ -111,13 +111,13 @@ function handleData(
 
   if (manga.startDate) {
     const { year: startYear, month: startMonth, day: startDay } = manga.startDate;
-
-    startDate = `${startYear}-${startMonth}-${startDay}`;
+    if (startYear === null) startDate = "Unknown";
+    else startDate = `${startYear}-${startMonth}-${startDay}`;
   }
   if (manga.endDate) {
     const { year: endYear, month: endMonth, day: endDay } = manga.endDate;
-
-    endDate = `${endYear}-${endMonth}-${endDay}`;
+    if (endYear === null) endDate = "Unknown";
+    else endDate = `${endYear}-${endMonth}-${endDay}`;
   }
 
   const firstPage = new EmbedBuilder()
