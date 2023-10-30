@@ -36,7 +36,7 @@ export default {
   run: async ({ interaction, client }): Promise<void> => {
     if (!interaction.isCommand()) return;
     if (!interaction.guild) return void interaction.reply({ content: "This command can only be used in a server.", ephemeral: true });
-    const subcommand= getSubcommand<["user", "list", "set", "wipe"]>(interaction.options)
+    const subcommand = getSubcommand<["user", "list", "set", "wipe"]>(interaction.options)
 
     if (subcommand === "set") {
       const { date } = getOptions<{ date: string }>(interaction.options, ["date"]);

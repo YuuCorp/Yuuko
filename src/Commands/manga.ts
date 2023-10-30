@@ -61,25 +61,26 @@ export default {
     // }
 
     console.log("[MangaCmd] No cache found, fetching from CringeQL");
-    GraphQLRequest("Manga", vars, interaction.ALtoken)
-      .then((response) => {
-        const data = response.data.Media;
-        if (data) {
-          // if (!mangaIdFound) redis.set(`_mangaId-${normalizedQuery}`, data.id);
-          // redis.json.set(`_manga-${data.id}`, "$", data);
-          // for(const synonym of data.synonyms || []) {
-          //   if(!synonym) continue;
-          //   redis.set(`_mangaId-${normalize(synonym)}`, data.id.toString());
-          // }
-          return void handleData({ manga: data, headers: response.headers}, interaction, hookdata)
-        } else {
-          return void interaction.editReply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
-        } // wanna attempt? hell yeah
-      })
-      .catch((error) => {
-        console.error(error);
-        return void interaction.editReply({ embeds: [EmbedError(error, vars)] });
-      });
+    try {
+      const {
+        data: { Media: data },
+        headers,
+      } = await GraphQLRequest("Manga", vars, interaction.ALtoken);
+      if (data) {
+        // if (!mangaIdFound) redis.set(`_mangaId-${normalizedQuery}`, data.id);
+        // redis.json.set(`_manga-${data.id}`, "$", data);
+        // for(const synonym of data.synonyms || []) {
+        //   if(!synonym) continue;
+        //   redis.set(`_mangaId-${normalize(synonym)}`, data.id.toString());
+        // }
+        return void handleData({ manga: data, headers: headers }, interaction, hookdata);
+      } else {
+        return void interaction.editReply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
+      }
+    } catch (e: any) {
+      console.error(e);
+      return void interaction.editReply({ embeds: [EmbedError(e, vars)] });
+    }
   },
 } satisfies CommandWithHook;
 
@@ -110,13 +111,13 @@ function handleData(
 
   if (manga.startDate) {
     const { year: startYear, month: startMonth, day: startDay } = manga.startDate;
-
-    startDate = `${startYear}-${startMonth}-${startDay}`;
+    if (startYear === null) startDate = "Unknown";
+    else startDate = `${startYear}-${startMonth}-${startDay}`;
   }
   if (manga.endDate) {
     const { year: endYear, month: endMonth, day: endDay } = manga.endDate;
-
-    endDate = `${endYear}-${endMonth}-${endDay}`;
+    if (endYear === null) endDate = "Unknown";
+    else endDate = `${endYear}-${endMonth}-${endDay}`;
   }
 
   const firstPage = new EmbedBuilder()

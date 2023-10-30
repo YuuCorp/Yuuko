@@ -93,48 +93,54 @@ export default {
 
     if (type === "status") {
       const vars = { text: getEmojis(interaction.options.getString("text", true)), asHtml: true };
-      GraphQLRequest("SaveTextActivity", vars, interaction.ALtoken)
-        .then((response) => {
-          const data = response.data.SaveTextActivity;
-          const userName = data!.user?.name || "Unknown";
-          const userText = data!.text || "Unknown";
-          if (!userName || !userText) return;
+      if (!interaction.ALtoken) return void interaction.editReply({ embeds: [EmbedError("No Anilist token found.")] });
+      try {
+        const {
+          data: { SaveTextActivity: data },
+          headers,
+        } = await GraphQLRequest("SaveTextActivity", vars, interaction.ALtoken);
+        const userName = data?.user?.name || "Unknown";
+        const userText = data?.text || "Unknown";
+        if (!userName || !userText) return;
 
-          const statusActivity = new EmbedBuilder()
-            .setURL(data?.siteUrl || "https://anilist.co")
-            .setTitle(`${userName} made a new activity!`)
-            .setDescription(userText)
-            .setFooter(Footer(response.headers));
+        const statusActivity = new EmbedBuilder()
+          .setURL(data?.siteUrl || "https://anilist.co")
+          .setTitle(`${userName} made a new activity!`)
+          .setDescription(userText)
+          .setFooter(Footer(headers));
 
-          return interaction.editReply({ embeds: [statusActivity] });
-        })
-        .catch((error) => {
-          console.error(error);
-          interaction.editReply({ embeds: [EmbedError(error, vars)] });
-        });
+        return void interaction.editReply({ embeds: [statusActivity] });
+      } catch (e: any) {
+        console.error(e);
+        return void interaction.editReply({ embeds: [EmbedError(e, vars)] });
+      }
     }
 
     if (type === "list") {
       const listOptions = ["mediaid", "status", "hide", "private", "lists", "score", "progress"].filter((x) => interaction.options.get(x));
+
       const vars: { [key: string]: any } = {};
       for (const option of listOptions) vars[option] = interaction.options.get(option)?.value;
 
-      GraphQLRequest("SaveMediaList", vars, interaction.ALtoken)
-        .then((response) => {
-          const data = response.data.SaveMediaListEntry;
-          if (!data) return interaction.editReply({ embeds: [EmbedError("Something went wrong while making the activity.")] });
-          const mediaListActivity = new EmbedBuilder()
-            .setURL(`https://anilist.co/${data?.media?.type || ""}/${data?.mediaId || ""}`)
-            .setTitle(`${data.user?.name || "Unknown"} added ${data?.media?.title?.userPreferred || "Unknown"} to ${data?.status || "Unknown"}!`)
-            .setFooter(Footer(response.headers));
-          if (data.media && data.media.bannerImage) mediaListActivity.setImage(data.media.bannerImage);
+      if (!interaction.ALtoken) return void interaction.editReply({ embeds: [EmbedError("No Anilist token found.")] });
 
-          return interaction.editReply({ embeds: [mediaListActivity] });
-        })
-        .catch((error) => {
-          console.error(error);
-          interaction.editReply({ embeds: [EmbedError(error, vars)] });
-        });
+      try {
+        const {
+          data: { SaveMediaListEntry: data },
+          headers,
+        } = await GraphQLRequest("SaveMediaList", vars, interaction.ALtoken);
+        if (!data) return void interaction.editReply({ embeds: [EmbedError("Something went wrong while making the activity.")] });
+        const mediaListActivity = new EmbedBuilder()
+          .setURL(`https://anilist.co/${data?.media?.type || ""}/${data?.mediaId || ""}`)
+          .setTitle(`${data.user?.name || "Unknown"} added ${data?.media?.title?.userPreferred || "Unknown"} to ${data?.status || "Unknown"}!`)
+          .setFooter(Footer(headers));
+        if (data.media && data.media.bannerImage) mediaListActivity.setImage(data.media.bannerImage);
+
+        return void interaction.editReply({ embeds: [mediaListActivity] });
+      } catch (e: any) {
+        console.error(e);
+        interaction.editReply({ embeds: [EmbedError(e, vars)] });
+      }
     }
   },
 } satisfies Command;
