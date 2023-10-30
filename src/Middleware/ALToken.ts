@@ -3,22 +3,20 @@ import { Middleware } from "../Structures/Middleware";
 import type { UsableInteraction } from "../Structures";
 
 async function requireALToken(interaction: UsableInteraction) {
-  // We can be sure we are passing a valid one;
+  if(!interaction.isCommand()) return;
   const id = interaction.user.id;
   const alUser = await getAnilistUser(id);
-  if (!alUser || !alUser.anilistToken) throw new Error("You must have an AniList token set to use this action.");
-
+  if (!alUser || !alUser.anilistToken) throw new Error("You must link your AniList account to use this command!");
+  interaction.alID = alUser.anilistId;
   interaction.ALtoken = RSACryption(alUser.anilistToken);
 }
 
 async function optionalALToken(interaction: UsableInteraction) {
   const id = interaction.user.id;
   const alUser = await getAnilistUser(id);
-  console.log(`Fetched user in: ${Date.now() - interaction.createdTimestamp}ms`)
   if (alUser && alUser.anilistToken) {
-
+    interaction.alID = alUser.anilistId;
     interaction.ALtoken = RSACryption(alUser.anilistToken);
-    console.log(`Decrypted in: ${Date.now() - interaction.createdTimestamp}ms`)
   }
 }
 

@@ -5,22 +5,21 @@ import NodeRSA from "node-rsa";
 /**
  *
  * @param item The item to decrypt/encrypt.
- * @param decrypt If true decrypts it, if false it encrypts it. By default is true.
+ * @param encrypt An optional boolean to specify if you want to encrypt the item.
+ * @example RSACryption("Hello", true) // Encrypts the string "Hello"
  */
-export function RSACryption(item: string, decrypt = true): string {
-  if (decrypt === true) {
-    const itemContent = path.join(__dirname, "..", "RSA", "id_rsa");
+export function RSACryption(item: string, encrypt?: boolean): string {
+  if (encrypt) {
+    const publicRSA = path.join(__dirname, "..", "RSA", "id_rsa.pub");
+    if (!fs.existsSync(publicRSA)) throw new Error("Missing public RSA key.");
 
-    if (!fs.existsSync(itemContent)) throw new Error("Missing Private RSA key.");
-    const decryptitem = new NodeRSA(fs.readFileSync(itemContent).toString());
-    return decryptitem.decrypt(item, "utf8");
-  } else if (decrypt === false) {
-    const itemContent = path.join(__dirname, "..", "RSA", "id_rsa.pub");
-    if (!fs.existsSync(itemContent)) throw new Error("Missing public RSA key.");
-
-    const encryptitem = new NodeRSA(fs.readFileSync(itemContent).toString());
+    const encryptitem = new NodeRSA(fs.readFileSync(publicRSA, 'utf8'));
     return encryptitem.encrypt(item, "base64");
-  } else {
-    throw new Error("Invalid type.");
   }
+
+  const privateRSA = path.join(__dirname, "..", "RSA", "id_rsa");
+  if (!fs.existsSync(privateRSA)) throw new Error("Missing Private RSA key.");
+  
+  const decryptitem = new NodeRSA(fs.readFileSync(privateRSA, 'utf8'));
+  return decryptitem.decrypt(item, "utf8");
 }

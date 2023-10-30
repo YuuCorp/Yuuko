@@ -8,6 +8,7 @@ import Logger from "../Utils/logger";
 export class Client extends DiscordClient {
   public commands: Collection<string, ClientCommand>;
   public components: Collection<string, YuukoComponent>;
+  public cooldowns: Collection<string, Collection<string, number>>; // alternative: { name: string, expire: number}[]>
   public logger: Logger;
 
   constructor(o: ClientOptions) {
@@ -16,6 +17,7 @@ export class Client extends DiscordClient {
     this.logger = new Logger(path.join(__dirname, "..", "Logging", "Logs.log"));
     this.commands = new Collection();
     this.components = new Collection();
+    this.cooldowns = new Collection();
   }
 
   log(text: string) {

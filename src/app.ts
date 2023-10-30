@@ -2,6 +2,7 @@ import dotenvFlow, { config } from "dotenv-flow";
 import { Client } from "./Structures/Client";
 import { GatewayIntentBits } from "discord.js";
 import { registerEvents } from "./Utils";
+import { runChecks } from "./Checks/Run";
 import path from "path";
 import fs from "fs";
 
@@ -11,6 +12,7 @@ const client = new Client({ intents: [GatewayIntentBits.GuildMessageReactions, G
 
 async function start(token: string | undefined) {
   await registerEvents(client);
+  await runChecks(client);
 
   client.login(token);
 

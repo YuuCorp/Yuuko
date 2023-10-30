@@ -102,7 +102,7 @@ export default {
         
         await db
           .update(anilistUser)
-          .set({ anilistToken: RSACryption(token, false), anilistId: data.id })
+          .set({ anilistToken: RSACryption(token, true), anilistId: data.id })
           .where(eq(anilistUser.discordId, interaction.user.id));
         return void interaction.reply({
           embeds: [
@@ -138,7 +138,7 @@ export default {
 
       if (!data) return void interaction.reply({ embeds: [EmbedError(`Invalid token provided.`)], ephemeral: true });
 
-      await db.insert(anilistUser).values({ discordId: interaction.user.id, anilistToken: RSACryption(token, false), anilistId: data.id });
+      await db.insert(anilistUser).values({ discordId: interaction.user.id, anilistToken: RSACryption(token, true), anilistId: data.id });
       return void interaction.reply({
         embeds: [
           {
