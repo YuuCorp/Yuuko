@@ -4688,7 +4688,7 @@ export type AnimeQueryVariables = Exact<{
 }>;
 
 
-export type AnimeQuery = { __typename?: 'Query', Media?: { __typename?: 'Media', id: number, description?: string | null, format?: MediaFormat | null, siteUrl?: string | null, source?: MediaSource | null, genres?: Array<string | null> | null, duration?: number | null, synonyms?: Array<string | null> | null, episodes?: number | null, meanScore?: number | null, bannerImage?: string | null, nextAiringEpisode?: { __typename?: 'AiringSchedule', timeUntilAiring: number, airingAt: number, episode: number } | null, coverImage?: { __typename?: 'MediaCoverImage', large?: string | null, medium?: string | null } | null, title?: { __typename?: 'MediaTitle', romaji?: string | null, english?: string | null, native?: string | null } | null, startDate?: { __typename?: 'FuzzyDate', year?: number | null, month?: number | null, day?: number | null } | null, endDate?: { __typename?: 'FuzzyDate', year?: number | null, month?: number | null, day?: number | null } | null, mediaListEntry?: { __typename?: 'MediaList', status?: MediaListStatus | null, progress?: number | null, score?: number | null, notes?: string | null, user?: { __typename?: 'User', name: string, mediaListOptions?: { __typename?: 'MediaListOptions', scoreFormat?: ScoreFormat | null } | null } | null } | null } | null };
+export type AnimeQuery = { __typename?: 'Query', Media?: { __typename?: 'Media', id: number, description?: string | null, format?: MediaFormat | null, siteUrl?: string | null, source?: MediaSource | null, genres?: Array<string | null> | null, duration?: number | null, synonyms?: Array<string | null> | null, episodes?: number | null, meanScore?: number | null, bannerImage?: string | null, nextAiringEpisode?: { __typename?: 'AiringSchedule', timeUntilAiring: number, airingAt: number, episode: number } | null, coverImage?: { __typename?: 'MediaCoverImage', large?: string | null, medium?: string | null } | null, title?: { __typename?: 'MediaTitle', romaji?: string | null, english?: string | null, native?: string | null } | null, startDate?: { __typename?: 'FuzzyDate', year?: number | null, month?: number | null, day?: number | null } | null, endDate?: { __typename?: 'FuzzyDate', year?: number | null, month?: number | null, day?: number | null } | null, mediaListEntry?: { __typename?: 'MediaList', status?: MediaListStatus | null, progress?: number | null, score?: number | null, notes?: string | null, user?: { __typename?: 'User', name: string, id: number, mediaListOptions?: { __typename?: 'MediaListOptions', scoreFormat?: ScoreFormat | null } | null } | null } | null } | null };
 
 export type CharacterQueryVariables = Exact<{
   charName?: InputMaybe<Scalars['String']['input']>;
@@ -4697,13 +4697,14 @@ export type CharacterQueryVariables = Exact<{
 
 export type CharacterQuery = { __typename?: 'Query', Character?: { __typename?: 'Character', age?: string | null, description?: string | null, siteUrl?: string | null, bloodType?: string | null, gender?: string | null, favourites?: number | null, name?: { __typename?: 'CharacterName', full?: string | null } | null, image?: { __typename?: 'CharacterImage', large?: string | null } | null, dateOfBirth?: { __typename?: 'FuzzyDate', year?: number | null, month?: number | null, day?: number | null } | null, media?: { __typename?: 'MediaConnection', nodes?: Array<{ __typename?: 'Media', siteUrl?: string | null, title?: { __typename?: 'MediaTitle', romaji?: string | null, native?: string | null, english?: string | null } | null } | null> | null } | null } | null };
 
-export type GetMediaCollectiobQueryVariables = Exact<{
+export type GetMediaCollectionQueryVariables = Exact<{
   type?: InputMaybe<MediaType>;
   userName?: InputMaybe<Scalars['String']['input']>;
+  userId?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type GetMediaCollectiobQuery = { __typename?: 'Query', MediaListCollection?: { __typename?: 'MediaListCollection', lists?: Array<{ __typename?: 'MediaListGroup', name?: string | null, entries?: Array<{ __typename?: 'MediaList', score?: number | null, media?: { __typename?: 'Media', id: number, genres?: Array<string | null> | null, title?: { __typename?: 'MediaTitle', english?: string | null } | null } | null } | null> | null } | null> | null } | null };
+export type GetMediaCollectionQuery = { __typename?: 'Query', MediaListCollection?: { __typename?: 'MediaListCollection', lists?: Array<{ __typename?: 'MediaListGroup', name?: string | null, entries?: Array<{ __typename?: 'MediaList', score?: number | null, status?: MediaListStatus | null, notes?: string | null, progress?: number | null, media?: { __typename?: 'Media', id: number, genres?: Array<string | null> | null, title?: { __typename?: 'MediaTitle', english?: string | null } | null } | null } | null> | null } | null> | null, user?: { __typename?: 'User', name: string, mediaListOptions?: { __typename?: 'MediaListOptions', scoreFormat?: ScoreFormat | null } | null } | null } | null };
 
 export type ListQueryQueryVariables = Exact<{
   userId?: InputMaybe<Scalars['Int']['input']>;

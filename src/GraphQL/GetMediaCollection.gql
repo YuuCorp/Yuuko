@@ -1,5 +1,5 @@
-query GetMediaCollectiob($type: MediaType, $userName: String) {
-  MediaListCollection(userName: $userName, type: $type) {
+query GetMediaCollection($type: MediaType, $userName: String, $userId: Int) {
+  MediaListCollection(type: $type, userName: $userName, userId: $userId) {
     lists {
       entries {
         media {
@@ -10,8 +10,17 @@ query GetMediaCollectiob($type: MediaType, $userName: String) {
           genres
         }
         score
+        status
+        notes
+        progress
       }
       name
+    }
+    user {
+      name
+      mediaListOptions {
+        scoreFormat
+      }
     }
   }
 }

@@ -1,8 +1,9 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { redis } from "../Caching/redis";
 import type { AnimeQuery } from "../GraphQL/types";
 import { mwOptionalALToken } from "../Middleware/ALToken";
 import type { CommandWithHook, HookData, UsableInteraction } from "../Structures";
-import { BuildPagination, EmbedError, Footer, GraphQLRequest, SeriesTitle, getOptions, type AlwaysExist, type GraphQLResponse } from "../Utils";
+import { normalize, BuildPagination, EmbedError, Footer, GraphQLRequest, SeriesTitle, getOptions, type AlwaysExist, type GraphQLResponse } from "../Utils";
 
 const name = "anime";
 const usage = "anime <title>";
@@ -22,8 +23,8 @@ export default {
   run: async ({ interaction, client, hook = false, hookdata = null }): Promise<void> => {
     if (!interaction.isCommand()) return;
     const { query } = getOptions<{ query: string }>(interaction.options, ["query"]);
-    // let normalizedQuery = "";
-    // if (query) normalizedQuery = normalize(query);
+    let normalizedQuery = "";
+    if (query) normalizedQuery = normalize(query);
 
     let animeIdFound = false;
 
@@ -40,29 +41,33 @@ export default {
         vars.aID = hookdata.id;
       } else if (hookdata.title) {
         vars.query = hookdata.title;
-        // normalizedQuery = normalize(hookdata.title);
+        normalizedQuery = normalize(hookdata.title);
       }
     } else return void interaction.editReply({ embeds: [EmbedError(`AnimeCmd was hooked, yet there was no title or ID provided in hookdata.`, null, false)] });
 
     console.log(`[AnimeCmd] Anime ID: ${vars.aID}`);
 
-    // if (!vars.aID) {
-    //   // const cachedId = await redis.get<string>(`_animeId-${normalizedQuery}`);
-    //   if (cachedId) {
-    //     animeIdFound = true;
-    //     vars.aID = parseInt(cachedId);
-    //     console.log(`[AnimeCmd] Found cached ID for ${normalizedQuery} : ${vars.aID}`);
-    //     console.log(`[AnimeCmd] Querying for ${normalizedQuery} with ID ${vars.aID}`);
-    //   }
-    // }
+    if (!vars.aID) {
+      const cachedId = await redis.get<string>(`_animeId-${normalizedQuery}`);
+      if (cachedId) {
+        animeIdFound = true;
+        vars.aID = parseInt(cachedId);
+        console.log(`[AnimeCmd] Found cached ID for ${normalizedQuery} : ${vars.aID}`);
+        console.log(`[AnimeCmd] Querying for ${normalizedQuery} with ID ${vars.aID}`);
+      }
+    }
 
-    // console.log(`[AnimeCmd] Querying Redis with hook animeId ${vars.aID}`);
-    // const cacheData = await redis.json.get(`_anime-${vars.aID}`);
+    console.log(`[AnimeCmd] Querying Redis with hook animeId ${vars.aID}`);
+    const cacheData = await redis.json.get(`_anime-${vars.aID}`);
 
-    // if (cacheData) {
-    //   console.log("[AnimeCmd] Found cache data, returning data...");
-    //   return void handleData({ anime: cacheData }, interaction);
-    // }
+    if (cacheData) {
+       if(interaction.alID) {
+          const mediaListEntry = await redis.json.get(`_user${interaction.alID}-${vars.aID}`); 
+          if(mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
+       }
+      console.log("[AnimeCmd] Found cache data, returning data...");
+      return void handleData({ anime: cacheData }, interaction);
+    }
     console.log("[AnimeCmd] No cache found, fetching from CringeQL");
     try {
       const {
@@ -70,16 +75,19 @@ export default {
         headers,
       } = await GraphQLRequest("Anime", vars, interaction.ALtoken);
       if (data) {
-        // if (!animeIdFound) redis.set(`_animeId-${normalizedQuery}`, data.id);
-        // redis.json.set(`_anime-${data.id}`, "$", data);
-        // for (const synonym of data.synonyms || []) {
-        //   if (!synonym) continue;
-        //   redis.set(`_animeId-${normalize(synonym)}`, data.id);
-        // }
-        // if (data.nextAiringEpisode?.airingAt) {
-        //   console.log(`[AnimeCmd] Expiring anime-${data.id} at ${data.nextAiringEpisode.airingAt}`);
-        //   redis.expireat(`_anime-${data.id}`, data.nextAiringEpisode.airingAt);
-        // }
+        if (!animeIdFound) redis.set(`_animeId-${normalizedQuery}`, data.id);
+        const { mediaListEntry, ...redisData } = data;
+        redis.json.set(`_anime-${redisData.id}`, "$", redisData);
+        for (const synonym of redisData.synonyms || []) {
+          if (!synonym) continue;
+          redis.set(`_animeId-${normalize(synonym)}`, data.id);
+        }
+        if (redisData.nextAiringEpisode?.airingAt) {
+          console.log(`[AnimeCmd] Expiring anime-${redisData.id} at ${redisData.nextAiringEpisode.airingAt}`);
+          redis.expireat(`_anime-${data.id}`, redisData.nextAiringEpisode.airingAt);
+        }
+        if(mediaListEntry)
+          redis.json.set(`_user${mediaListEntry.user?.id}-${redisData.id}`, "$", mediaListEntry);
         return void handleData({ anime: data, headers: headers }, interaction, hookdata);
       } else {
         return void interaction.editReply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });

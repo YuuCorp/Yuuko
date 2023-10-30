@@ -12,8 +12,8 @@ import type {
   AnimeQueryVariables,
   CharacterQuery,
   CharacterQueryVariables,
-  GetMediaCollectiobQuery,
-  GetMediaCollectiobQueryVariables,
+  GetMediaCollectionQuery,
+  GetMediaCollectionQueryVariables,
   MangaQuery,
   MangaQueryVariables,
   MediaListCollection,
@@ -51,7 +51,7 @@ const baseUrl = process.env.ANILIST_API || 'https://graphql.anilist.co'
 interface QueryVariables {
   Airing: [AiringQuery, AiringQueryVariables]
   Anime: [AnimeQuery, AnimeQueryVariables]
-  GetMediaCollection: [GetMediaCollectiobQuery, GetMediaCollectiobQueryVariables]
+  GetMediaCollection: [GetMediaCollectionQuery, GetMediaCollectionQueryVariables]
   Manga: [MangaQuery, MangaQueryVariables]
   MediaList: [MediaListCollection, MediaListCollectionCustomListsArgs]
   RecentChart: [RecentChartQuery, RecentChartQueryVariables]

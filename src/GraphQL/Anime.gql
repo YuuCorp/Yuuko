@@ -43,6 +43,7 @@ query Anime($query: String, $aID: Int) {
       notes
       user {
         name
+        id
         mediaListOptions {
           scoreFormat
         }

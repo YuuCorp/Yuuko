@@ -9,7 +9,6 @@ import NodeRSA from "node-rsa";
  * @example RSACryption("Hello", true) // Encrypts the string "Hello"
  */
 export function RSACryption(item: string, encrypt?: boolean): string {
-
   if (encrypt) {
     const publicRSA = path.join(__dirname, "..", "RSA", "id_rsa.pub");
     if (!fs.existsSync(publicRSA)) throw new Error("Missing public RSA key.");

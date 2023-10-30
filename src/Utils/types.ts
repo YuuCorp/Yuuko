@@ -1,6 +1,7 @@
 import type { Interaction } from 'discord.js'
 import type { Middleware } from '../Structures/Middleware'
 import type { Client } from '../Structures/Client'
+import type { MediaList } from '../GraphQL/types'
 
 export interface Media {
   title?: {
@@ -15,6 +16,8 @@ export interface Media {
   volumes?: number
   status: 'FINISHED' | 'RELEASING' | 'NOT_YET_RELEASED' | 'CANCELLED' | 'HIATUS'
 }
+
+export type CacheEntry = Omit<MediaList, "id" | "userId" | "mediaId">
 
 export interface YuukoComponent {
   name: string
