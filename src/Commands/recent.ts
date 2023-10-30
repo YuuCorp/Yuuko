@@ -40,7 +40,7 @@ export default {
     if (!userName) {
       // We try to use the one the user set
       try {
-        if(!interaction.alID) return void interaction.editReply({ embeds: [EmbedError(`You have yet to set an AniList token.`)] });
+        if (!interaction.alID) return void interaction.editReply({ embeds: [EmbedError(`You have yet to set an AniList token.`)] });
         vars.userId = interaction.alID;
       } catch (error) {
         console.error(error);
@@ -51,15 +51,17 @@ export default {
     }
 
     try {
-      const data = (await GraphQLRequest("RecentChart", vars)).data?.Page?.mediaList;
-      if (!data) return void interaction.editReply({ embeds: [EmbedError("Unable to find specified user", vars)] });
-      interaction.editReply({ embeds: [{ description: "Creating image..." }]})
+      const {
+        data: { Page: data },
+      } = await GraphQLRequest("RecentChart", vars);
+      if (!data?.mediaList) return void interaction.editReply({ embeds: [EmbedError("Unable to find specified user", vars)] });
+      interaction.editReply({ embeds: [{ description: "Creating image..." }] });
       const canvas = new Jimp(999, 999);
 
       let x = 0;
       let y = 0;
 
-      for (const item of data) {
+      for (const item of data.mediaList) {
         const media = item?.media;
         if (!media || !item) continue;
         const cover = media.coverImage?.extraLarge || "https://i.imgur.com/Hx8474m.png"; // Placeholder image
@@ -75,7 +77,7 @@ export default {
         const title = SeriesTitle(media.title || undefined);
         const status = parseStatus(item, type);
         if (status) infoRectangle.print(useFont, 0, 0, { text: status, alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER, alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE }, width, 40);
-        infoRectangle.print(useFont, 0, 20, { text: title, alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER, alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE }, width, 40)
+        infoRectangle.print(useFont, 0, 20, { text: title, alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER, alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE }, width, 40);
         canvas.composite(canvasImage, x, y);
         canvas.composite(infoRectangle, x, y + width - 60);
         x += width;
@@ -88,7 +90,7 @@ export default {
       const canvasResult = await canvas.getBufferAsync(Jimp.MIME_PNG);
       if (!canvasResult) return void interaction.editReply({ embeds: [EmbedError("Encountered an error whilst trying to create the image.", vars)] });
       const attachment = new AttachmentBuilder(canvasResult, { name: "recent.png" });
-      return void interaction.editReply({ files: [attachment], embeds: [] })
+      return void interaction.editReply({ files: [attachment], embeds: [] });
     } catch (error: any) {
       return void interaction.editReply({ embeds: [EmbedError(error, vars)] });
     }

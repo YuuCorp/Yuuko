@@ -62,16 +62,18 @@ export default {
 
     console.log("[MangaCmd] No cache found, fetching from CringeQL");
     try {
-      const { data, headers } = await GraphQLRequest("Manga", vars, interaction.ALtoken);
-      const response = data.Media;
-      if (response) {
+      const {
+        data: { Media: data },
+        headers,
+      } = await GraphQLRequest("Manga", vars, interaction.ALtoken);
+      if (data) {
         // if (!mangaIdFound) redis.set(`_mangaId-${normalizedQuery}`, data.id);
         // redis.json.set(`_manga-${data.id}`, "$", data);
         // for(const synonym of data.synonyms || []) {
         //   if(!synonym) continue;
         //   redis.set(`_mangaId-${normalize(synonym)}`, data.id.toString());
         // }
-        return void handleData({ manga: response, headers: headers }, interaction, hookdata);
+        return void handleData({ manga: data, headers: headers }, interaction, hookdata);
       } else {
         return void interaction.editReply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
       }
