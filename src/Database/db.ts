@@ -5,18 +5,30 @@ import anilistUser from "./Models/AnilistUser";
 import announcementModel from "./Models/Announcement";
 import userBirthday from "./Models/UserBirthday";
 
+import AnimeStats from "./Models/AnimeStats";
+import MangaStats from "./Models/MangaStats";
+
 export const tables = {
   anilistUser,
   userBirthday,
   announcementModel,
 };
 
-export const sqlite = new Database("./src/Database/db.sqlite");
+export const statTables = {
+  AnimeStats,
+  MangaStats,
+};
 
-sqlite.exec("PRAGMA journal_mode = WAL;")
+export const sqlite = new Database("./src/Database/db.sqlite");
+export const statDB = new Database("./src/Database/statsdb.sqlite");
+sqlite.exec("PRAGMA journal_mode = WAL;");
 
 export const db = drizzle(sqlite, {
   schema: tables,
 });
 
-export default db;
+export const stat = drizzle(statDB, {
+  schema: statTables,
+});
+
+export default { db, stat };

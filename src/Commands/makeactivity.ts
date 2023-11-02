@@ -2,7 +2,7 @@ import { EmbedError, Footer, GraphQLRequest, SeriesTitle, getOptions } from "../
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { mwRequireALToken } from "../Middleware/ALToken";
 import type { Command } from "../Structures";
-import db from "../Database/db";
+import {db} from "../Database/db";
 import getSubcommand from "../Utils/getSubcommand";
 
 const name = "makeactivity";
@@ -89,7 +89,7 @@ export default {
     if (!interaction.isChatInputCommand()) return;
     // const type = (interaction.options as CommandInteractionOptionResolver).getSubcommand() <- from auth command
     const type = getSubcommand<["list", "status"]>(interaction.options);
-    if (!type || (type != "status" && type != "list")) return void interaction.editReply({ embeds: [EmbedError(`Please use either the status or list subcommand. (Yours was "${type}")`, null, false)] });
+    if (!type || (type != "status" && type != "list")) return void interaction.editReply({ embeds: [EmbedError(`Please use either the status or list subcommand. (Yours was "${type}")`, null)] });
 
     if (type === "status") {
       const vars = { text: getEmojis(interaction.options.getString("text", true)), asHtml: true };

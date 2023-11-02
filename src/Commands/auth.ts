@@ -3,7 +3,7 @@ import type { CommandInteractionOptionResolver } from "discord.js";
 import { SlashCommandBuilder } from "discord.js";
 import type { Command } from "../Structures";
 import { EmbedError, Footer, GraphQLRequest, RSACryption, getOptions } from "../Utils";
-import db from "../Database/db";
+import { db } from "../Database/db";
 import { eq } from "drizzle-orm";
 import getSubcommand from "../Utils/getSubcommand";
 
@@ -61,7 +61,7 @@ export default {
     console.log(user);
 
     if (type === "wipe") {
-      if (!user) return void interaction.reply({ embeds: [EmbedError(`You don't have an AniList account bound to your Discord account.`, null, false)], ephemeral: true });
+      if (!user) return void interaction.reply({ embeds: [EmbedError(`You don't have an AniList account bound to your Discord account.`, null)], ephemeral: true });
       try {
         await db.delete(anilistUser).where(eq(anilistUser.discordId, interaction.user.id));
 
