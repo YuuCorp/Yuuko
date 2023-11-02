@@ -1,4 +1,4 @@
-import db from "../Database/db";
+import {db} from "../Database/db";
 import { tables } from "../Database";
 import { getOptions, BuildPagination, EmbedError, Footer } from "../Utils/";
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";

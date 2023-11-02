@@ -2,7 +2,7 @@ import type { YuukoComponent } from '../Utils/types'
 
 import announcementModel from '../Database/Models/Announcement'
 
-import db from '../Database/db'
+import {db} from '../Database/db'
 
 export default {
   name: 'annModal',
