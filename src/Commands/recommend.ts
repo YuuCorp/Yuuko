@@ -30,7 +30,7 @@ export default {
 
     const vars = { type, userName: anilistUser };
 
-    if (type != "ANIME" && type != "MANGA") return void interaction.reply({ embeds: [EmbedError(`Please specify either manga, or anime as your content type. (Yours was "${type}")`, null, false)] });
+    if (type != "ANIME" && type != "MANGA") return void interaction.reply({ embeds: [EmbedError(`Please specify either manga, or anime as your content type. (Yours was "${type}")`, null, '', false)] });
 
     const excludeIDs: number[] = [];
 
@@ -44,7 +44,7 @@ export default {
         for (const MediaList of data.lists.filter((MediaList) => MediaList!.name != "Planning")) {
           if (MediaList && MediaList.entries) MediaList.entries.map((e) => excludeIDs.push(e!.media!.id));
         }
-        if (!genres.length) return void interaction.reply({ embeds: [EmbedError(`Please specify at least one genre.`, null, false)] });
+        if (!genres.length) return void interaction.reply({ embeds: [EmbedError(`Please specify at least one genre.`, null,'', false)] });
 
         const genresArray = genres.split(",").map((genre) => genre.trim());
         const recommendationVars = { type, exclude_ids: excludeIDs, genresArray };
@@ -76,7 +76,7 @@ export default {
           interaction.reply({ embeds: [EmbedError(e, vars)] });
         }
       } else {
-        return void interaction.reply({ embeds: [EmbedError(`Couldn't find any data from the user specified. (Which was "${vars.userName}")`, null, false)] });
+        return void interaction.reply({ embeds: [EmbedError(`Couldn't find any data from the user specified. (Which was "${vars.userName}")`, null,'', false)] });
       }
     } catch (e: any) {
       console.error(e);
