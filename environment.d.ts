@@ -9,8 +9,6 @@ export declare global {
       CLIENT_ID: string
       GUILD_ID: string
       UPTIME: number
-      UPSTASH_REDIS_REST_URL: string // currently not optional, but planned in the future
-      UPSTASH_REDIS_REST_TOKEN: string // currently not optinal, but planned in the future
     }
   }
 }

@@ -31,24 +31,4 @@ const guildIDCheck = new Check({
   },
 })
 
-const redisURLCheck = new Check({
-  name: 'Redis URL Check',
-  description: 'Ensure that process.env.UPSTASH_REDIS_REST_URL is present and valid. This is required to connect to Redis.',
-  optional: false,
-  run: () => {
-    if (!process.env.UPSTASH_REDIS_REST_URL)
-      throw new Error('UPSTASH_REDIS_REST_URL is not set properly.')
-  },
-})
-
-const redisTokenCheck = new Check({
-  name: 'Redis Token Check',
-  description: 'Ensure that process.env.UPSTASH_REDIS_REST_TOKEN is present and valid. This is required to connect to Redis.',
-  optional: false,
-  run: () => {
-    if (!process.env.UPSTASH_REDIS_REST_TOKEN)
-      throw new Error('UPSTASH_REDIS_REST_TOKEN is not set properly.')
-  },
-})
-
-export default [tokenCheck, clientIDCheck, guildIDCheck, redisURLCheck, redisTokenCheck]
+export default [tokenCheck, clientIDCheck, guildIDCheck]

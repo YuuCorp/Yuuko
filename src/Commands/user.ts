@@ -72,7 +72,7 @@ export default {
           if (profileColor === "gray") userColor = "Grey";
           // this is just cancer
           // re: yeah, this is cancer
-          titleEmbed.setColor(userColor as any);
+          titleEmbed.setColor(userColor as ColorResolvable);
         }
         interaction.editReply({ embeds: [titleEmbed] });
       } else {
