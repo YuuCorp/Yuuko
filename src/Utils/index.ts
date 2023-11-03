@@ -16,3 +16,4 @@ export * from './registerComponents'
 export * from './getAnilistUser'
 export * from './normalize';
 export * from './getSubcommand';
+export * from './handleMediaData';
