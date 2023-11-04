@@ -3,7 +3,7 @@ import { redis } from "../Caching/redis";
 import { MediaType, type GetMediaCollectionQuery } from "../GraphQL/types";
 import { mwRequireALToken } from "../Middleware/ALToken";
 import type { Command, UsableInteraction } from "../Structures";
-import { stat, statTables } from "../Database/db";
+import { stat, statTables, type StatUser } from "../Database/db";
 import { EmbedError, GraphQLRequest, getSubcommand, type AlwaysExist, type CacheEntry, type GraphQLResponse } from "../Utils";
 import { eq } from "drizzle-orm";
 
@@ -105,8 +105,8 @@ async function handleData(
         notes: entry.notes,
       };
 
-      if(type === MediaType.Anime) await getAndInsertOrUpdate(statTables.AnimeStats, entry.media.id, interaction.alID);
-      else if(type === MediaType.Manga) await getAndInsertOrUpdate(statTables.MangaStats, entry.media.id, interaction.alID);
+      if(type === MediaType.Anime) await getAndInsertOrUpdate(statTables.AnimeStats, entry.media.id, { aId: interaction.alID, dId: interaction.user.id });
+      else if(type === MediaType.Manga) await getAndInsertOrUpdate(statTables.MangaStats, entry.media.id, { aId: interaction.alID, dId: interaction.user.id });
 
       dataToGiveToRedis[entry.media.id] = cacheEntry;
     }
@@ -114,25 +114,28 @@ async function handleData(
   redis.json.set(`_user${interaction.alID}-${type}`, "$", dataToGiveToRedis);
 }
 
-function keepUnique(oldIds: number[], newId: number) {
-  return [...oldIds, newId].filter((id, index, arr) => arr.indexOf(id) === index);
-}
-
 type TableType = typeof statTables.AnimeStats | typeof statTables.MangaStats;
 
-async function getAndInsertOrUpdate(table: TableType, mediaId: number, userId: number) {
+function keepUnique(oldIds: StatUser[], newId: StatUser) {
+  const ids = oldIds.map(id => id.dId);
+  if(ids.includes(newId.dId)) return oldIds;
+  return [...oldIds, newId];
+}
+
+
+async function getAndInsertOrUpdate(table: TableType, mediaId: number, user: StatUser) {
   const stats = (await stat.select().from(table).where(eq(table.mediaId, mediaId)).limit(1))[0];
   if (stats) {
     await stat
       .update(table)
       .set({
-        users: keepUnique(stats.users, userId),
+        users: keepUnique(stats.users, user),
       })
       .where(eq(table.mediaId, mediaId));
     return;
   }
   await stat.insert(table).values({
     mediaId: mediaId,
-    users: keepUnique([], userId),
+    users: keepUnique([], user),
   });
 }

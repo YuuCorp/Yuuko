@@ -64,7 +64,7 @@ export default {
         if(mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
      }
       console.log("[MangaCmd] Found cache data, returning data...");
-      return void handleData({ media: cacheData }, interaction, "manga");
+      return void handleData({ media: cacheData }, interaction, "MANGA");
     }
 
     console.log("[MangaCmd] No cache found, fetching from CringeQL");
@@ -77,11 +77,12 @@ export default {
         if (!mangaIdFound) redis.set(`_mangaId-${normalizedQuery}`, data.id);
         const { mediaListEntry, ...redisData } = data;
         redis.json.set(`_manga-${data.id}`, "$", redisData);
+        redis.expireAt(`_manga-${redisData.id}`, new Date(Date.now() + 604800000))
         for(const synonym of redisData.synonyms || []) {
           if(!synonym) continue;
           redis.set(`_mangaId-${normalize(synonym)}`, data.id.toString());
         }
-        return void handleData({ media: data, headers: headers }, interaction, "manga", hookdata);
+        return void handleData({ media: data, headers: headers }, interaction, "MANGA", hookdata);
       } else {
         return void interaction.editReply({ embeds: [EmbedError(`Couldn't find any data.`, vars)] });
       }
