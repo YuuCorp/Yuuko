@@ -1,9 +1,9 @@
 import type { Client, HookData, UsableInteraction } from "../Structures";
-import type { AnimeQuery, MangaQuery } from "../GraphQL/types";
+import type { AnimeQuery, MangaQuery, Maybe, ScoreFormat } from "../GraphQL/types";
 import type { AlwaysExist, CacheEntry, GraphQLResponse } from "./types";
 import { BuildPagination, Footer, SeriesTitle } from ".";
 import { stat, statTables } from "../Database";
-import { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, hyperlink } from "discord.js";
 import { redis } from "../Caching/redis";
 import { eq } from "drizzle-orm";
 
@@ -16,7 +16,6 @@ export async function handleData(
   mediaType: "ANIME" | "MANGA",
   hookdata?: HookData | null,
 ) {
-  
   const { media, headers } = data;
   // ^ Fix the description by replacing and converting HTML tags, and replacing duplicate newlines
   const descLength = 350;
@@ -93,12 +92,12 @@ export async function handleData(
     .setFooter(Footer(headers));
 
   if ("nextAiringEpisode" in media) {
-    if(media.nextAiringEpisode) {
-        firstPage.spliceFields(5, 1, {
-          name: `Episode ${media.nextAiringEpisode.episode} airing in:`,
-          value: `<t:${media.nextAiringEpisode.airingAt}:R>`,
-          inline: true,
-        });
+    if (media.nextAiringEpisode) {
+      firstPage.spliceFields(5, 1, {
+        name: `Episode ${media.nextAiringEpisode.episode} airing in:`,
+        value: `<t:${media.nextAiringEpisode.airingAt}:R>`,
+        inline: true,
+      });
     }
   }
 
@@ -125,23 +124,16 @@ export async function handleData(
     )
     .setColor("Green")
     .setFooter(Footer(headers));
-    
-    if (media.coverImage?.large) secondPage.setThumbnail(media.coverImage.large);
-    
-    if (hookdata?.image) firstPage.setImage(hookdata.image);
-    
-    if (hookdata?.fields) for (const field of hookdata.fields) firstPage.addFields({ name: field.name, value: field.value, inline: field.inline || false });
-    const pageList = [firstPage, secondPage];
+
+  if (media.coverImage?.large) secondPage.setThumbnail(media.coverImage.large);
+
+  if (hookdata?.image) firstPage.setImage(hookdata.image);
+
+  if (hookdata?.fields) for (const field of hookdata.fields) firstPage.addFields({ name: field.name, value: field.value, inline: field.inline || false });
+  const pageList = [firstPage, secondPage];
 
   if (media.mediaListEntry) {
-    let score = "Unknown";
     const scoring = media.mediaListEntry?.user?.mediaListOptions?.scoreFormat;
-    if (media.mediaListEntry.score) {
-      score = media.mediaListEntry.score.toString();
-      if (scoring === ("POINT_10_DECIMAL" || "POINT_10")) score = `${score} / 10`;
-      else if (scoring === ("POINT_100" || "POINT_5")) score = `${score} / ${scoring.split("POINT_")[1]}`;
-      else if (scoring === "POINT_3") score = score === "1" ? "☹️" : score === "2" ? "😐" : "🙂";
-    }
 
     const userProgress = media.mediaListEntry?.progress ? `${media.mediaListEntry.progress} ${mediaType === "ANIME" ? "episode(s)" : "chapter(s)"}` : "Unknown";
 
@@ -160,7 +152,7 @@ export async function handleData(
         },
         {
           name: "Score",
-          value: score,
+          value: fixScoring(scoring!, media.mediaListEntry?.score!),
           inline: true,
         },
         {
@@ -176,15 +168,36 @@ export async function handleData(
   }
 
   const tableToUse = mediaType === "ANIME" ? statTables.AnimeStats : statTables.MangaStats;
-  const mediaUsers = (await stat.select().from(tableToUse).where(eq(tableToUse.mediaId, data.media.id)))[0]
-  
-  if(mediaUsers) {
-    console.log(mediaUsers.users.length)
-    const userData = mediaUsers.users.map(async (user) => await redis.json.get(`_user${user}-${mediaType}`) as CacheEntry);
-    console.log(userData);
-    } 
-    // const statisticsEmbed = new EmbedBuilder()
-    //     .setAuthor({ name: `${media.title?.english || "N/A"} | Global Statistics` });
-    
+  const mediaUsers = (await stat.select().from(tableToUse).where(eq(tableToUse.mediaId, data.media.id)))[0];
+
+  if (mediaUsers) {
+    const mediaPool = mediaUsers.users.map(
+      (user) =>
+        redis.json.get(`_user${user.aId}-${mediaType}`, {
+          path: `$.${media.id}`,
+        }) as Promise<CacheEntry>,
+    );
+    const userData = (await Promise.allSettled(mediaPool)).filter((user): user is PromiseFulfilledResult<CacheEntry> => user.status === "fulfilled").flatMap((user) => user.value);
+    if(userData.length === 0) return BuildPagination(interaction, pageList).paginate();
+    const statisticsEmbed = new EmbedBuilder()
+      .setAuthor({ name: `${media.title?.english || "N/A"} | Guild Statistics` })
+      .setImage(media.bannerImage!)
+      .setDescription(
+        userData.map((user) => `${hyperlink(user.user!.name, `https://anilist.co/user/${user.user.id}`)}: ${user.progress} / ${episodeValue} | ${fixScoring(user.user?.mediaListOptions!.scoreFormat, user.score)}`).join("\n"),
+      );
+    pageList.push(statisticsEmbed);
+  }
+
   return BuildPagination(interaction, pageList).paginate();
+}
+
+function fixScoring(scoreType: Maybe<ScoreFormat> | undefined, scoreValue: Maybe<number> | undefined) {
+  let score = "Unknown";
+  if (scoreValue && scoreType) {
+    score = scoreValue.toString();
+    if (scoreType === ("POINT_10_DECIMAL" || "POINT_10")) score = `${score} / 10`;
+    else if (scoreType === ("POINT_100" || "POINT_5")) score = `${score} / ${scoreType.split("POINT_")[1]}`;
+    else if (scoreType === "POINT_3") score = score === "1" ? "☹️" : score === "2" ? "😐" : "🙂";
+  }
+  return score;
 }

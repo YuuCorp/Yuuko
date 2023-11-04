@@ -10,7 +10,7 @@ import { eq } from "drizzle-orm";
 const name = "synclists";
 const usage = "/synclists";
 const description = "Syncs your AniList lists with our bot, allowing for quick access to your lists!";
-const cooldown = 7200; // 2 hours in seconds;
+const cooldown = 0; // 2 hours in seconds;
 
 export default {
   name,
@@ -31,8 +31,7 @@ export default {
     if (subcommand === "wipe") {
       interaction.editReply(`Wiping your lists...`);
       try {
-        const dbExists = redis.exists(`_user${interaction.alID}-${MediaType.Anime}`);
-        if (!dbExists) return void interaction.editReply(`You have not synced your lists!`);
+        (await redis.json.get(`_user${interaction.alID}-${MediaType.Anime}`) as Record<number, CacheEntry>)
         redis.del(`_user${interaction.alID}-${MediaType.Anime}`);
         redis.del(`_user${interaction.alID}-${MediaType.Manga}`);
         return void interaction.editReply(`Successfully wiped your lists!`);
@@ -76,7 +75,6 @@ async function handleData(
   interaction: UsableInteraction,
   type: MediaType,
 ) {
-  // GAMEPLAN: Go through lists -> Go through entries -> Add entry data to redis
   if (!interaction.isCommand()) return;
   if (!interaction.alID) return;
 
@@ -105,8 +103,8 @@ async function handleData(
         notes: entry.notes,
       };
 
-      if(type === MediaType.Anime) await getAndInsertOrUpdate(statTables.AnimeStats, entry.media.id, { aId: interaction.alID, dId: interaction.user.id });
-      else if(type === MediaType.Manga) await getAndInsertOrUpdate(statTables.MangaStats, entry.media.id, { aId: interaction.alID, dId: interaction.user.id });
+      if (type === MediaType.Anime) await getAndInsertOrUpdate(statTables.AnimeStats, entry.media.id, { aId: interaction.alID, dId: interaction.user.id });
+      else if (type === MediaType.Manga) await getAndInsertOrUpdate(statTables.MangaStats, entry.media.id, { aId: interaction.alID, dId: interaction.user.id });
 
       dataToGiveToRedis[entry.media.id] = cacheEntry;
     }
@@ -117,11 +115,10 @@ async function handleData(
 type TableType = typeof statTables.AnimeStats | typeof statTables.MangaStats;
 
 function keepUnique(oldIds: StatUser[], newId: StatUser) {
-  const ids = oldIds.map(id => id.dId);
-  if(ids.includes(newId.dId)) return oldIds;
+  const ids = oldIds.map((id) => id.dId);
+  if (ids.includes(newId.dId)) return oldIds;
   return [...oldIds, newId];
 }
-
 
 async function getAndInsertOrUpdate(table: TableType, mediaId: number, user: StatUser) {
   const stats = (await stat.select().from(table).where(eq(table.mediaId, mediaId)).limit(1))[0];
@@ -138,4 +135,17 @@ async function getAndInsertOrUpdate(table: TableType, mediaId: number, user: Sta
     mediaId: mediaId,
     users: keepUnique([], user),
   });
+}
+
+async function deleteUser(table: TableType, mediaId: number, user: StatUser) {
+  const stats = (await stat.select().from(table).where(eq(table.mediaId, mediaId)).limit(1))[0];
+  if(!stats) return;
+  const newUsers = stats.users.filter(u => u.dId !== user.dId);
+  // ah fucking hell i see
+  console.log(newUsers);
+  if(newUsers.length === 0) {
+    await stat.delete(table).where(eq(table.mediaId, mediaId));
+    return;
+  }
+  await stat.update(table).set({ users: newUsers }).where(eq(table.mediaId, mediaId));
 }
