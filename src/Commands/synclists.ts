@@ -31,9 +31,19 @@ export default {
     if (subcommand === "wipe") {
       interaction.editReply(`Wiping your lists...`);
       try {
-        (await redis.json.get(`_user${interaction.alID}-${MediaType.Anime}`) as Record<number, CacheEntry>)
+        (await redis.json.get(`_user${interaction.alID}-${MediaType.Anime}`)) as Record<number, CacheEntry>;
+
         redis.del(`_user${interaction.alID}-${MediaType.Anime}`);
         redis.del(`_user${interaction.alID}-${MediaType.Manga}`);
+
+        const animeMediaIDs = await getMediaForUser(statTables.AnimeStats, interaction.alID!);
+        const mangaMediaIDs = await getMediaForUser(statTables.AnimeStats, interaction.alID!);
+
+        if (animeMediaIDs.length == 0 && mangaMediaIDs.length == 0) return void interaction.editReply(`You don't have any data synced with our bot!`);
+
+        await removeUserFromMedia(statTables.AnimeStats, animeMediaIDs, { aId: interaction.alID!, dId: interaction.user.id });
+        await removeUserFromMedia(statTables.AnimeStats, mangaMediaIDs, { aId: interaction.alID!, dId: interaction.user.id });
+        
         return void interaction.editReply(`Successfully wiped your lists!`);
       } catch (e: any) {
         console.error(e);
@@ -137,15 +147,22 @@ async function getAndInsertOrUpdate(table: TableType, mediaId: number, user: Sta
   });
 }
 
-async function deleteUser(table: TableType, mediaId: number, user: StatUser) {
-  const stats = (await stat.select().from(table).where(eq(table.mediaId, mediaId)).limit(1))[0];
-  if(!stats) return;
-  const newUsers = stats.users.filter(u => u.dId !== user.dId);
-  // ah fucking hell i see
-  console.log(newUsers);
-  if(newUsers.length === 0) {
-    await stat.delete(table).where(eq(table.mediaId, mediaId));
-    return;
+async function removeUserFromMedia(table: TableType, mediaIds: number[], user: StatUser) {
+  for (const mediaId of mediaIds) {
+    const stats = (await stat.select().from(table).where(eq(table.mediaId, mediaId)).limit(1))[0];
+    if (stats) {
+      const newUsers = stats.users.filter((u) => u.dId !== user.dId);
+      if (newUsers.length === 0) {
+        await stat.delete(table).where(eq(table.mediaId, mediaId));
+      } else {
+        await stat.update(table).set({ users: newUsers }).where(eq(table.mediaId, mediaId));
+      }
+    }
   }
-  await stat.update(table).set({ users: newUsers }).where(eq(table.mediaId, mediaId));
+}
+
+async function getMediaForUser(table: TableType, aId: number): Promise<number[]> {
+  const mediaEntries = await stat.select().from(table);
+  const mediaForUser = mediaEntries.filter((entry) => entry.users.some((user) => user.aId === aId));
+  return mediaForUser.map((entry) => entry.mediaId);
 }
