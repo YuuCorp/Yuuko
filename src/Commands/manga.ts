@@ -1,9 +1,9 @@
-import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 import { redis } from "../Caching/redis";
 import type { MangaQuery } from "../GraphQL/types";
 import { mwOptionalALToken } from "../Middleware/ALToken";
-import type { CommandWithHook, HookData, UsableInteraction } from "../Structures";
-import { handleData, BuildPagination, EmbedError, Footer, GraphQLRequest, SeriesTitle, getOptions, normalize, type AlwaysExist, type CacheEntry, type GraphQLResponse } from "../Utils";
+import type { CommandWithHook } from "../Structures";
+import { EmbedError, GraphQLRequest, getOptions, handleData, normalize, type CacheEntry } from "../Utils";
 
 const name = "manga";
 const usage = "manga <title>";
