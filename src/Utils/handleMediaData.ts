@@ -178,12 +178,16 @@ export async function handleData(
         }) as Promise<CacheEntry>,
     );
     const userData = (await Promise.allSettled(mediaPool)).filter((user): user is PromiseFulfilledResult<CacheEntry> => user.status === "fulfilled").flatMap((user) => user.value);
-    if(userData.every(u => u == null)) return BuildPagination(interaction, pageList).paginate();
+    if (userData.every((u) => u === null)) return BuildPagination(interaction, pageList).paginate();
+
     const statisticsEmbed = new EmbedBuilder()
       .setAuthor({ name: `${media.title?.english || "N/A"} | Guild Statistics for ${interaction.guild?.name}` })
       .setImage(media.bannerImage!)
       .setDescription(
-        userData.map((user) => `${hyperlink(user.user!.name, `https://anilist.co/user/${user.user.id}`)}: ${user.progress} / ${episodeValue} | ${fixScoring(user.user?.mediaListOptions!.scoreFormat, user.score)}`).join("\n"),
+        userData
+          .filter((u) => u != null)
+          .map((user) => `${hyperlink(user.user?.name, `https://anilist.co/user/${user.user?.id}`)}: ${user.progress} / ${episodeValue} | ${fixScoring(user.user?.mediaListOptions!.scoreFormat, user.score)}`)
+          .join("\n"),
       );
     pageList.push(statisticsEmbed);
   }
