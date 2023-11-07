@@ -178,7 +178,7 @@ export async function handleData(
         }) as Promise<CacheEntry>,
     );
     const userData = (await Promise.allSettled(mediaPool)).filter((user): user is PromiseFulfilledResult<CacheEntry> => user.status === "fulfilled").flatMap((user) => user.value);
-    if(userData.length === 0) return BuildPagination(interaction, pageList).paginate();
+    if(userData.every(u => u == null)) return BuildPagination(interaction, pageList).paginate();
     const statisticsEmbed = new EmbedBuilder()
       .setAuthor({ name: `${media.title?.english || "N/A"} | Guild Statistics for ${interaction.guild?.name}` })
       .setImage(media.bannerImage!)
