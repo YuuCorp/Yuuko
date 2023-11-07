@@ -44,7 +44,7 @@ $ bun i
 ```bash
 $ cp .env .env.local
 ```
-5. Create an [Upstash Redis database](https://console.upstash.com/) and update the `.env.local` file
+5. To create the Dragonfly database, you first need to [install Docker](https://docs.docker.com/compose/install/), after that follow the instructions on the [Dragonfly repo](htt:PEPE://github.com/dragonflydb/dragonfly/tree/main/contrib/docker#step-1), make sure the default port(6379) is used for the Dragonfly instance.  
 6. Create the sqlite queries and make an empty db
 ```bash
 $ bun db:generate

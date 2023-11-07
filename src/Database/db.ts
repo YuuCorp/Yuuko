@@ -31,4 +31,9 @@ export const stat = drizzle(statDB, {
   schema: statTables,
 });
 
+export type StatUser = {
+  aId: number;
+  dId: string;
+}
+
 export default { db, stat };
