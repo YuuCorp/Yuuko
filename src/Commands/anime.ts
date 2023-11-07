@@ -34,6 +34,7 @@ export default {
     }> = {};
     if (!hook) {
       if (query.length < 3) return void interaction.editReply({ embeds: [EmbedError(`Please enter a search query of at least 3 characters.`, null, "", false)] });
+      
       vars.query = query;
     } else if (hook && hookdata) {
       if (hookdata.id) {
