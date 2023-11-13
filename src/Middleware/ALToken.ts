@@ -8,7 +8,7 @@ async function requireALToken(interaction: UsableInteraction) {
   const alUser = await getAnilistUser(id);
   if (!alUser || !alUser.anilistToken) throw new Error("You must link your AniList account to use this command!");
   interaction.alID = alUser.anilistId;
-  interaction.ALtoken = RSACryption(alUser.anilistToken);
+  interaction.ALtoken = await RSACryption(alUser.anilistToken);
 }
 
 async function optionalALToken(interaction: UsableInteraction) {
@@ -16,7 +16,7 @@ async function optionalALToken(interaction: UsableInteraction) {
   const alUser = await getAnilistUser(id);
   if (alUser && alUser.anilistToken) {
     interaction.alID = alUser.anilistId;
-    interaction.ALtoken = RSACryption(alUser.anilistToken);
+    interaction.ALtoken = await RSACryption(alUser.anilistToken);
   }
 }
 
