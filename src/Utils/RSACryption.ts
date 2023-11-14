@@ -11,7 +11,7 @@ import path from "path";
 export async function RSACryption(item: any, encrypt?: boolean): Promise<string> {
   const enc = new TextEncoder();
   const dec = new TextDecoder('utf-8');
-  
+
   if (encrypt) {
     const itemBuffer = enc.encode(item);
     const _publicRSA = path.join(__dirname, "..", "RSA", "id_rsa.pub")
@@ -21,7 +21,6 @@ export async function RSACryption(item: any, encrypt?: boolean): Promise<string>
     publicRSA = publicRSA.replace('-----BEGIN PUBLIC KEY-----', '').replace('-----END PUBLIC KEY-----', '').replaceAll('\n', '');
     const publicRSAData = str2ab(atob(publicRSA));
     const cryptoKey = await globalThis.crypto.subtle.importKey('spki', publicRSAData, { name: 'RSA-OAEP', hash: 'SHA-256' }, false, ['encrypt']);
-    console.log(itemBuffer.byteLength);
     if(itemBuffer.byteLength > 245 ) {
       const chunks = [];
       const chunkSize = 245;
@@ -52,10 +51,12 @@ export async function RSACryption(item: any, encrypt?: boolean): Promise<string>
   privateRSA = privateRSA.replace('-----BEGIN PRIVATE KEY-----', '').replace('-----END PRIVATE KEY-----', '').replaceAll('\n', '');
   const privateRSAData = str2ab(atob(privateRSA));
   const cryptoKey = await globalThis.crypto.subtle.importKey('pkcs8', privateRSAData, { name: 'RSA-OAEP', hash: 'SHA-256' }, false, ['decrypt']);
+  console.log(cryptoKey)
   const itemBuffer = str2ab(atob(item));
-  if(itemBuffer.byteLength > 384) {
+  const chunkSize = cryptoKey.algorithm.modulusLength / 8;
+  console.log(chunkSize)
+  if(itemBuffer.byteLength > chunkSize) {
     const chunks = [];
-    const chunkSize = 384;
     for (let i = 0; i < itemBuffer.byteLength; i += chunkSize) {
       chunks.push(itemBuffer.slice(i, i + chunkSize));
     }
