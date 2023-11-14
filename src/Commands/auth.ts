@@ -58,7 +58,6 @@ export default {
     }
 
     const user = (await db.select().from(anilistUser).where(eq(anilistUser.discordId, interaction.user.id)).limit(1))[0];
-    console.log(user);
 
     if (type === "wipe") {
       if (!user) return void interaction.reply({ embeds: [EmbedError(`You don't have an AniList account bound to your Discord account.`, null)], ephemeral: true });
