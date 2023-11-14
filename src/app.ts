@@ -1,10 +1,16 @@
 import dotenvFlow, { config } from "dotenv-flow";
+import { sqlite } from "./Database";
 import { Client } from "./Structures/Client";
 import { GatewayIntentBits } from "discord.js";
 import { registerEvents } from "./Utils";
 import { runChecks } from "./Checks/Run";
 import path from "path";
 import fs from "fs";
+
+process.on("SIGINT", () => {
+  sqlite.close();
+  process.exit();
+})
 
 dotenvFlow.config({ silent: true });
 
