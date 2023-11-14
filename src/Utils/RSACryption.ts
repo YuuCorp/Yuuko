@@ -2,16 +2,17 @@ import fs from "fs";
 import path from "path";
 
 
+type RSAkey = CryptoKey & { algorithm: { modulusLength: number } };
 /**
  *
  * @param item The item to decrypt/encrypt.
  * @param encrypt An optional boolean to specify if you want to encrypt the item.
  * @example RSACryption("Hello", true) // Encrypts the string "Hello"
  */
-export async function RSACryption(item: any, encrypt?: boolean): Promise<string> {
+export async function RSACryption(item: string, encrypt?: boolean): Promise<string> {
   const enc = new TextEncoder();
-  const dec = new TextDecoder('utf-8');
-
+  const dec = new TextDecoder();
+  
   if (encrypt) {
     const itemBuffer = enc.encode(item);
     const _publicRSA = path.join(__dirname, "..", "RSA", "id_rsa.pub")
@@ -20,10 +21,14 @@ export async function RSACryption(item: any, encrypt?: boolean): Promise<string>
     let publicRSA = fs.readFileSync(_publicRSA, "utf8")
     publicRSA = publicRSA.replace('-----BEGIN PUBLIC KEY-----', '').replace('-----END PUBLIC KEY-----', '').replaceAll('\n', '');
     const publicRSAData = str2ab(atob(publicRSA));
-    const cryptoKey = await globalThis.crypto.subtle.importKey('spki', publicRSAData, { name: 'RSA-OAEP', hash: 'SHA-256' }, false, ['encrypt']);
-    if(itemBuffer.byteLength > 245 ) {
+    const cryptoKey = await globalThis.crypto.subtle.importKey('spki', publicRSAData, { name: 'RSA-OAEP', hash: 'SHA-256' }, false, ['encrypt']) as RSAkey;
+    // https://crypto.stackexchange.com/questions/42097/what-is-the-maximum-size-of-the-plaintext-message-for-rsa-oaep
+    // ^ According to this comment we can calculate the chunk size with the formula ( ( modulusLength / 8 ) - ( 2 * hLenBits / 8 ) - 2 )
+    // hLenBits is the length of the hash function output in bits, which is 256 for SHA-256
+    const chunkSize = cryptoKey.algorithm.modulusLength / 8 - 2 * 256 / 8 - 2;
+
+    if(itemBuffer.byteLength > chunkSize ) {
       const chunks = [];
-      const chunkSize = 245;
       for (let i = 0; i < itemBuffer.byteLength; i += chunkSize) {
         chunks.push(itemBuffer.slice(i, i + chunkSize));
       }
@@ -38,11 +43,10 @@ export async function RSACryption(item: any, encrypt?: boolean): Promise<string>
         encryptedItem.set(new Uint8Array(chunk), offset);
         offset += chunk.byteLength;
       }
-      console.log(arrayBufferToBase64(encryptedItem));
-      return arrayBufferToBase64(encryptedItem);
+      return abtob64(encryptedItem);
     }
     const encryptItem = await globalThis.crypto.subtle.encrypt('RSA-OAEP', cryptoKey, itemBuffer);
-    return arrayBufferToBase64(encryptItem);
+    return abtob64(encryptItem);
   }
   const _privateRSA = path.join(__dirname, "..", "RSA", "id_rsa") 
   if (!fs.existsSync(_privateRSA)) throw new Error("Missing private RSA key.");
@@ -50,11 +54,11 @@ export async function RSACryption(item: any, encrypt?: boolean): Promise<string>
   let privateRSA = fs.readFileSync(_privateRSA, "utf8");
   privateRSA = privateRSA.replace('-----BEGIN PRIVATE KEY-----', '').replace('-----END PRIVATE KEY-----', '').replaceAll('\n', '');
   const privateRSAData = str2ab(atob(privateRSA));
-  const cryptoKey = await globalThis.crypto.subtle.importKey('pkcs8', privateRSAData, { name: 'RSA-OAEP', hash: 'SHA-256' }, false, ['decrypt']);
-  console.log(cryptoKey)
+  const cryptoKey = await globalThis.crypto.subtle.importKey('pkcs8', privateRSAData, { name: 'RSA-OAEP', hash: 'SHA-256' }, false, ['decrypt']) as RSAkey;
+
   const itemBuffer = str2ab(atob(item));
   const chunkSize = cryptoKey.algorithm.modulusLength / 8;
-  console.log(chunkSize)
+
   if(itemBuffer.byteLength > chunkSize) {
     const chunks = [];
     for (let i = 0; i < itemBuffer.byteLength; i += chunkSize) {
@@ -86,11 +90,11 @@ function str2ab(str: string) {
   return buf;
 }
 
-function arrayBufferToBase64(buffer: Uint8Array | ArrayBuffer) {
-  let binary = '';
+function abtob64(buffer: Uint8Array | ArrayBuffer) {
+  const binary = [];
   const bytes = new Uint8Array(buffer);
-  for (let i = 0; i < bytes.byteLength; i++) {
-      binary += String.fromCharCode(bytes[i] || 0);
-  }
-  return btoa(binary);
+  for (let i = 0; i < bytes.byteLength; i++)
+    binary.push(String.fromCharCode(bytes[i]!));
+
+  return btoa(binary.join(''));
 }
