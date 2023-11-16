@@ -55,13 +55,13 @@ export default {
         const { data: animeData } = await GraphQLRequest("GetMediaCollection", {
           userId: interaction.alID,
           type: MediaType.Anime,
-        });
+        }, interaction.ALtoken);
         if (animeData) handleData({ media: animeData }, interaction, MediaType.Anime);
 
         const { data: mangaData } = await GraphQLRequest("GetMediaCollection", {
           userId: interaction.alID,
           type: MediaType.Manga,
-        });
+        }, interaction.ALtoken);
 
         if (mangaData) handleData({ media: mangaData }, interaction, MediaType.Manga);
 
