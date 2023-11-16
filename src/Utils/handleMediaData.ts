@@ -142,7 +142,7 @@ export async function handleData(
       .addFields(
         {
           name: "Status",
-          value: media.mediaListEntry?.status?.toString() || "Unknown",
+          value: media.mediaListEntry?.status?.toString() ? capitalize(media.mediaListEntry?.status?.toString()) : "Unknown",
           inline: true,
         },
         {
@@ -152,7 +152,7 @@ export async function handleData(
         },
         {
           name: "Score",
-          value: fixScoring(scoring!, media.mediaListEntry?.score!),
+          value: fixScoring(null, scoring!, media.mediaListEntry?.score!),
           inline: true,
         },
         {
@@ -178,14 +178,14 @@ export async function handleData(
         }) as Promise<CacheEntry>,
     );
     const userData = (await Promise.allSettled(mediaPool)).filter((user): user is PromiseFulfilledResult<CacheEntry> => user.status === "fulfilled").flatMap((user) => user.value);
-    console.log(userData.length)
-    console.log(userData)
-    if(userData.every(e => e == null)) return BuildPagination(interaction, pageList).paginate();
+    console.log(userData.length);
+    console.log(userData);
+    if (userData.every((e) => e == null)) return BuildPagination(interaction, pageList).paginate();
     const statisticsEmbed = new EmbedBuilder()
       .setAuthor({ name: `${media.title?.english || "N/A"} | Guild Statistics for ${interaction.guild?.name}` })
       .setImage(media.bannerImage!)
       .setDescription(
-        userData.map((user) => `${hyperlink(user.user!.name, `https://anilist.co/user/${user.user.id}`)}: ${user.progress} / ${episodeValue} | ${fixScoring(user.user?.mediaListOptions!.scoreFormat, user.score)}`).join("\n"),
+        userData.map((user) => `${hyperlink(user.user!.name, `https://anilist.co/user/${user.user.id}`)}: ${user.progress} / ${episodeValue} | ${fixScoring(user, user.user?.mediaListOptions!.scoreFormat, user.score)}`).join("\n"),
       );
     pageList.push(statisticsEmbed);
   }
@@ -193,13 +193,17 @@ export async function handleData(
   return BuildPagination(interaction, pageList).paginate();
 }
 
-function fixScoring(scoreType: Maybe<ScoreFormat> | undefined, scoreValue: Maybe<number> | undefined) {
+function fixScoring(user: CacheEntry | null, scoreType: Maybe<ScoreFormat> | undefined, scoreValue: Maybe<number> | undefined) {
   let score = "Unknown";
   if (scoreValue && scoreType) {
     score = scoreValue.toString();
     if (scoreType === ("POINT_10_DECIMAL" || "POINT_10")) score = `${score} / 10`;
     else if (scoreType === ("POINT_100" || "POINT_5")) score = `${score} / ${scoreType.split("POINT_")[1]}`;
     else if (scoreType === "POINT_3") score = score === "1" ? "☹️" : score === "2" ? "😐" : "🙂";
-  }
+  } else if (user && user.status) score = capitalize(user.status.toString());
   return score;
+}
+
+function capitalize(string: string) {
+  return string.charAt(0).toUpperCase() + string.slice(1).toLocaleLowerCase();
 }
