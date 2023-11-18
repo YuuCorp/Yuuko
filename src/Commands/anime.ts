@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "discord.js";
 import { redis } from "../Caching/redis";
 import type { AnimeQuery } from "../GraphQL/types";
-import { mwOptionalALToken } from "../Middleware/ALToken";
+import { mwGetUserEntry } from "../Middleware/UserEntry";
 import type { CommandWithHook } from "../Structures";
 import { EmbedError, GraphQLRequest, getOptions, handleData, normalize, type CacheEntry } from "../Utils";
 
@@ -13,7 +13,7 @@ export default {
   name,
   usage,
   description,
-  middlewares: [mwOptionalALToken],
+  middlewares: [mwGetUserEntry],
   commandType: "Anilist",
   withBuilder: new SlashCommandBuilder()
     .setName(name)
