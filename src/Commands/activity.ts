@@ -38,7 +38,7 @@ export default {
         const uData = (
           await GraphQLRequest("User", {
             username: vars.username,
-          })
+          }, interaction.ALtoken)
         ).data.User;
         vars.userid = uData?.id;
         if (!vars.userid) throw new Error("Couldn't find user id.");
@@ -51,7 +51,7 @@ export default {
     try {
       const {
         data: { Activity: data },
-      } = await GraphQLRequest("Activity", vars);
+      } = await GraphQLRequest("Activity", vars, interaction.ALtoken);
       if (data) {
         const embed = new EmbedBuilder().setTimestamp(data?.createdAt * 1000);
         switch (data?.__typename) {

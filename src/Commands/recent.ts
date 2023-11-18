@@ -53,7 +53,7 @@ export default {
     try {
       const {
         data: { Page: data },
-      } = await GraphQLRequest("RecentChart", vars);
+      } = await GraphQLRequest("RecentChart", vars, interaction.ALtoken);
       if (!data?.mediaList) return void interaction.editReply({ embeds: [EmbedError("Unable to find specified user", vars)] });
       interaction.editReply({ embeds: [{ description: "Creating image..." }] });
       const canvas = new Jimp(999, 999);

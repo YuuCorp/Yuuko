@@ -42,7 +42,7 @@ export default {
     }
     // Make the HTTP Api request
     try {
-      const { data, headers } = await GraphQLRequest("User", vars);
+      const { data, headers } = await GraphQLRequest("User", vars, interaction.ALtoken);
       const response = data.User;
       if (response) {
         const titleEmbed = new EmbedBuilder()
