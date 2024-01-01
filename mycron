@@ -1,0 +1,2 @@
+
+0 0 1 * * echo date +%Y-%m-%d %T: Resetting logs > src/Logging/logs.txt
