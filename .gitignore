@@ -141,3 +141,4 @@ Database/db.sqlite
 db.sqlite-*
 
 src/Local
+Database/drizzle/
