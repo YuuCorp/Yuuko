@@ -10,7 +10,7 @@ import { eq } from "drizzle-orm";
 const name = "synclists";
 const usage = "/synclists";
 const description = "Syncs your AniList lists with our bot, allowing for quick access to your lists!";
-const cooldown = 0; // 2 hours in seconds;
+const cooldown = 900; // 15 minutes in seconds;
 
 export default {
   name,
