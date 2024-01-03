@@ -177,7 +177,8 @@ export async function handleData(
           path: `$.${media.id}`,
         }) as Promise<CacheEntry>,
     );
-    const userData = (await Promise.allSettled(mediaPool)).filter((user): user is PromiseFulfilledResult<CacheEntry> => user.status === "fulfilled").flatMap((user) => user.value);
+    const userData = (await Promise.allSettled(mediaPool)).filter((user): user is PromiseFulfilledResult<CacheEntry> => user.status === "fulfilled")
+      .filter(Boolean).flatMap((user) => user.value);
     // console.log(userData.length);
     // console.log(userData);
     console.log(mediaType);
@@ -186,7 +187,9 @@ export async function handleData(
       .setAuthor({ name: `${media.title?.english || "N/A"} | Guild Statistics for ${interaction.guild?.name}` })
       .setImage(media.bannerImage!)
       .setDescription(
-        userData.map((user) => `${hyperlink(user.user!.name, `https://anilist.co/user/${user.user.id}`)}: ${user.progress} ${episodeValue ? ("/ " + episodeValue) : (mediaType === "ANIME" ? "episodes" : "chapters")} | ${fixScoring(user, user.user?.mediaListOptions!.scoreFormat, user.score)}`).join("\n"),
+        userData.map((user) => `${hyperlink(user.user!.name, `https://anilist.co/user/${user.user.id}`)}: ${user.progress} ${episodeValue
+          ? ("/ " + episodeValue) 
+          : (mediaType === "ANIME" ? "episodes" : "chapters")} | ${fixScoring(user, user.user?.mediaListOptions!.scoreFormat, user.score)}`).join("\n"),
       );
     pageList.push(statisticsEmbed);
   }
