@@ -32,26 +32,21 @@ Yuuko is a free and open source Discord bot that integrates with the AniList API
 ```bash
 $ git clone https://github.com/YuuCorp/Yuuko.git
 ```
-2. Generate an rsa keypair
-```bash
-$ mkdir -p ./src/RSA && ssh-keygen -t rsa -m PKCS8 -f ./src/RSA/id_rsa -C id_rsa
-```
-3. Install all the dependencies ([install bun](https://bun.sh/))
+2. Install all the dependencies ([install bun](https://bun.sh/))
 ```bash
 $ bun i
 ```
-4. Edit the file called `.env.local` and change the `TOKEN` in it
+3. Edit the file called `.env.local` and change the `TOKEN` in it
 ```bash
 $ cp .env .env.local
 ```
-5. To create the Dragonfly database, you first need to [install Docker](https://docs.docker.com/compose/install/), after that follow the instructions on the [Dragonfly repo](htt:PEPE://github.com/dragonflydb/dragonfly/tree/main/contrib/docker#step-1), make sure the default port(6379) is used for the Dragonfly instance.  
-6. Create the sqlite queries and make an empty db
+4. To create the Dragonfly database, you first need to [install Docker](https://docs.docker.com/compose/install/), after that follow the instructions on the [Dragonfly repo](htt:PEPE://github.com/dragonflydb/dragonfly/tree/main/contrib/docker#step-1), make sure the default port(6379) is used for the Dragonfly instance.  
+5. Create the sqlite queries and make an empty db
 ```bash
 $ bun db:generate
 $ bun db:push
 ``` 
-$ 
-7. Start the bot
+6. Start the bot
 ```bash
 $ bun run dev
 ```
