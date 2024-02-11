@@ -22,14 +22,19 @@ async function start(token: string | undefined) {
 
   client.login(token);
 
-  const logPath = path.join(__dirname, 'Logging/logs.txt')
+  const logPath = path.join(__dirname, 'Logging/logs.json')
   const currentDate = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
   
   if (!fs.existsSync(path.join(__dirname, 'Logging')))
     fs.mkdirSync(path.join(__dirname, 'Logging'))
 
   if (!fs.existsSync(logPath))
-    fs.writeFileSync(logPath, `${currentDate}: Initialised log file`)
+    fs.writeFileSync(logPath, JSON.stringify(
+  [{ 
+    date: currentDate, 
+    user: "SYSTEM_LOGGER", 
+    info: "Initialized log!" 
+  }]));
 
   process.env.UPTIME = Date.now();
 }
