@@ -20,25 +20,17 @@ export default {
     if (!interaction.isCommand())
       return
 
-      if (!fs.existsSync(path.join(__dirname, '..', 'Logging', 'logs.txt')))
+      if (!fs.existsSync(path.join(__dirname, '..', 'Logging', 'logs.json')))
         return void interaction.reply(`\`There are no logs to view.\``)
 
-      const logs = fs
-        .readFileSync(path.join(__dirname, '..', 'Logging', 'logs.txt'), 'utf8')
-        .split('\n')
-        .reverse()
-        .slice(0, 25)
-        .reverse()
-        .join('\n')
+      const logData = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'Logging', 'logs.json'), 'utf8')) as Array<{ date: string, user: string, info: string }>
+      const logs = logData.slice(-25).map(log => `${log.date}: ${log.user} ran ${log.info}`).join('\n');
+      
       return void interaction.reply({
         embeds: [
           {
             title: `Here are the 25 most recent logs.`,
-            /* example of formating
-                        • 2021-08-01 12:00:00: akira#6505 ran command: logs
-                        • 2021-08-01 12:00:00: akira#6505 ran command: user
-                    */
-            description: `\`\`\`\n${logs.replace(/\n/g, '\n')}\`\`\``,
+            description: "```\n" + logs + "```",
             color: 0x00FF00,
             footer: Footer(),
           },
