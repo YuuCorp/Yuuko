@@ -47,3 +47,9 @@ export interface GraphQLResponse<TData = any> {
   data: TData
   headers: any
 }
+
+export type YuukoLog = {
+  date: string;
+  user: string;
+  info: string;
+}
