@@ -4,6 +4,7 @@ import { Client } from "./Structures/Client";
 import { GatewayIntentBits } from "discord.js";
 import { registerEvents } from "./Utils";
 import { runChecks } from "./Checks/Run";
+import { start_API } from "./API/api_index";
 import path from "path";
 import fs from "fs";
 
@@ -21,6 +22,7 @@ async function start(token: string | undefined) {
   await runChecks(client);
 
   client.login(token);
+  start_API(client);
 
   const logPath = path.join(__dirname, 'Logging/logs.json')
   const currentDate = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')

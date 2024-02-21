@@ -9,6 +9,7 @@ export declare global {
       CLIENT_ID: string
       GUILD_ID: string
       UPTIME: number
+      PORT: number
     }
   }
 }

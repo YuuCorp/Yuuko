@@ -50,6 +50,7 @@
     "discord.js": "^14.7.1",
     "dotenv-flow": "^3.2.0",
     "drizzle-orm": "^0.28.6",
+    "elysia": "^0.8.17",
     "humanize-duration": "^3.27.0",
     "jimp": "^0.22.10",
     "ms": "^2.1.3",
