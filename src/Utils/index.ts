@@ -15,3 +15,4 @@ export * from './getAnilistUser'
 export * from './getSubcommand';
 export * from './handleMediaData';
 export * from './common'
+export * from './getStats'
