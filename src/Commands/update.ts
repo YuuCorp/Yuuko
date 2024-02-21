@@ -1,6 +1,7 @@
 import { mwTrustedUser } from "../Middleware/TrustedUser"
 import { spawn, execSync } from "child_process"
 import { SlashCommandBuilder } from "discord.js"
+import { sqlite } from "../Database"
 import fs from "fs"
 import path from "path"
 import type { Command } from "../Structures"
@@ -61,7 +62,7 @@ export default {
             fs.mkdirSync(path.join(__dirname, '../Local'))
 
           const tempFile = path.join(__dirname, '../Local/updatemsg.json')
-          console.log(updateMessage)
+          sqlite.close();
           fs.writeFileSync(tempFile, JSON.stringify(updateMessage))
           // execSync('git rev-parse --short HEAD > commit.hash', { encoding: 'utf-8' });
           execSync('pm2 restart "Yuuko Production"', { encoding: 'utf-8' })
