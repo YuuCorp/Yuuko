@@ -50,7 +50,7 @@ export const infoController = new Elysia({
 
     const announcementID = (await db.insert(tables.announcementModel).values(dbEntry).returning({ id: tables.announcementModel.id}))[0]
 
-    return `Succesfully created announcement #${announcementID?.id || "Unknown"}!`
+    return { message: `Succesfully created announcement #${announcementID?.id || "Unknown"}!` }
   }, { body: t.Object({ announcement: t.String(), date: t.String() }) })
 
 function readLogFile() {
