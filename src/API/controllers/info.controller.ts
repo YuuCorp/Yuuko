@@ -3,7 +3,7 @@ import fs from "node:fs";
 import { desc } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db, tables } from "../../Database";
-import { getStats } from "#Utils/botStats.js";
+import { getStats } from "#Utils/botStats.ts";
 
 const srcFolder = path.join(__dirname, "..", "..");
 

@@ -39,8 +39,6 @@
   "dependencies": {
     "@acegoal07/discordjs-pagination": "^1.5.0",
     "@discordjs/rest": "^0.3.0",
-    "@elysiajs/cookie": "^0.8.0",
-    "@elysiajs/jwt": "^0.8.0",
     "@types/bun": "^1.0.7",
     "@types/dotenv-flow": "^3.3.1",
     "@types/ms": "^0.7.33",
@@ -53,7 +51,7 @@
     "discord.js": "^14.7.1",
     "dotenv-flow": "^3.2.0",
     "drizzle-orm": "^0.28.6",
-    "elysia": "^0.8.17",
+    "elysia": "^1.0.7",
     "humanize-duration": "^3.27.0",
     "jimp": "^0.22.10",
     "ms": "^2.1.3",

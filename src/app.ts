@@ -7,6 +7,7 @@ import { runChecks } from "./Checks/Run";
 import { start_API } from "./API/api_index";
 import path from "path";
 import fs from "fs";
+import { verifyEnv } from "./API/config";
 
 process.on("SIGINT", () => {
   sqlite.close();
@@ -26,24 +27,24 @@ async function start(token: string | undefined) {
 
   const logPath = path.join(__dirname, 'Logging/logs.json')
   const currentDate = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
-  
+
   if (!fs.existsSync(path.join(__dirname, 'Logging')))
     fs.mkdirSync(path.join(__dirname, 'Logging'))
 
   if (!fs.existsSync(logPath))
     fs.writeFileSync(logPath, JSON.stringify(
-  [{ 
-    date: currentDate, 
-    user: "SYSTEM_LOGGER", 
-    info: "Initialized log!" 
-  }]));
+      [{
+        date: currentDate,
+        user: "SYSTEM_LOGGER",
+        info: "Initialized log!"
+      }]));
 
   process.env.UPTIME = Date.now();
 }
 
 async function makeRSAPair() {
   const RSAdirectory = path.join(__dirname, 'RSA');
-  if(fs.existsSync(RSAdirectory)) return;
+  if (fs.existsSync(RSAdirectory)) return;
   const dec = new TextDecoder();
 
   const keyPair = await globalThis.crypto.subtle.generateKey({
@@ -55,11 +56,11 @@ async function makeRSAPair() {
 
   const publicKey = await globalThis.crypto.subtle.exportKey('spki', keyPair.publicKey);
   const privateKey = await globalThis.crypto.subtle.exportKey('pkcs8', keyPair.privateKey)
-  
-  const exportedPublicKey = '-----BEGIN PUBLIC KEY-----\n' + 
-          btoa(String.fromCharCode.apply(null, [...new Uint8Array(publicKey)])).replace(/.{64}/g, '$&\n') + '\n-----END PUBLIC KEY-----';
+
+  const exportedPublicKey = '-----BEGIN PUBLIC KEY-----\n' +
+    btoa(String.fromCharCode.apply(null, [...new Uint8Array(publicKey)])).replace(/.{64}/g, '$&\n') + '\n-----END PUBLIC KEY-----';
   const exportedPrivateKey = '-----BEGIN PRIVATE KEY-----\n' + // Inserts a newline every 64 characters
-          btoa(String.fromCharCode.apply(null, [...new Uint8Array(privateKey)])).replace(/.{64}/g, '$&\n') + '\n-----END PRIVATE KEY-----';
+    btoa(String.fromCharCode.apply(null, [...new Uint8Array(privateKey)])).replace(/.{64}/g, '$&\n') + '\n-----END PRIVATE KEY-----';
 
   fs.mkdirSync(RSAdirectory);
 
@@ -71,3 +72,4 @@ async function makeRSAPair() {
 
 makeRSAPair();
 start(process.env.TOKEN);
+export const zodEnv = verifyEnv();
