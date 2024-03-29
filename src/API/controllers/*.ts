@@ -1,7 +1,6 @@
 import { triggerController } from "./trigger.controller";
 import { infoController } from "./info.controller";
 import { Elysia } from "elysia";
-import { zodEnv } from "../../app";
 
 export const api = new Elysia({
   prefix: "/api/v1",
