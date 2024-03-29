@@ -7,6 +7,7 @@ import userBirthday from "./Models/UserBirthday";
 
 import AnimeStats from "./Models/AnimeStats";
 import MangaStats from "./Models/MangaStats";
+import BotStats from "./Models/BotStats";
 
 export const tables = {
   anilistUser,
@@ -17,6 +18,7 @@ export const tables = {
 export const statTables = {
   AnimeStats,
   MangaStats,
+  BotStats,
 };
 
 export const sqlite = new Database("./src/Database/db.sqlite");
@@ -34,6 +36,6 @@ export const stat = drizzle(statDB, {
 export type StatUser = {
   aId: number;
   dId: string;
-}
+};
 
 export default { db, stat };

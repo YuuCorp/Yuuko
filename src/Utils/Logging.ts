@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import type { CommandInteractionOptionResolver, Interaction } from 'discord.js'
 import type { Command } from '../Structures/Command'
+import type { YuukoLog } from './types'
 
 export function Logging(command: Command, interaction: Interaction) {
   try {
@@ -14,7 +15,7 @@ export function Logging(command: Command, interaction: Interaction) {
       date: currentDate,
       user: `${interaction.user.username}${+interaction.user.discriminator === 0 ? '' : "#" + interaction.user.discriminator}`,
       info: `${command.name}${subcommand ? ` ${subcommand}` : ''}`
-    }
+    } satisfies YuukoLog
     const previousLogs = JSON.parse(fs.readFileSync(logPath, 'utf8')) as Array<typeof log>
     previousLogs.push(log)
 
