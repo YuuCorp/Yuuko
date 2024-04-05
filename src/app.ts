@@ -1,13 +1,13 @@
 import dotenvFlow, { config } from "dotenv-flow";
-import { sqlite } from "./Database";
-import { Client } from "./Structures/Client";
+import { sqlite } from "./database";
+import { Client } from "./structures/client";
 import { GatewayIntentBits } from "discord.js";
-import { registerEvents } from "./Utils";
-import { runChecks } from "./Checks/Run";
-import { start_API } from "./API/api_index";
+import { registerEvents } from "./utils";
+import { runChecks } from "./checks/run";
+import { startApi } from "./api";
 import path from "path";
 import fs from "fs";
-import { verifyEnv } from "./API/config";
+import { verifyEnv } from "./api/config";
 
 process.on("SIGINT", () => {
   sqlite.close();
@@ -23,7 +23,7 @@ async function start(token: string | undefined) {
   await runChecks(client);
 
   client.login(token);
-  start_API(client);
+  startApi(client);
 
   const logPath = path.join(__dirname, 'Logging/logs.json')
   const currentDate = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
