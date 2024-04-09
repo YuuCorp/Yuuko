@@ -5,7 +5,7 @@ import { Elysia, t } from "elysia";
 import { db, tables } from "../../database";
 import { getStats } from "../../utils/botStats";
 
-const srcFolder = path.join(__dirname, "..", "..");
+const srcFolder = path.join(import.meta.dir, "..", "..");
 
 export const infoController = new Elysia({
     prefix: "/info",

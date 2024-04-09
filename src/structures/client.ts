@@ -14,7 +14,7 @@ export class Client extends DiscordClient {
   constructor(o: ClientOptions) {
     super(o);
 
-    this.logger = new Logger(path.join(__dirname, "..", "Logging", "Logs.log"));
+    this.logger = new Logger(path.join(import.meta.dir, "..", "Logging", "Logs.log"));
     this.commands = new Collection();
     this.components = new Collection();
     this.cooldowns = new Collection();

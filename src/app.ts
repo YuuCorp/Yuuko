@@ -22,11 +22,11 @@ async function start(token: string | undefined) {
 
   client.login(token);
 
-  const logPath = path.join(__dirname, 'Logging/logs.json')
+  const logPath = path.join(import.meta.dir, 'Logging/logs.json')
   const currentDate = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
 
-  if (!fs.existsSync(path.join(__dirname, 'Logging')))
-    fs.mkdirSync(path.join(__dirname, 'Logging'))
+  if (!fs.existsSync(path.join(import.meta.dir, 'Logging')))
+    fs.mkdirSync(path.join(import.meta.dir, 'Logging'))
 
   if (!fs.existsSync(logPath))
     fs.writeFileSync(logPath, JSON.stringify(
@@ -40,7 +40,7 @@ async function start(token: string | undefined) {
 }
 
 async function makeRSAPair() {
-  const RSAdirectory = path.join(__dirname, 'RSA');
+  const RSAdirectory = path.join(import.meta.dir, 'RSA');
   if (fs.existsSync(RSAdirectory)) return;
   const dec = new TextDecoder();
 

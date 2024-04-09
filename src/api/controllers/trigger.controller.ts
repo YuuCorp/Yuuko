@@ -27,7 +27,7 @@ export const triggerController = new Elysia({
   .post(
     "/wipe-logs",
     async () => {
-      const logPath = path.join(__dirname, "..", "..", "Logging", "logs.json");
+      const logPath = path.join(import.meta.dir, "..", "..", "Logging", "logs.json");
       fs.writeFileSync(logPath, JSON.stringify([]), "utf8");
       return { message: "Wiped all logs!" };
     },

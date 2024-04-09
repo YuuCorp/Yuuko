@@ -13,7 +13,7 @@ import path from 'node:path';
 
   await Bun.write('./src/GraphQL/types/queries.ts', `export default ${JSON.stringify(out, null, 2)} as const`)
 
-  const fullPath = path.join(__dirname, '../GraphQL/types/queries.ts')
+  const fullPath = path.join(import.meta.dir, '../GraphQL/types/queries.ts')
 
   console.log(`Finished generating queries. ${fullPath}`)
 })()

@@ -6,7 +6,7 @@ import type { YuukoLog } from './types'
 
 export function logging(command: Command, interaction: Interaction) {
   try {
-    const logPath = path.join(__dirname, '..', 'Logging/logs.json')
+    const logPath = path.join(import.meta.dir, '..', 'Logging/logs.json')
     const currentDate = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
 
     if (!interaction.isCommand()) return

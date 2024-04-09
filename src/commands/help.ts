@@ -54,7 +54,7 @@ export default {
 
   run: async ({ interaction, client }): Promise<void> => {
     // Require all files from the commands folder and fetch description
-    const cmds = fs.readdirSync(__dirname).filter((x) => x.endsWith(".ts") && x != "help.ts");
+    const cmds = fs.readdirSync(import.meta.dir).filter((x) => x.endsWith(".ts") && x != "help.ts");
     console.log(cmds);
     const cmdsDesc = [];
     const cmdGroups: Record<CommandType, Partial<Command>[]> = { 
@@ -65,7 +65,7 @@ export default {
       "Misc": [],
     };
     for (const cmd of cmds) {
-      const cmdEntry = (await import(path.join(__dirname, cmd))).default as Command;
+      const cmdEntry = (await import(path.join(import.meta.dir, cmd))).default as Command;
       if(cmdEntry.commandType === "Internal") continue;
       if (!cmdGroups[cmdEntry.commandType]) cmdGroups[cmdEntry.commandType] = [];
       cmdGroups[cmdEntry.commandType].push({ usage: cmdEntry.usage, name: cmdEntry.name, description: cmdEntry.description });
