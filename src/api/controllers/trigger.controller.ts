@@ -18,7 +18,7 @@ export const triggerController = new Elysia({
     },
     {
       afterHandle() {
-        setTimeout(() => execSync('pm2 restart "Yuuko Production"', { encoding: "utf-8" }), 250);
+        execSync('pm2 restart "Yuuko Production"', { encoding: "utf-8" });
       },
       response: t.Object({ message: t.String() }),
     },

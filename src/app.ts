@@ -4,10 +4,8 @@ import { Client } from "./structures/client";
 import { GatewayIntentBits } from "discord.js";
 import { registerEvents } from "./utils";
 import { runChecks } from "./checks/run";
-import { startApi } from "./api";
 import path from "path";
 import fs from "fs";
-import { verifyEnv } from "./api/config";
 
 process.on("SIGINT", () => {
   sqlite.close();
@@ -23,7 +21,6 @@ async function start(token: string | undefined) {
   await runChecks(client);
 
   client.login(token);
-  startApi(client);
 
   const logPath = path.join(__dirname, 'Logging/logs.json')
   const currentDate = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
@@ -72,4 +69,3 @@ async function makeRSAPair() {
 
 makeRSAPair();
 start(process.env.TOKEN);
-export const zodEnv = verifyEnv();
