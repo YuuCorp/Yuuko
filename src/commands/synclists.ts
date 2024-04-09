@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "discord.js";
 import { redis } from "../caching/redis";
 import { MediaType, type GetMediaCollectionQuery } from "../graphQL/types";
-import { mwRequireALToken } from "../Middleware/alToken";
+import { mwRequireALToken } from "../middleware/alToken";
 import type { Command, UsableInteraction } from "../structures";
 import { stat, statTables, type StatUser } from "../database/db";
 import { embedError, graphQLRequest, getSubcommand, type AlwaysExist, type CacheEntry, type GraphQLResponse } from "../utils";
@@ -43,7 +43,7 @@ export default {
 
         await removeUserFromMedia(statTables.AnimeStats, animeMediaIDs, { aId: interaction.alID!, dId: interaction.user.id });
         await removeUserFromMedia(statTables.AnimeStats, mangaMediaIDs, { aId: interaction.alID!, dId: interaction.user.id });
-        
+
         return void interaction.editReply(`Successfully wiped your lists!`);
       } catch (e: any) {
         console.error(e);

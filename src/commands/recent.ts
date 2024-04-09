@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, AttachmentBuilder } from "discord.js";
-import { mwGetUserEntry } from "../Middleware/userEntry";
+import { mwGetUserEntry } from "../middleware/userEntry";
 import Jimp from "jimp";
 import type { Command } from "../structures";
 import { CommandCategories, embedError, graphQLRequest, SeriesTitle, getOptions } from "../utils";

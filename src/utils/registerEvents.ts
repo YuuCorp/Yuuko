@@ -4,7 +4,7 @@ import { removeExtension } from ".";
 import type { Client } from "../structures";
 
 export async function registerEvents(client: Client) {
-  const eventsPath = path.join(__dirname, "..", "Events");
+  const eventsPath = path.join(__dirname, "..", "events");
 
   fs.readdirSync(eventsPath)
     .filter((x) => x.endsWith(".ts"))

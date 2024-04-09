@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "discord.js";
 import { redis } from "../caching/redis";
 import type { MangaQuery } from "../graphQL/types";
-import { mwGetUserEntry } from "../Middleware/userEntry";
+import { mwGetUserEntry } from "../middleware/userEntry";
 import type { CommandWithHook } from "../structures";
 import { embedError, graphQLRequest, getOptions, handleData, normalize, type CacheEntry } from "../utils";
 
@@ -35,14 +35,14 @@ export default {
     let mangaIdFound = false;
 
     if (!hook) {
-      if (manga.length < 3) return void interaction.editReply({ embeds: [embedError(`Please enter a search query of at least 3 characters.`, null,'', false)] });
+      if (manga.length < 3) return void interaction.editReply({ embeds: [embedError(`Please enter a search query of at least 3 characters.`, null, '', false)] });
       vars.query = manga;
     } else if (hook && hookdata) {
       if (hookdata.title) {
         vars.query = hookdata.title;
         normalizedQuery = normalize(hookdata.title);
       }
-    } else return void interaction.editReply({ embeds: [embedError(`MangaCmd was hooked, yet there was no title or ID provided in hookdata.`, null,'', false)] });
+    } else return void interaction.editReply({ embeds: [embedError(`MangaCmd was hooked, yet there was no title or ID provided in hookdata.`, null, '', false)] });
 
     if (!vars.mID) {
       const mangaId = await redis.get(`_mangaId-${normalizedQuery}`);
@@ -57,12 +57,12 @@ export default {
     const cacheData = await redis.json.get(`_manga-${vars.mID}`) as MangaQuery["Media"] | null;
 
     if (cacheData) {
-      if(interaction.alID) {
-        const _mediaListEntry = await redis.json.get(`_user${interaction.alID}-MANGA`) as Record<number, CacheEntry>; 
-        if(!vars.mID) return void interaction.editReply({ embeds: [embedError(`Something went wrong while fetching your list entry.`, vars)] });
+      if (interaction.alID) {
+        const _mediaListEntry = await redis.json.get(`_user${interaction.alID}-MANGA`) as Record<number, CacheEntry>;
+        if (!vars.mID) return void interaction.editReply({ embeds: [embedError(`Something went wrong while fetching your list entry.`, vars)] });
         const mediaListEntry = _mediaListEntry ? _mediaListEntry[vars.mID] : null;
-        if(mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
-     }
+        if (mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
+      }
       console.log("[MangaCmd] Found cache data, returning data...");
       return void handleData({ media: cacheData }, interaction, "MANGA");
     }
@@ -78,8 +78,8 @@ export default {
         const { mediaListEntry, ...redisData } = data;
         redis.json.set(`_manga-${data.id}`, "$", redisData);
         redis.expireAt(`_manga-${redisData.id}`, new Date(Date.now() + 604800000))
-        for(const synonym of redisData.synonyms || []) {
-          if(!synonym) continue;
+        for (const synonym of redisData.synonyms || []) {
+          if (!synonym) continue;
           redis.set(`_mangaId-${normalize(synonym)}`, data.id.toString());
         }
         return void handleData({ media: data, headers: headers }, interaction, "MANGA", hookdata);
