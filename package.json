@@ -65,31 +65,31 @@
   },
   "imports": {
     "#Utils/*": [
-      "./src/Utils/*"
+      "./src/utils/*"
     ],
     "#Commands/*": [
-      "./src/Commands/*"
+      "./src/commands/*"
     ],
     "#Structures/*": [
-      "./src/Structures/*"
+      "./src/structures/*"
     ],
     "#GraphQL/*": [
-      "./src/GraphQL/*"
+      "./src/graphQL/*"
     ],
     "#Models/*": [
-      "./src/Database/Models/*"
+      "./src/database/models/*"
     ],
     "#Caching/*": [
-      "./src/Caching/*"
+      "./src/caching/*"
     ],
     "#RSA/*": [
       "./src/RSA/*"
     ],
     "#Middleware/*": [
-      "./src/Middleware/*"
+      "./src/middleware/*"
     ],
     "#Components/*": [
-      "./src/Components/*"
+      "./src/components/*"
     ]
   },
   "devDependencies": {

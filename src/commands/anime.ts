@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "discord.js";
 import { redis } from "../caching/redis";
 import type { AnimeQuery } from "../graphQL/types";
-import { mwGetUserEntry } from "../Middleware/userEntry";
+import { mwGetUserEntry } from "../middleware/userEntry";
 import type { CommandWithHook } from "../structures";
 import { embedError, graphQLRequest, getOptions, handleData, normalize, type CacheEntry } from "../utils";
 
@@ -34,7 +34,7 @@ export default {
     }> = {};
     if (!hook) {
       if (query.length < 3) return void interaction.editReply({ embeds: [embedError(`Please enter a search query of at least 3 characters.`, null, "", false)] });
-      
+
       vars.query = query;
     } else if (hook && hookdata) {
       if (hookdata.id) {

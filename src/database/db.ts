@@ -21,8 +21,8 @@ export const statTables = {
   BotStats,
 };
 
-export const sqlite = new Database("./src/Database/db.sqlite");
-export const statDB = new Database("./src/Database/statsdb.sqlite");
+export const sqlite = new Database("./src/database/db.sqlite");
+export const statDB = new Database("./src/database/statsdb.sqlite");
 sqlite.exec("PRAGMA journal_mode = WAL;");
 
 export const db = drizzle(sqlite, {

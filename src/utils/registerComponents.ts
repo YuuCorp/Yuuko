@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 
 export async function registerComponents(client: Client) {
-  const compPath = path.join(import.meta.dir, "..", "Components");
+  const compPath = path.join(import.meta.dir, "..", "components");
   fs.readdirSync(compPath)
     .filter((file) => file.endsWith(".ts"))
     .forEach(file => {

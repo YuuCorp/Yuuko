@@ -1,5 +1,5 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import { mwGetUserEntry } from "../Middleware/userEntry";
+import { mwGetUserEntry } from "../middleware/userEntry";
 import type { Command } from "../structures";
 import { embedError, graphQLRequest, SeriesTitle, getOptions } from "../utils";
 
@@ -97,6 +97,6 @@ export default {
   },
 } satisfies Command;
 
-function capitalizeString(string: string)  {
+function capitalizeString(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
