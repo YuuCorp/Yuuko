@@ -1,4 +1,4 @@
-import { api } from '#api/controllers/*.ts'
+import { api } from '#api/controllers/*'
 import { cors } from '@elysiajs/cors'
 import { Elysia } from 'elysia'
 
