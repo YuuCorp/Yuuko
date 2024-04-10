@@ -1,16 +1,16 @@
 import { SlashCommandBuilder } from "discord.js";
-import { redis } from "../caching/redis";
-import { MediaType, type GetMediaCollectionQuery } from "../graphQL/types";
-import { mwRequireALToken } from "../middleware/alToken";
-import type { Command, UsableInteraction } from "../structures";
-import { stat, statTables, type StatUser } from "../database/db";
-import { embedError, graphQLRequest, getSubcommand, type AlwaysExist, type CacheEntry, type GraphQLResponse } from "../utils";
+import { redis } from "#caching/redis";
+import { MediaType, type GetMediaCollectionQuery } from "#graphQL/types";
+import { mwRequireALToken } from "#middleware/alToken";
+import type { Command, UsableInteraction } from "#structures/index";
+import { stat, statTables, type StatUser } from "#database/db";
+import { embedError, graphQLRequest, getSubcommand, type AlwaysExist, type CacheEntry, type GraphQLResponse } from "#utils/index";
 import { eq } from "drizzle-orm";
 
 const name = "synclists";
 const usage = "/synclists";
 const description = "Syncs your AniList lists with our bot, allowing for quick access to your lists!";
-const cooldown = 900; // 15 minutes in seconds;
+const cooldown = 15 * 60; // 15 minutes in seconds;
 
 export default {
   name,

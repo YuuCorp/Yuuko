@@ -1,9 +1,9 @@
-import MangaCmd from "#Commands/manga.ts";
-import AnimeCmd from "#Commands/anime.ts";
-import { embedError, graphQLRequest, SeriesTitle, getOptions } from "../utils";
+import MangaCmd from "#commands/manga";
+import AnimeCmd from "#commands/anime";
+import { embedError, graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
 import { SlashCommandBuilder } from "discord.js";
-import type { Command } from "../structures";
-import type { MediaType } from "../graphQL/types";
+import type { Command } from "#structures/command";
+import type { MediaType } from "#graphQL/types";
 
 const name = "recommend";
 const usage = "recommend <anime | manga> <anilist user> <genre1, genreN>";
@@ -44,7 +44,7 @@ export default {
         for (const MediaList of data.lists.filter((MediaList) => MediaList!.name != "Planning")) {
           if (MediaList && MediaList.entries) MediaList.entries.map((e) => excludeIDs.push(e!.media!.id));
         }
-        if (!genres.length) return void interaction.reply({ embeds: [embedError(`Please specify at least one genre.`, null,'', false)] });
+        if (!genres.length) return void interaction.reply({ embeds: [embedError(`Please specify at least one genre.`, null, '', false)] });
 
         const genresArray = genres.split(",").map((genre) => genre.trim());
         const recommendationVars = { type, exclude_ids: excludeIDs, genresArray };
@@ -76,7 +76,7 @@ export default {
           interaction.reply({ embeds: [embedError(e, vars)] });
         }
       } else {
-        return void interaction.reply({ embeds: [embedError(`Couldn't find any data from the user specified. (Which was "${vars.userName}")`, null,'', false)] });
+        return void interaction.reply({ embeds: [embedError(`Couldn't find any data from the user specified. (Which was "${vars.userName}")`, null, '', false)] });
       }
     } catch (e: any) {
       console.error(e);

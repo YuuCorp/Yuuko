@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import type { Command } from "../structures";
-import { embedError, footer, graphQLRequest, SeriesTitle, getOptions } from "../utils";
+import type { Command } from "#structures/command";
+import { embedError, footer, graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
 
 const name = "studio";
 const usage = "studio <?>";

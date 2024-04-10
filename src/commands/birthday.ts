@@ -1,10 +1,8 @@
-import {db} from "../database/db";
-import { tables } from "../database";
-import { getOptions, buildPagination, embedError, footer } from "../utils";
+import { getOptions, buildPagination, embedError, footer, getSubcommand } from "#utils/index";
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import type { Command } from "../structures";
+import { db, tables } from "#database/db";
 import { eq, sql } from "drizzle-orm";
-import getSubcommand from "../utils/getSubcommand";
+import type { Command } from "#structures/command";
 
 const name = "birthday";
 const usage = "birthday <user | list | set | wipe>";
@@ -48,7 +46,7 @@ export default {
         await db.update(tables.userBirthday).set({ birthday, updatedAt: sql`CURRENT_TIMESTAMP` }).where(eq(tables.userBirthday.userId, interaction.user.id));
       } else {
         console.log('[/birthday set] userBirthday does not exist, inserting...')
-        const data = {userId: interaction.user.id, birthday, guildId: interaction.guild.id}
+        const data = { userId: interaction.user.id, birthday, guildId: interaction.guild.id }
         console.log(data)
         const bOpt = {
           birthday,
@@ -128,9 +126,9 @@ export default {
       buildPagination(interaction, embeds).paginate();
     }
 
-    if(subcommand === "wipe") {
+    if (subcommand === "wipe") {
       const birthday = (await db.query.userBirthday.findFirst({ where: (birthday, { eq }) => eq(birthday.userId, interaction.user.id) }));
-      if(!birthday) return void interaction.reply({ content: "You have not set your birthday.", ephemeral: true });
+      if (!birthday) return void interaction.reply({ content: "You have not set your birthday.", ephemeral: true });
       try {
         await db.delete(tables.userBirthday).where(eq(tables.userBirthday.userId, interaction.user.id));
         return void interaction.reply({

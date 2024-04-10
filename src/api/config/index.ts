@@ -7,7 +7,7 @@ const envSchema = z.object({
     ANILIST_API: z.string(),
     CLIENT_ID: z.string(),
     GUILD_ID: z.string(),
-    UPTIME: z.string().transform((value) => parseInt(value)).optional(),
+    UPTIME: z.string().transform((value) => parseInt(value)),
     PORT: z.string().transform((value) => parseInt(value)),
 });
 

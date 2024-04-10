@@ -1,9 +1,9 @@
+import { embedError, graphQLRequest, getOptions, handleData, normalize, type CacheEntry } from "#utils/index";
 import { SlashCommandBuilder } from "discord.js";
-import { redis } from "../caching/redis";
-import type { AnimeQuery } from "../graphQL/types";
-import { mwGetUserEntry } from "../middleware/userEntry";
-import type { CommandWithHook } from "../structures";
-import { embedError, graphQLRequest, getOptions, handleData, normalize, type CacheEntry } from "../utils";
+import { redis } from "#caching/redis";
+import type { AnimeQuery } from "#graphQL/types";
+import { mwGetUserEntry } from "#middleware/userEntry";
+import type { CommandWithHook } from "#structures/index";
 
 const name = "anime";
 const usage = "anime <title>";

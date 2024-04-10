@@ -1,8 +1,8 @@
+import { buildPagination, embedError, footer, graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
 import { EmbedBuilder, SlashCommandBuilder, TimestampStyles, time } from "discord.js";
 import ms from "ms";
-import { MediaType } from "../graphQL/types";
-import type { Command } from "../structures";
-import { buildPagination, embedError, footer, graphQLRequest, SeriesTitle, getOptions } from "../utils";
+import { MediaType } from "#graphQL/types";
+import type { Command } from "#structures/command";
 
 const name = "airing";
 const usage = "airing <?in>";
@@ -111,7 +111,7 @@ export default {
 
             embed.addFields({
               name: `${SeriesTitle(media?.title || undefined)}`,
-              value: `> **[EP - ${episode}]** :airplane: ${(new Date(airingAt * 1000) > new Date() ? `Going to air ` : `Aired` ) + time(airingAt, TimestampStyles.RelativeTime)}`,
+              value: `> **[EP - ${episode}]** :airplane: ${(new Date(airingAt * 1000) > new Date() ? `Going to air ` : `Aired`) + time(airingAt, TimestampStyles.RelativeTime)}`,
               inline: false,
             });
           });

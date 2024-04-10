@@ -1,7 +1,7 @@
+import { embedError, graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import { mwGetUserEntry } from "../middleware/userEntry";
-import type { Command } from "../structures";
-import { embedError, graphQLRequest, SeriesTitle, getOptions } from "../utils";
+import { mwGetUserEntry } from "#middleware/userEntry";
+import type { Command } from "#structures/command";
 
 const name = "activity";
 const usage = "activity <user>";
