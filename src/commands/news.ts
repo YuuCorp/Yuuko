@@ -1,8 +1,7 @@
-import { embedError } from '../utils/embedError'
-import { footer } from '../utils/footer'
+import { embedError, footer } from '#utils/index'
 import axios from 'axios'
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import type { Command } from '../structures'
+import type { Command } from '#structures/index'
 
 const name = 'aninews'
 const usage = '/aninews'
@@ -40,7 +39,7 @@ export default {
             content = `${content.substring(0, 1015)}...`
 
           if (i != (process.env.RSS_LIMIT || 5) - 1)
-          embed.addFields({ name: `:newspaper:  ${rss.items[i].title}`, value: content })
+            embed.addFields({ name: `:newspaper:  ${rss.items[i].title}`, value: content })
         }
 
         interaction.reply({ embeds: [embed] })

@@ -1,10 +1,10 @@
-import type { Client, HookData, UsableInteraction } from "../structures";
-import type { AnimeQuery, MangaQuery, Maybe, ScoreFormat } from "../graphQL/types";
+import type { HookData, UsableInteraction } from "#structures/index";
+import type { AnimeQuery, MangaQuery, Maybe, ScoreFormat } from "#graphQL/types";
 import type { AlwaysExist, CacheEntry, GraphQLResponse } from "./types";
 import { buildPagination, footer, SeriesTitle } from ".";
-import { stat, statTables } from "../database";
+import { stat, statTables } from "#database/db";
 import { EmbedBuilder, hyperlink } from "discord.js";
-import { redis } from "../caching/redis";
+import { redis } from "#caching/redis";
 import { eq } from "drizzle-orm";
 
 export async function handleData(
@@ -188,7 +188,7 @@ export async function handleData(
       .setImage(media.bannerImage!)
       .setDescription(
         userData.map((user) => `${hyperlink(user.user!.name, `https://anilist.co/user/${user.user.id}`)}: ${user.progress} ${episodeValue
-          ? ("/ " + episodeValue) 
+          ? ("/ " + episodeValue)
           : (mediaType === "ANIME" ? "episodes" : "chapters")} | ${fixScoring(user, user.user?.mediaListOptions!.scoreFormat, user.score)}`).join("\n"),
       );
     pageList.push(statisticsEmbed);

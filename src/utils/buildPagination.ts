@@ -1,5 +1,4 @@
-import type { EmbedBuilder, Interaction } from 'discord.js'
-import { ButtonBuilder, ButtonStyle } from 'discord.js'
+import { ButtonBuilder, ButtonStyle, type EmbedBuilder, type Interaction } from 'discord.js'
 import { Pagination } from '@acegoal07/discordjs-pagination'
 
 export function buildPagination(interaction: Interaction, pageList: EmbedBuilder[]) {

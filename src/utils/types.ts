@@ -1,7 +1,6 @@
 import type { Interaction } from 'discord.js'
-import type { Middleware } from '../structures/middleware'
-import type { Client } from '../structures/client'
-import type { Maybe, MediaListStatus, ScoreFormat } from '../graphQL/types'
+import type { Middleware, Client } from '#structures/index'
+import type { Maybe, MediaListStatus, ScoreFormat } from '#graphQL/types'
 
 export interface Media {
   title?: {

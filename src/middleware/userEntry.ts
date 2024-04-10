@@ -1,5 +1,5 @@
-import { Middleware } from "../structures/middleware";
-import { rsaEncryption, getAnilistUser } from "../utils";
+import { Middleware } from "#structures/middleware";
+import { rsaEncryption, getAnilistUser } from "#utils/index";
 
 export const mwGetUserEntry = new Middleware({
   name: "Require AniList Token",

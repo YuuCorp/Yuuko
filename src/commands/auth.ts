@@ -1,11 +1,9 @@
-import anilistUser from "../database/models/anilistUser";
-import type { CommandInteractionOptionResolver } from "discord.js";
+import { embedError, footer, graphQLRequest, rsaEncryption, getOptions, updateBotStats, getSubcommand } from "#utils/index";
+import anilistUser from "#database/models/anilistUser";
+import type { Command } from "#structures/index";
 import { SlashCommandBuilder } from "discord.js";
-import type { Command } from "../structures";
-import { embedError, footer, graphQLRequest, rsaEncryption, getOptions, updateBotStats } from "../utils";
-import { db } from "../database/db";
+import { db } from "#database/db";
 import { eq } from "drizzle-orm";
-import getSubcommand from "../utils/getSubcommand";
 
 const name = "auth";
 const usage = "auth <help | anilistToken | wipe>";

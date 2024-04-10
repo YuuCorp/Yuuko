@@ -1,5 +1,5 @@
-import type { Client } from "../structures";
-import { stat, statTables, db } from "../database/db";
+import type { Client } from "#structures/index";
+import { stat, statTables, db } from "#database/db";
 
 export async function getStats() {
     const stats = (await stat.select().from(statTables.BotStats))[0];

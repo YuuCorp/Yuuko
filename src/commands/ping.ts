@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js'
-import type { Command } from '../structures'
+import type { Command } from '#structures/index'
 
 const name = 'ping'
 const usage = '/ping'

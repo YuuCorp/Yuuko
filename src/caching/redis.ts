@@ -1,5 +1,5 @@
 import { createClient } from "redis";
-import { client } from "../app";
+import { client } from "app";
 
 export const redis = createClient({
   socket: {
@@ -13,8 +13,8 @@ redis.on("error", (err) => {
 });
 
 redis.on("connect", () => {
-    client.log("[Redis] Connected.");
-    redis.set("test", "test");
+  client.log("[Redis] Connected.");
+  redis.set("test", "test");
 });
 
 (async () => {

@@ -1,13 +1,7 @@
 import { drizzle } from "drizzle-orm/bun-sqlite";
 import { Database } from "bun:sqlite";
 
-import anilistUser from "./models/anilistUser";
-import announcementModel from "./models/announcement";
-import userBirthday from "./models/userBirthday";
-
-import AnimeStats from "./models/animeStats";
-import MangaStats from "./models/mangaStats";
-import BotStats from "./models/botStats";
+import { anilistUser, announcementModel, userBirthday, AnimeStats, MangaStats, BotStats } from "#models/index";
 
 export const tables = {
   anilistUser,

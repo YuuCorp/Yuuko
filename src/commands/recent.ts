@@ -1,9 +1,9 @@
 import { SlashCommandBuilder, AttachmentBuilder } from "discord.js";
-import { mwGetUserEntry } from "../middleware/userEntry";
+import { mwGetUserEntry } from "#middleware/userEntry";
 import Jimp from "jimp";
-import type { Command } from "../structures";
-import { CommandCategories, embedError, graphQLRequest, SeriesTitle, getOptions } from "../utils";
-import type { MediaList, MediaType } from "../graphQL/types";
+import type { Command } from "#structures/index";
+import { CommandCategories, embedError, graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
+import type { MediaList, MediaType } from "#graphQL/types";
 
 const name = "recent";
 const usage = "recent";

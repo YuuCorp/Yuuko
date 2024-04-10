@@ -1,3 +1,3 @@
-import { startApi } from "./api/index";
+import { startApi } from "#api/index";
 
 startApi();

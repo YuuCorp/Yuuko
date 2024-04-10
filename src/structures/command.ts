@@ -1,8 +1,7 @@
 import type { APIEmbedField, ApplicationCommandOptionType, Interaction } from "discord.js";
 import type Discord from "discord.js";
-import type { CommandCategories } from "../utils/commandCategories.js";
-import type { Middleware } from "./middleware.js";
-import type { Client } from "./client.js";
+import type { CommandCategories } from "#utils/commandCategories";
+import type { Middleware, Client } from "./index";
 
 export interface CommandOptions {
   name: string;

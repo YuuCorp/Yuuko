@@ -1,9 +1,7 @@
 import { type Interaction, Collection, time } from "discord.js";
 
-import { embedError } from "../utils/embedError";
-import { logging } from "../utils/logging";
-import type { Middleware } from "../structures/middleware";
-import type { Client, ClientCommand, UsableInteraction, YuukoEvent } from "../structures";
+import { embedError, logging } from "#utils/index";
+import type { Client, ClientCommand, UsableInteraction, YuukoEvent, Middleware } from "#structures/index";
 
 /* discord doesn't have the commands property in their class for somea reason */
 export const run: YuukoEvent<"interactionCreate"> = async (client, interaction) => {
@@ -39,9 +37,9 @@ export const run: YuukoEvent<"interactionCreate"> = async (client, interaction) 
   } catch (e: any) {
     if (!interaction.isCommand()) return;
     console.error(e);
-    if(interaction.deferred)
+    if (interaction.deferred)
       return void interaction.editReply({ embeds: [embedError(e, null, e?.cause || null)] });
-    else 
+    else
       return void interaction.reply({ embeds: [embedError(e, null, e?.cause || null)] });
   }
 };

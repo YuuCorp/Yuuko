@@ -1,6 +1,6 @@
 import { execSync, spawnSync } from "child_process";
 import { Elysia, t } from "elysia";
-import { sqlite } from "../../database";
+import { sqlite } from "#database/db";
 import path from "path";
 import fs from "fs";
 

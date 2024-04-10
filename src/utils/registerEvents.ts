@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 import { removeExtension } from ".";
-import type { Client } from "../structures";
+import type { Client } from "#structures/index";
 
 export async function registerEvents(client: Client) {
   const eventsPath = path.join(import.meta.dir, "..", "events");

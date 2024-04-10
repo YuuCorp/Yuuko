@@ -1,8 +1,8 @@
 import { execSync } from 'node:child_process'
 
 import { SlashCommandBuilder } from 'discord.js'
-import type { Command } from '../structures'
-import { footer } from '../utils'
+import type { Command } from '#structures/index'
+import { footer } from '#utils/footer'
 
 const name = 'changelog'
 const description = 'See what has changed with the recent updates.'

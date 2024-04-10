@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "target": "es2022",
-    "lib": ["es2022"],
+    "lib": [
+      "es2022"
+    ],
     "moduleDetection": "force",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
@@ -17,6 +19,54 @@
     "noEmit": true,
     "esModuleInterop": true,
     "verbatimModuleSyntax": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": "src",
+    "paths": {
+      "#api/*": [
+        "api/*"
+      ],
+      "#caching/*": [
+        "caching/*"
+      ],
+      "#checks/*": [
+        "checks/*"
+      ],
+      "#commands/*": [
+        "commands/*"
+      ],
+      "#components/*": [
+        "components/*"
+      ],
+      "#database/*": [
+        "database/*"
+      ],
+      "#events/*": [
+        "events/*"
+      ],
+      "#graphQL/*": [
+        "graphQL/*"
+      ],
+      "#logging/*": [
+        "Logging/*"
+      ],
+      "#middleware/*": [
+        "middleware/*"
+      ],
+      "#models/*": [
+        "database/models/*"
+      ],
+      "#RSA/*": [
+        "RSA/*"
+      ],
+      "#scripts/*": [
+        "scripts/*"
+      ],
+      "#structures/*": [
+        "structures/*"
+      ],
+      "#utils/*": [
+        "utils/*"
+      ]
+    },
   }
 }

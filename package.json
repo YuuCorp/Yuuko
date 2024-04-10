@@ -63,35 +63,6 @@
     "winston": "^3.11.0",
     "zod": "^3.22.4"
   },
-  "imports": {
-    "#Utils/*": [
-      "./src/utils/*"
-    ],
-    "#Commands/*": [
-      "./src/commands/*"
-    ],
-    "#Structures/*": [
-      "./src/structures/*"
-    ],
-    "#GraphQL/*": [
-      "./src/graphQL/*"
-    ],
-    "#Models/*": [
-      "./src/database/models/*"
-    ],
-    "#Caching/*": [
-      "./src/caching/*"
-    ],
-    "#RSA/*": [
-      "./src/RSA/*"
-    ],
-    "#Middleware/*": [
-      "./src/middleware/*"
-    ],
-    "#Components/*": [
-      "./src/components/*"
-    ]
-  },
   "devDependencies": {
     "@antfu/eslint-config": "^1.0.0-beta.26",
     "@graphql-codegen/cli": "^5.0.0",

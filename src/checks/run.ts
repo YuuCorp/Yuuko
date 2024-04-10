@@ -1,7 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { Client } from "../structures";
-import type { Check } from '../structures/check'
+import { Client, type Check } from "#structures/index";
 
 export async function runChecks(client: Client) {
   // Flatten the array of checks

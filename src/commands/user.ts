@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, EmbedBuilder, type ColorResolvable } from "discord.js";
-import { mwGetUserEntry } from "../middleware/userEntry";
-import type { Command } from "../structures";
-import { embedError, graphQLRequest, footer, getOptions } from "../utils";
+import { mwGetUserEntry } from "#middleware/userEntry";
+import type { Command } from "#structures/index";
+import { embedError, graphQLRequest, footer, getOptions } from "#utils/index";
 
 const name = "user";
 const usage = "user <?anilist name>";

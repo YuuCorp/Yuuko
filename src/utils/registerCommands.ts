@@ -1,6 +1,6 @@
 import path from "path";
 import fs from "fs";
-import { Client, type Command } from "../structures";
+import { Client, type Command } from "#structures/index";
 import { REST, Routes } from "discord.js";
 
 export async function registerCommands(client: Client) {

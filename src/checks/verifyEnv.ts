@@ -1,4 +1,4 @@
-import { Check } from '../structures/check'
+import { Check } from '#structures/index'
 
 const tokenCheck = new Check({
   name: 'Token Check',
