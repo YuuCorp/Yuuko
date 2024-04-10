@@ -8,10 +8,10 @@ export async function runChecks(client: Client) {
   const checks: Check[] = (
     await Promise.all(
       fs
-        .readdirSync(path.join(__dirname))
+        .readdirSync(path.join(import.meta.dir))
         .filter(file => file.endsWith('.ts') && file !== 'run.ts')
         .map(async (file) => {
-          const check = await import(path.join(__dirname, file))
+          const check = await import(path.join(import.meta.dir, file))
           return check.default
         }),
     )
