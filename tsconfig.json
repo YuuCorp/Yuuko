@@ -52,6 +52,9 @@
       "#middleware/*": [
         "middleware/*"
       ],
+      "#models/*": [
+        "database/models/*"
+      ],
       "#RSA/*": [
         "RSA/*"
       ],
