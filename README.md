@@ -6,17 +6,17 @@
     <a href="https://www.codacy.com?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=YuuCorp/Yuuko&amp;utm_campaign=Badge_Grade" alt="Codacy Code Quality">
         <img src="https://app.codacy.com/project/badge/Grade/21b43885505b44a08784ad868babbd10" /></a>
     <a href="https://github.com/YuuCorp/Yuuko/blob/main/LICENSE" alt="MIT License Badge">
-        <img src="https://img.shields.io/badge/license-MIT-brightgreen" /></a>
+        <img src="https://img.shields.io/badge/license-MIT-brightgreen"/>
+    </a>
     <a href="https://github.com/YuuCorp/Yuuko/">
-        <img src="https://img.shields.io/github/commit-activity/m/YuuCorp/Yuuko" alt="Commit Activity"/></a>
-    <a href="https://discord.gg/WK3C4a5P">
-        <img src="https://img.shields.io/discord/884525603628388372?label=Discord"></a>
-        <img src="https://img.shields.io/tokei/lines/github/YuuCorp/Yuuko" alt="Lines Of Code">
-       <img src="https://img.shields.io/david/YuuCorp/Yuuko" alt="Dependency Status">
+        <img src="https://img.shields.io/github/commit-activity/m/YuuCorp/Yuuko" alt="Commit Activity"/>
+    </a>
+    <a href="https://discord.gg/DUCEj7vqKD">
+        <img src="https://img.shields.io/discord/884525603628388372?label=Discord">
+    </a>
 </p>
 
-<img src="https://i.imgur.com/8fFCTX1.png" align="right"
-     alt="Yuuko Logo" width="120" height="120">
+<img src="https://i.imgur.com/8fFCTX1.png" align="right" alt="Yuuko Logo" width="120" height="120">
 
 Yuuko is a free and open source Discord bot that integrates with the AniList API, providing the users with useful commands for viewing anime, manga, getting recommendations, viewing AniList users profiles without opening a browser tab, and many more. Yuuko is the product of two bots being merged together (AniSuggest by [TibixDev](https://github.com/TibixDev), [Sayykii](https://github.com/sayykii), and TheCultureMan by [crackheadakira](https://github.com/crackheadakira)). It is actively maintained.
 
@@ -71,7 +71,7 @@ Feel free to create pull requests for any improvements you feel like making, but
 Licensed under the MIT license:
 
 ```text
-Copyright 2021 - 2023 Yuuko Developers
+Copyright 2021 - 2024 Yuuko Developers
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
