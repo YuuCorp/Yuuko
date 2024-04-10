@@ -1,7 +1,7 @@
 import { embedError, footer } from '#utils/index'
 import axios from 'axios'
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import type { Command } from '#structures/command'
+import type { Command } from '#structures/index'
 
 const name = 'aninews'
 const usage = '/aninews'

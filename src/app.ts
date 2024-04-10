@@ -1,9 +1,9 @@
 import dotenvFlow, { config } from "dotenv-flow";
-import { sqlite } from "./database";
-import { Client } from "./structures/client";
+import { sqlite } from "#database/db";
+import { Client } from "#structures/index";
 import { GatewayIntentBits } from "discord.js";
-import { registerEvents } from "./utils";
-import { runChecks } from "./checks/run";
+import { registerEvents } from "#utils/index";
+import { runChecks } from "#checks/run";
 import path from "path";
 import fs from "fs";
 

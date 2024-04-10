@@ -2,7 +2,7 @@ import Discord, { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import fs from "fs";
 import path from "path";
 import { db, tables } from "#database/db";
-import type { Command, CommandType } from "#structures/command";
+import type { Command, CommandType } from "#structures/index";
 import { buildPagination, CommandCategories } from "#utils/index";
 import { desc } from "drizzle-orm";
 

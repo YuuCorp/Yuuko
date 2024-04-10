@@ -2,7 +2,7 @@ import { getOptions, buildPagination, embedError, footer, getSubcommand } from "
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { db, tables } from "#database/db";
 import { eq, sql } from "drizzle-orm";
-import type { Command } from "#structures/command";
+import type { Command } from "#structures/index";
 
 const name = "birthday";
 const usage = "birthday <user | list | set | wipe>";

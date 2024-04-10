@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder, type ColorResolvable } from "discord.js";
 import { mwGetUserEntry } from "#middleware/userEntry";
-import type { Command } from "#structures/command";
+import type { Command } from "#structures/index";
 import { embedError, graphQLRequest, footer, getOptions } from "#utils/index";
 
 const name = "user";

@@ -2,7 +2,7 @@ import MangaCmd from "#commands/manga";
 import AnimeCmd from "#commands/anime";
 import { embedError, graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
 import { SlashCommandBuilder } from "discord.js";
-import type { Command } from "#structures/command";
+import type { Command } from "#structures/index";
 import type { MediaType } from "#graphQL/types";
 
 const name = "recommend";

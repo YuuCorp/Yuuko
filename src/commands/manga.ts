@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from "discord.js";
 import { redis } from "#caching/redis";
 import type { MangaQuery } from "#graphQL/types";
 import { mwGetUserEntry } from "#middleware/userEntry";
-import type { CommandWithHook } from "#structures/command";
+import type { CommandWithHook } from "#structures/index";
 import { embedError, graphQLRequest, getOptions, handleData, normalize, type CacheEntry } from "#utils/index";
 
 const name = "manga";

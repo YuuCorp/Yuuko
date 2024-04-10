@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import type { CommandInteractionOptionResolver, Interaction } from 'discord.js'
-import type { Command } from '../structures/command'
+import type { Command } from '#structures/index'
 import type { YuukoLog } from './types'
 
 export function logging(command: Command, interaction: Interaction) {

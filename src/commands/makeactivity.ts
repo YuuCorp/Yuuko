@@ -1,7 +1,7 @@
 import { embedError, footer, graphQLRequest, getSubcommand } from "#utils/index";
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { mwRequireALToken } from "#middleware/alToken";
-import type { Command } from "#structures/command";
+import type { Command } from "#structures/index";
 import { db } from "#database/db";
 
 const name = "makeactivity";

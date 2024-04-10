@@ -1,5 +1,5 @@
 import type { YuukoComponent } from ".";
-import type { Client } from "../structures";
+import type { Client } from "#structures/index";
 import path from "path";
 import fs from "fs";
 

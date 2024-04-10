@@ -1,6 +1,6 @@
 import { embedError, footer, graphQLRequest, rsaEncryption, getOptions, updateBotStats, getSubcommand } from "#utils/index";
 import anilistUser from "#database/models/anilistUser";
-import type { Command } from "#structures/command";
+import type { Command } from "#structures/index";
 import { SlashCommandBuilder } from "discord.js";
 import { db } from "#database/db";
 import { eq } from "drizzle-orm";

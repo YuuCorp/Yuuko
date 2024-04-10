@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import { SlashCommandBuilder } from "discord.js";
-import type { Command } from "#structures/command";
+import type { Command } from "#structures/index";
 import { embedError } from "#utils/embedError";
 import AnimeCmd from "#commands/anime";
 

@@ -1,5 +1,5 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import type { Command } from "#structures/command";
+import type { Command } from "#structures/index";
 import { buildPagination, embedError, footer, graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
 
 const name = "staff";

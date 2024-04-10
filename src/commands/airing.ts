@@ -2,7 +2,7 @@ import { buildPagination, embedError, footer, graphQLRequest, SeriesTitle, getOp
 import { EmbedBuilder, SlashCommandBuilder, TimestampStyles, time } from "discord.js";
 import ms from "ms";
 import { MediaType } from "#graphQL/types";
-import type { Command } from "#structures/command";
+import type { Command } from "#structures/index";
 
 const name = "airing";
 const usage = "airing <?in>";

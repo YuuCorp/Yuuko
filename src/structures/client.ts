@@ -1,9 +1,8 @@
-import fs from "fs";
 import path from "path";
 import { Collection, Client as DiscordClient, type ClientOptions } from "discord.js";
-import type { YuukoComponent } from "../utils/types";
+import type { YuukoComponent } from "#utils/types";
 import type { ClientCommand } from "./command";
-import Logger from "../utils/logger";
+import Logger from "#utils/logger";
 
 export class Client extends DiscordClient {
   public commands: Collection<string, ClientCommand>;

@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, AttachmentBuilder } from "discord.js";
 import { mwGetUserEntry } from "#middleware/userEntry";
 import Jimp from "jimp";
-import type { Command } from "#structures/command";
+import type { Command } from "#structures/index";
 import { CommandCategories, embedError, graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
 import type { MediaList, MediaType } from "#graphQL/types";
 

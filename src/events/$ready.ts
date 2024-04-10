@@ -1,5 +1,5 @@
 import { ActivityType } from "discord.js";
-import type { YuukoEvent } from "#structures/event";
+import type { YuukoEvent } from "#structures/index";
 import { registerCommands, registerComponents } from "#utils/index";
 
 export const run: YuukoEvent<"ready"> = async (client) => {

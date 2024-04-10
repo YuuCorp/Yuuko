@@ -1,4 +1,4 @@
-import type { MediaTitle } from '../graphQL/types'
+import type { MediaTitle } from '#graphQL/types'
 
 export function SeriesTitle(media: MediaTitle | undefined) {
   if (!media)
@@ -10,10 +10,9 @@ export function SeriesTitle(media: MediaTitle | undefined) {
  * @example normalize("attack ON   TiTan") => "ATTACK_ON_TITAN"
  */
 export function normalize(query: string) {
-    return query.toUpperCase().split(/\s+/).join("_");
-  }
+  return query.toUpperCase().split(/\s+/).join("_");
+}
 
-  export function removeExtension(fileName: string, extension = '.ts') {
-    return fileName.slice(0, fileName.indexOf(extension))
-  }
-  
+export function removeExtension(fileName: string, extension = '.ts') {
+  return fileName.slice(0, fileName.indexOf(extension))
+}

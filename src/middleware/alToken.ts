@@ -1,9 +1,8 @@
-import { rsaEncryption, getAnilistUser } from "../utils";
-import { Middleware } from "../structures/middleware";
-import type { UsableInteraction } from "../structures";
+import { rsaEncryption, getAnilistUser } from "#utils/index";
+import { Middleware, type UsableInteraction } from "#structures/index";
 
 async function requireALToken(interaction: UsableInteraction) {
-  if(!interaction.isCommand()) return;
+  if (!interaction.isCommand()) return;
   const id = interaction.user.id;
   const alUser = await getAnilistUser(id);
   if (!alUser || !alUser.anilistToken) throw new Error("You must link your AniList account to use this command!");

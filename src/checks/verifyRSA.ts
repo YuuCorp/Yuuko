@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import { rsaEncryption } from '#utils/rsaEncryption'
-import { Check } from '#structures/check'
+import { Check } from '#structures/index'
 
 const rsaPublicCheck = new Check({
   name: 'RSA Public Key Check',
