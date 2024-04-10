@@ -64,32 +64,47 @@
     "zod": "^3.22.4"
   },
   "imports": {
-    "#Utils/*": [
-      "./src/utils/*"
+    "#api/*": [
+      "./src/api/*"
     ],
-    "#Commands/*": [
+    "#caching/*": [
+      "./src/caching/*"
+    ],
+    "#checks/*": [
+      "./src/checks/*"
+    ],
+    "#commands/*": [
       "./src/commands/*"
     ],
-    "#Structures/*": [
-      "./src/structures/*"
+    "#components/*": [
+      "./src/components/*"
     ],
-    "#GraphQL/*": [
+    "#database/*": [
+      "./src/database/*"
+    ],
+    "#events/*": [
+      "./src/events/*"
+    ],
+    "#graphQL/*": [
       "./src/graphQL/*"
     ],
-    "#Models/*": [
-      "./src/database/models/*"
+    "#logging/*": [
+      "./src/Logging/*"
     ],
-    "#Caching/*": [
-      "./src/caching/*"
+    "#middleware/*": [
+      "./src/middleware/*"
     ],
     "#RSA/*": [
       "./src/RSA/*"
     ],
-    "#Middleware/*": [
-      "./src/middleware/*"
+    "#scripts/*": [
+      "./src/scripts/*"
     ],
-    "#Components/*": [
-      "./src/components/*"
+    "#structures/*": [
+      "./src/structures/*"
+    ],
+    "#utils/*": [
+      "./src/utils/*"
     ]
   },
   "devDependencies": {

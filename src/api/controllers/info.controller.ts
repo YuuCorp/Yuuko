@@ -2,8 +2,8 @@ import path from "node:path";
 import fs from "node:fs";
 import { desc } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import { db, tables } from "../../database";
-import { getStats } from "../../utils/botStats";
+import { db, tables } from "#database/db.ts";
+import { getStats } from "#utils/botStats.ts";
 
 const srcFolder = path.join(import.meta.dir, "..", "..");
 
