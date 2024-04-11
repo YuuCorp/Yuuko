@@ -1,10 +1,10 @@
 import type { Config } from "drizzle-kit";
 
 export default {
-  schema: "src/Database/schema.ts",
-  out: "./src/Database/drizzle",
+  schema: "src/database/schema.ts",
+  out: "./src/databaseMigration/drizzle",
   driver: "libsql",
   dbCredentials: {
-    url: "file:./src/Database/db.sqlite",
+    url: "file:./src/database/db.sqlite",
   },
 } satisfies Config;
