@@ -1,8 +1,3 @@
-import type { AxiosResponse } from 'axios'
-import axios from 'axios'
-
-// import DocumentNode
-// import print
 import type {
   ActivityQuery,
   ActivityQueryVariables,
@@ -68,23 +63,32 @@ interface QueryVariables {
   SaveTextActivity: [SaveTextActivityMutation, SaveTextActivityMutationVariables]
   ListQuery: [ListQueryQuery, ListQueryQueryVariables]
 }
-
-export function graphQLRequest<QueryKey extends Query>(queryKey: QueryKey, vars: QueryVariables[QueryKey][1], token?: string, url = baseUrl) {
+export async function graphQLRequest<QueryKey extends Query>(queryKey: QueryKey, vars: QueryVariables[QueryKey][1], token?: string, url = baseUrl) {
+  const headers = new Headers()
   if (token && token.length > 1000)
-    axios.defaults.headers.common.Authorization = `Bearer ${token}`
+    headers.append('Authorization', `Bearer ${token}`)
 
-  return new Promise<GraphQLResponse<QueryVariables[QueryKey][0]>>((resolve, reject) => {
-    axios
-      .post(url, {
-        variables: vars,
-        query: Queries[queryKey],
-      })
-      .then((res: AxiosResponse) => {
-        resolve({ data: res.data.data, headers: res.headers })
-      })
-      .catch((err: any) => {
-        console.error(err)
-        reject(`GraphQL Request Rejected\n\n${err?.response?.data?.errors?.map((e: any) => `> ${e.message}\n`) || err}`)
-      })
-  })
+  headers.append('Content-Type', 'application/json');
+
+  const reqOptions = {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      query: Queries[queryKey],
+      variables: vars,
+    })
+  } satisfies FetchRequestInit
+
+  try {
+    const res = await fetch(url, reqOptions)
+    if(!res.ok) {
+      const errorMsg = res.statusText
+      throw new Error(`GraphQL Request Rejected\n\n${errorMsg}`)
+    }
+    const data = await res.json() as GraphQLResponse<QueryVariables[QueryKey][0]>
+    return data;
+  } catch(e: any) {
+    console.error(e)
+    throw new Error(`GraphQL Request Rejected\n\n${e?.message || e}`);
+  }
 }

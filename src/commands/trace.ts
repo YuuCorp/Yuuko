@@ -1,6 +1,5 @@
 // use esm
 
-import axios from "axios";
 import { SlashCommandBuilder } from "discord.js";
 import type { Command } from "#structures/index";
 import { embedError } from "#utils/embedError";
@@ -12,6 +11,8 @@ import humanizeDuration from "humanize-duration";
 const name = "trace";
 const usage = "trace <image attachment>";
 const description = "Gets an anime from an image.";
+
+const baseUrl = 'https://api.trace.moe/search?cutBorders&url='
 
 interface TraceMoeReturnType {
   anilist: number;
@@ -40,26 +41,25 @@ export default {
 
     if (!image) return void interaction.reply({ embeds: [embedError("No image attached.")] });
 
-    // Send and axios request to trace.moe with an image the user attached
     try {
-      const response = (await axios.get<{ result: TraceMoeReturnType[] }>(`https://api.trace.moe/search?cutBorders&url=${image.url}`)).data.result[0]
-      console.log(response)
-      // If the request was successful
+      const res = await fetch(`${baseUrl}${image.url}`)
+      if(!res.ok) return void interaction.reply({ embeds: [embedError(res.statusText)] });
+      
+      const data = await res.json() as { result: TraceMoeReturnType[] }
+      const response = data.result[0];
       if (!response) return void interaction.reply({ embeds: [embedError("No results found.", { url: image.url })] });
-      const match = response;
       const hookdata = {
-        id: match.anilist,
+        id: response.anilist,
         image: image.url,
         fields: [
           { name: "\u200B", value: "\u200B" },
-          { name: "In Episode", value: `${match.episode || "Full"} (${humanizeDuration(match.from * 1000, { round: true }).toString()} in)`, inline: true },
-          { name: "Similarity", value: match.similarity.toFixed(2).toString(), inline: true },
-          { name: "Video", value: `[Link](${match.video})`, inline: true },
+          { name: "In Episode", value: `${response.episode || "Full"} (${humanizeDuration(response.from * 1000, { round: true }).toString()} in)`, inline: true },
+          { name: "Similarity", value: response.similarity.toFixed(2).toString(), inline: true },
+          { name: "Video", value: `[Link](${response.video})`, inline: true },
         ],
       };
       AnimeCmd.run({ interaction, client, hook: true, hookdata });
     } catch (e: any) {
-      // ^ log axios request status code and error
       if (e.response) console.error(e.response.data.errors);
       else console.error(e);
 

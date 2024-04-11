@@ -24,9 +24,9 @@
     "gen:queries": "bun run ./src/Scripts/genQueries.ts",
     "db:push:main": "bun drizzle-kit push:sqlite",
     "db:push:stats": " bun drizzle-kit push:sqlite --config=drizzle.stats.config.ts",
-    "db:push": "bun run db:push:main && bun run db:push:stats",
     "db:generate:main": "bun drizzle-kit generate:sqlite",
     "db:generate:stats": "bun drizzle-kit generate:sqlite --config=drizzle.stats.config.ts",
+    "db:push": "bun run db:push:main && bun run db:push:stats",
     "db:generate": "bun run db:generate:main && bun run db:generate:stats",
     "db:studio": "bun drizzle-kit studio"
   },
@@ -45,7 +45,6 @@
     "@types/ms": "^0.7.33",
     "@types/node-rsa": "^1.1.2",
     "@upstash/redis": "^1.23.4",
-    "axios": "^0.21.1",
     "better-sqlite3": "^9.2.2",
     "bun-types": "^1.0.5",
     "colors": "^1.4.0",
