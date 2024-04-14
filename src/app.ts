@@ -22,6 +22,11 @@ async function start(token: string | undefined) {
 
   client.login(token);
 
+  const guild = client.guilds.cache.get(process.env.GUILD_ID);
+  if (guild) {
+    client.emit("guildCreate", guild);
+  }
+
   const logPath = path.join(import.meta.dir, 'Logging/logs.json')
   const currentDate = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
 
