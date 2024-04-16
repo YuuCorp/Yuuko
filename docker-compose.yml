@@ -6,7 +6,9 @@ services:
     # ports:
     #   - "3030:3030"
     volumes:
-      - .:/app
+      # Mount the RSA key folder and the database folder
+      - ./src/RSA:/src/RSA
+      - ./src/database:/src/database
     env_file:
       - .env.local
     command: bun run start:prod
