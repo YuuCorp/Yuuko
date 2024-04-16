@@ -1,0 +1,27 @@
+services:
+  yuuko-docker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # ports:
+    #   - "3030:3030"
+    volumes:
+      - .:/app
+    env_file:
+      - .env.local
+    command: bun run start:prod
+    depends_on:
+      - dragonfly
+    network_mode: "service:dragonfly"
+
+  dragonfly:
+    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+    ulimits:
+      memlock: -1
+    ports:
+      - "6379:6379"
+    volumes:
+      - dragonflydata:/data
+
+volumes:
+  dragonflydata:
