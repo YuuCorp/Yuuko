@@ -18,12 +18,15 @@ ENV NODE_ENV=production
 FROM base AS release
 
 COPY --from=install /temp/prod/node_modules node_modules
-COPY --from=prerelease /usr/src/Yuuko/src/app.ts .
+COPY --from=prerelease /usr/src/Yuuko/src ./src
 COPY --from=prerelease /usr/src/Yuuko/package.json .
+COPY --from=prerelease /usr/src/Yuuko/tsconfig.json .
+COPY --from=prerelease /usr/src/Yuuko/drizzle.config.ts .
+COPY --from=prerelease /usr/src/Yuuko/drizzle.stats.config.ts .
 
-VOLUME /usr/src/Yuuko/src/database
-VOLUME /usr/src/Yuuko/src/RSA
+# VOLUME /usr/src/Yuuko/src/database
+# VOLUME /usr/src/Yuuko/src/RSA
 
 USER bun
 EXPOSE 3030/tcp
-ENTRYPOINT [ "bun", "run", "./src/app.ts" ]
+ENTRYPOINT [ "bun", "start:prod" ]
