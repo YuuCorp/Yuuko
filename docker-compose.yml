@@ -7,7 +7,7 @@ services:
     volumes:
       # Mount the RSA key folder and the database folder
       - ./src/RSA:/usr/src/Yuuko/src/RSA
-      - ./src/database:/usr/src/Yuuko/src/database
+      - ./src/database/sqlite:/usr/src/Yuuko/src/database/sqlite
     env_file:
       - .env.local
     environment:

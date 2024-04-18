@@ -29,6 +29,6 @@ COPY --from=prerelease /usr/src/Yuuko/drizzle.stats.config.ts .
 
 EXPOSE 3030/tcp
 
-VOLUME "usr/src/Yuuko/database"
+VOLUME "usr/src/Yuuko/database/sqlite"
 
 ENTRYPOINT [ "sh", "entrypoint.sh" ]
