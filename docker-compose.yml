@@ -15,6 +15,17 @@ services:
     depends_on:
       - dragonfly
 
+  api:
+    container_name: yuuko-api
+    env_file:
+      - .env.local
+    ports:
+      - ${PORT}:${PORT}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    entrypoint: [ "bun", "api" ]
+
   dragonfly:
     container_name: dragonfly
     image: 'docker.dragonflydb.io/dragonflydb/dragonfly'

@@ -13,6 +13,7 @@
   ],
   "main": "src/app.js",
   "scripts": {
+    "api": "bun run ./src/api.ts",
     "start": "pm2 start ecosystem.config.js --env production",
     "dev": "bun run --watch ./src/app.ts",
     "start:prod": "bun run ./src/app.ts",
