@@ -1,16 +1,34 @@
-FROM node:16
+#FROM oven/bun:1.1.4 as base
+FROM node:20 as base
+RUN useradd -m -u 1001 -s /bin/bash bun
+
 # install bun from here curl -fsSL https://bun.sh/install | bash
-RUN apt-get update && apt-get install -y curl && \
-    curl -fsSL https://bun.sh/install | bash && \
-    apt-get remove -y curl && \
-    apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+RUN curl -fsSL https://bun.sh/install | bash && \
+    ln -s $HOME/.bun/bin/bun /usr/local/bin/bun
+
 WORKDIR /usr/src/Yuuko
-COPY package.json ./
-COPY yarn.lock ./
-RUN yarn install --ignore-engines
+
+FROM base AS install
+RUN mkdir -p /temp/prod
+COPY package.json bun.lockb /temp/prod/
+RUN cd /temp/prod && bun install --frozen-lockfile --production
+
+FROM base AS prerelease
 COPY . .
-RUN mkdir -p ./src/RSA && \
-    [ ! -f ./src/RSA/id_rsa ] && ssh-keygen -m PEM -t rsa -f ./src/RSA/id_rsa -C id_rsa || echo "RSA keys already exist"
-CMD [ "bun" ,"run" ,"app.ts"]
+ENV NODE_ENV docker
+
+FROM base AS release
+COPY --from=install /temp/prod/node_modules node_modules
+COPY --from=prerelease /usr/src/Yuuko/src ./src
+
+COPY --from=prerelease /usr/src/Yuuko/entrypoint.sh .
+COPY --from=prerelease /usr/src/Yuuko/package.json .
+COPY --from=prerelease /usr/src/Yuuko/tsconfig.json .
+COPY --from=prerelease /usr/src/Yuuko/drizzle.config.ts .
+COPY --from=prerelease /usr/src/Yuuko/drizzle.stats.config.ts .
+
+EXPOSE 3030/tcp
+
+VOLUME "usr/src/Yuuko/database"
+
+ENTRYPOINT [ "sh", "entrypoint.sh" ]

@@ -34,7 +34,7 @@ export async function registerCommands(client: Client) {
 
     await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: slashCommands });
 
-    if (process.env.NODE_ENV == "production") await rest.put(Routes.applicationCommands(clientId), { body: slashCommands });
+    if (process.env.NODE_ENV === "production" || process.env.NODE_ENV === "docker") await rest.put(Routes.applicationCommands(clientId), { body: slashCommands });
 
     client.log(`Refreshed ${slashCommands.length} slash (/) commands.`);
   } catch (error: any) {
