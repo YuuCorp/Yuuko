@@ -15,6 +15,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag yuuko:${{ github.sha }}
+      run: docker build . --file Dockerfile --tag yuuko:latest
     - name: Push the Docker Image
-      run: docker login -u $DOCKER_USERNAME -p ${{ secrets.DOCKER_TOKEN }} && docker push $DOCKER_USERNAME/yuuko:${{ github.sha }}
+      run: docker login -u crackheadakira -p ${{ secrets.DOCKER_TOKEN }} && docker push crackheadakira/yuuko:latest
