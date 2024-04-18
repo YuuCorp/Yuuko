@@ -2,7 +2,7 @@ import dotenvFlow, { config } from "dotenv-flow";
 import { sqlite } from "#database/db";
 import { Client } from "#structures/index";
 import { GatewayIntentBits } from "discord.js";
-import { registerEvents } from "#utils/index";
+import { registerEvents, updateBotStats } from "#utils/index";
 import { runChecks } from "#checks/run";
 import path from "path";
 import fs from "fs";
@@ -21,11 +21,7 @@ async function start(token: string | undefined) {
   await runChecks(client);
 
   client.login(token);
-
-  const guild = client.guilds.cache.get(process.env.GUILD_ID);
-  if (guild) {
-    client.emit("guildCreate", guild);
-  }
+  updateBotStats(client);
 
   const logPath = path.join(import.meta.dir, 'Logging/logs.json')
   const currentDate = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')

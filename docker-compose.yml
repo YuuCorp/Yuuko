@@ -1,22 +1,22 @@
 services:
-  yuuko-docker:
+  bot:
+    container_name: yuuko
     build:
       context: .
       dockerfile: Dockerfile
-    # ports:
-    #   - "3030:3030"
     volumes:
       # Mount the RSA key folder and the database folder
-      - ./src/RSA:/src/RSA
-      - ./src/database:/src/database
+      - ./src/RSA:/usr/src/Yuuko/src/RSA
+      - ./src/database:/usr/src/Yuuko/src/database
     env_file:
       - .env.local
-    command: bun run start:prod
+    environment:
+      - NODE_ENV=docker
     depends_on:
       - dragonfly
-    network_mode: "service:dragonfly"
 
   dragonfly:
+    container_name: dragonfly
     image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
     ulimits:
       memlock: -1
