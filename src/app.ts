@@ -42,7 +42,6 @@ async function start(token: string | undefined) {
 
 async function makeRSAPair() {
   const RSAdirectory = path.join(import.meta.dir, 'RSA');
-  console.log(RSAdirectory)
   if (fs.existsSync(RSAdirectory)) return;
   const dec = new TextDecoder();
 
@@ -69,5 +68,5 @@ async function makeRSAPair() {
   client.log("Successfully generated the RSA key pair!")
 }
 
-makeRSAPair();
+await makeRSAPair();
 start(process.env.TOKEN);
