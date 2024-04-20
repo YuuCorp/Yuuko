@@ -42,7 +42,7 @@ async function start(token: string | undefined) {
 
 async function makeRSAPair() {
   const RSAdirectory = path.join(import.meta.dir, 'RSA');
-  if (fs.existsSync(RSAdirectory)) return;
+  if (fs.existsSync(path.join(RSAdirectory, 'id_rsa'))) return;
   const dec = new TextDecoder();
 
   const keyPair = await globalThis.crypto.subtle.generateKey({
@@ -65,7 +65,7 @@ async function makeRSAPair() {
   fs.writeFileSync(path.join(RSAdirectory, 'id_rsa'), exportedPrivateKey);
   fs.writeFileSync(path.join(RSAdirectory, 'id_rsa.pub'), exportedPublicKey);
 
-  client.log("Successfully generated the RSA key pair!")
+  client.log("[RSA] Successfully generated the RSA key pair!")
 }
 
 await makeRSAPair();
