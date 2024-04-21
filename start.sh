@@ -1,6 +1,6 @@
 #!/bin/sh
 git pull origin main
-bun i
+bun i --production
 git rev-parse --short HEAD > commit.hash
 
 # Cron job to reset logs every month
