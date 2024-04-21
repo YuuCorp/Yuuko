@@ -60,7 +60,7 @@ async function makeRSAPair() {
   const exportedPrivateKey = '-----BEGIN PRIVATE KEY-----\n' + // Inserts a newline every 64 characters
     btoa(String.fromCharCode.apply(null, [...new Uint8Array(privateKey)])).replace(/.{64}/g, '$&\n') + '\n-----END PRIVATE KEY-----';
 
-  fs.mkdirSync(RSAdirectory);
+  if (!fs.existsSync(RSAdirectory)) fs.mkdirSync(RSAdirectory);
 
   fs.writeFileSync(path.join(RSAdirectory, 'id_rsa'), exportedPrivateKey);
   fs.writeFileSync(path.join(RSAdirectory, 'id_rsa.pub'), exportedPublicKey);
@@ -68,5 +68,5 @@ async function makeRSAPair() {
   client.log("[RSA] Successfully generated the RSA key pair!")
 }
 
-await makeRSAPair();
+makeRSAPair();
 start(process.env.TOKEN);
