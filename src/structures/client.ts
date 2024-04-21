@@ -19,7 +19,7 @@ export class Client extends DiscordClient {
     this.cooldowns = new Collection();
   }
 
-  log(text: string) {
-    this.logger.log(text);
+  log(text: string, category?: string) {
+    this.logger.log(text, category);
   }
 }
