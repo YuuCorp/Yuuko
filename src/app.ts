@@ -65,7 +65,7 @@ async function makeRSAPair() {
   fs.writeFileSync(path.join(RSAdirectory, 'id_rsa'), exportedPrivateKey);
   fs.writeFileSync(path.join(RSAdirectory, 'id_rsa.pub'), exportedPublicKey);
 
-  client.log("[RSA] Successfully generated the RSA key pair!")
+  client.log("Successfully generated the RSA key pair!", "RSA")
 }
 
 makeRSAPair();

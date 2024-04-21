@@ -13,12 +13,12 @@ export async function registerEvents(client: Client) {
       let eventName = removeExtension(fileName);
 
       if (!event?.run) {
-        client.log(`Event ${eventName} (${eventsPath}/${fileName}) does not have a run function`);
+        client.log(`Event ${eventName} (${eventsPath}/${fileName}) does not have a run function`, "EventRegister");
         process.exit(0);
       }
       const isOnce = eventName.startsWith("$");
       eventName = eventName.substring(isOnce ? 1 : 0);
       client[isOnce ? "once" : "on"](eventName, (...args) => event.run(client, ...args));
-      client.log(`Registered ${isOnce ? "once" : "on"}.${eventName} (${eventsPath}/${fileName})`);
+      client.log(`Registered ${isOnce ? "once" : "on"}.${eventName} (${eventsPath}/${fileName})`, "EventRegister");
     });
 }

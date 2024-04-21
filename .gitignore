@@ -133,6 +133,9 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+# IntellJ Idea
+.idea/
+
 # Added by Yuuko Devs
 /Local
 /temp

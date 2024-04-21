@@ -15,12 +15,12 @@ export async function runChecks(client: Client) {
         }),
     )
   ).flat()
-  client.log(`[CheckRunner] Running ${checks.length} checks...`)
+  client.log(`Running ${checks.length} checks...`, "CheckRunner")
 
   for (const check of checks) {
     try {
       check.run()
-      client.log(`[✅] Check "${check.name}" passed.`)
+      client.log(`[✅] Check "${check.name}" passed.`, "CheckRunner")
     }
     catch (e) {
       if (check.optional === true) {
@@ -38,5 +38,5 @@ export async function runChecks(client: Client) {
     }
   }
 
-  client.log(`[CheckRunner] Checks passed!`)
+  client.log(`Checks passed!`, "CheckRunner")
 }

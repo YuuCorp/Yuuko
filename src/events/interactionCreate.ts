@@ -13,12 +13,12 @@ export const run: YuukoEvent<"interactionCreate"> = async (client, interaction) 
       const command = client.commands.find((cmd) => cmd.name == interaction.commandName);
       if (!command) return;
       logging(command, interaction);
-      client.log(`Interaction received in: ${Date.now() - interaction.createdTimestamp}ms`);
-      checkCooldown(client, command, interaction);  // yeah uh at this point i think we should 
+      client.log(`Interaction received in: ${Date.now() - interaction.createdTimestamp}ms`, "Debug");
+      checkCooldown(client, command, interaction);
       const args = await runMiddlewares(command.middlewares, interaction);
-      client.log(`Ran middleware in: ${Date.now() - interaction.createdTimestamp}ms`);
+      client.log(`Ran middleware in: ${Date.now() - interaction.createdTimestamp}ms`, "Debug");
       command.run({ interaction: args, client });
-      client.log(`Ran command in: ${Date.now() - interaction.createdTimestamp}ms`);
+      client.log(`Ran command in: ${Date.now() - interaction.createdTimestamp}ms`, "Debug");
 
       // Check for autocomplete
     } else if (interaction.isAutocomplete()) {
@@ -26,7 +26,7 @@ export const run: YuukoEvent<"interactionCreate"> = async (client, interaction) 
       if (!command || !interaction) return;
       if (!command.autocomplete) return;
 
-      await command.autocomplete(await runMiddlewares(command.middlewares, interaction));
+      command.autocomplete(await runMiddlewares(command.middlewares, interaction));
 
       // Check for modal
     } else if (interaction.isModalSubmit()) {

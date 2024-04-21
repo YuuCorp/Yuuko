@@ -55,8 +55,6 @@ export default {
       if (data) {
         const embed = new EmbedBuilder().setTimestamp(data?.createdAt * 1000);
         switch (data?.__typename) {
-          // i think i might know why, you see the
-          // yeah uh this is gonna be sad
           case "ListActivity":
             embed.setURL(data?.siteUrl!);
             embed.setTitle(`Here's ${data?.user?.name?.toString() || "Unknown Name"}'s most recent activity!`);
