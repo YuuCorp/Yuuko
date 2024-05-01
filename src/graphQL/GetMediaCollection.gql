@@ -1,18 +1,50 @@
-query GetMediaCollection($type: MediaType, $userName: String, $userId: Int) {
-  MediaListCollection(type: $type, userName: $userName, userId: $userId) {
+query GetMediaCollection($type: MediaType, $userName: String, $userId: Int, $sort: [MediaListSort]) {
+  MediaListCollection(type: $type, userName: $userName, userId: $userId, sort: $sort) {
     lists {
       entries {
         media {
           id
           title {
             english
+            romaji
+            native
           }
           genres
+          nextAiringEpisode {
+            airingAt
+            timeUntilAiring
+            episode
+          }
+          description
+          coverImage {
+            large
+            medium
+          }
+          format
+          siteUrl
+          source
+          duration
+          synonyms
+          episodes
+          chapters
+          meanScore
+          startDate {
+            day
+            month
+            year
+          }
+          endDate {
+            day
+            month
+            year
+          }
+          bannerImage
         }
-        score
+        score(format: POINT_10_DECIMAL)
         status
         notes
         progress
+        updatedAt
       }
       name
     }
@@ -21,6 +53,7 @@ query GetMediaCollection($type: MediaType, $userName: String, $userId: Int) {
       mediaListOptions {
         scoreFormat
       }
+      id
     }
   }
 }
