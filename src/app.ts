@@ -21,7 +21,7 @@ async function start(token: string | undefined) {
   await runChecks(client);
 
   client.login(token);
-  updateBotStats(client);
+  await updateBotStats(client);
 
   const logPath = path.join(import.meta.dir, 'Logging/logs.json')
   const currentDate = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
