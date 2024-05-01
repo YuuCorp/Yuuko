@@ -23,6 +23,7 @@ export default {
 
   run: async ({ interaction, client }): Promise<void> => {
     if (!interaction.isCommand()) return;
+    interaction.deferReply();
 
     const { type } = getOptions<{ type: MediaType }>(interaction.options, ["type"]);
     const { anilist_user: anilistUser } = getOptions<{ anilist_user: string }>(interaction.options, ["anilist_user"]);
