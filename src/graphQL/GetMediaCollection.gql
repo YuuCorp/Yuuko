@@ -28,6 +28,7 @@ query GetMediaCollection($type: MediaType, $userName: String, $userId: Int, $sor
           episodes
           chapters
           meanScore
+          volumes
           startDate {
             day
             month
