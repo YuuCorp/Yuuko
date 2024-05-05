@@ -1,4 +1,5 @@
 import { triggerController } from "./trigger.controller";
+import { publicController } from "./public.controller";
 import { infoController } from "./info.controller";
 import { Elysia } from "elysia";
 
@@ -17,4 +18,4 @@ export const api = new Elysia({
     (app) =>
       app.use(triggerController)
         .use(infoController)
-  )
+  ).use(publicController)
