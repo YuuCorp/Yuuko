@@ -50,6 +50,15 @@ export const infoController = new Elysia({
         },
         { response: t.Object({ servers: t.Number(), members: t.Number(), registered: t.Number() }) },
     )
+    .get(
+        "/rsa",
+        async ({ set }) => {
+            set.headers["content-type"] = "text/plain";
+            set.status = 200;
+            return fs.readFileSync(path.join(import.meta.dir, "..", "..", "RSA", "id_rsa.pub"), "utf-8");
+        },
+        { response: t.String(), }
+    )
     .post(
         "/create-announcement",
         async ({ body, set }) => {
