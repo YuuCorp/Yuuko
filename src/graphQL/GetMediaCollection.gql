@@ -29,6 +29,7 @@ query GetMediaCollection($type: MediaType, $userName: String, $userId: Int, $sor
           chapters
           meanScore
           volumes
+          isAdult
           startDate {
             day
             month
@@ -40,6 +41,10 @@ query GetMediaCollection($type: MediaType, $userName: String, $userId: Int, $sor
             year
           }
           bannerImage
+          tags {
+            rank
+            name
+          }
         }
         score(format: POINT_10_DECIMAL)
         status
