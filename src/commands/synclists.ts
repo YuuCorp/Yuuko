@@ -1,10 +1,10 @@
 import { SlashCommandBuilder } from "discord.js";
 import { redis } from "#caching/redis";
-import { MediaType, type GetMediaCollectionQuery } from "#graphQL/types";
+import { MediaType, type AnimeQuery, type GetMediaCollectionQuery, type MangaQuery } from "#graphQL/types";
 import { mwRequireALToken } from "#middleware/alToken";
 import type { Command, UsableInteraction } from "#structures/index";
 import { stat, statTables, type StatUser } from "#database/db";
-import { embedError, graphQLRequest, getSubcommand, type AlwaysExist, type CacheEntry, type GraphQLResponse } from "#utils/index";
+import { normalize, embedError, graphQLRequest, getSubcommand, type AlwaysExist, type CacheEntry, type GraphQLResponse } from "#utils/index";
 import { eq } from "drizzle-orm";
 
 const name = "synclists";
@@ -117,6 +117,37 @@ async function handleData(
       else if (type === MediaType.Manga) await getAndInsertOrUpdate(statTables.MangaStats, entry.media.id, { aId: interaction.alID, dId: interaction.user.id });
 
       dataToGiveToRedis[entry.media.id] = cacheEntry;
+
+      if (entry.media) {
+        const redisData = entry.media;
+        if (type === MediaType.Anime) {
+          delete redisData.chapters;
+          delete redisData.volumes;
+
+          redis.json.set(`_anime-${redisData.id}`, "$", redisData);
+          redis.expireAt(`_anime-${redisData.id}`, new Date(Date.now() + 604800000));
+          for (const synonym of redisData.synonyms || []) {
+            if (!synonym) continue;
+            redis.set(`_animeId-${normalize(synonym)}`, redisData.id);
+          }
+          if (redisData.nextAiringEpisode?.airingAt) {
+            redis.expireAt(`_anime-${redisData.id}`, redisData.nextAiringEpisode.airingAt);
+          }
+
+        } else if (type === MediaType.Manga) {
+          delete redisData.episodes;
+          delete redisData.duration;
+          delete redisData.nextAiringEpisode;
+
+          redis.json.set(`_manga-${redisData.id}`, "$", redisData);
+          redis.expireAt(`_manga-${redisData.id}`, new Date(Date.now() + 604800000))
+          for (const synonym of redisData.synonyms || []) {
+            if (!synonym) continue;
+            redis.set(`_mangaId-${normalize(synonym)}`, redisData.id);
+          }
+
+        }
+      }
     }
   }
   redis.json.set(`_user${interaction.alID}-${type}`, "$", dataToGiveToRedis);

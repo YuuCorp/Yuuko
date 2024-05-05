@@ -1,8 +1,8 @@
 overwrite: true
 schema: 'https://graphql.anilist.co' # Replace with your GraphQL endpoint
-documents: './src/GraphQL/*.gql'
+documents: './src/graphQL/*.gql'
 generates:
-  ./src/GraphQL/types/index.ts:
+  ./src/graphQL/types/index.ts:
     plugins:
       - typescript
       - typescript-operations

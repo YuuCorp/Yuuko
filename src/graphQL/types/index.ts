@@ -2151,6 +2151,8 @@ export enum ModRole {
   Admin = 'ADMIN',
   /** An anime data moderator */
   AnimeData = 'ANIME_DATA',
+  /** A character data moderator */
+  CharacterData = 'CHARACTER_DATA',
   /** A community moderator */
   Community = 'COMMUNITY',
   /** An AniList developer */
@@ -2172,7 +2174,9 @@ export enum ModRole {
   /** A retired moderator */
   Retired = 'RETIRED',
   /** A social media moderator */
-  SocialMedia = 'SOCIAL_MEDIA'
+  SocialMedia = 'SOCIAL_MEDIA',
+  /** A staff data moderator */
+  StaffData = 'STAFF_DATA'
 }
 
 export type Mutation = {
@@ -4701,10 +4705,11 @@ export type GetMediaCollectionQueryVariables = Exact<{
   type?: InputMaybe<MediaType>;
   userName?: InputMaybe<Scalars['String']['input']>;
   userId?: InputMaybe<Scalars['Int']['input']>;
+  sort?: InputMaybe<Array<InputMaybe<MediaListSort>> | InputMaybe<MediaListSort>>;
 }>;
 
 
-export type GetMediaCollectionQuery = { __typename?: 'Query', MediaListCollection?: { __typename?: 'MediaListCollection', lists?: Array<{ __typename?: 'MediaListGroup', name?: string | null, entries?: Array<{ __typename?: 'MediaList', score?: number | null, status?: MediaListStatus | null, notes?: string | null, progress?: number | null, media?: { __typename?: 'Media', id: number, genres?: Array<string | null> | null, title?: { __typename?: 'MediaTitle', english?: string | null } | null } | null } | null> | null } | null> | null, user?: { __typename?: 'User', name: string, mediaListOptions?: { __typename?: 'MediaListOptions', scoreFormat?: ScoreFormat | null } | null } | null } | null };
+export type GetMediaCollectionQuery = { __typename?: 'Query', MediaListCollection?: { __typename?: 'MediaListCollection', lists?: Array<{ __typename?: 'MediaListGroup', name?: string | null, entries?: Array<{ __typename?: 'MediaList', score?: number | null, status?: MediaListStatus | null, notes?: string | null, progress?: number | null, updatedAt?: number | null, media?: { __typename?: 'Media', id: number, genres?: Array<string | null> | null, description?: string | null, format?: MediaFormat | null, siteUrl?: string | null, source?: MediaSource | null, duration?: number | null, synonyms?: Array<string | null> | null, episodes?: number | null, chapters?: number | null, meanScore?: number | null, volumes?: number | null, isAdult?: boolean | null, bannerImage?: string | null, title?: { __typename?: 'MediaTitle', english?: string | null, romaji?: string | null, native?: string | null } | null, nextAiringEpisode?: { __typename?: 'AiringSchedule', airingAt: number, timeUntilAiring: number, episode: number } | null, coverImage?: { __typename?: 'MediaCoverImage', large?: string | null, medium?: string | null } | null, startDate?: { __typename?: 'FuzzyDate', day?: number | null, month?: number | null, year?: number | null } | null, endDate?: { __typename?: 'FuzzyDate', day?: number | null, month?: number | null, year?: number | null } | null, tags?: Array<{ __typename?: 'MediaTag', rank?: number | null, name: string } | null> | null } | null } | null> | null } | null> | null, user?: { __typename?: 'User', name: string, id: number, mediaListOptions?: { __typename?: 'MediaListOptions', scoreFormat?: ScoreFormat | null } | null } | null } | null };
 
 export type ListQueryQueryVariables = Exact<{
   userId?: InputMaybe<Scalars['Int']['input']>;
