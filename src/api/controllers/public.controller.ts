@@ -25,15 +25,16 @@ export const publicController = new Elysia({
     .post(
         "/register",
         async ({ body, set, headers }) => {
+            set.status = 400;
             const discordId = body.discordId;
-            const encryptedToken = headers.Authorization;
-            if (encryptedToken.length < 1000) throw new Error("Invalid token");
+            const encryptedToken = headers.authorization;
+            if (encryptedToken.length < 1000) return { message: "Invalid token" };
             const decryptedToken = await rsaEncryption(encryptedToken, false);
             const { Viewer: data } = (await graphQLRequest("Viewer", {}, decryptedToken)).data;
-            if (!data) throw new Error("Invalid token");
+            if (!data) return { message: "Invalid token" };
             console.log(data);
             const existingUser = (await db.select().from(anilistUser).where(eq(anilistUser.discordId, discordId)).limit(1))[0];
-            if (existingUser) throw new Error("User already registered");
+            if (existingUser) return { message: "User already registered" };
             await db.insert(anilistUser).values({ discordId, anilistToken: encryptedToken, anilistId: data.id });
 
             set.status = 201;
@@ -42,6 +43,6 @@ export const publicController = new Elysia({
         {
             response: t.Object({ message: t.String() }),
             body: t.Object({ discordId: t.String() }),
-            headers: t.Object({ Authorization: t.String() })
+            headers: t.Object({ authorization: t.String() })
         }
     )
