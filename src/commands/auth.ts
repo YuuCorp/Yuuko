@@ -18,36 +18,22 @@ export default {
         .setName(name)
         .setDescription(description)
         .addSubcommand((subcommand) => subcommand.setName("help").setDescription("Shows you info on how to get your AniList token."))
-        .addSubcommand((subcommand) => subcommand.setName("wipe").setDescription("Unlink your AniList token from the bot."))
-        .addSubcommand((subcommand) =>
-            subcommand
-                .setName("token")
-                .setDescription("Use the AniList token here.")
-                .addStringOption((option) => option.setName("token").setDescription("Add the AniList token here.").setMinLength(750).setRequired(true)),
-        ),
+        .addSubcommand((subcommand) => subcommand.setName("wipe").setDescription("Unlink your AniList token from the bot.")),
 
     run: async ({ interaction, client }): Promise<void> => {
         if (!interaction.isCommand()) return;
 
-        // const type = (interaction.options as CommandInteractionOptionResolver).getSubcommand();
         const type = getSubcommand<["token", "help", "wipe"]>(interaction.options);
         const { token } = getOptions<{ token: string | undefined }>(interaction.options, ["token"]);
 
         db.query.anilistUser.findFirst({ where: (user, { eq }) => eq(user.discordId, interaction.user.id) });
-
-        if (type === "token" && !token) return void interaction.reply({ embeds: [embedError(`Please provide a token with this option.`)], ephemeral: true });
 
         if (type === "help") {
             return void (await interaction.reply({
                 embeds: [
                     {
                         title: `Steps to get your AniList Token.`,
-                        description:
-                            `To add you as an user you have to [login with AniList](https://anilist.co/api/v2/oauth/authorize?client_id=9020&response_type=token). \n Once you've done that, all you have to do is run the command again with the subcommand ` +
-                            "`" +
-                            "token" +
-                            "`" +
-                            ` and paste the token you received on the site into the token option.`,
+                        description:`To add you as an user you have to [link your Discord account with Anilist](https://auth.yuuko.dev).`,
                         footer: footer(),
                     },
                 ],
