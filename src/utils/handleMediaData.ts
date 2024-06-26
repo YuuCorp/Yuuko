@@ -178,7 +178,7 @@ export async function handleData(
         }) as Promise<CacheEntry>,
     );
     const userData = (await Promise.allSettled(mediaPool)).filter((user): user is PromiseFulfilledResult<CacheEntry> => user.status === "fulfilled")
-      .filter(Boolean).flatMap((user) => user.value);
+      .flatMap((user) => user.value).filter(Boolean);
     // console.log(userData.length);
     // console.log(userData);
     console.log(mediaType);
