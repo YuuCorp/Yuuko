@@ -11,11 +11,14 @@ query Activity($userid: Int) {
           large
         }
       }
-      likes {
-        name
-      }
       likeCount
       replyCount
+      replies {
+        text
+        user {
+          name
+        }
+      }
     }
     ... on ListActivity {
       user {
@@ -25,6 +28,12 @@ query Activity($userid: Int) {
         }
       }
       likeCount
+      replies {
+        text
+        user {
+          name
+        }
+      }
       replyCount
       status
       progress
@@ -44,9 +53,6 @@ query Activity($userid: Int) {
       }
       createdAt
       siteUrl
-      likes {
-        name
-      }
     }
     ... on MessageActivity {
       createdAt
