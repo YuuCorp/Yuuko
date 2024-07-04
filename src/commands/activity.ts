@@ -1,7 +1,8 @@
-import { embedError, graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
+import { embedError, graphQLRequest, SeriesTitle, getOptions, buildPagination } from "#utils/index";
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { mwGetUserEntry } from "#middleware/userEntry";
 import type { Command } from "#structures/index";
+import type { ActivityReply } from "#graphQL/types";
 
 const name = "activity";
 const usage = "activity <user>";
@@ -54,6 +55,8 @@ export default {
       } = await graphQLRequest("Activity", vars, interaction.ALtoken);
       if (data) {
         const embed = new EmbedBuilder().setTimestamp(data?.createdAt * 1000);
+        const pageList = [];
+
         switch (data?.__typename) {
           case "ListActivity":
             embed.setURL(data?.siteUrl!);
@@ -70,21 +73,63 @@ export default {
               if (thumbnail) embed.setThumbnail(thumbnail);
             }
 
+            pageList.push(embed);
+
+            // I couldn't find a good way to handle the type, so I couldn't extract it to a function
+            if (data.replies) {
+              const replyPages = Math.ceil(data.replyCount / 25);
+              for (let i = 0; i < replyPages; i++) {
+                const replyEmbed = new EmbedBuilder().setTitle(`Replies to ${data?.user?.name?.toString() || "Unknown Name"}'s activity!`);
+
+                const replies = data.replies.slice(i * 25, i * 25 + 25).map((reply) => {
+                  if (!reply || !reply.user || !reply.text) return;
+                  const replyText = anilistToMarkdown(reply.text, 1024);
+                  const replyName = reply.user.name
+
+                  return { name: replyName, value: replyText };
+                }).filter((reply) => reply !== undefined);
+
+                replyEmbed.addFields(replies);
+                pageList.push(replyEmbed);
+              }
+            }
+
             break;
 
           case "TextActivity":
             embed
               .setTitle(`Here's ${data?.user?.name?.toString() || "Unknown Name"}'s most recent activity!`)
-              .setDescription(data?.text?.replace(`!~`, `||`).replace(`~!`, `||`).replaceAll("~", ``) || "No text found.")
+              .setDescription(anilistToMarkdown(data.text, 4096))
               .setThumbnail(data?.user?.avatar?.large!)
               .setFooter({ text: `${data?.likeCount | 0} ♥  ${data?.replyCount | 0} 💬` });
 
-            return void interaction.editReply({ embeds: [embed] });
+            pageList.push(embed);
+
+            // I couldn't find a good way to handle the type, so I couldn't extract it to a function
+            if (data.replies) {
+              const replyPages = Math.ceil(data.replyCount / 25);
+              for (let i = 0; i < replyPages; i++) {
+                const replyEmbed = new EmbedBuilder().setTitle(`Replies to ${data?.user?.name?.toString() || "Unknown Name"}'s activity!`);
+
+                const replies = data.replies.slice(i * 25, i * 25 + 25).map((reply) => {
+                  if (!reply || !reply.user || !reply.text) return;
+                  const replyText = anilistToMarkdown(reply.text, 1024);
+                  const replyName = reply.user.name
+
+                  return { name: replyName, value: replyText };
+                }).filter((reply) => reply !== undefined);
+
+                replyEmbed.addFields(replies);
+                pageList.push(replyEmbed);
+              }
+            }
+
+            break;
 
           case "MessageActivity":
             break;
         }
-        return void interaction.editReply({ embeds: [embed] });
+        return void buildPagination(interaction, pageList).paginate();
       } else {
         return void interaction.editReply({ embeds: [embedError(`Couldn't find any data.`, vars)] });
       }
@@ -97,4 +142,33 @@ export default {
 
 function capitalizeString(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function anilistToMarkdown(string: string | undefined | null, filterLength: number) {
+  let text = string?.replace(`!~`, `||`)
+    .replace(`~!`, `||`)
+    .replace(/<br><br>/g, "\n")
+    .replace(/<br>/g, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\n\n/g, "\n")
+    .replaceAll("~", ``) || "No text found.";
+
+  if (filterLength && text.length > filterLength) text = text.slice(0, filterLength - 3) + "...";
+
+  return replaceUrls(text);
+}
+
+function replaceUrls(input: string): string {
+  const regex = /img\d+\((.*?)\)/gi;
+  const matches = input.matchAll(regex);
+  let newString = input;
+
+  for (const match of matches) {
+    if (match[1]) {
+      newString = newString.replace(match[0], `[<Link to image>](${match[1]})`);
+    }
+  }
+
+  return newString;
 }
