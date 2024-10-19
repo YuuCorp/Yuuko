@@ -21,14 +21,14 @@ export default {
 
   run: async ({ interaction, client }): Promise<void> => {
     if (!interaction.isCommand()) return;
-    const vars: Partial<{
+    const vars: {
       dateStart: number;
       nextDay: number;
-      getID: number[];
-    }> = {
+      getID: number[] | undefined;
+    } = {
       dateStart: 0,
       nextDay: 0,
-      getID: [],
+      getID: undefined
     };
     // ^ Check if the user wants to search for a specific day
     let airingIn = 0;
@@ -50,6 +50,15 @@ export default {
       }
     }
 
+    // ^ Get current day and time in UTC
+    const _day = new Date(Date.now() + airingIn);
+    const day = new Date(Date.UTC(_day.getFullYear(), _day.getMonth(), _day.getDate()));
+    const nextWeek = new Date(day.getTime());
+    nextWeek.setHours(23, 59, 59, 999);
+    nextWeek.setDate(day.getDate() + 7);
+    vars.dateStart = Math.floor(day.getTime() / 1000);
+    vars.nextDay = Math.floor(nextWeek.getTime() / 1000);
+
     if (username) {
       const tempVars = { userName: username, type: "ANIME" };
       const {
@@ -62,27 +71,23 @@ export default {
           if (!data.lists[i]?.entries) return;
           if (data.lists[i]?.entries?.length === 0) return;
           // check so the object is not undefined
-          if (data.lists[i]?.entries && data.lists[i]?.entries?.length != 0) mediaIDs.push(...data.lists[i]!.entries!.map((entry) => entry!.media!.id));
+          if (data.lists[i]?.entries && data.lists[i]?.entries?.length != 0) mediaIDs.push(...data.lists[i]!.entries!.map((entry) => {
+            if (!entry?.media?.nextAiringEpisode?.airingAt) return;
+            return entry!.media!.id;
+          }));
         }
       }
 
-      vars.getID = mediaIDs;
+      vars.getID = mediaIDs.filter((id) => id !== undefined);
     }
-    // ^ Get current day and time in UTC
-    const _day = new Date(Date.now() + airingIn);
-    const day = new Date(Date.UTC(_day.getFullYear(), _day.getMonth(), _day.getDate()));
-    const nextWeek = new Date(day.getTime());
-    nextWeek.setHours(23, 59, 59, 999);
-    nextWeek.setDate(day.getDate() + 7);
-    vars.dateStart = Math.floor(day.getTime() / 1000);
-    vars.nextDay = Math.floor(nextWeek.getTime() / 1000);
+
     // ^ Make the HTTP Api request
 
     try {
       const {
         data: { Page: data },
         headers,
-      } = await graphQLRequest("Airing", { nextDay: vars.nextDay, dateStart: vars.dateStart });
+      } = await graphQLRequest("Airing", vars);
       if (!data) return void interaction.reply({ embeds: [embedError("No airing anime found.")] });
       const { airingSchedules } = data;
 
