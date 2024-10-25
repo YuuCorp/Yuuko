@@ -20,7 +20,6 @@ export default {
     .addStringOption((option) => option.setName("in").setDescription('Airing *in* (e.g. "1 week")')),
 
   run: async ({ interaction, client }): Promise<void> => {
-    if (!interaction.isCommand()) return;
     const vars: AiringQueryVariables = {
       dateStart: 0,
       nextDay: 0,

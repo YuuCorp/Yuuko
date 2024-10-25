@@ -22,7 +22,6 @@ export default {
     .addStringOption((option) => option.setName("user").setDescription("The user to search for").setRequired(false)),
 
   run: async ({ interaction, client }): Promise<void> => {
-    if (!interaction.isCommand()) return;
 
     const { user: userName } = getOptions<{ user: string }>(interaction.options, ["user"]);
     const { type } = getOptions<{ type: MediaType }>(interaction.options, ["type"]);

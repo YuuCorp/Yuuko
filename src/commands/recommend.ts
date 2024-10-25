@@ -22,7 +22,6 @@ export default {
     .addStringOption((option) => option.setName("genres").setDescription('A comma separated list of genres (e.g. "romance, drama")').setRequired(true)),
 
   run: async ({ interaction, client }): Promise<void> => {
-    if (!interaction.isCommand()) return;
     interaction.deferReply();
 
     const { type } = getOptions<{ type: MediaType }>(interaction.options, ["type"]);

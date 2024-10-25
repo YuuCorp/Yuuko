@@ -20,8 +20,6 @@ export default {
     .addStringOption((option) => option.setName("user").setDescription("The user to search for").setRequired(false)),
 
   run: async ({ interaction, client }): Promise<void> => {
-    if (!interaction.isCommand()) return;
-    getOptions;
     const { user: username } = getOptions<{ user: string | undefined }>(interaction.options, ["user"]);
 
     const vars: UserQueryVariables = {

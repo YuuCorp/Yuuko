@@ -1,4 +1,4 @@
-import type { APIEmbedField, ApplicationCommandOptionType, Interaction } from "discord.js";
+import type { APIEmbedField, ApplicationCommandOptionType, CacheType, ChatInputCommandInteraction, Interaction } from "discord.js";
 import type Discord from "discord.js";
 import type { CommandCategories } from "#utils/commandCategories";
 import type { Middleware, Client } from "./index";
@@ -27,7 +27,7 @@ export interface RunOptions<Args = any> {
   args?: Args;
 }
 
-export type UsableInteraction = Interaction & { alID?: number, ALtoken?: string }
+export type UsableInteraction = ChatInputCommandInteraction & { alID?: number, ALtoken?: string }
 
 interface CommandStringOption {
   name: string;

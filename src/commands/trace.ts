@@ -36,15 +36,14 @@ export default {
     .addAttachmentOption((option) => option.setName("image").setDescription("Attach the image of the anime.").setRequired(true)),
 
   run: async ({ interaction, client }): Promise<void> => {
-    if (!interaction.isCommand()) return;
     const image = interaction.options.getAttachment("image");
 
     if (!image) return void interaction.reply({ embeds: [embedError("No image attached.")] });
 
     try {
       const res = await fetch(`${baseUrl}${image.url}`)
-      if(!res.ok) return void interaction.reply({ embeds: [embedError(res.statusText)] });
-      
+      if (!res.ok) return void interaction.reply({ embeds: [embedError(res.statusText)] });
+
       const data = await res.json() as { result: TraceMoeReturnType[] }
       const response = data.result[0];
       if (!response) return void interaction.reply({ embeds: [embedError("No results found.", { url: image.url })] });

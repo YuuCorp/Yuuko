@@ -17,7 +17,6 @@ export default {
     .addStringOption((option) => option.setName("query").setDescription("The query to search for").setRequired(true)),
 
   run: async ({ interaction, client }): Promise<void> => {
-    if (!interaction.isCommand()) return;
 
     const { query: staffName } = getOptions<{ query: string }>(interaction.options, ["query"]);
 

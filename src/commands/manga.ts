@@ -21,7 +21,6 @@ export default {
     .addStringOption((option) => option.setName("query").setDescription("The query to search for").setRequired(true)),
 
   run: async ({ interaction, client, hook = false, hookdata = null }): Promise<void> => {
-    if (!interaction.isCommand()) return;
 
     const { query: manga } = getOptions<{ query: string }>(interaction.options, ["query"]);
     let normalizedQuery = "";

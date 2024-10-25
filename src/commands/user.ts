@@ -21,7 +21,6 @@ export default {
   // .setRequired(true)),
 
   run: async ({ interaction, client }): Promise<void> => {
-    if (!interaction.isCommand()) return;
 
     const { query: anilistUser } = getOptions<{ query: string }>(interaction.options, ["query"]);
 
