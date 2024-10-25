@@ -2,6 +2,7 @@ import { SlashCommandBuilder, EmbedBuilder, type ColorResolvable } from "discord
 import { mwGetUserEntry } from "#middleware/userEntry";
 import type { Command } from "#structures/index";
 import { embedError, graphQLRequest, footer, getOptions } from "#utils/index";
+import type { UserQueryVariables } from "#graphQL/types";
 
 const name = "user";
 const usage = "user <?anilist name>";
@@ -24,10 +25,7 @@ export default {
 
     const { query: anilistUser } = getOptions<{ query: string }>(interaction.options, ["query"]);
 
-    let vars: Partial<{
-      username: string;
-      userid: number;
-    }> = {
+    let vars: UserQueryVariables = {
       username: anilistUser,
     };
 

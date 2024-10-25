@@ -1,7 +1,7 @@
 import { buildPagination, embedError, footer, graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
 import { EmbedBuilder, SlashCommandBuilder, TimestampStyles, time } from "discord.js";
 import ms from "ms";
-import { MediaType } from "#graphQL/types";
+import { MediaType, type AiringQueryVariables } from "#graphQL/types";
 import type { Command } from "#structures/index";
 
 const name = "airing";
@@ -21,11 +21,7 @@ export default {
 
   run: async ({ interaction, client }): Promise<void> => {
     if (!interaction.isCommand()) return;
-    const vars: {
-      dateStart: number;
-      nextDay: number;
-      getID: number[] | undefined;
-    } = {
+    const vars: AiringQueryVariables = {
       dateStart: 0,
       nextDay: 0,
       getID: undefined

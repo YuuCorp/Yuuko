@@ -3,7 +3,7 @@ import { mwGetUserEntry } from "#middleware/userEntry";
 import Jimp from "jimp";
 import type { Command } from "#structures/index";
 import { CommandCategories, embedError, graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
-import type { MediaList, MediaType } from "#graphQL/types";
+import type { MediaList, MediaType, RecentChartQuery, RecentChartQueryVariables } from "#graphQL/types";
 
 const name = "recent";
 const usage = "recent";
@@ -27,12 +27,7 @@ export default {
     const { user: userName } = getOptions<{ user: string }>(interaction.options, ["user"]);
     const { type } = getOptions<{ type: MediaType }>(interaction.options, ["type"]);
 
-    const vars: Partial<{
-      perPage: number;
-      type: MediaType;
-      userId: number;
-      user?: string;
-    }> = {
+    const vars: RecentChartQueryVariables = {
       perPage: 9,
       type: type,
     };

@@ -2,7 +2,7 @@ import { embedError, graphQLRequest, SeriesTitle, getOptions, buildPagination } 
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { mwGetUserEntry } from "#middleware/userEntry";
 import type { Command } from "#structures/index";
-import type { ActivityReply } from "#graphQL/types";
+import type { ActivityReply, UserQueryVariables } from "#graphQL/types";
 
 const name = "activity";
 const usage = "activity <user>";
@@ -24,10 +24,7 @@ export default {
     getOptions;
     const { user: username } = getOptions<{ user: string | undefined }>(interaction.options, ["user"]);
 
-    const vars: Partial<{
-      username: string;
-      userid: number;
-    }> = {
+    const vars: UserQueryVariables = {
       username,
       userid: interaction.alID,
     };
@@ -62,7 +59,7 @@ export default {
             embed.setURL(data?.siteUrl!);
             embed.setTitle(`Here's ${data?.user?.name?.toString() || "Unknown Name"}'s most recent activity!`);
             embed.setDescription(
-              `${capitalizeString(data?.status!)} ${data?.progress?.toLowerCase() || ""} ${data?.status!.startsWith("read" || "watched") ? "of" : ""} **[${SeriesTitle(data.media?.title || undefined)}](${data?.media
+              `${capitalizeString(data?.status!)} ${data?.progress?.toLowerCase() || ""} ${data?.status!.startsWith("read") || data?.status!.startsWith("watched") ? "of" : ""} **[${SeriesTitle(data.media?.title || undefined)}](${data?.media
                 ?.siteUrl})**`,
             );
             embed.setFooter({ text: `${data?.likeCount | 0} ♥  ${data?.replyCount | 0} 💬` });

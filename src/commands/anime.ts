@@ -1,7 +1,7 @@
 import { embedError, graphQLRequest, getOptions, handleData, normalize, type CacheEntry } from "#utils/index";
 import { SlashCommandBuilder } from "discord.js";
 import { redis } from "#caching/redis";
-import type { AnimeQuery } from "#graphQL/types";
+import type { AnimeQuery, AnimeQueryVariables } from "#graphQL/types";
 import { mwGetUserEntry } from "#middleware/userEntry";
 import type { CommandWithHook } from "#structures/index";
 
@@ -28,10 +28,7 @@ export default {
 
     let animeIdFound = false;
 
-    const vars: Partial<{
-      query: string;
-      aID: number;
-    }> = {};
+    const vars: AnimeQueryVariables = {};
     if (!hook) {
       if (query.length < 3) return void interaction.editReply({ embeds: [embedError(`Please enter a search query of at least 3 characters.`, null, "", false)] });
 
