@@ -87,44 +87,44 @@ export default {
       if (!data) return void interaction.reply({ embeds: [embedError("No airing anime found.")] });
       const { airingSchedules } = data;
 
-      if (data) {
-        const chunkSize = 5;
-        const fields = [];
-        // Sort the airing anime alphabetically by title
-        if (!airingSchedules) return void interaction.reply({ embeds: [embedError("No airing anime found.")] });
-        airingSchedules.sort((a, b) => (a?.timeUntilAiring || 0) - (b?.timeUntilAiring || 0));
-
-        for (let i = 0; i < airingSchedules.length; i += chunkSize) {
-          fields.push(airingSchedules.slice(i, i + chunkSize));
-        }
-
-        // ^ Create pages with 5 airing anime per page and then make them into embeds
-        const pageList: EmbedBuilder[] = [];
-        fields.forEach((fieldSet, index) => {
-          const embed = new EmbedBuilder();
-          embed.setTitle(`Airing between ${day.toDateString()} to ${nextWeek.toDateString()}`);
-          embed.setColor("Green");
-          embed.setFooter(footer(headers));
-
-          fieldSet.forEach((field) => {
-            if (!field) return;
-            const { media, episode, airingAt } = field;
-
-            embed.addFields({
-              name: `${SeriesTitle(media?.title || undefined)}`,
-              value: `> **[EP - ${episode}]** :airplane: ${(new Date(airingAt * 1000) > new Date() ? `Going to air ` : `Aired`) + time(airingAt, TimestampStyles.RelativeTime)}`,
-              inline: false,
-            });
-          });
-          pageList.push(embed);
-        });
-
-        buildPagination(interaction, pageList).paginate();
-      } else {
-        interaction.reply({
+      if (!data) {
+        return void interaction.reply({
           embeds: [embedError("No airing anime found.")],
         });
       }
+
+      const chunkSize = 5;
+      const fields = [];
+      // Sort the airing anime alphabetically by title
+      if (!airingSchedules) return void interaction.reply({ embeds: [embedError("No airing anime found.")] });
+      airingSchedules.sort((a, b) => (a?.timeUntilAiring || 0) - (b?.timeUntilAiring || 0));
+
+      for (let i = 0; i < airingSchedules.length; i += chunkSize) {
+        fields.push(airingSchedules.slice(i, i + chunkSize));
+      }
+
+      // ^ Create pages with 5 airing anime per page and then make them into embeds
+      const pageList: EmbedBuilder[] = [];
+      fields.forEach((fieldSet, index) => {
+        const embed = new EmbedBuilder();
+        embed.setTitle(`Airing between ${day.toDateString()} to ${nextWeek.toDateString()}`);
+        embed.setColor("Green");
+        embed.setFooter(footer(headers));
+
+        fieldSet.forEach((field) => {
+          if (!field) return;
+          const { media, episode, airingAt } = field;
+
+          embed.addFields({
+            name: `${SeriesTitle(media?.title || undefined)}`,
+            value: `> **[EP - ${episode}]** :airplane: ${(new Date(airingAt * 1000) > new Date() ? `Going to air ` : `Aired`) + time(airingAt, TimestampStyles.RelativeTime)}`,
+            inline: false,
+          });
+        });
+        pageList.push(embed);
+      });
+
+      buildPagination(interaction, pageList).paginate();
     } catch (e: any) {
       console.error(e);
       interaction.reply({ embeds: [embedError(e, vars)] });

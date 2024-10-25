@@ -42,40 +42,42 @@ export default {
     try {
       const { data, headers } = await graphQLRequest("User", vars, interaction.ALtoken);
       const response = data.User;
-      if (response) {
-        const titleEmbed = new EmbedBuilder()
-          // TODO: Fix depricated function calls 101
-          .setAuthor({ name: response.name, iconURL: "https://anilist.co/img/icons/android-chrome-512x512.png", url: response.siteUrl || "https://anilist.co" })
-          .setFooter(footer(headers));
 
-        if (response.avatar?.large) titleEmbed.setThumbnail(response.avatar.large);
-        if (response.bannerImage) titleEmbed.setImage(response.bannerImage);
-
-        const statistics = response.statistics;
-
-        if (statistics) {
-          titleEmbed.addFields(
-            { name: "< Anime >\n\n", value: `**Watched:** ${statistics.anime?.count.toString()}\n**Average score**: ${statistics.anime?.meanScore.toString()}`, inline: true },
-            { name: "< Manga >\n\n", value: `**Read:** ${statistics.manga?.count.toString()}\n**Average score**: ${statistics.manga?.meanScore.toString()}`, inline: true },
-          );
-        }
-
-        let userColor: ColorResolvable | null;
-        const profileColor = response.options?.profileColor;
-
-        if (profileColor) {
-          userColor = profileColor.charAt(0).toUpperCase() + profileColor.slice(1);
-
-          if (profileColor === "pink") userColor = "LuminousVividPink";
-          if (profileColor === "gray") userColor = "Grey";
-          // this is just cancer
-          // re: yeah, this is cancer
-          titleEmbed.setColor(userColor as ColorResolvable);
-        }
-        interaction.editReply({ embeds: [titleEmbed] });
-      } else {
+      if (!response) {
         return void interaction.editReply({ embeds: [embedError(`Couldn't find any data.`, vars)] });
       }
+
+      const titleEmbed = new EmbedBuilder()
+        // TODO: Fix depricated function calls 101
+        .setAuthor({ name: response.name, iconURL: "https://anilist.co/img/icons/android-chrome-512x512.png", url: response.siteUrl || "https://anilist.co" })
+        .setFooter(footer(headers));
+
+      if (response.avatar?.large) titleEmbed.setThumbnail(response.avatar.large);
+      if (response.bannerImage) titleEmbed.setImage(response.bannerImage);
+
+      const statistics = response.statistics;
+
+      if (statistics) {
+        titleEmbed.addFields(
+          { name: "< Anime >\n\n", value: `**Watched:** ${statistics.anime?.count.toString()}\n**Average score**: ${statistics.anime?.meanScore.toString()}`, inline: true },
+          { name: "< Manga >\n\n", value: `**Read:** ${statistics.manga?.count.toString()}\n**Average score**: ${statistics.manga?.meanScore.toString()}`, inline: true },
+        );
+      }
+
+      let userColor: ColorResolvable | null;
+      const profileColor = response.options?.profileColor;
+
+      if (profileColor) {
+        userColor = profileColor.charAt(0).toUpperCase() + profileColor.slice(1);
+
+        if (profileColor === "pink") userColor = "LuminousVividPink";
+        if (profileColor === "gray") userColor = "Grey";
+        // this is just cancer
+        // re: yeah, this is cancer
+        titleEmbed.setColor(userColor as ColorResolvable);
+      }
+      interaction.editReply({ embeds: [titleEmbed] });
+
     } catch (e: any) {
       console.error(e);
       interaction.editReply({ embeds: [embedError(e, vars)] });

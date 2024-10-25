@@ -75,23 +75,25 @@ export default {
         data: { Media: data },
         headers,
       } = await graphQLRequest("Anime", vars, interaction.ALtoken);
-      if (data) {
-        if (!animeIdFound) redis.set(`_animeId-${normalizedQuery}`, data.id);
-        const { mediaListEntry, ...redisData } = data;
-        redis.json.set(`_anime-${redisData.id}`, "$", redisData);
-        redis.expireAt(`_anime-${redisData.id}`, new Date(Date.now() + 604800000));
-        for (const synonym of redisData.synonyms || []) {
-          if (!synonym) continue;
-          redis.set(`_animeId-${normalize(synonym)}`, data.id);
-        }
-        if (redisData.nextAiringEpisode?.airingAt) {
-          console.log(`[AnimeCmd] Expiring anime-${redisData.id} at ${redisData.nextAiringEpisode.airingAt}`);
-          redis.expireAt(`_anime-${data.id}`, redisData.nextAiringEpisode.airingAt);
-        }
-        return void await handleData({ media: data, headers: headers }, interaction, "ANIME", hookdata);
-      } else {
+
+      if (!data) {
         return void interaction.editReply({ embeds: [embedError(`Couldn't find any data.`, vars)] });
       }
+
+      if (!animeIdFound) redis.set(`_animeId-${normalizedQuery}`, data.id);
+      const { mediaListEntry, ...redisData } = data;
+      redis.json.set(`_anime-${redisData.id}`, "$", redisData);
+      redis.expireAt(`_anime-${redisData.id}`, new Date(Date.now() + 604800000));
+      for (const synonym of redisData.synonyms || []) {
+        if (!synonym) continue;
+        redis.set(`_animeId-${normalize(synonym)}`, data.id);
+      }
+      if (redisData.nextAiringEpisode?.airingAt) {
+        console.log(`[AnimeCmd] Expiring anime-${redisData.id} at ${redisData.nextAiringEpisode.airingAt}`);
+        redis.expireAt(`_anime-${data.id}`, redisData.nextAiringEpisode.airingAt);
+      }
+      return void await handleData({ media: data, headers: headers }, interaction, "ANIME", hookdata);
+
     } catch (e: any) {
       console.error(e);
       interaction.editReply({ embeds: [embedError(e, vars)] });
