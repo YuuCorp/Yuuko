@@ -22,7 +22,6 @@ export default {
     .addStringOption((option) => option.setName("genres").setDescription('A comma separated list of genres (e.g. "romance, drama")').setRequired(true)),
 
   run: async ({ interaction, client }): Promise<void> => {
-    if (!interaction.isCommand()) return;
     interaction.deferReply();
 
     const { type } = getOptions<{ type: MediaType }>(interaction.options, ["type"]);
@@ -40,44 +39,45 @@ export default {
       const {
         data: { MediaListCollection: data },
       } = await graphQLRequest("GetMediaCollection", vars);
-      if (data && data.lists && data.lists.length > 0) {
-        // ^ We filter out the Planning list
-        for (const MediaList of data.lists.filter((MediaList) => MediaList!.name != "Planning")) {
-          if (MediaList && MediaList.entries) MediaList.entries.map((e) => excludeIDs.push(e!.media!.id));
-        }
-        if (!genres.length) return void interaction.reply({ embeds: [embedError(`Please specify at least one genre.`, null, '', false)] });
 
-        const genresArray = genres.split(",").map((genre) => genre.trim());
-        const recommendationVars = { type, exclude_ids: excludeIDs, genresArray };
-
-        try {
-          const {
-            data: { Page: data },
-          } = await graphQLRequest("Recommendations", recommendationVars);
-          if (data && data.media) {
-            // ^ Filter out the Planning list
-            const recommendations = data.media.filter((Media) => Media!.title);
-            const random = Math.floor(Math.random() * Math.floor(recommendations.length));
-            const recommendedSeries = recommendations[random];
-            if (!recommendedSeries) return void interaction.reply({ embeds: [embedError(`Couldn't find any data.`, recommendationVars)] });
-
-            switch (type) {
-              case "ANIME":
-                AnimeCmd.run({ interaction, client, hook: true, hookdata: { title: SeriesTitle(recommendedSeries.title || undefined) } });
-                break;
-              case "MANGA":
-                MangaCmd.run({ interaction, client, hook: true, hookdata: { title: SeriesTitle(recommendedSeries.title || undefined) } });
-                break;
-            }
-          } else {
-            return void interaction.reply({ embeds: [embedError(`Couldn't find any data.`, recommendationVars)] });
-          }
-        } catch (e: any) {
-          console.error(e);
-          interaction.reply({ embeds: [embedError(e, vars)] });
-        }
-      } else {
+      if (!data || !data.lists || data.lists.length < 1) {
         return void interaction.reply({ embeds: [embedError(`Couldn't find any data from the user specified. (Which was "${vars.userName}")`, null, '', false)] });
+      }
+
+      // ^ We filter out the Planning list
+      for (const MediaList of data.lists.filter((MediaList) => MediaList!.name != "Planning")) {
+        if (MediaList && MediaList.entries) MediaList.entries.map((e) => excludeIDs.push(e!.media!.id));
+      }
+      if (!genres.length) return void interaction.reply({ embeds: [embedError(`Please specify at least one genre.`, null, '', false)] });
+
+      const genresArray = genres.split(",").map((genre) => genre.trim());
+      const recommendationVars = { type, exclude_ids: excludeIDs, genresArray };
+
+      try {
+        const {
+          data: { Page: data },
+        } = await graphQLRequest("Recommendations", recommendationVars);
+
+        if (!data || !data.media) {
+          return void interaction.reply({ embeds: [embedError(`Couldn't find any data.`, recommendationVars)] });
+        }
+        // ^ Filter out the Planning list
+        const recommendations = data.media.filter((Media) => Media!.title);
+        const random = Math.floor(Math.random() * Math.floor(recommendations.length));
+        const recommendedSeries = recommendations[random];
+        if (!recommendedSeries) return void interaction.reply({ embeds: [embedError(`Couldn't find any data.`, recommendationVars)] });
+
+        switch (type) {
+          case "ANIME":
+            AnimeCmd.run({ interaction, client, hook: true, hookdata: { title: SeriesTitle(recommendedSeries.title || undefined) } });
+            break;
+          case "MANGA":
+            MangaCmd.run({ interaction, client, hook: true, hookdata: { title: SeriesTitle(recommendedSeries.title || undefined) } });
+            break;
+        }
+      } catch (e: any) {
+        console.error(e);
+        interaction.reply({ embeds: [embedError(e, vars)] });
       }
     } catch (e: any) {
       console.error(e);

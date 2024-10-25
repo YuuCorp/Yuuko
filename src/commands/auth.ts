@@ -21,7 +21,6 @@ export default {
         .addSubcommand((subcommand) => subcommand.setName("wipe").setDescription("Unlink your AniList token from the bot.")),
 
     run: async ({ interaction, client }): Promise<void> => {
-        if (!interaction.isCommand()) return;
 
         const type = getSubcommand<["token", "help", "wipe"]>(interaction.options);
         const { token } = getOptions<{ token: string | undefined }>(interaction.options, ["token"]);
@@ -33,7 +32,7 @@ export default {
                 embeds: [
                     {
                         title: `Steps to get your AniList Token.`,
-                        description:`To add you as an user you have to [link your Discord account with Anilist](https://auth.yuuko.dev).`,
+                        description: `To add you as an user you have to [link your Discord account with Anilist](https://auth.yuuko.dev).`,
                         footer: footer(),
                     },
                 ],

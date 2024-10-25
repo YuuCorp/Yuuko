@@ -17,8 +17,11 @@ export const run: YuukoEvent<"interactionCreate"> = async (client, interaction) 
       checkCooldown(client, command, interaction);
       const args = await runMiddlewares(command.middlewares, interaction);
       client.log(`Ran middleware in: ${Date.now() - interaction.createdTimestamp}ms`, "Debug");
-      command.run({ interaction: args, client });
-      client.log(`Ran command in: ${Date.now() - interaction.createdTimestamp}ms`, "Debug");
+
+      if (args.isCommand() && args.isChatInputCommand()) {
+        command.run({ interaction: args, client });
+        client.log(`Ran command in: ${Date.now() - interaction.createdTimestamp}ms`, "Debug");
+      }
 
       // Check for autocomplete
     } else if (interaction.isAutocomplete()) {

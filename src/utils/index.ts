@@ -1,5 +1,4 @@
 export * from "./buildPagination";
-export * from "./canvasHelper";
 export * from "./commandCategories";
 export * from "./embedError";
 export * from "./footer";

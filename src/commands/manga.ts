@@ -21,7 +21,6 @@ export default {
     .addStringOption((option) => option.setName("query").setDescription("The query to search for").setRequired(true)),
 
   run: async ({ interaction, client, hook = false, hookdata = null }): Promise<void> => {
-    if (!interaction.isCommand()) return;
 
     const { query: manga } = getOptions<{ query: string }>(interaction.options, ["query"]);
     let normalizedQuery = "";
@@ -73,19 +72,20 @@ export default {
         data: { Media: data },
         headers,
       } = await graphQLRequest("Manga", vars, interaction.ALtoken);
-      if (data) {
-        if (!mangaIdFound) redis.set(`_mangaId-${normalizedQuery}`, data.id);
-        const { mediaListEntry, ...redisData } = data;
-        redis.json.set(`_manga-${data.id}`, "$", redisData);
-        redis.expireAt(`_manga-${redisData.id}`, new Date(Date.now() + 604800000))
-        for (const synonym of redisData.synonyms || []) {
-          if (!synonym) continue;
-          redis.set(`_mangaId-${normalize(synonym)}`, data.id.toString());
-        }
-        return void handleData({ media: data, headers: headers }, interaction, "MANGA", hookdata);
-      } else {
+
+      if (!data) {
         return void interaction.editReply({ embeds: [embedError(`Couldn't find any data.`, vars)] });
       }
+
+      if (!mangaIdFound) redis.set(`_mangaId-${normalizedQuery}`, data.id);
+      const { mediaListEntry, ...redisData } = data;
+      redis.json.set(`_manga-${data.id}`, "$", redisData);
+      redis.expireAt(`_manga-${redisData.id}`, new Date(Date.now() + 604800000))
+      for (const synonym of redisData.synonyms || []) {
+        if (!synonym) continue;
+        redis.set(`_mangaId-${normalize(synonym)}`, data.id.toString());
+      }
+      return void handleData({ media: data, headers: headers }, interaction, "MANGA", hookdata);
     } catch (e: any) {
       console.error(e);
       return void interaction.editReply({ embeds: [embedError(e, vars)] });

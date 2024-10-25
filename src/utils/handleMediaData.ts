@@ -201,8 +201,8 @@ function fixScoring(user: CacheEntry | null, scoreType: Maybe<ScoreFormat> | und
   let score = "Unknown";
   if (scoreValue && scoreType) {
     score = scoreValue.toString();
-    if (scoreType === ("POINT_10_DECIMAL" || "POINT_10")) score = `${score} / 10`;
-    else if (scoreType === ("POINT_100" || "POINT_5")) score = `${score} / ${scoreType.split("POINT_")[1]}`;
+    if (scoreType === "POINT_10_DECIMAL" || scoreType === "POINT_10") score = `${score} / 10`;
+    else if (scoreType === "POINT_100" || scoreType === "POINT_5") score = `${score} / ${scoreType.split("POINT_")[1]}`;
     else if (scoreType === "POINT_3") score = score === "1" ? "☹️" : score === "2" ? "😐" : "🙂";
   } else if (user && user.status) score = capitalize(user.status.toString());
   return score;

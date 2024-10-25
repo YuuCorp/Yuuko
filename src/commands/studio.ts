@@ -17,7 +17,6 @@ export default {
     .addStringOption((option) => option.setName("query").setDescription("The query to search for").setRequired(true)),
 
   run: async ({ interaction, client }): Promise<void> => {
-    if (!interaction.isCommand()) return;
     const { query: query } = getOptions<{ query: string }>(interaction.options, ["query"]);
 
     try {
@@ -25,26 +24,28 @@ export default {
         data: { Studio: data },
         headers,
       } = await graphQLRequest("Studio", { query });
-      if (data) {
-        let animes: string[] | string = [];
-        if (!data.media?.nodes) return void interaction.reply({ embeds: [embedError(`Couldn't find any data.`, { query })] });
-        for (const anime of data.media.nodes) animes = animes.concat(`[${SeriesTitle(anime?.title || undefined)}]` + `(https://anilist.co/anime/${anime!.id})`);
 
-        animes = animes.toString().replaceAll(",", "\n");
-
-        const studioEmbed = new EmbedBuilder()
-          // .setThumbnail(data.image.large)
-          .setTitle(`${data.name} | ${data.favourites} favourites`)
-          .setDescription(`\n${animes}`)
-          .setURL(data.siteUrl || "https://anilist.co")
-          .setColor("Green")
-          .setFooter(footer(headers));
-
-        // data.description.split("<br>").forEach(line => titleEmbed.addField(line, "", true))
-        interaction.reply({ embeds: [studioEmbed] });
-      } else {
+      if (!data) {
         return void interaction.reply({ embeds: [embedError(`Couldn't find any data.`, { query })] });
       }
+
+      let animes: string[] | string = [];
+      if (!data.media?.nodes) return void interaction.reply({ embeds: [embedError(`Couldn't find any data.`, { query })] });
+      for (const anime of data.media.nodes) animes = animes.concat(`[${SeriesTitle(anime?.title || undefined)}]` + `(https://anilist.co/anime/${anime!.id})`);
+
+      animes = animes.toString().replaceAll(",", "\n");
+
+      const studioEmbed = new EmbedBuilder()
+        // .setThumbnail(data.image.large)
+        .setTitle(`${data.name} | ${data.favourites} favourites`)
+        .setDescription(`\n${animes}`)
+        .setURL(data.siteUrl || "https://anilist.co")
+        .setColor("Green")
+        .setFooter(footer(headers));
+
+      // data.description.split("<br>").forEach(line => titleEmbed.addField(line, "", true))
+      interaction.reply({ embeds: [studioEmbed] });
+
     } catch (e: any) {
       console.error(e);
       interaction.reply({ embeds: [embedError(e, { query })] });

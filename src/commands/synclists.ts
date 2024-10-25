@@ -25,7 +25,6 @@ export default {
     .addSubcommand((subcommand) => subcommand.setName("sync").setDescription("Sync your lists with our bot."))
     .addSubcommand((subcommand) => subcommand.setName("wipe").setDescription("Wipe your lists from our bot. (This will not wipe your AniList lists.)")),
   run: async ({ interaction, client }): Promise<void> => {
-    if (!interaction.isCommand()) return;
     const subcommand = getSubcommand<["sync", "wipe"]>(interaction.options);
 
     if (subcommand === "wipe") {
@@ -85,7 +84,6 @@ async function handleData(
   interaction: UsableInteraction,
   type: MediaType,
 ) {
-  if (!interaction.isCommand()) return;
   if (!interaction.alID) return;
 
   const dataToGiveToRedis: Record<number, CacheEntry> = {};
