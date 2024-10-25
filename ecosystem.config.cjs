@@ -1,7 +1,7 @@
 module.exports = {
   apps: [{
       name: "Yuuko Production",
-      script: "./src/app.ts",
+      script: ".",
       max_memory_restart: "812M",
       watch: ["commit.hash"],
       interpreter: "/usr/bin/bun",
@@ -10,7 +10,8 @@ module.exports = {
       },
       env_development: {
           NODE_ENV: "development"
-      }
+      },
+      interpreter_args: "run start:prod"
   }, {
     name: "Yuuko Production API",
     script: "./src/api.ts",

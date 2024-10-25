@@ -1,6 +1,7 @@
 import { SlashCommandBuilder, AttachmentBuilder } from "discord.js";
 import { mwGetUserEntry } from "#middleware/userEntry";
-import Jimp from "jimp";
+import { HorizontalAlign, Jimp, loadFont, VerticalAlign } from "jimp";
+import { SANS_16_WHITE } from "jimp/fonts";
 import type { Command } from "#structures/index";
 import { CommandCategories, embedError, graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
 import type { MediaList, MediaType, RecentChartQuery, RecentChartQueryVariables } from "#graphQL/types";
@@ -50,7 +51,8 @@ export default {
       } = await graphQLRequest("RecentChart", vars, interaction.ALtoken);
       if (!data?.mediaList) return void interaction.editReply({ embeds: [embedError("Unable to find specified user", vars)] });
       interaction.editReply({ embeds: [{ description: "Creating image..." }] });
-      const canvas = new Jimp(999, 999);
+      const canvas = new Jimp({ width: 999, height: 999 });
+      const useFont = await loadFont(SANS_16_WHITE);
 
       let x = 0;
       let y = 0;
@@ -62,16 +64,15 @@ export default {
         const canvasImage = await Jimp.read(cover);
 
         const width = 333;
-        const height = (width / canvasImage.getWidth()) * canvasImage.getHeight();
-        canvasImage.resize(width, height);
-        const infoRectangle = new Jimp(width, 60, "#000000bf");
+        const height = (width / canvasImage.width) * canvasImage.height;
+        canvasImage.resize({ w: width, h: height });
+        const infoRectangle = new Jimp({ width, height: 60, color: "#000000bf" });
 
-        const useFont = await Jimp.loadFont(Jimp.FONT_SANS_16_WHITE);
 
         const title = SeriesTitle(media.title || undefined);
         const status = parseStatus(item, type);
-        if (status) infoRectangle.print(useFont, 0, 0, { text: status, alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER, alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE }, width, 40);
-        infoRectangle.print(useFont, 0, 20, { text: title, alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER, alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE }, width, 40);
+        if (status) infoRectangle.print({ maxWidth: width, maxHeight: 40, font: useFont, x: 0, y: 0, text: { text: status, alignmentX: HorizontalAlign.CENTER, alignmentY: VerticalAlign.MIDDLE } });
+        infoRectangle.print({ maxWidth: width, maxHeight: 40, font: useFont, x: 0, y: 20, text: { text: title, alignmentX: HorizontalAlign.CENTER, alignmentY: VerticalAlign.MIDDLE } });
         canvas.composite(canvasImage, x, y);
         canvas.composite(infoRectangle, x, y + width - 60);
         x += width;
@@ -81,11 +82,12 @@ export default {
         }
       }
 
-      const canvasResult = await canvas.getBufferAsync(Jimp.MIME_PNG);
+      const canvasResult = await canvas.getBuffer("image/png");
       if (!canvasResult) return void interaction.editReply({ embeds: [embedError("Encountered an error whilst trying to create the image.", vars)] });
       const attachment = new AttachmentBuilder(canvasResult, { name: "recent.png" });
       return void interaction.editReply({ files: [attachment], embeds: [] });
     } catch (error: any) {
+      console.error(error);
       return void interaction.editReply({ embeds: [embedError(error, vars)] });
     }
   },
