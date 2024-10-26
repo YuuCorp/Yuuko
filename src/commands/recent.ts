@@ -3,8 +3,8 @@ import { mwGetUserEntry } from "#middleware/userEntry";
 import { HorizontalAlign, Jimp, loadFont, VerticalAlign } from "jimp";
 import { SANS_16_WHITE } from "jimp/fonts";
 import type { Command } from "#structures/index";
-import { CommandCategories, embedError, graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
-import type { MediaList, MediaType, RecentChartQuery, RecentChartQueryVariables } from "#graphQL/types";
+import { CommandCategories, graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
+import type { MediaList, MediaType, RecentChartQueryVariables } from "#graphQL/types";
 
 const name = "recent";
 const usage = "recent";
@@ -34,62 +34,52 @@ export default {
 
     if (!userName) {
       // We try to use the one the user set
-      try {
-        if (!interaction.alID) return void interaction.editReply({ embeds: [embedError(`You have yet to set an AniList token.`)] });
-        vars.userId = interaction.alID;
-      } catch (error) {
-        console.error(error);
-        return void interaction.editReply({ embeds: [embedError(`You have yet to set an AniList token.`)] });
-      }
+      if (!interaction.alID) throw new Error("You have yet to set an AniList token.")
+      vars.userId = interaction.alID;
     } else {
       vars.user = userName;
     }
 
-    try {
-      const {
-        data: { Page: data },
-      } = await graphQLRequest("RecentChart", vars, interaction.ALtoken);
-      if (!data?.mediaList) return void interaction.editReply({ embeds: [embedError("Unable to find specified user", vars)] });
-      interaction.editReply({ embeds: [{ description: "Creating image..." }] });
-      const canvas = new Jimp({ width: 999, height: 999 });
-      const useFont = await loadFont(SANS_16_WHITE);
+    const {
+      data: { Page: data },
+    } = await graphQLRequest("RecentChart", vars, interaction.ALtoken);
+    if (!data?.mediaList) throw new Error("Unable to find specified user.", { cause: vars });
+    interaction.editReply({ embeds: [{ description: "Creating image..." }] });
+    const canvas = new Jimp({ width: 999, height: 999 });
+    const useFont = await loadFont(SANS_16_WHITE);
 
-      let x = 0;
-      let y = 0;
+    let x = 0;
+    let y = 0;
 
-      for (const item of data.mediaList) {
-        const media = item?.media;
-        if (!media || !item) continue;
-        const cover = media.coverImage?.extraLarge || "https://i.imgur.com/Hx8474m.png"; // Placeholder image
-        const canvasImage = await Jimp.read(cover);
+    for (const item of data.mediaList) {
+      const media = item?.media;
+      if (!media || !item) continue;
+      const cover = media.coverImage?.extraLarge || "https://i.imgur.com/Hx8474m.png"; // Placeholder image
+      const canvasImage = await Jimp.read(cover);
 
-        const width = 333;
-        const height = (width / canvasImage.width) * canvasImage.height;
-        canvasImage.resize({ w: width, h: height });
-        const infoRectangle = new Jimp({ width, height: 60, color: "#000000bf" });
+      const width = 333;
+      const height = (width / canvasImage.width) * canvasImage.height;
+      canvasImage.resize({ w: width, h: height });
+      const infoRectangle = new Jimp({ width, height: 60, color: "#000000bf" });
 
 
-        const title = SeriesTitle(media.title || undefined);
-        const status = parseStatus(item, type);
-        if (status) infoRectangle.print({ maxWidth: width, maxHeight: 40, font: useFont, x: 0, y: 0, text: { text: status, alignmentX: HorizontalAlign.CENTER, alignmentY: VerticalAlign.MIDDLE } });
-        infoRectangle.print({ maxWidth: width, maxHeight: 40, font: useFont, x: 0, y: 20, text: { text: title, alignmentX: HorizontalAlign.CENTER, alignmentY: VerticalAlign.MIDDLE } });
-        canvas.composite(canvasImage, x, y);
-        canvas.composite(infoRectangle, x, y + width - 60);
-        x += width;
-        if (x >= 999) {
-          x = 0;
-          y += width;
-        }
+      const title = SeriesTitle(media.title || undefined);
+      const status = parseStatus(item, type);
+      if (status) infoRectangle.print({ maxWidth: width, maxHeight: 40, font: useFont, x: 0, y: 0, text: { text: status, alignmentX: HorizontalAlign.CENTER, alignmentY: VerticalAlign.MIDDLE } });
+      infoRectangle.print({ maxWidth: width, maxHeight: 40, font: useFont, x: 0, y: 20, text: { text: title, alignmentX: HorizontalAlign.CENTER, alignmentY: VerticalAlign.MIDDLE } });
+      canvas.composite(canvasImage, x, y);
+      canvas.composite(infoRectangle, x, y + width - 60);
+      x += width;
+      if (x >= 999) {
+        x = 0;
+        y += width;
       }
-
-      const canvasResult = await canvas.getBuffer("image/png");
-      if (!canvasResult) return void interaction.editReply({ embeds: [embedError("Encountered an error whilst trying to create the image.", vars)] });
-      const attachment = new AttachmentBuilder(canvasResult, { name: "recent.png" });
-      return void interaction.editReply({ files: [attachment], embeds: [] });
-    } catch (error: any) {
-      console.error(error);
-      return void interaction.editReply({ embeds: [embedError(error, vars)] });
     }
+
+    const canvasResult = await canvas.getBuffer("image/png");
+    if (!canvasResult) throw new Error("Encountered an error whilst trying to create the image.");
+    const attachment = new AttachmentBuilder(canvasResult, { name: "recent.png" });
+    return void interaction.editReply({ files: [attachment], embeds: [] });
   }
 } satisfies Command;
 

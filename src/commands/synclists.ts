@@ -1,10 +1,10 @@
 import { SlashCommandBuilder } from "discord.js";
 import { redis } from "#caching/redis";
-import { MediaType, type AnimeQuery, type GetMediaCollectionQuery, type MangaQuery } from "#graphQL/types";
+import { MediaType, type GetMediaCollectionQuery } from "#graphQL/types";
 import { mwRequireALToken } from "#middleware/alToken";
 import type { Command, UsableInteraction } from "#structures/index";
 import { stat, statTables, type StatUser } from "#database/db";
-import { normalize, embedError, graphQLRequest, getSubcommand, type AlwaysExist, type CacheEntry, type GraphQLResponse } from "#utils/index";
+import { normalize, graphQLRequest, getSubcommand, type AlwaysExist, type CacheEntry, type GraphQLResponse } from "#utils/index";
 import { eq } from "drizzle-orm";
 
 const name = "synclists";
@@ -29,49 +29,39 @@ export default {
 
     if (subcommand === "wipe") {
       interaction.editReply(`Wiping your lists...`);
-      try {
-        (await redis.json.get(`_user${interaction.alID}-${MediaType.Anime}`)) as Record<number, CacheEntry>;
+      (await redis.json.get(`_user${interaction.alID}-${MediaType.Anime}`)) as Record<number, CacheEntry>;
 
-        redis.del(`_user${interaction.alID}-${MediaType.Anime}`);
-        redis.del(`_user${interaction.alID}-${MediaType.Manga}`);
+      redis.del(`_user${interaction.alID}-${MediaType.Anime}`);
+      redis.del(`_user${interaction.alID}-${MediaType.Manga}`);
 
-        const animeMediaIDs = await getMediaForUser(statTables.AnimeStats, interaction.alID!);
-        const mangaMediaIDs = await getMediaForUser(statTables.AnimeStats, interaction.alID!);
+      const animeMediaIDs = await getMediaForUser(statTables.AnimeStats, interaction.alID!);
+      const mangaMediaIDs = await getMediaForUser(statTables.AnimeStats, interaction.alID!);
 
-        if (animeMediaIDs.length == 0 && mangaMediaIDs.length == 0) return void interaction.editReply(`You don't have any data synced with our bot!`);
+      if (animeMediaIDs.length == 0 && mangaMediaIDs.length == 0) return void interaction.editReply(`You don't have any data synced with our bot!`);
 
-        await removeUserFromMedia(statTables.AnimeStats, animeMediaIDs, { aId: interaction.alID!, dId: interaction.user.id });
-        await removeUserFromMedia(statTables.AnimeStats, mangaMediaIDs, { aId: interaction.alID!, dId: interaction.user.id });
+      await removeUserFromMedia(statTables.AnimeStats, animeMediaIDs, { aId: interaction.alID!, dId: interaction.user.id });
+      await removeUserFromMedia(statTables.AnimeStats, mangaMediaIDs, { aId: interaction.alID!, dId: interaction.user.id });
 
-        return void interaction.editReply(`Successfully wiped your lists!`);
-      } catch (e: any) {
-        console.error(e);
-        return void interaction.editReply({ embeds: [embedError(e)] });
-      }
+      return void interaction.editReply(`Successfully wiped your lists!`);
     } else if (subcommand === "sync") {
       interaction.editReply(`Syncing your lists...`);
-      try {
-        const { data: animeData } = await graphQLRequest("GetMediaCollection", {
-          userId: interaction.alID,
-          type: MediaType.Anime,
-        }, interaction.ALtoken);
-        if (animeData) handleData({ media: animeData }, interaction, MediaType.Anime);
+      const { data: animeData } = await graphQLRequest("GetMediaCollection", {
+        userId: interaction.alID,
+        type: MediaType.Anime,
+      }, interaction.ALtoken);
+      if (animeData) handleData({ media: animeData }, interaction, MediaType.Anime);
 
-        const { data: mangaData } = await graphQLRequest("GetMediaCollection", {
-          userId: interaction.alID,
-          type: MediaType.Manga,
-        }, interaction.ALtoken);
+      const { data: mangaData } = await graphQLRequest("GetMediaCollection", {
+        userId: interaction.alID,
+        type: MediaType.Manga,
+      }, interaction.ALtoken);
 
-        if (mangaData) handleData({ media: mangaData }, interaction, MediaType.Manga);
+      if (mangaData) handleData({ media: mangaData }, interaction, MediaType.Manga);
 
-        const commandCooldown = client.cooldowns.get(name);
-        if (commandCooldown) commandCooldown.set(interaction.user.id, Date.now() + cooldown * 1000);
+      const commandCooldown = client.cooldowns.get(name);
+      if (commandCooldown) commandCooldown.set(interaction.user.id, Date.now() + cooldown * 1000);
 
-        return void interaction.editReply(`Successfully synced your lists!`);
-      } catch (e: any) {
-        console.error(e);
-        return void interaction.editReply({ embeds: [embedError(e)] });
-      }
+      return void interaction.editReply(`Successfully synced your lists!`);
     }
   },
 } satisfies Command;

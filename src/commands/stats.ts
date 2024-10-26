@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 import type { Command } from '#structures/index'
-import { getStats, updateBotStats } from '#utils/index'
+import { updateBotStats } from '#utils/index'
 
 const name = 'stats'
 const description = 'Shows you the statistics of the server & bot.'
