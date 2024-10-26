@@ -9,7 +9,7 @@ export async function registerComponents(client: Client) {
     .filter((file) => file.endsWith(".ts"))
     .forEach(file => {
       const component = require(path.join(compPath, file)).default as YuukoComponent;
-      client.log(`Component ${component.name} loaded`);
+      client.log(`Component ${component.name} loaded`, "Info");
       client.components.set(component.name, component);
     });
 }

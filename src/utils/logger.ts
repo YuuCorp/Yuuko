@@ -9,7 +9,7 @@ class Logger {
     })
   }
 
-  log(text: string, category: "Debug" | "Info") {
+  log(text: string, category: string) {
     if (category === "Debug" && process.env.NODE_ENV !== "development") return;
     const d = new Date()
     const categoryText = category ? category : 'Info'
