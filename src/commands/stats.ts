@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 import type { Command } from '#structures/index'
-import { getStats } from '#utils/index'
+import { getStats, updateBotStats } from '#utils/index'
 
 const name = 'stats'
 const description = 'Shows you the statistics of the server & bot.'
@@ -21,7 +21,7 @@ export default {
     const seconds = Math.floor(((uptime % 3600000) % 60000) / 1000)
     const uptimeString = `${hours} hours, ${minutes} minutes, ${seconds} seconds`
 
-    const { servers, members, registered } = await getStats();
+    const { servers, members, registered } = await updateBotStats(client);
 
     const embed = new EmbedBuilder()
       .setTitle('Here are the stats!')

@@ -1,5 +1,4 @@
-import type { APIEmbedField, ApplicationCommandOptionType, CacheType, ChatInputCommandInteraction, Interaction } from "discord.js";
-import type Discord from "discord.js";
+import type { SlashCommandBuilder, APIEmbedField, ApplicationCommandOptionType, CacheType, ChatInputCommandInteraction, Interaction } from "discord.js";
 import type { CommandCategories } from "#utils/commandCategories";
 import type { Middleware, Client } from "./index";
 
@@ -9,7 +8,7 @@ export interface CommandOptions {
   usage: string;
   type: string;
   run: Function;
-  slash?: Discord.SlashCommandBuilder;
+  slash?: SlashCommandBuilder;
   guildOnly?: boolean;
   middlewares?: Middleware[];
   autocomplete?: (interaction: Interaction) => void;

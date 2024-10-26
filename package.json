@@ -1,5 +1,5 @@
 {
-  "name": "anisuggest",
+  "name": "yuuko",
   "type": "module",
   "version": "1.0.0",
   "description": "A bot that goes through your anilist and recommends you anime and manga.",
@@ -31,10 +31,6 @@
     "db:generate": "bun run db:generate:main && bun run db:generate:stats",
     "db:studio": "bun drizzle-kit studio"
   },
-  "trustedDependencies": [
-    "canvas",
-    "bindings"
-  ],
   "dependencies": {
     "@acegoal07/discordjs-pagination": "^1.5.9",
     "@discordjs/rest": "^2.4.0",
