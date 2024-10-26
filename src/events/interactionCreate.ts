@@ -39,9 +39,8 @@ export const run: YuukoEvent<"interactionCreate"> = async (client, interaction) 
     }
 
   } catch (e: any) {
-    if (!interaction.isCommand()) return;
-
     console.error(e);
+    if (!interaction.isCommand()) return;
 
     if (interaction.deferred)
       return void interaction.editReply({ embeds: [embedError(e, e.cause)] });

@@ -6,7 +6,7 @@ import { db } from "#database/db";
 import { eq } from "drizzle-orm";
 
 const name = "auth";
-const usage = "auth <help | anilistToken | wipe>";
+const usage = "auth <help | wipe>";
 const description = "Binds an existing AniList user to your Discord account in the bot database.";
 
 export default {

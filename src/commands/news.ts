@@ -51,7 +51,6 @@ export default {
     const clamp = (num: number, min: number, max: number) => Math.min(Math.max(num, min), max)
     for (let i = 0; i < clamp(process.env.RSS_LIMIT || 5, 0, rss.items.length); i++) {
       if (rss.items[i] === undefined) continue
-      console.log(`Processing ${i}...`)
       let content: string = rss.items[i]!.content
       /*
         .replace(/<img .*?>/g, "") // Remove image tjags

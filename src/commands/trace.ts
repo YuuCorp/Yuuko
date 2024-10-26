@@ -35,11 +35,17 @@ export default {
     .addAttachmentOption((option) => option.setName("image").setDescription("Attach the image of the anime.").setRequired(true)),
 
   run: async ({ interaction, client }): Promise<void> => {
+    interaction.deferReply();
     const image = interaction.options.getAttachment("image");
 
     if (!image) throw new Error("No image attached.");
 
-    const res = await fetch(`${baseUrl}${image.url}`)
+    const imageData = await (await fetch(image.url)).arrayBuffer();
+    const res = await fetch(baseUrl, {
+      method: "POST",
+      body: imageData,
+      headers: { "Content-type": "image/jpeg" },
+    })
     if (!res.ok) throw new Error(`Failed to fetch image: ${res.statusText}`);
 
     const data = await res.json() as { result: TraceMoeReturnType[] }

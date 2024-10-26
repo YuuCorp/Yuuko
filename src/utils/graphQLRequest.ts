@@ -81,14 +81,14 @@ export async function graphQLRequest<QueryKey extends Query>(queryKey: QueryKey,
 
   try {
     const res = await fetch(url, reqOptions)
-    if(!res.ok) {
+    if (!res.ok) {
       const errorMsg = res.statusText
       throw new Error(`GraphQL Request Rejected\n\n${errorMsg}`)
     }
     const data = await res.json() as GraphQLResponse<QueryVariables[QueryKey][0]>
     return data;
-  } catch(e: any) {
+  } catch (e: any) {
     console.error(e)
-    throw new Error(`GraphQL Request Rejected\n\n${e?.message || e}`);
+    throw new Error(e?.message || e, { cause: vars });
   }
 }
