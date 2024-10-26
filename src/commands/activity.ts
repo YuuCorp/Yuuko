@@ -27,21 +27,18 @@ export default {
       userid: interaction.alID,
     };
 
-    if (!interaction.options.get("user") && !vars.userid) return void interaction.editReply({ embeds: [embedError(`You have yet to set an AniList token. You can see the instructions with /auth help`)] });
+    if (!interaction.options.get("user") && !vars.userid) throw new Error("You need to provide a user to search for or link your AniList account. (check /auth help for more info)");
 
     if (vars.username) {
-      try {
-        const uData = (
-          await graphQLRequest("User", {
-            username: vars.username,
-          }, interaction.ALtoken)
-        ).data.User;
-        vars.userid = uData?.id;
-        if (!vars.userid) throw new Error("Couldn't find user id.");
-      } catch (error: any) {
-        console.error(error);
-        interaction.editReply({ embeds: [embedError(error, vars)] });
-      }
+      const uData = (
+        await graphQLRequest("User", {
+          username: vars.username,
+        }, interaction.ALtoken)
+      ).data.User;
+
+      if (!uData?.id) throw new Error("Couldn't find user id.", { cause: vars });
+      vars.userid = uData?.id;
+
     }
 
     try {

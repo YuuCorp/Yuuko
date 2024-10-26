@@ -19,7 +19,7 @@ export const run: YuukoEvent<"interactionCreate"> = async (client, interaction) 
       client.log(`Ran middleware in: ${Date.now() - interaction.createdTimestamp}ms`, "Debug");
 
       if (args.isCommand() && args.isChatInputCommand()) {
-        command.run({ interaction: args, client });
+        await command.run({ interaction: args, client });
         client.log(`Ran command in: ${Date.now() - interaction.createdTimestamp}ms`, "Debug");
       }
 
@@ -37,41 +37,44 @@ export const run: YuukoEvent<"interactionCreate"> = async (client, interaction) 
       if (!component) return;
       component.run(await runMiddlewares(component.middlewares, interaction), null, client);
     }
+
   } catch (e: any) {
     if (!interaction.isCommand()) return;
+
     console.error(e);
+
     if (interaction.deferred)
-      return void interaction.editReply({ embeds: [embedError(e, null, e?.cause || null)] });
+      return void interaction.editReply({ embeds: [embedError(e, e.cause)] });
     else
-      return void interaction.reply({ embeds: [embedError(e, null, e?.cause || null)] });
-  }
-};
+      return void interaction.reply({ embeds: [embedError(e, e.cause)] });
+  };
 
-async function runMiddlewares(middlewares: Middleware[] | undefined, interaction: Interaction): Promise<Interaction> {
-  if (!interaction.isChatInputCommand()) return interaction;
-  if (!middlewares) return interaction;
-  if (middlewares.some((mw) => mw.defer)) await interaction.deferReply();
-  await Promise.all(middlewares.map((mw) => mw.run(interaction))).catch((e: any) => {
-    throw e;
-  });
-  return interaction;
-}
-
-
-function checkCooldown(client: Client, command: ClientCommand, interaction: UsableInteraction): UsableInteraction {
-  if (!interaction.isChatInputCommand()) return interaction;
-  const commandCooldown = client.cooldowns.get(command.name);
-  if (!commandCooldown) {
-    client.cooldowns.set(command.name, new Collection());
+  async function runMiddlewares(middlewares: Middleware[] | undefined, interaction: Interaction): Promise<Interaction> {
+    if (!interaction.isChatInputCommand()) return interaction;
+    if (!middlewares) return interaction;
+    if (middlewares.some((mw) => mw.defer)) await interaction.deferReply();
+    await Promise.all(middlewares.map((mw) => mw.run(interaction))).catch((e: any) => {
+      throw e;
+    });
     return interaction;
   }
-  if (commandCooldown.has(interaction.user.id)) {
-    const cooldownExpires = commandCooldown.get(interaction.user.id);
-    console.log(cooldownExpires);
-    if (!cooldownExpires) return interaction;
-    if (cooldownExpires > Date.now()) {
-      throw new Error(`User ${interaction.user.tag} is on cooldown for command ${command.name}`, { cause: `Cooldown expires on ${time(Math.ceil(cooldownExpires / 1000), "f")} (${time(Math.ceil(cooldownExpires / 1000), "R")})` });
+
+
+  function checkCooldown(client: Client, command: ClientCommand, interaction: UsableInteraction): UsableInteraction {
+    if (!interaction.isChatInputCommand()) return interaction;
+    const commandCooldown = client.cooldowns.get(command.name);
+    if (!commandCooldown) {
+      client.cooldowns.set(command.name, new Collection());
+      return interaction;
     }
+    if (commandCooldown.has(interaction.user.id)) {
+      const cooldownExpires = commandCooldown.get(interaction.user.id);
+      console.log(cooldownExpires);
+      if (!cooldownExpires) return interaction;
+      if (cooldownExpires > Date.now()) {
+        throw new Error(`User ${interaction.user.tag} is on cooldown for command ${command.name}`, { cause: `Cooldown expires on ${time(Math.ceil(cooldownExpires / 1000), "f")} (${time(Math.ceil(cooldownExpires / 1000), "R")})` });
+      }
+    }
+    return interaction;
   }
-  return interaction;
 }

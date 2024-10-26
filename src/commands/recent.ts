@@ -90,7 +90,7 @@ export default {
       console.error(error);
       return void interaction.editReply({ embeds: [embedError(error, vars)] });
     }
-  },
+  }
 } satisfies Command;
 
 function parseStatus(data: Pick<MediaList, "progress" | "status">, mediaType: MediaType) {
