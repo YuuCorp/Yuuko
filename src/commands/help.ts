@@ -1,4 +1,4 @@
-import Discord, { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { EmbedBuilder, SlashCommandBuilder, time } from "discord.js";
 import fs from "fs";
 import path from "path";
 import { db, tables } from "#database/db";
@@ -78,7 +78,7 @@ export default {
     helpInfoEmbed.addFields(
       { name: "Usage", value: "Use the buttons below to navigate the help pages. Note that a category might have more than one page." },
       { name: "Tip", value: "Since the migration to slash commands, you can also view the list of commands in the slash menu, you can use that too." },
-      { name: "Announcements", value: announcements.length > 0 ? announcements.map((x) => `${Discord.time(x.date)} - ${x.announcement}`).join("\n") : "No announcements yet!" },
+      { name: "Announcements", value: announcements.length > 0 ? announcements.map((x) => `${time(x.date)} - ${x.announcement}`).join("\n") : "No announcements yet!" },
       { name: "Voting", value: "[Vote for our bot on Top.GG!](https://top.gg/bot/867010131745177621) There are no added benefits yet, but they help us be seen by other users!" },
     );
     helpInfoEmbed.setColor("#1873bf");

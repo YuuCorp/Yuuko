@@ -46,7 +46,7 @@ export const run: YuukoEvent<"interactionCreate"> = async (client, interaction) 
     if (interaction.deferred)
       return void interaction.editReply({ embeds: [embedError(e, e.cause)] });
     else
-      return void interaction.reply({ embeds: [embedError(e, e.cause)] });
+      return void interaction.reply({ embeds: [embedError(e, e.cause)], ephemeral: true });
   };
 
   async function runMiddlewares(middlewares: Middleware[] | undefined, interaction: Interaction): Promise<Interaction> {

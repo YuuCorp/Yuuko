@@ -1,4 +1,4 @@
-import { getOptions, buildPagination, embedError, footer, getSubcommand } from "#utils/index";
+import { getOptions, buildPagination, footer, getSubcommand } from "#utils/index";
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { db, tables } from "#database/db";
 import { eq, sql } from "drizzle-orm";
@@ -128,31 +128,18 @@ export default {
     if (subcommand === "wipe") {
       const birthday = (await db.query.userBirthday.findFirst({ where: (birthday, { eq }) => eq(birthday.userId, interaction.user.id) }));
       if (!birthday) return void interaction.reply({ content: "You have not set your birthday.", ephemeral: true });
-      try {
-        await db.delete(tables.userBirthday).where(eq(tables.userBirthday.userId, interaction.user.id));
-        return void interaction.reply({
-          embeds: [
-            {
-              title: `Successfully wiped your birthday.`,
-              description: `Your birthday has been wiped from our database.`,
-              color: 0x00ff00,
-              footer: footer(),
-            },
-          ],
-          ephemeral: true,
-        })
-      } catch (error) {
-        console.error(error);
-        return void interaction.reply({
-          embeds: [
-            embedError(
-              `An error occurred while updating your AniList account binding:\n\n${error}`,
-              null,
-            ),
-          ],
-          ephemeral: true,
-        });
-      }
+      await db.delete(tables.userBirthday).where(eq(tables.userBirthday.userId, interaction.user.id));
+      return void interaction.reply({
+        embeds: [
+          {
+            title: `Successfully wiped your birthday.`,
+            description: `Your birthday has been wiped from our database.`,
+            color: 0x00ff00,
+            footer: footer(),
+          },
+        ],
+        ephemeral: true,
+      })
     }
 
     function daysLeftUntilBirthday(date: Date) {

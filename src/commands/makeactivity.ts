@@ -1,4 +1,4 @@
-import { embedError, footer, graphQLRequest, getSubcommand } from "#utils/index";
+import { footer, graphQLRequest, getSubcommand } from "#utils/index";
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { mwRequireALToken } from "#middleware/alToken";
 import type { Command } from "#structures/index";
@@ -88,31 +88,27 @@ export default {
     if (!interaction.isChatInputCommand()) return;
     // const type = (interaction.options as CommandInteractionOptionResolver).getSubcommand() <- from auth command
     const type = getSubcommand<["list", "status"]>(interaction.options);
-    if (!type || (type != "status" && type != "list")) return void interaction.editReply({ embeds: [embedError(`Please use either the status or list subcommand. (Yours was "${type}")`, null)] });
+    if (!type || (type != "status" && type != "list")) throw new Error(`Please use either the status or list subcommand. (Yours was "${type}")`);
 
     if (type === "status") {
       const vars = { text: getEmojis(interaction.options.getString("text", true)), asHtml: true };
-      if (!interaction.ALtoken) return void interaction.editReply({ embeds: [embedError("No Anilist token found.")] });
-      try {
-        const {
-          data: { SaveTextActivity: data },
-          headers,
-        } = await graphQLRequest("SaveTextActivity", vars, interaction.ALtoken);
-        const userName = data?.user?.name || "Unknown";
-        const userText = data?.text || "Unknown";
-        if (!userName || !userText) return;
+      if (!interaction.ALtoken) throw new Error("No Anilist token found.");
 
-        const statusActivity = new EmbedBuilder()
-          .setURL(data?.siteUrl || "https://anilist.co")
-          .setTitle(`${userName} made a new activity!`)
-          .setDescription(userText)
-          .setFooter(footer(headers));
+      const {
+        data: { SaveTextActivity: data },
+        headers,
+      } = await graphQLRequest("SaveTextActivity", vars, interaction.ALtoken);
+      const userName = data?.user?.name || "Unknown";
+      const userText = data?.text || "Unknown";
+      if (!userName || !userText) return;
 
-        return void interaction.editReply({ embeds: [statusActivity] });
-      } catch (e: any) {
-        console.error(e);
-        return void interaction.editReply({ embeds: [embedError(e, vars)] });
-      }
+      const statusActivity = new EmbedBuilder()
+        .setURL(data?.siteUrl || "https://anilist.co")
+        .setTitle(`${userName} made a new activity!`)
+        .setDescription(userText)
+        .setFooter(footer(headers));
+
+      return void interaction.editReply({ embeds: [statusActivity] });
     }
 
     if (type === "list") {
@@ -121,25 +117,21 @@ export default {
       const vars: { [key: string]: any } = {};
       for (const option of listOptions) vars[option] = interaction.options.get(option)?.value;
 
-      if (!interaction.ALtoken) return void interaction.editReply({ embeds: [embedError("No Anilist token found.")] });
+      if (!interaction.ALtoken) throw new Error("No Anilist token found.");
 
-      try {
-        const {
-          data: { SaveMediaListEntry: data },
-          headers,
-        } = await graphQLRequest("SaveMediaList", vars, interaction.ALtoken);
-        if (!data) return void interaction.editReply({ embeds: [embedError("Something went wrong while making the activity.")] });
-        const mediaListActivity = new EmbedBuilder()
-          .setURL(`https://anilist.co/${data?.media?.type || ""}/${data?.mediaId || ""}`)
-          .setTitle(`${data.user?.name || "Unknown"} added ${data?.media?.title?.userPreferred || "Unknown"} to ${data?.status || "Unknown"}!`)
-          .setFooter(footer(headers));
-        if (data.media && data.media.bannerImage) mediaListActivity.setImage(data.media.bannerImage);
+      const {
+        data: { SaveMediaListEntry: data },
+        headers,
+      } = await graphQLRequest("SaveMediaList", vars, interaction.ALtoken);
+      if (!data) throw new Error("Something went wrong while making the activity.");
+      const mediaListActivity = new EmbedBuilder()
+        .setURL(`https://anilist.co/${data?.media?.type || ""}/${data?.mediaId || ""}`)
+        .setTitle(`${data.user?.name || "Unknown"} added ${data?.media?.title?.userPreferred || "Unknown"} to ${data?.status || "Unknown"}!`)
+        .setFooter(footer(headers));
+      if (data.media && data.media.bannerImage) mediaListActivity.setImage(data.media.bannerImage);
 
-        return void interaction.editReply({ embeds: [mediaListActivity] });
-      } catch (e: any) {
-        console.error(e);
-        interaction.editReply({ embeds: [embedError(e, vars)] });
-      }
+      return void interaction.editReply({ embeds: [mediaListActivity] });
+
     }
   },
 } satisfies Command;

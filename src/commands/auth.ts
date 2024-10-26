@@ -1,4 +1,4 @@
-import { embedError, footer, graphQLRequest, rsaEncryption, getOptions, updateBotStats, getSubcommand } from "#utils/index";
+import { footer, graphQLRequest, rsaEncryption, getOptions, updateBotStats, getSubcommand } from "#utils/index";
 import anilistUser from "#database/models/anilistUser";
 import type { Command } from "#structures/index";
 import { SlashCommandBuilder } from "discord.js";
@@ -43,109 +43,67 @@ export default {
         const user = (await db.select().from(anilistUser).where(eq(anilistUser.discordId, interaction.user.id)).limit(1))[0];
 
         if (type === "wipe") {
-            if (!user) return void interaction.reply({ embeds: [embedError(`You don't have an AniList account bound to your Discord account.`, null)], ephemeral: true });
-            try {
-                await db.delete(anilistUser).where(eq(anilistUser.discordId, interaction.user.id));
+            if (!user) throw new Error("You don't have an AniList account bound to your Discord account.")
+            await db.delete(anilistUser).where(eq(anilistUser.discordId, interaction.user.id));
 
-                await updateBotStats(client);
-                return void interaction.reply({
-                    embeds: [
-                        {
-                            title: `Successfully wiped your AniList account binding.`,
-                            description: `Your Discord-bound AniList account has been wiped from our database.`,
-                            color: 0x00ff00,
-                            footer: footer(),
-                        },
-                    ],
-                    ephemeral: true,
-                });
-            } catch (error) {
-                console.error(error);
-                return void interaction.reply({
-                    embeds: [
-                        embedError(
-                            `An error occurred while updating your AniList account binding:
-                                                                   \n\n${error}`,
-                            null,
-                        ),
-                    ],
-                    ephemeral: true,
-                });
-            }
-        }
-
-        // Update existing user
-        if (user) {
-            try {
-                if (!token) return void interaction.reply({ embeds: [embedError(`Please provide a token with this option.`)], ephemeral: true });
-
-                const { Viewer: data } = (await graphQLRequest("Viewer", {}, token)).data;
-
-                if (!data) return void interaction.reply({ embeds: [embedError(`Invalid token provided.`)], ephemeral: true });
-
-                await db
-                    .update(anilistUser)
-                    .set({ anilistToken: await rsaEncryption(token, true), anilistId: data.id })
-                    .where(eq(anilistUser.discordId, interaction.user.id));
-                return void interaction.reply({
-                    embeds: [
-                        {
-                            title: `Successfully updated your AniList account binding.`,
-                            description: `Your Discord-bound AniList account has been changed to \`${data.name}\`.`,
-                            color: 0x00ff00,
-                            footer: footer(),
-                        },
-                    ],
-                    ephemeral: true,
-                });
-            } catch (error) {
-                console.error(error);
-                return void interaction.reply({
-                    embeds: [
-                        embedError(
-                            `An error occurred while updating your AniList account binding:
-                                                                   \n\n${error}`,
-                            null,
-                        ),
-                    ],
-                    ephemeral: true,
-                });
-            }
-        }
-
-        // Create new user
-        try {
-            if (!token) return void interaction.reply({ embeds: [embedError(`Please provide a token with this option.`)], ephemeral: true });
-
-            const { Viewer: data } = (await graphQLRequest("Viewer", {}, token)).data;
-
-            if (!data) return void interaction.reply({ embeds: [embedError(`Invalid token provided.`)], ephemeral: true });
-
-            await db.insert(anilistUser).values({ discordId: interaction.user.id, anilistToken: await rsaEncryption(token, true), anilistId: data.id });
             await updateBotStats(client);
             return void interaction.reply({
                 embeds: [
                     {
-                        title: `Successfully bound your AniList account to your Discord account.`,
-                        description: `Your AniList account is now \`${data.name}\`.`,
+                        title: `Successfully wiped your AniList account binding.`,
+                        description: `Your Discord-bound AniList account has been wiped from our database.`,
                         color: 0x00ff00,
                         footer: footer(),
                     },
                 ],
                 ephemeral: true,
             });
-        } catch (error) {
-            console.error(error);
-            return void (await interaction.reply({
+        }
+
+        // Update existing user
+        if (user) {
+            if (!token) throw new Error("Please provide a token with this option.");
+
+            const { Viewer: data } = (await graphQLRequest("Viewer", {}, token)).data;
+
+            if (!data) throw new Error("Invalid token provided.");
+
+            await db
+                .update(anilistUser)
+                .set({ anilistToken: await rsaEncryption(token, true), anilistId: data.id })
+                .where(eq(anilistUser.discordId, interaction.user.id));
+            return void interaction.reply({
                 embeds: [
-                    embedError(
-                        `Something went wrong while trying to create your AniList account binding:
-                                                               \n\n${error}`,
-                        null,
-                    ),
+                    {
+                        title: `Successfully updated your AniList account binding.`,
+                        description: `Your Discord-bound AniList account has been changed to \`${data.name}\`.`,
+                        color: 0x00ff00,
+                        footer: footer(),
+                    },
                 ],
                 ephemeral: true,
-            }));
+            });
         }
+
+        // Create new user
+        if (!token) throw new Error("Please provide a token with this option.");
+
+        const { Viewer: data } = (await graphQLRequest("Viewer", {}, token)).data;
+
+        if (!data) throw new Error("Invalid token provided.");
+
+        await db.insert(anilistUser).values({ discordId: interaction.user.id, anilistToken: await rsaEncryption(token, true), anilistId: data.id });
+        await updateBotStats(client);
+        return void interaction.reply({
+            embeds: [
+                {
+                    title: `Successfully bound your AniList account to your Discord account.`,
+                    description: `Your AniList account is now \`${data.name}\`.`,
+                    color: 0x00ff00,
+                    footer: footer(),
+                },
+            ],
+            ephemeral: true,
+        });
     },
 } satisfies Command;
