@@ -1,4 +1,4 @@
-import { buildPagination, embedError, footer, graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
+import { buildPagination, footer, graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
 import { EmbedBuilder, SlashCommandBuilder, TimestampStyles, time } from "discord.js";
 import ms from "ms";
 import { MediaType, type AiringQueryVariables } from "#graphQL/types";
@@ -30,19 +30,11 @@ export default {
 
     const { user: username } = getOptions<{ user: string | undefined }>(interaction.options, ["user"]);
     const { in: period } = getOptions<{ in: string | undefined }>(interaction.options, ["in"]);
-    // const period = interaction.options.getString("in");
-    // const user = interaction.options.getString("user");
     const mediaIDs = [];
 
     if (period) {
-      try {
-        airingIn = ms(period);
-        if (!airingIn) throw new Error("Invalid time format.");
-      } catch (r) {
-        return void interaction.reply({
-          embeds: [embedError(`Invalid time format. See \`/help\` for more information.`, { period })],
-        });
-      }
+      airingIn = ms(period);
+      if (!airingIn) throw new Error("Invalid time format. See `/help` for more information.", { cause: { period } });
     }
 
     // ^ Get current day and time in UTC
@@ -78,55 +70,43 @@ export default {
 
     // ^ Make the HTTP Api request
 
-    try {
-      const {
-        data: { Page: data },
-        headers,
-      } = await graphQLRequest("Airing", vars);
-      if (!data) return void interaction.reply({ embeds: [embedError("No airing anime found.")] });
-      const { airingSchedules } = data;
+    const {
+      data: { Page: data },
+      headers,
+    } = await graphQLRequest("Airing", vars);
+    if (!data || !data.airingSchedules) throw new Error("No airing anime found.", { cause: vars });
+    const { airingSchedules } = data;
 
-      if (!data) {
-        return void interaction.reply({
-          embeds: [embedError("No airing anime found.")],
-        });
-      }
+    const chunkSize = 5;
+    const fields = [];
 
-      const chunkSize = 5;
-      const fields = [];
-      // Sort the airing anime alphabetically by title
-      if (!airingSchedules) return void interaction.reply({ embeds: [embedError("No airing anime found.")] });
-      airingSchedules.sort((a, b) => (a?.timeUntilAiring || 0) - (b?.timeUntilAiring || 0));
-
-      for (let i = 0; i < airingSchedules.length; i += chunkSize) {
-        fields.push(airingSchedules.slice(i, i + chunkSize));
-      }
-
-      // ^ Create pages with 5 airing anime per page and then make them into embeds
-      const pageList: EmbedBuilder[] = [];
-      fields.forEach((fieldSet, index) => {
-        const embed = new EmbedBuilder();
-        embed.setTitle(`Airing between ${day.toDateString()} to ${nextWeek.toDateString()}`);
-        embed.setColor("Green");
-        embed.setFooter(footer(headers));
-
-        fieldSet.forEach((field) => {
-          if (!field) return;
-          const { media, episode, airingAt } = field;
-
-          embed.addFields({
-            name: `${SeriesTitle(media?.title || undefined)}`,
-            value: `> **[EP - ${episode}]** :airplane: ${(new Date(airingAt * 1000) > new Date() ? `Going to air ` : `Aired`) + time(airingAt, TimestampStyles.RelativeTime)}`,
-            inline: false,
-          });
-        });
-        pageList.push(embed);
-      });
-
-      buildPagination(interaction, pageList).paginate();
-    } catch (e: any) {
-      console.error(e);
-      interaction.reply({ embeds: [embedError(e, vars)] });
+    // Sort the airing anime alphabetically by title
+    airingSchedules.sort((a, b) => (a?.timeUntilAiring || 0) - (b?.timeUntilAiring || 0));
+    for (let i = 0; i < airingSchedules.length; i += chunkSize) {
+      fields.push(airingSchedules.slice(i, i + chunkSize));
     }
+
+    // ^ Create pages with 5 airing anime per page and then make them into embeds
+    const pageList: EmbedBuilder[] = [];
+    fields.forEach((fieldSet, index) => {
+      const embed = new EmbedBuilder();
+      embed.setTitle(`Airing between ${day.toDateString()} to ${nextWeek.toDateString()}`);
+      embed.setColor("Green");
+      embed.setFooter(footer(headers));
+
+      fieldSet.forEach((field) => {
+        if (!field) return;
+        const { media, episode, airingAt } = field;
+
+        embed.addFields({
+          name: `${SeriesTitle(media?.title || undefined)}`,
+          value: `> **[EP - ${episode}]** :airplane: ${(new Date(airingAt * 1000) > new Date() ? `Going to air ` : `Aired`) + time(airingAt, TimestampStyles.RelativeTime)}`,
+          inline: false,
+        });
+      });
+      pageList.push(embed);
+    });
+
+    buildPagination(interaction, pageList).paginate();
   },
 } satisfies Command;

@@ -1,4 +1,4 @@
-import { embedError, graphQLRequest, getOptions, handleData, normalize, type CacheEntry } from "#utils/index";
+import { graphQLRequest, getOptions, handleData, normalize, type CacheEntry } from "#utils/index";
 import { SlashCommandBuilder } from "discord.js";
 import { redis } from "#caching/redis";
 import type { AnimeQuery, AnimeQueryVariables } from "#graphQL/types";
@@ -29,32 +29,31 @@ export default {
 
     const vars: AnimeQueryVariables = {};
     if (!hook) {
-      if (query.length < 3) return void interaction.editReply({ embeds: [embedError(`Please enter a search query of at least 3 characters.`, null, "", false)] });
-
+      if (query.length < 3) throw new Error("Query must be at least 3 characters long.");
       vars.query = query;
     } else if (hook && hookdata) {
       if (hookdata.id) {
-        console.log(`[AnimeCmd] Hookdata Anime ID: ${hookdata.id}`);
+        client.log(`[AnimeCmd] Hookdata Anime ID: ${hookdata.id}`, "Debug");
         vars.aID = hookdata.id;
       } else if (hookdata.title) {
         vars.query = hookdata.title;
         normalizedQuery = normalize(hookdata.title);
       }
-    } else return void interaction.editReply({ embeds: [embedError(`AnimeCmd was hooked, yet there was no title or ID provided in hookdata.`, null, "", false)] });
+    } else throw new Error("AnimeCmd was hooked, yet there was no title or ID provided in hookdata.");
 
-    console.log(`[AnimeCmd] Anime ID: ${vars.aID}`);
+    client.log(`[AnimeCmd] Anime ID: ${vars.aID}`, "Debug");
 
     if (!vars.aID) {
       const cachedId = await redis.get(`_animeId-${normalizedQuery}`);
       if (cachedId) {
         animeIdFound = true;
         vars.aID = parseInt(cachedId);
-        console.log(`[AnimeCmd] Found cached ID for ${normalizedQuery} : ${vars.aID}`);
-        console.log(`[AnimeCmd] Querying for ${normalizedQuery} with ID ${vars.aID}`);
+        client.log(`[AnimeCmd] Found cached ID for ${normalizedQuery} : ${vars.aID}`, "Debug");
+        client.log(`[AnimeCmd] Querying for ${normalizedQuery} with ID ${vars.aID}`, "Debug");
       }
     }
 
-    console.log(`[AnimeCmd] Querying Redis with hook animeId ${vars.aID}`);
+    client.log(`[AnimeCmd] Querying Redis with hook animeId ${vars.aID}`, "Debug");
     const cacheData = (await redis.json.get(`_anime-${vars.aID}`)) as AnimeQuery["Media"] | null;
 
     if (cacheData) {
@@ -65,37 +64,31 @@ export default {
 
         if (mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
       }
-      console.log("[AnimeCmd] Found cache data, returning data...");
+      client.log("[AnimeCmd] Found cache data, returning data...", "Debug");
       return void handleData({ media: cacheData }, interaction, "ANIME");
     }
-    console.log("[AnimeCmd] No cache found, fetching from CringeQL");
-    try {
-      const {
-        data: { Media: data },
-        headers,
-      } = await graphQLRequest("Anime", vars, interaction.ALtoken);
+    client.log("[AnimeCmd] No cache found, fetching from CringeQL", "Debug");
+    const {
+      data: { Media: data },
+      headers,
+    } = await graphQLRequest("Anime", vars, interaction.ALtoken);
 
-      if (!data) {
-        return void interaction.editReply({ embeds: [embedError(`Couldn't find any data.`, vars)] });
-      }
-
-      if (!animeIdFound) redis.set(`_animeId-${normalizedQuery}`, data.id);
-      const { mediaListEntry, ...redisData } = data;
-      redis.json.set(`_anime-${redisData.id}`, "$", redisData);
-      redis.expireAt(`_anime-${redisData.id}`, new Date(Date.now() + 604800000));
-      for (const synonym of redisData.synonyms || []) {
-        if (!synonym) continue;
-        redis.set(`_animeId-${normalize(synonym)}`, data.id);
-      }
-      if (redisData.nextAiringEpisode?.airingAt) {
-        console.log(`[AnimeCmd] Expiring anime-${redisData.id} at ${redisData.nextAiringEpisode.airingAt}`);
-        redis.expireAt(`_anime-${data.id}`, redisData.nextAiringEpisode.airingAt);
-      }
-      return void await handleData({ media: data, headers: headers }, interaction, "ANIME", hookdata);
-
-    } catch (e: any) {
-      console.error(e);
-      interaction.editReply({ embeds: [embedError(e, vars)] });
+    if (!data) {
+      throw new Error("No anime found.", { cause: vars });
     }
+
+    if (!animeIdFound) redis.set(`_animeId-${normalizedQuery}`, data.id);
+    const { mediaListEntry, ...redisData } = data;
+    redis.json.set(`_anime-${redisData.id}`, "$", redisData);
+    redis.expireAt(`_anime-${redisData.id}`, new Date(Date.now() + 604800000));
+    for (const synonym of redisData.synonyms || []) {
+      if (!synonym) continue;
+      redis.set(`_animeId-${normalize(synonym)}`, data.id);
+    }
+    if (redisData.nextAiringEpisode?.airingAt) {
+      client.log(`[AnimeCmd] Expiring anime-${redisData.id} at ${redisData.nextAiringEpisode.airingAt}`, "Debug");
+      redis.expireAt(`_anime-${data.id}`, redisData.nextAiringEpisode.airingAt);
+    }
+    return void await handleData({ media: data, headers: headers }, interaction, "ANIME", hookdata);
   },
 } satisfies CommandWithHook;
