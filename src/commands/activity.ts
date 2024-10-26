@@ -1,8 +1,8 @@
-import { graphQLRequest, SeriesTitle, getOptions, buildPagination } from "#utils/index";
+import { graphQLRequest, SeriesTitle, getOptions, buildPagination, YuukoError } from "#utils/index";
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { mwGetUserEntry } from "#middleware/userEntry";
 import type { Command } from "#structures/index";
-import type { ActivityReply, UserQueryVariables } from "#graphQL/types";
+import type { UserQueryVariables } from "#graphQL/types";
 
 const name = "activity";
 const usage = "activity <user>";
@@ -27,7 +27,7 @@ export default {
       userid: interaction.alID,
     };
 
-    if (!interaction.options.get("user") && !vars.userid) throw new Error("You need to provide a user to search for or link your AniList account. (check /auth help for more info)");
+    if (!interaction.options.get("user") && !vars.userid) throw new YuukoError("You need to provide a user to search for or link your AniList account. (check /auth help for more info)");
 
     if (vars.username) {
       const uData = (
@@ -36,7 +36,7 @@ export default {
         }, interaction.ALtoken)
       ).data.User;
 
-      if (!uData?.id) throw new Error("Couldn't find user id.", { cause: vars });
+      if (!uData?.id) throw new YuukoError("Couldn't find user id.", vars);
       vars.userid = uData?.id;
 
     }
@@ -46,7 +46,7 @@ export default {
     } = await graphQLRequest("Activity", vars, interaction.ALtoken);
 
     if (!data) {
-      throw new Error("Couldn't find any data.", { cause: vars });
+      throw new YuukoError("Couldn't find any data.", vars);
     }
 
     const embed = new EmbedBuilder().setTimestamp(data?.createdAt * 1000);

@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import type { Command } from "#structures/index";
-import { footer, graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
+import { footer, graphQLRequest, SeriesTitle, getOptions, YuukoError } from "#utils/index";
 
 const name = "studio";
 const usage = "studio <?>";
@@ -24,7 +24,7 @@ export default {
       headers,
     } = await graphQLRequest("Studio", { query });
 
-    if (!data || !data.media?.nodes) throw new Error("Couldn't find any data.", { cause: { query } });
+    if (!data || !data.media?.nodes) throw new YuukoError("Couldn't find any data.", { query });
 
     let animes: string[] | string = [];
     for (const anime of data.media.nodes) animes = animes.concat(`[${SeriesTitle(anime?.title || undefined)}]` + `(https://anilist.co/anime/${anime!.id})`);

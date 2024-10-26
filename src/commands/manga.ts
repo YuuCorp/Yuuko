@@ -3,7 +3,7 @@ import { redis } from "#caching/redis";
 import type { MangaQuery } from "#graphQL/types";
 import { mwGetUserEntry } from "#middleware/userEntry";
 import type { CommandWithHook } from "#structures/index";
-import { graphQLRequest, getOptions, handleData, normalize, type CacheEntry } from "#utils/index";
+import { graphQLRequest, getOptions, handleData, normalize, type CacheEntry, YuukoError } from "#utils/index";
 
 const name = "manga";
 const usage = "manga <title>";
@@ -34,14 +34,14 @@ export default {
     let mangaIdFound = false;
 
     if (!hook) {
-      if (manga.length < 3) throw new Error("Please enter a search query of at least 3 characters.");
+      if (manga.length < 3) throw new YuukoError("Please enter a search query of at least 3 characters.");
       vars.query = manga;
     } else if (hook && hookdata) {
       if (hookdata.title) {
         vars.query = hookdata.title;
         normalizedQuery = normalize(hookdata.title);
       }
-    } else throw new Error("MangaCmd was hooked, yet there was no title or ID provided in hookdata.");
+    } else throw new YuukoError("MangaCmd was hooked, yet there was no title or ID provided in hookdata.");
 
     if (!vars.mID) {
       const mangaId = await redis.get(`_mangaId-${normalizedQuery}`);
@@ -58,7 +58,7 @@ export default {
     if (cacheData) {
       if (interaction.alID) {
         const _mediaListEntry = await redis.json.get(`_user${interaction.alID}-MANGA`) as Record<number, CacheEntry>;
-        if (!vars.mID) throw new Error("No mID found in cache data.", { cause: vars });
+        if (!vars.mID) throw new YuukoError("No mID found in cache data.", vars);
         const mediaListEntry = _mediaListEntry ? _mediaListEntry[vars.mID] : null;
         if (mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
       }
@@ -74,7 +74,7 @@ export default {
     } = await graphQLRequest("Manga", vars, interaction.ALtoken);
 
     if (!data) {
-      throw new Error("Couldn't find any data.", { cause: vars });
+      throw new YuukoError("Couldn't find any data.", vars);
     }
 
     if (!mangaIdFound) redis.set(`_mangaId-${normalizedQuery}`, data.id);

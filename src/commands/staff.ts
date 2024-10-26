@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import type { Command } from "#structures/index";
-import { buildPagination, footer, graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
+import { buildPagination, footer, graphQLRequest, SeriesTitle, getOptions, YuukoError } from "#utils/index";
 
 const name = "staff";
 const usage = "staff <name>";
@@ -24,7 +24,7 @@ export default {
       data: { Staff: data },
       headers
     } = await graphQLRequest("Staff", { staffName });
-    if (!data) throw new Error("Couldn't find any data.", { cause: { staffName } });
+    if (!data) throw new YuukoError("Couldn't find any data.", { staffName });
     const staffMedia = data.staffMedia;
     const characterMedia = data.characterMedia;
 

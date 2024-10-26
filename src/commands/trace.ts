@@ -5,6 +5,7 @@ import type { Command } from "#structures/index";
 import AnimeCmd from "#commands/anime";
 
 import humanizeDuration from "humanize-duration";
+import { YuukoError } from "#utils/types";
 // const humanizeDuration = require("humanize-duration");
 
 const name = "trace";
@@ -38,7 +39,7 @@ export default {
     interaction.deferReply();
     const image = interaction.options.getAttachment("image");
 
-    if (!image) throw new Error("No image attached.");
+    if (!image) throw new YuukoError("No image attached.");
 
     const imageData = await (await fetch(image.url)).arrayBuffer();
     const res = await fetch(baseUrl, {
@@ -46,11 +47,11 @@ export default {
       body: imageData,
       headers: { "Content-type": "image/jpeg" },
     })
-    if (!res.ok) throw new Error(`Failed to fetch image: ${res.statusText}`);
+    if (!res.ok) throw new YuukoError(`Failed to fetch image: ${res.statusText}`);
 
     const data = await res.json() as { result: TraceMoeReturnType[] }
     const response = data.result[0];
-    if (!response) throw new Error("No results found.");
+    if (!response) throw new YuukoError("No results found.");
     const hookdata = {
       id: response.anilist,
       image: image.url,

@@ -1,4 +1,4 @@
-import { buildPagination, footer, graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
+import { buildPagination, footer, graphQLRequest, SeriesTitle, getOptions, YuukoError } from "#utils/index";
 import { EmbedBuilder, SlashCommandBuilder, TimestampStyles, time } from "discord.js";
 import ms from "ms";
 import { MediaType, type AiringQueryVariables } from "#graphQL/types";
@@ -36,7 +36,7 @@ export default {
 
     if (period) {
       airingIn = ms(period);
-      if (!airingIn) throw new Error("Invalid time format. See `/help` for more information.", { cause: { period } });
+      if (!airingIn) throw new YuukoError("Invalid time format. See `/help` for more information.", { period });
     }
 
     // ^ Get current day and time in UTC
@@ -76,7 +76,7 @@ export default {
       data: { Page: data },
       headers,
     } = await graphQLRequest("Airing", vars);
-    if (!data || !data.airingSchedules) throw new Error("No airing anime found.", { cause: vars });
+    if (!data || !data.airingSchedules) throw new YuukoError("No airing anime found.", vars);
     const { airingSchedules } = data;
 
     const chunkSize = 5;

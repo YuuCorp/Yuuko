@@ -3,7 +3,7 @@ import { mwGetUserEntry } from "#middleware/userEntry";
 import { HorizontalAlign, Jimp, loadFont, VerticalAlign } from "jimp";
 import { SANS_16_WHITE } from "jimp/fonts";
 import type { Command } from "#structures/index";
-import { CommandCategories, graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
+import { CommandCategories, graphQLRequest, SeriesTitle, getOptions, YuukoError } from "#utils/index";
 import type { MediaList, MediaType, RecentChartQueryVariables } from "#graphQL/types";
 
 const name = "recent";
@@ -34,7 +34,7 @@ export default {
 
     if (!userName) {
       // We try to use the one the user set
-      if (!interaction.alID) throw new Error("You have yet to set an AniList token.")
+      if (!interaction.alID) throw new YuukoError("You have yet to set an AniList token.", null, true)
       vars.userId = interaction.alID;
     } else {
       vars.user = userName;
@@ -43,7 +43,7 @@ export default {
     const {
       data: { Page: data },
     } = await graphQLRequest("RecentChart", vars, interaction.ALtoken);
-    if (!data?.mediaList) throw new Error("Unable to find specified user.", { cause: vars });
+    if (!data?.mediaList) throw new YuukoError("Unable to find specified user.", vars, true);
     interaction.editReply({ embeds: [{ description: "Creating image..." }] });
     const canvas = new Jimp({ width: 999, height: 999 });
     const useFont = await loadFont(SANS_16_WHITE);
@@ -77,7 +77,7 @@ export default {
     }
 
     const canvasResult = await canvas.getBuffer("image/png");
-    if (!canvasResult) throw new Error("Encountered an error whilst trying to create the image.");
+    if (!canvasResult) throw new YuukoError("Encountered an error whilst trying to create the image.");
     const attachment = new AttachmentBuilder(canvasResult, { name: "recent.png" });
     return void interaction.editReply({ files: [attachment], embeds: [] });
   }

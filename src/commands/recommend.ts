@@ -1,6 +1,6 @@
 import MangaCmd from "#commands/manga";
 import AnimeCmd from "#commands/anime";
-import { graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
+import { graphQLRequest, SeriesTitle, getOptions, YuukoError } from "#utils/index";
 import { SlashCommandBuilder } from "discord.js";
 import type { Command } from "#structures/index";
 import type { MediaType } from "#graphQL/types";
@@ -30,7 +30,7 @@ export default {
 
     const vars = { type, userName: anilistUser };
 
-    if (type != "ANIME" && type != "MANGA") throw new Error(`Please specify either manga, or anime as your content type. (Yours was "${type}")`);
+    if (type != "ANIME" && type != "MANGA") throw new YuukoError(`Please specify either manga, or anime as your content type. (Yours was "${type}")`);
 
     const excludeIDs: number[] = [];
 
@@ -39,13 +39,13 @@ export default {
       data: { MediaListCollection: data },
     } = await graphQLRequest("GetMediaCollection", vars);
 
-    if (!data || !data.lists || data.lists.length < 1) throw new Error("Couldn't find any data from the user specified.", { cause: vars });
+    if (!data || !data.lists || data.lists.length < 1) throw new YuukoError("Couldn't find any data from the user specified.", vars);
 
     // ^ We filter out the Planning list
     for (const MediaList of data.lists.filter((MediaList) => MediaList!.name != "Planning")) {
       if (MediaList && MediaList.entries) MediaList.entries.map((e) => excludeIDs.push(e!.media!.id));
     }
-    if (!genres.length) throw new Error("Please specify at least one genre.");
+    if (!genres.length) throw new YuukoError("Please specify at least one genre.");
 
     const genresArray = genres.split(",").map((genre) => genre.trim());
     const recommendationVars = { type, exclude_ids: excludeIDs, genresArray };
@@ -55,13 +55,13 @@ export default {
     } = await graphQLRequest("Recommendations", recommendationVars);
 
     if (!recommendationData || !recommendationData.media) {
-      throw new Error("Couldn't find any data.", { cause: recommendationVars });
+      throw new YuukoError("Couldn't find any data.", recommendationVars);
     }
     // ^ Filter out the Planning list
     const recommendations = recommendationData.media.filter((Media) => Media!.title);
     const random = Math.floor(Math.random() * Math.floor(recommendations.length));
     const recommendedSeries = recommendations[random];
-    if (!recommendedSeries) throw new Error("Couldn't find any data.", { cause: recommendationVars });
+    if (!recommendedSeries) throw new YuukoError("Couldn't find any data.", recommendationVars);
 
     switch (type) {
       case "ANIME":

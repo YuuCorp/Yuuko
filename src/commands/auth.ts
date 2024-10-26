@@ -1,4 +1,4 @@
-import { footer, graphQLRequest, rsaEncryption, getOptions, updateBotStats, getSubcommand } from "#utils/index";
+import { footer, graphQLRequest, rsaEncryption, getOptions, updateBotStats, getSubcommand, YuukoError } from "#utils/index";
 import anilistUser from "#database/models/anilistUser";
 import type { Command } from "#structures/index";
 import { SlashCommandBuilder } from "discord.js";
@@ -43,7 +43,7 @@ export default {
         const user = (await db.select().from(anilistUser).where(eq(anilistUser.discordId, interaction.user.id)).limit(1))[0];
 
         if (type === "wipe") {
-            if (!user) throw new Error("You don't have an AniList account bound to your Discord account.")
+            if (!user) throw new YuukoError("You don't have an AniList account bound to your Discord account.", null, true)
             await db.delete(anilistUser).where(eq(anilistUser.discordId, interaction.user.id));
 
             await updateBotStats(client);
@@ -62,11 +62,11 @@ export default {
 
         // Update existing user
         if (user) {
-            if (!token) throw new Error("Please provide a token with this option.");
+            if (!token) throw new YuukoError("Please provide a token with this option.", null, true);
 
             const { Viewer: data } = (await graphQLRequest("Viewer", {}, token)).data;
 
-            if (!data) throw new Error("Invalid token provided.");
+            if (!data) throw new YuukoError("Invalid token provided.", null, true);
 
             await db
                 .update(anilistUser)
@@ -86,11 +86,11 @@ export default {
         }
 
         // Create new user
-        if (!token) throw new Error("Please provide a token with this option.");
+        if (!token) throw new YuukoError("Please provide a token with this option.", null, true);
 
         const { Viewer: data } = (await graphQLRequest("Viewer", {}, token)).data;
 
-        if (!data) throw new Error("Invalid token provided.");
+        if (!data) throw new YuukoError("Invalid token provided.", null, true);
 
         await db.insert(anilistUser).values({ discordId: interaction.user.id, anilistToken: await rsaEncryption(token, true), anilistId: data.id });
         await updateBotStats(client);

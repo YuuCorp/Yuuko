@@ -1,5 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 import type { Command } from '#structures/index'
+import { YuukoError } from '#utils/types'
 
 const name = 'aninews'
 const usage = '/aninews'
@@ -42,7 +43,7 @@ export default {
       method: 'GET'
     })
 
-    if (!res.ok) throw new Error(`Failed to fetch RSS feed: ${res.statusText}`);
+    if (!res.ok) throw new YuukoError(`Failed to fetch RSS feed: ${res.statusText}`);
 
     const rss = await res.json() as RSSFeed
 

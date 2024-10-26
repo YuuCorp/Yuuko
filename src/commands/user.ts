@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, EmbedBuilder, type ColorResolvable } from "discord.js";
 import { mwGetUserEntry } from "#middleware/userEntry";
 import type { Command } from "#structures/index";
-import { graphQLRequest, footer, getOptions } from "#utils/index";
+import { graphQLRequest, footer, getOptions, YuukoError } from "#utils/index";
 import type { UserQueryVariables } from "#graphQL/types";
 
 const name = "user";
@@ -34,7 +34,7 @@ export default {
       if (interaction.alID) {
         vars = { userid: interaction.alID };
       } else {
-        throw new Error("You have yet to set an AniList token.");
+        throw new YuukoError("You have yet to set an AniList token.", null, true);
       }
     }
 
@@ -42,7 +42,7 @@ export default {
     const { data, headers } = await graphQLRequest("User", vars, interaction.ALtoken);
     const response = data.User;
 
-    if (!response) throw new Error("Couldn't find any data.", { cause: vars });
+    if (!response) throw new YuukoError("Couldn't find any data.", vars);
 
     const titleEmbed = new EmbedBuilder()
       // TODO: Fix depricated function calls 101

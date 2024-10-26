@@ -1,4 +1,4 @@
-import { graphQLRequest, getOptions, handleData, normalize, type CacheEntry } from "#utils/index";
+import { graphQLRequest, getOptions, handleData, normalize, type CacheEntry, YuukoError } from "#utils/index";
 import { SlashCommandBuilder } from "discord.js";
 import { redis } from "#caching/redis";
 import type { AnimeQuery, AnimeQueryVariables } from "#graphQL/types";
@@ -29,7 +29,7 @@ export default {
 
     const vars: AnimeQueryVariables = {};
     if (!hook) {
-      if (query.length < 3) throw new Error("Query must be at least 3 characters long.");
+      if (query.length < 3) throw new YuukoError("Query must be at least 3 characters long.");
       vars.query = query;
     } else if (hook && hookdata) {
       if (hookdata.id) {
@@ -39,7 +39,7 @@ export default {
         vars.query = hookdata.title;
         normalizedQuery = normalize(hookdata.title);
       }
-    } else throw new Error("AnimeCmd was hooked, yet there was no title or ID provided in hookdata.");
+    } else throw new YuukoError("AnimeCmd was hooked, yet there was no title or ID provided in hookdata.");
 
     client.log(`[AnimeCmd] Anime ID: ${vars.aID}`, "Debug");
 
@@ -59,7 +59,7 @@ export default {
     if (cacheData) {
       if (interaction.alID) {
         const _mediaListEntry = (await redis.json.get(`_user${interaction.alID}-ANIME`)) as Record<number, CacheEntry>;
-        if (!vars.aID) throw new Error("No anime ID found");
+        if (!vars.aID) throw new YuukoError("No anime ID found");
         const mediaListEntry = _mediaListEntry ? _mediaListEntry[vars.aID] : null;
 
         if (mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
@@ -74,7 +74,7 @@ export default {
     } = await graphQLRequest("Anime", vars, interaction.ALtoken);
 
     if (!data) {
-      throw new Error("No anime found.", { cause: vars });
+      throw new YuukoError("No anime found.", vars);
     }
 
     if (!animeIdFound) redis.set(`_animeId-${normalizedQuery}`, data.id);

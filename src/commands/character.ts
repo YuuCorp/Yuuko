@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import type { Command } from "#structures/index";
-import { buildPagination, footer, graphQLRequest, SeriesTitle, getOptions } from "#utils/index";
+import { buildPagination, footer, graphQLRequest, SeriesTitle, getOptions, YuukoError } from "#utils/index";
 
 const name = "character";
 const usage = "character <name>";
@@ -25,7 +25,7 @@ export default {
       headers,
     } = await graphQLRequest("Character", { charName });
 
-    if (!data) throw new Error("Couldn't find this character.", { cause: { charName } });
+    if (!data) throw new YuukoError("Couldn't find this character.", { charName });
 
     const embeds = [];
     const description =

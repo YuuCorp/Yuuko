@@ -1,6 +1,6 @@
 import { type Interaction, Collection, time } from "discord.js";
 
-import { embedError, logging } from "#utils/index";
+import { embedError, logging, YuukoError } from "#utils/index";
 import type { Client, ClientCommand, UsableInteraction, YuukoEvent, Middleware } from "#structures/index";
 
 /* discord doesn't have the commands property in their class for somea reason */
@@ -40,12 +40,15 @@ export const run: YuukoEvent<"interactionCreate"> = async (client, interaction) 
 
   } catch (e: any) {
     console.error(e);
-    if (!interaction.isCommand()) return;
 
-    if (interaction.deferred)
-      return void interaction.editReply({ embeds: [embedError(e, e.cause)] });
-    else
-      return void interaction.reply({ embeds: [embedError(e, e.cause)], ephemeral: true });
+    if (e instanceof YuukoError) {
+      if (!interaction.isCommand()) return;
+
+      if (interaction.deferred)
+        return void interaction.editReply({ embeds: [embedError(e)] });
+      else
+        return void interaction.reply({ embeds: [embedError(e)], ephemeral: e.ephemeral });
+    }
   };
 
   async function runMiddlewares(middlewares: Middleware[] | undefined, interaction: Interaction): Promise<Interaction> {
@@ -71,7 +74,7 @@ export const run: YuukoEvent<"interactionCreate"> = async (client, interaction) 
       console.log(cooldownExpires);
       if (!cooldownExpires) return interaction;
       if (cooldownExpires > Date.now()) {
-        throw new Error(`User ${interaction.user.tag} is on cooldown for command ${command.name}`, { cause: `Cooldown expires on ${time(Math.ceil(cooldownExpires / 1000), "f")} (${time(Math.ceil(cooldownExpires / 1000), "R")})` });
+        throw new YuukoError(`User ${interaction.user.tag} is on cooldown for command ${command.name}`, null, false, `Cooldown expires on ${time(Math.ceil(cooldownExpires / 1000), "f")} (${time(Math.ceil(cooldownExpires / 1000), "R")})`);
       }
     }
     return interaction;

@@ -1,4 +1,4 @@
-import { footer, graphQLRequest, getSubcommand } from "#utils/index";
+import { footer, graphQLRequest, getSubcommand, YuukoError } from "#utils/index";
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { mwRequireALToken } from "#middleware/alToken";
 import type { Command } from "#structures/index";
@@ -88,11 +88,11 @@ export default {
     if (!interaction.isChatInputCommand()) return;
     // const type = (interaction.options as CommandInteractionOptionResolver).getSubcommand() <- from auth command
     const type = getSubcommand<["list", "status"]>(interaction.options);
-    if (!type || (type != "status" && type != "list")) throw new Error(`Please use either the status or list subcommand. (Yours was "${type}")`);
+    if (!type || (type != "status" && type != "list")) throw new YuukoError(`Please use either the status or list subcommand. (Yours was "${type}")`);
 
     if (type === "status") {
       const vars = { text: getEmojis(interaction.options.getString("text", true)), asHtml: true };
-      if (!interaction.ALtoken) throw new Error("No Anilist token found.");
+      if (!interaction.ALtoken) throw new YuukoError("No Anilist token found.", null, true);
 
       const {
         data: { SaveTextActivity: data },
@@ -117,13 +117,13 @@ export default {
       const vars: { [key: string]: any } = {};
       for (const option of listOptions) vars[option] = interaction.options.get(option)?.value;
 
-      if (!interaction.ALtoken) throw new Error("No Anilist token found.");
+      if (!interaction.ALtoken) throw new YuukoError("No Anilist token found.", null, true);
 
       const {
         data: { SaveMediaListEntry: data },
         headers,
       } = await graphQLRequest("SaveMediaList", vars, interaction.ALtoken);
-      if (!data) throw new Error("Something went wrong while making the activity.");
+      if (!data) throw new YuukoError("Something went wrong while making the activity.", null, true);
       const mediaListActivity = new EmbedBuilder()
         .setURL(`https://anilist.co/${data?.media?.type || ""}/${data?.mediaId || ""}`)
         .setTitle(`${data.user?.name || "Unknown"} added ${data?.media?.title?.userPreferred || "Unknown"} to ${data?.status || "Unknown"}!`)
