@@ -52,3 +52,21 @@ export type YuukoLog = {
   user: string;
   info: string;
 }
+
+export class YuukoError extends Error {
+  vars?: any
+  ephemeral?: boolean
+  cause?: string
+
+  constructor(message: string, vars?: any, ephemeral: boolean = false, cause?: string) {
+    super(message);
+    this.name = 'YuukoError';
+    this.message = message;
+    this.vars = vars;
+    this.ephemeral = ephemeral;
+    this.cause = cause;
+
+    Object.setPrototypeOf(this, YuukoError.prototype);
+  }
+
+}

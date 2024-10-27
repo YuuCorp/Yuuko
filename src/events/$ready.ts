@@ -12,5 +12,5 @@ export const run: YuukoEvent<"ready"> = async (client) => {
   await registerCommands(client);
   await registerComponents(client);
 
-  client.log(`${client.user.tag} is ready!`);
+  client.log(`${client.user.tag} is ready!`, "Info");
 };

@@ -1,4 +1,4 @@
-import { getOptions, buildPagination, embedError, footer, getSubcommand } from "#utils/index";
+import { getOptions, buildPagination, footer, getSubcommand } from "#utils/index";
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { db, tables } from "#database/db";
 import { eq, sql } from "drizzle-orm";
@@ -41,12 +41,9 @@ export default {
       if (birthday.toString() === "Invalid Date") return void interaction.reply({ content: "Invalid date format. Please use YYYY-MM-DD.", ephemeral: true });
       const userBirthday = await db.query.userBirthday.findFirst({ where: (birthday, { eq }) => eq(birthday.userId, interaction.user.id) });
       if (userBirthday) {
-        console.log('[/birthday set] userBirthday exists, updating...')
         await db.update(tables.userBirthday).set({ birthday, updatedAt: sql`CURRENT_TIMESTAMP` }).where(eq(tables.userBirthday.userId, interaction.user.id));
       } else {
-        console.log('[/birthday set] userBirthday does not exist, inserting...')
         const data = { userId: interaction.user.id, birthday, guildId: interaction.guild.id }
-        console.log(data)
         const bOpt = {
           birthday,
           userId: interaction.user.id,
@@ -63,7 +60,6 @@ export default {
       const user = interaction.options.getUser("user");
       if (!user) return void interaction.reply({ content: "Please provide a user.", ephemeral: true });
       const birthday = (await db.select().from(tables.userBirthday).where(eq(tables.userBirthday.userId, user.id)).limit(1))[0]
-      console.log(birthday);
       if (!birthday) return void interaction.reply({ content: `${user.tag} has not set their birthday.`, ephemeral: true });
       const userBirthday = new Date(birthday.birthday);
       const daysLeft = daysLeftUntilBirthday(userBirthday);
@@ -88,7 +84,6 @@ export default {
 
     if (subcommand === "list") {
       const birthdays = await db.query.userBirthday.findMany({ where: (birthday, { eq }) => eq(birthday.guildId, interaction.guild!.id) });
-      console.log(birthdays)
       if (birthdays.length === 0) return void interaction.reply({ content: "There are no birthdays registered for this server.", ephemeral: true });
       const embeds = [];
       let currentEmbed = new EmbedBuilder().setTitle("Birthdays");
@@ -128,31 +123,18 @@ export default {
     if (subcommand === "wipe") {
       const birthday = (await db.query.userBirthday.findFirst({ where: (birthday, { eq }) => eq(birthday.userId, interaction.user.id) }));
       if (!birthday) return void interaction.reply({ content: "You have not set your birthday.", ephemeral: true });
-      try {
-        await db.delete(tables.userBirthday).where(eq(tables.userBirthday.userId, interaction.user.id));
-        return void interaction.reply({
-          embeds: [
-            {
-              title: `Successfully wiped your birthday.`,
-              description: `Your birthday has been wiped from our database.`,
-              color: 0x00ff00,
-              footer: footer(),
-            },
-          ],
-          ephemeral: true,
-        })
-      } catch (error) {
-        console.error(error);
-        return void interaction.reply({
-          embeds: [
-            embedError(
-              `An error occurred while updating your AniList account binding:\n\n${error}`,
-              null,
-            ),
-          ],
-          ephemeral: true,
-        });
-      }
+      await db.delete(tables.userBirthday).where(eq(tables.userBirthday.userId, interaction.user.id));
+      return void interaction.reply({
+        embeds: [
+          {
+            title: `Successfully wiped your birthday.`,
+            description: `Your birthday has been wiped from our database.`,
+            color: 0x00ff00,
+            footer: footer(),
+          },
+        ],
+        ephemeral: true,
+      })
     }
 
     function daysLeftUntilBirthday(date: Date) {

@@ -14,10 +14,10 @@ export default {
   withBuilder: new SlashCommandBuilder().setName(name).setDescription(description),
 
   run: async ({ interaction, client }): Promise<void> => {
-    if (!interaction.isCommand())
-      return
     interaction.reply(`Ping: ${client.ws.ping} ms.`)
+
     const commandCooldown = client.cooldowns.get(name);
+
     if (commandCooldown)
       commandCooldown.set(interaction.user.id, Date.now() + cooldown * 1000);
   },
