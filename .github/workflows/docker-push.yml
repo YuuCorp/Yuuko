@@ -1,0 +1,19 @@
+name: Docker Build and Push
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag crackheadakira/yuuko:latest
+      - name: Push the Docker Image
+        env:
+          DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+        run: |
+          docker login -u crackheadakira -p $DOCKER_TOKEN
+          docker push crackheadakira/yuuko:latest
