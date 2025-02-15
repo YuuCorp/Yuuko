@@ -77,6 +77,6 @@ export default {
         .setColor("Green");
       pageList.push(charEmbed);
     }
-    return void buildPagination(interaction, pageList).paginate();
+    return void await buildPagination(interaction, pageList);
   },
 } satisfies Command;

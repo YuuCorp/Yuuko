@@ -124,7 +124,7 @@ export default {
       case "MessageActivity":
         break;
     }
-    return void buildPagination(interaction, pageList).paginate();
+    return void await buildPagination(interaction, pageList);
   },
 } satisfies Command;
 

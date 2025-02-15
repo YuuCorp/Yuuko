@@ -54,7 +54,6 @@ export default {
   run: async ({ interaction, client }): Promise<void> => {
     // Require all files from the commands folder and fetch description
     const cmds = fs.readdirSync(import.meta.dir).filter((x) => x.endsWith(".ts") && x != "help.ts");
-    console.log(cmds);
     const cmdsDesc = [];
     const cmdGroups: Record<CommandType, Partial<Command>[]> = {
       "User": [],
@@ -90,6 +89,6 @@ export default {
       pageList.push(...generateHelpEmbeds(cmdHelpArr, _category));
     }
 
-    buildPagination(interaction, pageList).paginate();
+    return void await buildPagination(interaction, pageList);
   },
 } satisfies Omit<Command, "commandType">;

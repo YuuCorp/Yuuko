@@ -1,5 +1,5 @@
 import { getOptions, buildPagination, footer, getSubcommand } from "#utils/index";
-import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { EmbedBuilder, MessageFlags, SlashCommandBuilder } from "discord.js";
 import { db, tables } from "#database/db";
 import { eq, sql } from "drizzle-orm";
 import type { Command } from "#structures/index";
@@ -32,13 +32,13 @@ export default {
     ),
 
   run: async ({ interaction, client }): Promise<void> => {
-    if (!interaction.guild) return void interaction.reply({ content: "This command can only be used in a server.", ephemeral: true });
+    if (!interaction.guild) return void interaction.reply({ content: "This command can only be used in a server.", flags: MessageFlags.Ephemeral });
     const subcommand = getSubcommand<["user", "list", "set", "wipe"]>(interaction.options)
 
     if (subcommand === "set") {
       const { date } = getOptions<{ date: string }>(interaction.options, ["date"]);
       const birthday = new Date(date);
-      if (birthday.toString() === "Invalid Date") return void interaction.reply({ content: "Invalid date format. Please use YYYY-MM-DD.", ephemeral: true });
+      if (birthday.toString() === "Invalid Date") return void interaction.reply({ content: "Invalid date format. Please use YYYY-MM-DD.", flags: MessageFlags.Ephemeral });
       const userBirthday = await db.query.userBirthday.findFirst({ where: (birthday, { eq }) => eq(birthday.userId, interaction.user.id) });
       if (userBirthday) {
         await db.update(tables.userBirthday).set({ birthday, updatedAt: sql`CURRENT_TIMESTAMP` }).where(eq(tables.userBirthday.userId, interaction.user.id));
@@ -53,14 +53,14 @@ export default {
         }
         await db.insert(tables.userBirthday).values(bOpt);
       }
-      return void interaction.reply({ content: `Your birthday has been set to ${getReadableDate(birthday)}.`, ephemeral: true });
+      return void interaction.reply({ content: `Your birthday has been set to ${getReadableDate(birthday)}.`, flags: MessageFlags.Ephemeral });
     }
 
     if (subcommand === "user") {
       const user = interaction.options.getUser("user");
-      if (!user) return void interaction.reply({ content: "Please provide a user.", ephemeral: true });
+      if (!user) return void interaction.reply({ content: "Please provide a user.", flags: MessageFlags.Ephemeral });
       const birthday = (await db.select().from(tables.userBirthday).where(eq(tables.userBirthday.userId, user.id)).limit(1))[0]
-      if (!birthday) return void interaction.reply({ content: `${user.tag} has not set their birthday.`, ephemeral: true });
+      if (!birthday) return void interaction.reply({ content: `${user.tag} has not set their birthday.`, flags: MessageFlags.Ephemeral });
       const userBirthday = new Date(birthday.birthday);
       const daysLeft = daysLeftUntilBirthday(userBirthday);
       const age = calculateAge(userBirthday);
@@ -84,7 +84,7 @@ export default {
 
     if (subcommand === "list") {
       const birthdays = await db.query.userBirthday.findMany({ where: (birthday, { eq }) => eq(birthday.guildId, interaction.guild!.id) });
-      if (birthdays.length === 0) return void interaction.reply({ content: "There are no birthdays registered for this server.", ephemeral: true });
+      if (birthdays.length === 0) return void interaction.reply({ content: "There are no birthdays registered for this server.", flags: MessageFlags.Ephemeral });
       const embeds = [];
       let currentEmbed = new EmbedBuilder().setTitle("Birthdays");
       let currentEmbedIndex = 0;
@@ -117,12 +117,12 @@ export default {
           embeds.push(currentEmbed);
         }
       }
-      buildPagination(interaction, embeds).paginate();
+      await buildPagination(interaction, embeds);
     }
 
     if (subcommand === "wipe") {
       const birthday = (await db.query.userBirthday.findFirst({ where: (birthday, { eq }) => eq(birthday.userId, interaction.user.id) }));
-      if (!birthday) return void interaction.reply({ content: "You have not set your birthday.", ephemeral: true });
+      if (!birthday) return void interaction.reply({ content: "You have not set your birthday.", flags: MessageFlags.Ephemeral });
       await db.delete(tables.userBirthday).where(eq(tables.userBirthday.userId, interaction.user.id));
       return void interaction.reply({
         embeds: [
@@ -133,7 +133,7 @@ export default {
             footer: footer(),
           },
         ],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral
       })
     }
 
