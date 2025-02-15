@@ -85,7 +85,7 @@ export async function graphQLRequest<QueryKey extends Query>(queryKey: QueryKey,
     if (!res.ok) {
       let errorMessage = "";
       if (resJson.errors) errorMessage = resJson.errors[0].message;
-      throw new YuukoError(`${res.status} ${errorMessage.length > 0 ? errorMessage : ""} ${res.statusText}`, vars);
+      throw new YuukoError(`${res.status} ${errorMessage} ${res.statusText}`, vars);
     }
 
     const data = resJson as GraphQLResponse<QueryVariables[QueryKey][0]>
