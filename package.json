@@ -23,12 +23,8 @@
     "lint:fix": "eslint . --fix",
     "gen:gql": "graphql-codegen",
     "gen:queries": "bun run ./src/scripts/genQueries.ts",
-    "db:push:main": "bun drizzle-kit push:sqlite",
-    "db:push:stats": " bun drizzle-kit push:sqlite --config=drizzle.stats.config.ts",
-    "db:generate:main": "bun drizzle-kit generate:sqlite",
-    "db:generate:stats": "bun drizzle-kit generate:sqlite --config=drizzle.stats.config.ts",
-    "db:push": "bun run db:push:main && bun run db:push:stats",
-    "db:generate": "bun run db:generate:main && bun run db:generate:stats",
+    "db:push": "bun drizzle-kit push",
+    "db:generate": "bun drizzle-kit generate",
     "db:studio": "bun drizzle-kit studio"
   },
   "dependencies": {

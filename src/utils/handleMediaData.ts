@@ -2,10 +2,11 @@ import type { HookData, UsableInteraction } from "#structures/index";
 import type { AnimeQuery, MangaQuery, Maybe, ScoreFormat } from "#graphQL/types";
 import type { AlwaysExist, CacheEntry, GraphQLResponse } from "./types";
 import { buildPagination, footer, SeriesTitle } from ".";
-import { stat, statTables } from "#database/db";
+import { db } from "#database/db";
 import { EmbedBuilder, hyperlink } from "discord.js";
 import { redis } from "#caching/redis";
 import { eq } from "drizzle-orm";
+import { mediaStats } from "#database/models";
 
 export async function handleData(
   data: {
@@ -167,13 +168,18 @@ export async function handleData(
     pageList.push(thirdPage);
   }
 
-  const tableToUse = mediaType === "ANIME" ? statTables.AnimeStats : statTables.MangaStats;
-  const mediaUsers = (await stat.select().from(tableToUse).where(eq(tableToUse.mediaId, data.media.id)))[0];
+  // const tableToUse = mediaType === "ANIME" ? statTables.AnimeStats : statTables.MangaStats;
+  // const mediaUsers = (await stat.select().from(tableToUse).where(eq(tableToUse.mediaId, data.media.id)))[0];
+  const mediaUsers = await db.query.mediaStatUsers.findMany({
+    where: eq(mediaStats.mediaId, data.media.id),
+  });
+
+  console.log(mediaUsers);
 
   if (mediaUsers) {
-    const mediaPool = mediaUsers.users.map(
+    const mediaPool = mediaUsers.map(
       (user) =>
-        redis.json.get(`_user${user.aId}-${mediaType}`, {
+        redis.json.get(`_user${user.anilistId}-${mediaType}`, {
           path: `$.${media.id}`,
         }) as Promise<CacheEntry>,
     );
