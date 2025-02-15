@@ -168,26 +168,30 @@ export async function handleData(
     pageList.push(thirdPage);
   }
 
-  // const tableToUse = mediaType === "ANIME" ? statTables.AnimeStats : statTables.MangaStats;
-  // const mediaUsers = (await stat.select().from(tableToUse).where(eq(tableToUse.mediaId, data.media.id)))[0];
   const mediaUsers = await db.query.mediaStatUsers.findMany({
     where: eq(mediaStats.mediaId, data.media.id),
   });
 
-  console.log(mediaUsers);
+  if (mediaUsers.length > 1) {
 
-  if (mediaUsers) {
-    const mediaPool = mediaUsers.map(
-      (user) =>
-        redis.json.get(`_user${user.anilistId}-${mediaType}`, {
-          path: `$.${media.id}`,
-        }) as Promise<CacheEntry>,
-    );
-    const userData = (await Promise.allSettled(mediaPool)).filter((user): user is PromiseFulfilledResult<CacheEntry> => user.status === "fulfilled")
-      .flatMap((user) => user.value).filter(Boolean);
+    const mediaPool = mediaUsers.map(async (user) => {
+      const result = await redis.json.get(`_user${user.anilistId}-${media.id}`,).catch((e) => {
+        return console.log(e);
+      });
+
+      if (!result) {
+        console.log(`No data found for user ${user.anilistId}`)
+        return null;
+      }
+
+      return result as CacheEntry
+    });
+
+    const userData = (await Promise.all(mediaPool)).filter((u) => u != null);
+
     if (userData.every((e) => e == null)) return await buildPagination(interaction, pageList);
     const statisticsEmbed = new EmbedBuilder()
-      .setAuthor({ name: `${media.title?.english || "N/A"} | Guild Statistics for ${interaction.guild?.name}` })
+      .setAuthor({ name: `${media.title?.english || media.title?.romaji || "N/A"} | Statistics for Yuuko Users!` })
       .setImage(media.bannerImage!)
       .setDescription(
         userData.map((user) => `${hyperlink(user.user!.name, `https://anilist.co/user/${user.user.id}`)}: ${user.progress} ${episodeValue

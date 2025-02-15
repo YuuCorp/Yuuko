@@ -11,7 +11,7 @@ import { mediaStats, mediaStatUsers } from "#database/models";
 const name = "synclists";
 const usage = "/synclists";
 const description = "Syncs your AniList lists with our bot, allowing for quick access to your lists!";
-const cooldown = 15 * 60; // 15 minutes in seconds;
+const cooldown = 60; // 1 minutes in seconds;
 
 export default {
   name,
@@ -30,10 +30,7 @@ export default {
 
     if (subcommand === "wipe") {
       interaction.editReply(`Wiping your lists from DB...`);
-      (await redis.json.get(`_user${interaction.alID}-${MediaType.Anime}`)) as Record<number, CacheEntry>;
-
-      redis.del(`_user${interaction.alID}-${MediaType.Anime}`);
-      redis.del(`_user${interaction.alID}-${MediaType.Manga}`);
+      redis.del(await redis.keys(`_user${interaction.alID}-*`))
 
       await db.delete(mediaStatUsers).where(eq(mediaStatUsers.anilistId, interaction.alID!));
 
@@ -71,8 +68,6 @@ async function handleData(
 ) {
   if (!interaction.alID) return;
 
-  const dataToGiveToRedis: Record<number, CacheEntry> = {};
-
   const lists = data.media.MediaListCollection?.lists;
   const user = data.media.MediaListCollection?.user;
   const bulkMedia = new Set<{ mediaId: number, type: MediaType }>();
@@ -85,7 +80,6 @@ async function handleData(
     // for bulk inserting into DB
     for (const entry of entries) {
       if (!entry || !entry.media || !entry.media.id) continue;
-      if (dataToGiveToRedis[entry.media.id]) continue;
       const cacheEntry: CacheEntry = {
         user: {
           name: user.name,
@@ -99,8 +93,8 @@ async function handleData(
       };
 
       bulkMedia.add({ mediaId: entry.media.id, type });
-
-      dataToGiveToRedis[entry.media.id] = cacheEntry;
+      redis.json.set(`_user${user.id}-${entry.media.id}`, "$", cacheEntry);
+      // should be all we need, but then we need to also update the wipe part
 
       if (entry.media) {
         const redisData = entry.media;
@@ -148,6 +142,4 @@ async function handleData(
     .insert(mediaStatUsers)
     .values(userFromMedias)
     .onConflictDoNothing();
-
-  redis.json.set(`_user${interaction.alID}-${type}`, "$", dataToGiveToRedis);
 }
