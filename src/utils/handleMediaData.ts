@@ -179,7 +179,7 @@ export async function handleData(
     );
     const userData = (await Promise.allSettled(mediaPool)).filter((user): user is PromiseFulfilledResult<CacheEntry> => user.status === "fulfilled")
       .flatMap((user) => user.value).filter(Boolean);
-    if (userData.every((e) => e == null)) return buildPagination(interaction, pageList).paginate();
+    if (userData.every((e) => e == null)) return await buildPagination(interaction, pageList);
     const statisticsEmbed = new EmbedBuilder()
       .setAuthor({ name: `${media.title?.english || "N/A"} | Guild Statistics for ${interaction.guild?.name}` })
       .setImage(media.bannerImage!)
@@ -191,7 +191,7 @@ export async function handleData(
     pageList.push(statisticsEmbed);
   }
 
-  return buildPagination(interaction, pageList).paginate();
+  return await buildPagination(interaction, pageList);
 }
 
 function fixScoring(user: CacheEntry | null, scoreType: Maybe<ScoreFormat> | undefined, scoreValue: Maybe<number> | undefined) {

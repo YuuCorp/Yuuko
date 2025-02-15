@@ -68,7 +68,6 @@ export default {
         embeds.push(charMediaEmbed);
       }
     }
-    const pagination = buildPagination(interaction, embeds);
-    pagination.paginate();
+    await buildPagination(interaction, embeds);
   },
 } satisfies Command;

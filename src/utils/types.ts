@@ -1,4 +1,4 @@
-import type { Interaction } from 'discord.js'
+import type { Interaction, MessageFlags } from 'discord.js'
 import type { Middleware, Client } from '#structures/index'
 import type { Maybe, MediaListStatus, ScoreFormat } from '#graphQL/types'
 

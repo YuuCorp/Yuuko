@@ -1,7 +1,7 @@
 import { footer, graphQLRequest, rsaEncryption, getOptions, updateBotStats, getSubcommand, YuukoError } from "#utils/index";
 import anilistUser from "#database/models/anilistUser";
 import type { Command } from "#structures/index";
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import { db } from "#database/db";
 import { eq } from "drizzle-orm";
 
@@ -36,7 +36,7 @@ export default {
                         footer: footer(),
                     },
                 ],
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             }));
         }
 
@@ -56,7 +56,7 @@ export default {
                         footer: footer(),
                     },
                 ],
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             });
         }
 
@@ -81,7 +81,7 @@ export default {
                         footer: footer(),
                     },
                 ],
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             });
         }
 
@@ -103,7 +103,7 @@ export default {
                     footer: footer(),
                 },
             ],
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
         });
     },
 } satisfies Command;

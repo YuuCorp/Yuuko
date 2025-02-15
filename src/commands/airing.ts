@@ -35,6 +35,7 @@ export default {
     const mediaIDs = [];
 
     if (period) {
+      // @ts-ignore can't think of any other way to get around this
       airingIn = ms(period);
       if (!airingIn) throw new YuukoError("Invalid time format. See `/help` for more information.", { period });
     }
@@ -49,10 +50,8 @@ export default {
     vars.nextDay = Math.floor(nextWeek.getTime() / 1000);
 
     if (username) {
-      const tempVars = { userName: username, type: "ANIME" };
       const {
-        data: { MediaListCollection: data },
-        headers,
+        data: { MediaListCollection: data }
       } = await graphQLRequest("GetMediaCollection", { type: MediaType.Anime, userName: username });
 
       if (data?.lists) {
@@ -109,6 +108,6 @@ export default {
       pageList.push(embed);
     });
 
-    buildPagination(interaction, pageList).paginate();
+    await buildPagination(interaction, pageList);
   },
 } satisfies Command;

@@ -1,4 +1,4 @@
-import { type Interaction, Collection, time } from "discord.js";
+import { type Interaction, Collection, MessageFlags, time } from "discord.js";
 
 import { embedError, logging, YuukoError } from "#utils/index";
 import type { Client, ClientCommand, UsableInteraction, YuukoEvent, Middleware } from "#structures/index";
@@ -47,7 +47,10 @@ export const run: YuukoEvent<"interactionCreate"> = async (client, interaction) 
       if (interaction.deferred)
         return void interaction.editReply({ embeds: [embedError(e)] });
       else
-        return void interaction.reply({ embeds: [embedError(e)], ephemeral: e.ephemeral });
+        return void interaction.reply({
+          embeds: [embedError(e)],
+          flags: e.ephemeral ? MessageFlags.Ephemeral : undefined,
+        });
     }
   };
 
