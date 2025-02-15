@@ -81,9 +81,13 @@ export async function graphQLRequest<QueryKey extends Query>(queryKey: QueryKey,
 
   try {
     const res = await fetch(url, reqOptions)
-    if (!res.ok) throw new YuukoError(res.statusText, vars);
+    const resJson = await res.json() as GraphQLResponse;
+    if (!res.ok) {
+      const errorMessage = resJson.errors[0].message;
+      throw new YuukoError(`${res.status} ${errorMessage.length > 0 ? errorMessage : ""} ${res.statusText}`, vars);
+    }
 
-    const data = await res.json() as GraphQLResponse<QueryVariables[QueryKey][0]>
+    const data = resJson as GraphQLResponse<QueryVariables[QueryKey][0]>
     return data;
   } catch (e: any) {
     console.error(e)

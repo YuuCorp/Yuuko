@@ -1,4 +1,4 @@
-import { api } from '#api/controllers/*'
+import { api } from '#api/controllers/global.controller'
 import { cors } from '@elysiajs/cors'
 import { Elysia } from 'elysia'
 
