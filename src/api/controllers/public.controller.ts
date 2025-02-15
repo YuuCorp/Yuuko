@@ -32,11 +32,11 @@ export const publicController = new Elysia({
             const decryptedToken = await rsaEncryption(encryptedToken, false);
             const { Viewer: data } = (await graphQLRequest("Viewer", {}, decryptedToken)).data;
             if (!data) return { message: "Invalid token" };
-            console.log(data);
             const existingUser = (await db.select().from(anilistUser).where(eq(anilistUser.discordId, discordId)).limit(1))[0];
             if (existingUser) return { message: "User already registered" };
             await db.insert(anilistUser).values({ discordId, anilistToken: encryptedToken, anilistId: data.id });
 
+            console.log(`Registered ${discordId} as ${data.name}`);
             set.status = 201;
             return { message: `Registered as ${data.name}!` };
         },
