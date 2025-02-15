@@ -44,7 +44,7 @@ export interface Headers {
 
 export interface GraphQLResponse<TData = any> {
   data: TData
-  errors: any[]
+  errors?: any[]
   headers: any
 }
 
