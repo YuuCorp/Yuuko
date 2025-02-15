@@ -43,7 +43,6 @@ async function start(token: string | undefined) {
 async function makeRSAPair() {
   const RSAdirectory = path.join(import.meta.dir, 'RSA');
   if (fs.existsSync(path.join(RSAdirectory, 'id_rsa'))) return;
-  const dec = new TextDecoder();
 
   const keyPair = await globalThis.crypto.subtle.generateKey({
     name: "RSA-OAEP",

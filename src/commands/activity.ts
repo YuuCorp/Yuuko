@@ -2,7 +2,7 @@ import { graphQLRequest, SeriesTitle, getOptions, buildPagination, YuukoError } 
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { mwGetUserEntry } from "#middleware/userEntry";
 import type { Command } from "#structures/index";
-import type { UserQueryVariables } from "#graphQL/types";
+import type { ActivityQuery, UserQueryVariables } from "#graphQL/types";
 
 const name = "activity";
 const usage = "activity <user>";
@@ -70,24 +70,7 @@ export default {
 
         pageList.push(embed);
 
-        // I couldn't find a good way to handle the type, so I couldn't extract it to a function
-        if (data.replies) {
-          const replyPages = Math.ceil(data.replyCount / 25);
-          for (let i = 0; i < replyPages; i++) {
-            const replyEmbed = new EmbedBuilder().setTitle(`Replies to ${data?.user?.name?.toString() || "Unknown Name"}'s activity!`);
-
-            const replies = data.replies.slice(i * 25, i * 25 + 25).map((reply) => {
-              if (!reply || !reply.user || !reply.text) return;
-              const replyText = anilistToMarkdown(reply.text, 1024);
-              const replyName = reply.user.name
-
-              return { name: replyName, value: replyText };
-            }).filter((reply) => reply !== undefined);
-
-            replyEmbed.addFields(replies);
-            pageList.push(replyEmbed);
-          }
-        }
+        generateReplayEmbeds(data, pageList);
 
         break;
 
@@ -100,24 +83,7 @@ export default {
 
         pageList.push(embed);
 
-        // I couldn't find a good way to handle the type, so I couldn't extract it to a function
-        if (data.replies) {
-          const replyPages = Math.ceil(data.replyCount / 25);
-          for (let i = 0; i < replyPages; i++) {
-            const replyEmbed = new EmbedBuilder().setTitle(`Replies to ${data?.user?.name?.toString() || "Unknown Name"}'s activity!`);
-
-            const replies = data.replies.slice(i * 25, i * 25 + 25).map((reply) => {
-              if (!reply || !reply.user || !reply.text) return;
-              const replyText = anilistToMarkdown(reply.text, 1024);
-              const replyName = reply.user.name
-
-              return { name: replyName, value: replyText };
-            }).filter((reply) => reply !== undefined);
-
-            replyEmbed.addFields(replies);
-            pageList.push(replyEmbed);
-          }
-        }
+        generateReplayEmbeds(data, pageList);
 
         break;
 
@@ -127,6 +93,26 @@ export default {
     return void await buildPagination(interaction, pageList);
   },
 } satisfies Command;
+
+function generateReplayEmbeds(data: ActivityQuery['Activity'], pageList: any[]) {
+  if (!data || data.__typename !== "ListActivity" && data.__typename !== "TextActivity" || !data.replies) return;
+
+  const replyPages = Math.ceil(data.replyCount / 25);
+  for (let i = 0; i < replyPages; i++) {
+    const replyEmbed = new EmbedBuilder().setTitle(`Replies to ${data?.user?.name?.toString() || "Unknown Name"}'s activity!`);
+
+    const replies = data.replies.slice(i * 25, i * 25 + 25).map((reply) => {
+      if (!reply || !reply.user || !reply.text) return;
+      const replyText = anilistToMarkdown(reply.text, 1024);
+      const replyName = reply.user.name;
+
+      return { name: replyName, value: replyText };
+    }).filter((reply) => reply !== undefined);
+
+    replyEmbed.addFields(replies);
+    pageList.push(replyEmbed);
+  }
+}
 
 function capitalizeString(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
