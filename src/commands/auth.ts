@@ -32,7 +32,7 @@ export default {
                 embeds: [
                     {
                         title: `Steps to get your AniList Token.`,
-                        description: `To add you as an user you have to [link your Discord account with Anilist](https://auth.yuuko.dev).`,
+                        description: `To add you as an user you have to [link your Discord account with Anilist](https://auth.yuuko.dev).\nBeware! Tokens last one year, so if you start experiencing an error of invalid token, it means you have to run \`/auth wipe\` and reconnect your account.`,
                         footer: footer(),
                     },
                 ],
