@@ -12,11 +12,11 @@ export const workerEvents = sqliteTable("workerevents", {
 
     createdAt: integer("createdAt", { mode: "timestamp" })
         .notNull()
-        .default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: integer("updatedAt", { mode: "timestamp" })
+        .default(sql`current_timestamp`),
+    updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
         .notNull()
-        .default(sql`CURRENT_TIMESTAMP`)
-        .$onUpdateFn(() => sql`CURRENT_TIMESTAMP`),
+        .default(sql`current_timestamp`)
+        .$onUpdateFn(() => sql`current_timestamp`),
 });
 
 export const reminderUsers = sqliteTable("reminderusers", {

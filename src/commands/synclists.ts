@@ -2,9 +2,9 @@ import { SlashCommandBuilder } from "discord.js";
 import { redis } from "#caching/redis";
 import { MediaType, type GetMediaCollectionQuery } from "#graphQL/types";
 import { mwRequireALToken } from "#middleware/alToken";
-import type { Command, UsableInteraction } from "#structures/index";
+import type { Command } from "#structures/index";
 import { db } from "#database/db";
-import { normalize, graphQLRequest, getSubcommand, type AlwaysExist, type CacheEntry, type GraphQLResponse } from "#utils/index";
+import { normalize, graphQLRequest, getSubcommand, type AlwaysExist, type CacheEntry, type GraphQLResponse, YuukoError } from "#utils/index";
 import { eq } from "drizzle-orm";
 import { mediaStats, mediaStatUsers } from "#database/models";
 
@@ -41,14 +41,15 @@ export default {
         userId: interaction.alID,
         type: MediaType.Anime,
       }, interaction.ALtoken);
-      if (animeData) handleData({ media: animeData }, interaction, MediaType.Anime);
+
+      if (animeData) await handleSyncing({ media: animeData }, interaction.alID!, MediaType.Anime);
 
       const { data: mangaData } = await graphQLRequest("GetMediaCollection", {
         userId: interaction.alID,
         type: MediaType.Manga,
       }, interaction.ALtoken);
 
-      if (mangaData) handleData({ media: mangaData }, interaction, MediaType.Manga);
+      if (mangaData) await handleSyncing({ media: mangaData }, interaction.alID!, MediaType.Manga);
 
       const commandCooldown = client.cooldowns.get(name);
       if (commandCooldown) commandCooldown.set(interaction.user.id, Date.now() + cooldown * 1000);
@@ -58,20 +59,20 @@ export default {
   },
 } satisfies Command;
 
-async function handleData(
+export async function handleSyncing(
   data: {
     media: AlwaysExist<GetMediaCollectionQuery>;
     headers?: GraphQLResponse["headers"];
   },
-  interaction: UsableInteraction,
+  alID: number,
   type: MediaType,
 ) {
-  if (!interaction.alID) return;
 
   const lists = data.media.MediaListCollection?.lists;
   const user = data.media.MediaListCollection?.user;
   const bulkMedia = new Set<{ mediaId: number, type: MediaType }>();
-  if (!lists || !user) return interaction.editReply(`You have no lists!`);
+  if (!lists || !user) throw new YuukoError("You have no lists!");
+
   for (const list of lists) {
     if (!list) continue;
     const entries = list.entries;
@@ -83,7 +84,7 @@ async function handleData(
       const cacheEntry: CacheEntry = {
         user: {
           name: user.name,
-          id: interaction.alID,
+          id: alID,
           mediaListOptions: user.mediaListOptions,
         },
         status: entry.status,
@@ -136,7 +137,7 @@ async function handleData(
     .values(mediasArray)
     .onConflictDoNothing();
 
-  const userFromMedias = mediasArray.map((m) => ({ mediaId: m.mediaId, anilistId: interaction.alID! }));
+  const userFromMedias = mediasArray.map((m) => ({ mediaId: m.mediaId, anilistId: alID }));
   // bulk insert user into given media(s)
   await db
     .insert(mediaStatUsers)

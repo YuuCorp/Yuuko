@@ -1,12 +1,12 @@
 import dotenvFlow, { config } from "dotenv-flow";
-import { sqlite } from "#database/db";
+import { db, sqlite, tables } from "#database/db";
 import { Client } from "#structures/index";
 import { GatewayIntentBits } from "discord.js";
 import { registerEvents, updateBotStats } from "#utils/index";
 import { runChecks } from "#checks/run";
 import path from "path";
 import fs from "fs";
-import type { WorkerResponseUnion } from "#workers/manager";
+import { syncAnilistUsers, type WorkerResponseUnion } from "#workers/index";
 
 process.on("SIGINT", () => {
   sqlite.close();
@@ -15,7 +15,7 @@ process.on("SIGINT", () => {
 
 dotenvFlow.config({ silent: true });
 
-export const client = new Client({ intents: [GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildEmojisAndStickers, GatewayIntentBits.DirectMessages, GatewayIntentBits.Guilds], allowedMentions: { repliedUser: false } });
+export const client = new Client({ intents: [GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildExpressions, GatewayIntentBits.DirectMessages, GatewayIntentBits.Guilds], allowedMentions: { repliedUser: false } });
 const workerManager = new Worker("#workers/manager.ts");
 
 async function start(token: string | undefined) {
@@ -69,17 +69,36 @@ async function makeRSAPair() {
   client.log("Successfully generated the RSA key pair!", "RSA")
 }
 
+async function initializeWorkerDB() {
+  const syncEvent = await db.select().from(tables.workerEvents).limit(1);
+
+  // only add if doesn't exist
+  if (!syncEvent.length) {
+    await db.insert(tables.workerEvents).values({
+      type: "SYNC",
+      period: 60 * 1000 * 5, // 5 minutes in milliseconds
+    });
+  };
+}
+
 
 await makeRSAPair();
 await start(process.env.TOKEN);
 
+await initializeWorkerDB();
+
+// tell the worker to start a check loop
 workerManager.postMessage(null);
 
-workerManager.onmessage = (e) => {
+workerManager.onmessage = async (e) => {
   if (!e.data.type) return;
   const data = e.data as WorkerResponseUnion;
 
-  // interval only posts something to main thread when we need
-  // to interact with discord
-  console.log(client.commands.first());
+  switch (data.type) {
+    case "SYNC": {
+      console.log("syncing users...");
+      await syncAnilistUsers(data);
+      break;
+    }
+  }
 };
