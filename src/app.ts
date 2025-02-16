@@ -6,6 +6,7 @@ import { registerEvents, updateBotStats } from "#utils/index";
 import { runChecks } from "#checks/run";
 import path from "path";
 import fs from "fs";
+import type { WorkerResponseUnion } from "#workers/manager";
 
 process.on("SIGINT", () => {
   sqlite.close();
@@ -15,6 +16,7 @@ process.on("SIGINT", () => {
 dotenvFlow.config({ silent: true });
 
 export const client = new Client({ intents: [GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildEmojisAndStickers, GatewayIntentBits.DirectMessages, GatewayIntentBits.Guilds], allowedMentions: { repliedUser: false } });
+const workerManager = new Worker("#workers/manager.ts");
 
 async function start(token: string | undefined) {
   await registerEvents(client);
@@ -67,5 +69,17 @@ async function makeRSAPair() {
   client.log("Successfully generated the RSA key pair!", "RSA")
 }
 
-makeRSAPair();
-start(process.env.TOKEN);
+
+await makeRSAPair();
+await start(process.env.TOKEN);
+
+workerManager.postMessage(null);
+
+workerManager.onmessage = (e) => {
+  if (!e.data.type) return;
+  const data = e.data as WorkerResponseUnion;
+
+  // interval only posts something to main thread when we need
+  // to interact with discord
+  console.log(client.commands.first());
+};

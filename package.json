@@ -15,8 +15,8 @@
   "scripts": {
     "api": "bun run ./src/api.ts",
     "start": "pm2 start ecosystem.config.cjs --env production",
-    "dev": "NODE_ENV=development bun run --define self=undefined --watch ./src/app.ts",
-    "start:prod": "NODE_ENV=production bun run --define self=undefined ./src/app.ts",
+    "dev": "NODE_ENV=development bun run --watch ./src/app.ts",
+    "start:prod": "NODE_ENV=production bun run ./src/app.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "prettier --write .",
     "lint": "eslint .",
@@ -60,5 +60,8 @@
     "prettier": "^3.5.1",
     "prettier-eslint": "^16.3.0",
     "typescript": "^5.7.3"
+  },
+  "patchedDependencies": {
+    "@jimp/plugin-print@1.6.0": "patches/@jimp%2Fplugin-print@1.6.0.patch"
   }
 }
