@@ -15,14 +15,17 @@ export async function syncAnilistUsers(data: SyncUsers) {
     let i = 1;
     for (const user of anilistUsers) {
         try {
-            const { data: animeData } = await graphQLRequest("GetMediaCollection", {
+            // GetUserList is a more optimized query for syncing lists compared to GetMediaCollection
+            // as we don't care about the media, only user entries
+            const start = performance.now();
+            const { data: animeData } = await graphQLRequest("GetUserList", {
                 userId: user.anilistId,
                 type: MediaType.Anime,
             }, user.anilistToken);
 
             if (animeData) await handleSyncing({ media: animeData }, user.anilistId, MediaType.Anime);
 
-            const { data: mangaData } = await graphQLRequest("GetMediaCollection", {
+            const { data: mangaData } = await graphQLRequest("GetUserList", {
                 userId: user.anilistId,
                 type: MediaType.Anime,
             }, user.anilistToken);
@@ -31,9 +34,10 @@ export async function syncAnilistUsers(data: SyncUsers) {
 
             client.log(`Synced user ${user.anilistId} (${i} / ${anilistUsers.length})`, "SYNC");
 
-            if (i <= total) {
-                client.log(`Waiting ${timeOut}ms before syncing the next user... (${i} / ${total})`, "SYNC");
-                await new Promise((resolve) => setTimeout(resolve, timeOut));
+            const localTimeout = Math.max(0, Math.floor(timeOut - (performance.now() - start)));
+            if (i <= total && localTimeout > 0) {
+                client.log(`Waiting ${localTimeout}ms before syncing the next user... (${i} / ${total})`, "SYNC");
+                await new Promise((resolve) => setTimeout(resolve, localTimeout));
             }
             i++;
 

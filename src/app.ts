@@ -1,4 +1,4 @@
-import dotenvFlow, { config } from "dotenv-flow";
+import dotenvFlow from "dotenv-flow";
 import { db, sqlite, tables } from "#database/db";
 import { Client } from "#structures/index";
 import { GatewayIntentBits } from "discord.js";
@@ -76,7 +76,7 @@ async function initializeWorkerDB() {
   if (!syncEvent.length) {
     await db.insert(tables.workerEvents).values({
       type: "SYNC",
-      period: 60 * 1000 * 5, // 5 minutes in milliseconds
+      period: 24 * 60 * 60 * 1000, // 1 day in milliseconds
     });
   };
 }

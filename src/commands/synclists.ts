@@ -97,7 +97,7 @@ export async function handleSyncing(
       redis.json.set(`_user${user.id}-${entry.media.id}`, "$", cacheEntry);
       // should be all we need, but then we need to also update the wipe part
 
-      if (entry.media) {
+      if (entry.media && entry.media.title) {
         const redisData = entry.media;
         if (type === MediaType.Anime) {
           delete redisData.chapters;
