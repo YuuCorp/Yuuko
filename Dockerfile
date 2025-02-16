@@ -24,8 +24,7 @@ COPY --from=prerelease /usr/src/Yuuko/src ./src
 COPY --from=prerelease /usr/src/Yuuko/entrypoint.sh .
 COPY --from=prerelease /usr/src/Yuuko/package.json .
 COPY --from=prerelease /usr/src/Yuuko/tsconfig.json .
-COPY --from=prerelease /usr/src/Yuuko/drizzle.config.ts .
-COPY --from=prerelease /usr/src/Yuuko/drizzle.stats.config.ts .
+COPY --from=prerelease /usr/src/Yuuko/drizzle.config.ts ..
 
 EXPOSE 3030/tcp
 

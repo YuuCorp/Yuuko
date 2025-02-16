@@ -33,7 +33,7 @@ export default {
       vars.query = query;
     } else if (hook && hookdata) {
       if (hookdata.id) {
-        client.log(`[AnimeCmd] Hookdata Anime ID: ${hookdata.id}`, "Debug");
+        client.log(`Hookdata Anime ID: ${hookdata.id}`, "AnimeCmd");
         vars.aID = hookdata.id;
       } else if (hookdata.title) {
         vars.query = hookdata.title;
@@ -41,19 +41,19 @@ export default {
       }
     } else throw new YuukoError("AnimeCmd was hooked, yet there was no title or ID provided in hookdata.");
 
-    client.log(`[AnimeCmd] Anime ID: ${vars.aID}`, "Debug");
+    client.log(`Anime ID: ${vars.aID}`, "AnimeCmd");
 
     if (!vars.aID) {
       const cachedId = await redis.get(`_animeId-${normalizedQuery}`);
       if (cachedId) {
         animeIdFound = true;
         vars.aID = parseInt(cachedId);
-        client.log(`[AnimeCmd] Found cached ID for ${normalizedQuery} : ${vars.aID}`, "Debug");
-        client.log(`[AnimeCmd] Querying for ${normalizedQuery} with ID ${vars.aID}`, "Debug");
+        client.log(`Found cached ID for ${normalizedQuery} : ${vars.aID}`, "AnimeCmd");
+        client.log(`Querying for ${normalizedQuery} with ID ${vars.aID}`, "AnimeCmd");
       }
     }
 
-    client.log(`[AnimeCmd] Querying Redis with hook animeId ${vars.aID}`, "Debug");
+    client.log(`Querying Redis with hook animeId ${vars.aID}`, "AnimeCmd");
     const cacheData = (await redis.json.get(`_anime-${vars.aID}`)) as AnimeQuery["Media"] | null;
 
     if (cacheData) {
@@ -64,10 +64,10 @@ export default {
 
         if (mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
       }
-      client.log("[AnimeCmd] Found cache data, returning data...", "Debug");
+      client.log("Found cache data, returning data...", "AnimeCmd");
       return void handleData({ media: cacheData }, interaction, "ANIME");
     }
-    client.log("[AnimeCmd] No cache found, fetching from CringeQL", "Debug");
+    client.log("No cache found, fetching from CringeQL", "AnimeCmd");
     const {
       data: { Media: data },
       headers,
