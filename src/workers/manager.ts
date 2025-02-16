@@ -1,4 +1,3 @@
-import { anilistUser } from '#models/anilistUser';
 // prevents TS errors
 declare var self: Worker;
 
@@ -6,14 +5,14 @@ export type WorkerResponseUnion = ReminderMessage | SyncUsers;
 
 type ReminderMessage = {
     type: 'REMINDER'
-    userId: string;
+    discordId: string;
     animeId: string;
     episode: number;
 };
 
 type SyncUsers = {
     type: "SYNC",
-    userIDs: string[];
+    anilistIDs: string[];
 };
 
 
@@ -29,7 +28,7 @@ self.onmessage = (e) => {
         await checkUpcomingEpisodes();
         self.postMessage({
             type: "REMINDER",
-            userId: "51562",
+            discordId: "51562",
             animeId: "10313",
             episode: 12,
         } satisfies ReminderMessage); // talk back to main thread
