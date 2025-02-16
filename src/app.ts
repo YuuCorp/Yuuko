@@ -1,11 +1,12 @@
-import dotenvFlow, { config } from "dotenv-flow";
-import { sqlite } from "#database/db";
+import dotenvFlow from "dotenv-flow";
+import { db, sqlite, tables } from "#database/db";
 import { Client } from "#structures/index";
 import { GatewayIntentBits } from "discord.js";
 import { registerEvents, updateBotStats } from "#utils/index";
 import { runChecks } from "#checks/run";
 import path from "path";
 import fs from "fs";
+import { syncAnilistUsers, type WorkerResponseUnion } from "#workers/index";
 
 process.on("SIGINT", () => {
   sqlite.close();
@@ -14,7 +15,8 @@ process.on("SIGINT", () => {
 
 dotenvFlow.config({ silent: true });
 
-export const client = new Client({ intents: [GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildEmojisAndStickers, GatewayIntentBits.DirectMessages, GatewayIntentBits.Guilds], allowedMentions: { repliedUser: false } });
+export const client = new Client({ intents: [GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildExpressions, GatewayIntentBits.DirectMessages, GatewayIntentBits.Guilds], allowedMentions: { repliedUser: false } });
+const workerManager = new Worker("#workers/manager.ts");
 
 async function start(token: string | undefined) {
   await registerEvents(client);
@@ -43,7 +45,6 @@ async function start(token: string | undefined) {
 async function makeRSAPair() {
   const RSAdirectory = path.join(import.meta.dir, 'RSA');
   if (fs.existsSync(path.join(RSAdirectory, 'id_rsa'))) return;
-  const dec = new TextDecoder();
 
   const keyPair = await globalThis.crypto.subtle.generateKey({
     name: "RSA-OAEP",
@@ -68,5 +69,36 @@ async function makeRSAPair() {
   client.log("Successfully generated the RSA key pair!", "RSA")
 }
 
-makeRSAPair();
-start(process.env.TOKEN);
+async function initializeWorkerDB() {
+  const syncEvent = await db.select().from(tables.workerEvents).limit(1);
+
+  // only add if doesn't exist
+  if (!syncEvent.length) {
+    await db.insert(tables.workerEvents).values({
+      type: "SYNC",
+      period: 24 * 60 * 60 * 1000, // 1 day in milliseconds
+    });
+  };
+}
+
+
+await makeRSAPair();
+await start(process.env.TOKEN);
+
+await initializeWorkerDB();
+
+// tell the worker to start a check loop
+workerManager.postMessage(null);
+
+workerManager.onmessage = async (e) => {
+  if (!e.data.type) return;
+  const data = e.data as WorkerResponseUnion;
+
+  switch (data.type) {
+    case "SYNC": {
+      console.log("syncing users...");
+      await syncAnilistUsers(data);
+      break;
+    }
+  }
+};

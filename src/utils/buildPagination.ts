@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Message, type CollectedMessageInteraction, type EmbedBuilder, type InteractionReplyOptions, type MessageComponentCollectorOptions } from 'discord.js'
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, Message, type CollectedMessageInteraction, type InteractionReplyOptions, type MessageComponentCollectorOptions } from 'discord.js'
 import type { UsableInteraction } from '#structures/command';
 
 export async function buildPagination(interaction: UsableInteraction, pageList: EmbedBuilder[]) {
@@ -75,9 +75,12 @@ export async function buildPagination(interaction: UsableInteraction, pageList: 
 }
 
 function createPaginationData(pageList: EmbedBuilder[], pageNumber: number, totalPages: number, buttonList: ButtonBuilder[]) {
-  const currentPage = pageList[pageNumber]!;
+  const currentPage = EmbedBuilder.from(pageList[pageNumber]!);
+
+  const embedFooter = currentPage.data.footer?.text;
   let newFooter = `Page ${pageNumber + 1} / ${totalPages}`;
-  if (currentPage.data.footer?.text) newFooter = `${currentPage.data.footer.text} • ${newFooter}`;
+  if (embedFooter && !embedFooter.includes("Page ")) newFooter = `${embedFooter} • ${newFooter}`;
+
   return {
     embeds: [
       currentPage.setFooter({ text: newFooter })

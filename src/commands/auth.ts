@@ -1,5 +1,5 @@
 import { footer, graphQLRequest, rsaEncryption, getOptions, updateBotStats, getSubcommand, YuukoError } from "#utils/index";
-import anilistUser from "#database/models/anilistUser";
+import { anilistUser } from "#database/models/anilistUser";
 import type { Command } from "#structures/index";
 import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import { db } from "#database/db";

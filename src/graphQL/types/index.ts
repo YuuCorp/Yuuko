@@ -4711,6 +4711,14 @@ export type GetMediaCollectionQueryVariables = Exact<{
 
 export type GetMediaCollectionQuery = { __typename?: 'Query', MediaListCollection?: { __typename?: 'MediaListCollection', lists?: Array<{ __typename?: 'MediaListGroup', name?: string | null, entries?: Array<{ __typename?: 'MediaList', score?: number | null, status?: MediaListStatus | null, notes?: string | null, progress?: number | null, updatedAt?: number | null, media?: { __typename?: 'Media', id: number, genres?: Array<string | null> | null, description?: string | null, format?: MediaFormat | null, siteUrl?: string | null, source?: MediaSource | null, duration?: number | null, synonyms?: Array<string | null> | null, episodes?: number | null, chapters?: number | null, meanScore?: number | null, volumes?: number | null, isAdult?: boolean | null, bannerImage?: string | null, title?: { __typename?: 'MediaTitle', english?: string | null, romaji?: string | null, native?: string | null } | null, nextAiringEpisode?: { __typename?: 'AiringSchedule', airingAt: number, timeUntilAiring: number, episode: number } | null, coverImage?: { __typename?: 'MediaCoverImage', large?: string | null, medium?: string | null } | null, startDate?: { __typename?: 'FuzzyDate', day?: number | null, month?: number | null, year?: number | null } | null, endDate?: { __typename?: 'FuzzyDate', day?: number | null, month?: number | null, year?: number | null } | null, tags?: Array<{ __typename?: 'MediaTag', rank?: number | null, name: string } | null> | null } | null } | null> | null } | null> | null, user?: { __typename?: 'User', name: string, id: number, mediaListOptions?: { __typename?: 'MediaListOptions', scoreFormat?: ScoreFormat | null } | null } | null } | null };
 
+export type GetUserListQueryVariables = Exact<{
+  type?: InputMaybe<MediaType>;
+  userId?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetUserListQuery = { __typename?: 'Query', MediaListCollection?: { __typename?: 'MediaListCollection', lists?: Array<{ __typename?: 'MediaListGroup', entries?: Array<{ __typename?: 'MediaList', status?: MediaListStatus | null, progress?: number | null, score?: number | null, notes?: string | null, media?: { __typename?: 'Media', id: number } | null } | null> | null } | null> | null, user?: { __typename?: 'User', name: string, id: number, mediaListOptions?: { __typename?: 'MediaListOptions', scoreFormat?: ScoreFormat | null } | null } | null } | null };
+
 export type ListQueryQueryVariables = Exact<{
   userId?: InputMaybe<Scalars['Int']['input']>;
 }>;

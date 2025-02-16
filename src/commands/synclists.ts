@@ -2,15 +2,16 @@ import { SlashCommandBuilder } from "discord.js";
 import { redis } from "#caching/redis";
 import { MediaType, type GetMediaCollectionQuery } from "#graphQL/types";
 import { mwRequireALToken } from "#middleware/alToken";
-import type { Command, UsableInteraction } from "#structures/index";
-import { stat, statTables, type StatUser } from "#database/db";
-import { normalize, graphQLRequest, getSubcommand, type AlwaysExist, type CacheEntry, type GraphQLResponse } from "#utils/index";
+import type { Command } from "#structures/index";
+import { db } from "#database/db";
+import { normalize, graphQLRequest, getSubcommand, type AlwaysExist, type CacheEntry, type GraphQLResponse, YuukoError } from "#utils/index";
 import { eq } from "drizzle-orm";
+import { mediaStats, mediaStatUsers } from "#database/models";
 
 const name = "synclists";
 const usage = "/synclists";
 const description = "Syncs your AniList lists with our bot, allowing for quick access to your lists!";
-const cooldown = 15 * 60; // 15 minutes in seconds;
+const cooldown = 60; // 1 minutes in seconds;
 
 export default {
   name,
@@ -28,35 +29,27 @@ export default {
     const subcommand = getSubcommand<["sync", "wipe"]>(interaction.options);
 
     if (subcommand === "wipe") {
-      interaction.editReply(`Wiping your lists...`);
-      (await redis.json.get(`_user${interaction.alID}-${MediaType.Anime}`)) as Record<number, CacheEntry>;
+      interaction.editReply(`Wiping your lists from DB...`);
+      redis.del(await redis.keys(`_user${interaction.alID}-*`))
 
-      redis.del(`_user${interaction.alID}-${MediaType.Anime}`);
-      redis.del(`_user${interaction.alID}-${MediaType.Manga}`);
+      await db.delete(mediaStatUsers).where(eq(mediaStatUsers.anilistId, interaction.alID!));
 
-      const animeMediaIDs = await getMediaForUser(statTables.AnimeStats, interaction.alID!);
-      const mangaMediaIDs = await getMediaForUser(statTables.AnimeStats, interaction.alID!);
-
-      if (animeMediaIDs.length == 0 && mangaMediaIDs.length == 0) return void interaction.editReply(`You don't have any data synced with our bot!`);
-
-      await removeUserFromMedia(statTables.AnimeStats, animeMediaIDs, { aId: interaction.alID!, dId: interaction.user.id });
-      await removeUserFromMedia(statTables.AnimeStats, mangaMediaIDs, { aId: interaction.alID!, dId: interaction.user.id });
-
-      return void interaction.editReply(`Successfully wiped your lists!`);
+      return void interaction.editReply(`Successfully wiped your lists from our DB!`);
     } else if (subcommand === "sync") {
       interaction.editReply(`Syncing your lists...`);
       const { data: animeData } = await graphQLRequest("GetMediaCollection", {
         userId: interaction.alID,
         type: MediaType.Anime,
       }, interaction.ALtoken);
-      if (animeData) handleData({ media: animeData }, interaction, MediaType.Anime);
+
+      if (animeData) await handleSyncing({ media: animeData }, interaction.alID!, MediaType.Anime);
 
       const { data: mangaData } = await graphQLRequest("GetMediaCollection", {
         userId: interaction.alID,
         type: MediaType.Manga,
       }, interaction.ALtoken);
 
-      if (mangaData) handleData({ media: mangaData }, interaction, MediaType.Manga);
+      if (mangaData) await handleSyncing({ media: mangaData }, interaction.alID!, MediaType.Manga);
 
       const commandCooldown = client.cooldowns.get(name);
       if (commandCooldown) commandCooldown.set(interaction.user.id, Date.now() + cooldown * 1000);
@@ -66,33 +59,32 @@ export default {
   },
 } satisfies Command;
 
-async function handleData(
+export async function handleSyncing(
   data: {
     media: AlwaysExist<GetMediaCollectionQuery>;
     headers?: GraphQLResponse["headers"];
   },
-  interaction: UsableInteraction,
+  alID: number,
   type: MediaType,
 ) {
-  if (!interaction.alID) return;
-
-  const dataToGiveToRedis: Record<number, CacheEntry> = {};
 
   const lists = data.media.MediaListCollection?.lists;
   const user = data.media.MediaListCollection?.user;
-  if (!lists || !user) return interaction.editReply(`You have no lists!`);
+  const bulkMedia = new Set<{ mediaId: number, type: MediaType }>();
+  if (!lists || !user) throw new YuukoError("You have no lists!");
+
   for (const list of lists) {
     if (!list) continue;
     const entries = list.entries;
     if (!entries) continue;
 
+    // for bulk inserting into DB
     for (const entry of entries) {
       if (!entry || !entry.media || !entry.media.id) continue;
-      if (dataToGiveToRedis[entry.media.id]) continue;
       const cacheEntry: CacheEntry = {
         user: {
           name: user.name,
-          id: interaction.alID,
+          id: alID,
           mediaListOptions: user.mediaListOptions,
         },
         status: entry.status,
@@ -101,12 +93,11 @@ async function handleData(
         notes: entry.notes,
       };
 
-      if (type === MediaType.Anime) await getAndInsertOrUpdate(statTables.AnimeStats, entry.media.id, { aId: interaction.alID, dId: interaction.user.id });
-      else if (type === MediaType.Manga) await getAndInsertOrUpdate(statTables.MangaStats, entry.media.id, { aId: interaction.alID, dId: interaction.user.id });
+      bulkMedia.add({ mediaId: entry.media.id, type });
+      redis.json.set(`_user${user.id}-${entry.media.id}`, "$", cacheEntry);
+      // should be all we need, but then we need to also update the wipe part
 
-      dataToGiveToRedis[entry.media.id] = cacheEntry;
-
-      if (entry.media) {
+      if (entry.media && entry.media.title) {
         const redisData = entry.media;
         if (type === MediaType.Anime) {
           delete redisData.chapters;
@@ -138,50 +129,18 @@ async function handleData(
       }
     }
   }
-  redis.json.set(`_user${interaction.alID}-${type}`, "$", dataToGiveToRedis);
-}
 
-type TableType = typeof statTables.AnimeStats | typeof statTables.MangaStats;
+  const mediasArray = Array.from(bulkMedia);
+  // bulk insert media_id, do nothing if exists already
+  await db
+    .insert(mediaStats)
+    .values(mediasArray)
+    .onConflictDoNothing();
 
-function keepUnique(oldIds: StatUser[], newId: StatUser) {
-  const ids = oldIds.map((id) => id.dId);
-  if (ids.includes(newId.dId)) return oldIds;
-  return [...oldIds, newId];
-}
-
-async function getAndInsertOrUpdate(table: TableType, mediaId: number, user: StatUser) {
-  const stats = (await stat.select().from(table).where(eq(table.mediaId, mediaId)).limit(1))[0];
-  if (stats) {
-    await stat
-      .update(table)
-      .set({
-        users: keepUnique(stats.users, user),
-      })
-      .where(eq(table.mediaId, mediaId));
-    return;
-  }
-  await stat.insert(table).values({
-    mediaId: mediaId,
-    users: keepUnique([], user),
-  });
-}
-
-async function removeUserFromMedia(table: TableType, mediaIds: number[], user: StatUser) {
-  for (const mediaId of mediaIds) {
-    const stats = (await stat.select().from(table).where(eq(table.mediaId, mediaId)).limit(1))[0];
-    if (stats) {
-      const newUsers = stats.users.filter((u) => u.dId !== user.dId);
-      if (newUsers.length === 0) {
-        await stat.delete(table).where(eq(table.mediaId, mediaId));
-      } else {
-        await stat.update(table).set({ users: newUsers }).where(eq(table.mediaId, mediaId));
-      }
-    }
-  }
-}
-
-async function getMediaForUser(table: TableType, aId: number): Promise<number[]> {
-  const mediaEntries = await stat.select().from(table);
-  const mediaForUser = mediaEntries.filter((entry) => entry.users.some((user) => user.aId === aId));
-  return mediaForUser.map((entry) => entry.mediaId);
+  const userFromMedias = mediasArray.map((m) => ({ mediaId: m.mediaId, anilistId: alID }));
+  // bulk insert user into given media(s)
+  await db
+    .insert(mediaStatUsers)
+    .values(userFromMedias)
+    .onConflictDoNothing();
 }

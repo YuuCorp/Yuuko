@@ -140,8 +140,8 @@ dist
 /Local
 /temp
 commit.hash
-Database/db.sqlite
 db.sqlite-*
 
 src/Local
-Database/drizzle/
+src/database/sqlite
+src/database/migration

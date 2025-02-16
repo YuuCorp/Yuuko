@@ -1,10 +1,7 @@
 import { integer, sqliteTable } from "drizzle-orm/sqlite-core";
-import { sql } from "drizzle-orm";
 
-export const BotStats = sqliteTable("botstats", {
+export const botStats = sqliteTable("botstats", {
   servers: integer("servers", { mode: "number" }).notNull().default(0),
   members: integer("members", { mode: "number" }).notNull().default(0),
   registered: integer("registered", { mode: "number" }).notNull().default(0),
 });
-
-export default BotStats;

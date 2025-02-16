@@ -4,9 +4,8 @@ import { SlashCommandBuilder } from "discord.js";
 import type { Command } from "#structures/index";
 import AnimeCmd from "#commands/anime";
 
-import humanizeDuration from "humanize-duration";
 import { YuukoError } from "#utils/types";
-// const humanizeDuration = require("humanize-duration");
+import ms from "ms";
 
 const name = "trace";
 const usage = "trace <image attachment>";
@@ -57,7 +56,7 @@ export default {
       image: image.url,
       fields: [
         { name: "\u200B", value: "\u200B" },
-        { name: "In Episode", value: `${response.episode || "Full"} (${humanizeDuration(response.from * 1000, { round: true }).toString()} in)`, inline: true },
+        { name: "In Episode", value: `${response.episode || "Full"} (${ms(response.from * 1000, { long: true })} in)`, inline: true },
         { name: "Similarity", value: response.similarity.toFixed(2).toString(), inline: true },
         { name: "Video", value: `[Link](${response.video})`, inline: true },
       ],

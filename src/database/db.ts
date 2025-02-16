@@ -1,35 +1,16 @@
 import { drizzle } from "drizzle-orm/bun-sqlite";
 import { Database } from "bun:sqlite";
 
-import { anilistUser, announcementModel, userBirthday, AnimeStats, MangaStats, BotStats } from "#models/index";
+import * as schema from "#models/index";
 
 export const tables = {
-    anilistUser,
-    userBirthday,
-    announcementModel,
-};
-
-export const statTables = {
-    AnimeStats,
-    MangaStats,
-    BotStats,
+    ...schema
 };
 
 export const sqlite = new Database("./src/database/sqlite/db.sqlite");
-export const statDB = new Database("./src/database/sqlite/statsdb.sqlite");
 sqlite.exec("PRAGMA journal_mode = WAL;");
 
-export const db = drizzle(sqlite, {
+export const db = drizzle({
+    client: sqlite,
     schema: tables,
 });
-
-export const stat = drizzle(statDB, {
-    schema: statTables,
-});
-
-export type StatUser = {
-    aId: number;
-    dId: string;
-};
-
-export default { db, stat };
