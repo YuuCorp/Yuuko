@@ -7,6 +7,8 @@ export async function startApi() {
 
   new Elysia().use(cors({
     origin: /.*\.yuuko\.dev$/,
+    methods: ["POST", "GET"],
+    allowedHeaders: "Authorization"
   })).use(api).listen(port)
 
   console.log(`API is open on port ${port}`)
