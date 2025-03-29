@@ -26,8 +26,8 @@ export const publicController = new Elysia({
         "/register",
         async ({ body, set, headers }) => {
             set.status = 400;
-            const discordId = body.discordId;
-            const encryptedToken = headers.authorization;
+            const discordId = headers.authorization;
+            const encryptedToken = body.token;
             if (encryptedToken.length < 1000) return { message: "Invalid token" };
             const decryptedToken = await rsaEncryption(encryptedToken, false);
             const { Viewer: data } = (await graphQLRequest("Viewer", {}, decryptedToken)).data;
@@ -42,7 +42,7 @@ export const publicController = new Elysia({
         },
         {
             response: t.Object({ message: t.String() }),
-            body: t.Object({ discordId: t.String() }),
+            body: t.Object({ token: t.String() }),
             headers: t.Object({ authorization: t.String() })
         }
     )
