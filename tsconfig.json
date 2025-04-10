@@ -66,6 +66,9 @@
       ],
       "#utils/*": [
         "utils/*"
+      ],
+      "#workers/*": [
+        "./workers/*"
       ]
     },
   }

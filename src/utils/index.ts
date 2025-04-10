@@ -15,3 +15,4 @@ export * from "./getSubcommand";
 export * from "./handleMediaData";
 export * from "./common";
 export * from "./botStats";
+export * from "./decodeJWT";

@@ -35,6 +35,8 @@ import type {
   SaveMediaListEntryMutationVariables,
   SaveTextActivityMutation,
   SaveTextActivityMutationVariables,
+  GetUserListQuery,
+  GetUserListQueryVariables,
 } from '../graphQL/types'
 import Queries from '../graphQL/types/queries'
 import { YuukoError, type GraphQLResponse } from './types'
@@ -61,7 +63,8 @@ interface QueryVariables {
   Viewer: [ViewerQuery, ViewerQueryVariables]
   SaveMediaList: [SaveMediaListEntryMutation, SaveMediaListEntryMutationVariables]
   SaveTextActivity: [SaveTextActivityMutation, SaveTextActivityMutationVariables]
-  ListQuery: [ListQueryQuery, ListQueryQueryVariables]
+  ListQuery: [ListQueryQuery, ListQueryQueryVariables],
+  GetUserList: [GetUserListQuery, GetUserListQueryVariables],
 }
 export async function graphQLRequest<QueryKey extends Query>(queryKey: QueryKey, vars: QueryVariables[QueryKey][1], token?: string, url = baseUrl) {
   const headers = new Headers()
@@ -77,7 +80,7 @@ export async function graphQLRequest<QueryKey extends Query>(queryKey: QueryKey,
       query: Queries[queryKey],
       variables: vars,
     })
-  } satisfies FetchRequestInit
+  } satisfies BunFetchRequestInit
 
   try {
     const res = await fetch(url, reqOptions)

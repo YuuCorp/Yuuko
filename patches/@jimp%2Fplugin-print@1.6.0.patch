@@ -1,0 +1,13 @@
+diff --git a/dist/esm/load-bitmap-font.js b/dist/esm/load-bitmap-font.js
+index 508fb92ca6b3a1eabab3d06a103bd422635ba796..c9a2ef8a0590770f69f21a53dcc1309e71a010a3 100644
+--- a/dist/esm/load-bitmap-font.js
++++ b/dist/esm/load-bitmap-font.js
+@@ -6,7 +6,7 @@ import { createJimp } from "@jimp/core";
+ import path from "path";
+ import xmlPackage from "simple-xml-to-json";
+ const { convertXML } = xmlPackage;
+-export const isWebWorker = typeof self !== "undefined" && self.document === undefined;
++export const isWebWorker = false;
+ const CharacterJimp = createJimp({ formats: [png] });
+ const HEADER = Buffer.from([66, 77, 70, 3]);
+ function isBinary(buf) {

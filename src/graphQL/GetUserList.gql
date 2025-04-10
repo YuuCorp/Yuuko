@@ -1,0 +1,22 @@
+query GetUserList($type: MediaType, $userId: Int) {
+    MediaListCollection(type: $type, userId: $userId) {
+        lists {
+            entries {
+                media {
+                    id
+                }
+                status
+                progress
+                score(format: POINT_10_DECIMAL)
+                notes
+            }
+        }
+        user {
+            name
+            mediaListOptions {
+                scoreFormat
+            }
+            id
+        }
+    }
+}

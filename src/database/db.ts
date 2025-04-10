@@ -1,35 +1,21 @@
 import { drizzle } from "drizzle-orm/bun-sqlite";
+import { type InferSelectModel } from "drizzle-orm";
 import { Database } from "bun:sqlite";
 
-import { anilistUser, announcementModel, userBirthday, AnimeStats, MangaStats, BotStats } from "#models/index";
+import * as schema from "#models/index";
+import type { SQLiteTable } from "drizzle-orm/sqlite-core";
 
 export const tables = {
-    anilistUser,
-    userBirthday,
-    announcementModel,
-};
-
-export const statTables = {
-    AnimeStats,
-    MangaStats,
-    BotStats,
+    ...schema
 };
 
 export const sqlite = new Database("./src/database/sqlite/db.sqlite");
-export const statDB = new Database("./src/database/sqlite/statsdb.sqlite");
 sqlite.exec("PRAGMA journal_mode = WAL;");
 
-export const db = drizzle(sqlite, {
+export const db = drizzle({
+    client: sqlite,
     schema: tables,
 });
 
-export const stat = drizzle(statDB, {
-    schema: statTables,
-});
-
-export type StatUser = {
-    aId: number;
-    dId: string;
-};
-
-export default { db, stat };
+// magic that allows us to get a table as a type
+export type InferTable<T extends keyof typeof tables> = (typeof tables)[T] extends SQLiteTable ? InferSelectModel<typeof tables[T]> : never;
