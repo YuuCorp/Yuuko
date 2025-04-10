@@ -9,13 +9,7 @@ export const announcementModel = sqliteTable("announcementmodel", {
     .default(sql`CURRENT_TIMESTAMP`),
   announcement: text("announcement", {
     length: 128,
-  }).notNull(),
-  createdAt: integer("createdAt", { mode: "timestamp" })
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: integer("updatedAt", { mode: "timestamp" })
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
+  }).notNull()
 });
 
 export default announcementModel;
