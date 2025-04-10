@@ -34,8 +34,6 @@ export const infoController = new Elysia({
                         id: t.Number(),
                         announcement: t.String(),
                         date: t.Date(),
-                        createdAt: t.Date(),
-                        updatedAt: t.Date(),
                     }),
                 ),
             ),
@@ -66,8 +64,6 @@ export const infoController = new Elysia({
             const dbEntry = {
                 announcement: body.announcement,
                 date: entryDate,
-                createdAt: entryDate,
-                updatedAt: entryDate,
             };
 
             const announcementID = (await db.insert(tables.announcementModel).values(dbEntry).returning({ id: tables.announcementModel.id }))[0];
