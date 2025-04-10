@@ -80,7 +80,7 @@ export async function graphQLRequest<QueryKey extends Query>(queryKey: QueryKey,
       query: Queries[queryKey],
       variables: vars,
     })
-  } satisfies FetchRequestInit
+  } satisfies BunFetchRequestInit
 
   try {
     const res = await fetch(url, reqOptions)

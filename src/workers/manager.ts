@@ -1,7 +1,7 @@
 // prevents TS errors
 declare var self: Worker;
 
-import { db, tables } from '#database/index';
+import { db, tables, type InferTable } from '#database/index';
 import { rsaEncryption } from '#utils/rsaEncryption';
 import { eq, sql } from 'drizzle-orm';
 
@@ -16,11 +16,7 @@ export type ReminderMessage = {
 
 export type SyncUsers = {
     type: "SYNC",
-    anilistUsers: {
-        anilistId: number;
-        discordId: string;
-        anilistToken: string;
-    }[];
+    anilistUsers: InferTable<"anilistUser">[];
     usersPerMinute: number;
 };
 
