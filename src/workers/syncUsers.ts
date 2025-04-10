@@ -1,7 +1,7 @@
 import { handleSyncing } from "#commands/synclists";
 import { db, tables } from "#database/index";
 import { MediaType } from "#graphQL/types";
-import { graphQLRequest, YuukoError } from "#utils/index";
+import { decodeJWT, graphQLRequest, YuukoError } from "#utils/index";
 import type { SyncUsers } from "#workers/manager";
 import { client } from "app";
 import { eq } from "drizzle-orm";
@@ -9,15 +9,26 @@ import { eq } from "drizzle-orm";
 // for main thread to call
 export async function syncAnilistUsers(data: SyncUsers) {
     const { anilistUsers, usersPerMinute } = data;
-    const timeOut = Math.floor(60 * 1000 / usersPerMinute);
+    const timeOut = Math.ceil(60 * 1000 / usersPerMinute);
 
     const total = anilistUsers.length;
     let i = 1;
+
+    const date = Math.floor(Date.now() / 1000);
     for (const user of anilistUsers) {
         try {
             // GetUserList is a more optimized query for syncing lists compared to GetMediaCollection
             // as we don't care about the media, only user entries
             const start = performance.now();
+
+            // If the user's token is expired, instantly delete, saves on requests to AniList
+            const { payload } = decodeJWT(user.anilistToken);
+            if (date >= payload.exp) {
+                i++
+                await deleteUser(user.anilistId);
+                continue;
+            }
+
             const { data: animeData } = await graphQLRequest("GetUserList", {
                 userId: user.anilistId,
                 type: MediaType.Anime,
@@ -36,7 +47,6 @@ export async function syncAnilistUsers(data: SyncUsers) {
 
             const localTimeout = Math.max(0, Math.floor(timeOut - (performance.now() - start)));
             if (i <= total && localTimeout > 0) {
-                client.log(`Waiting ${localTimeout}ms before syncing the next user... (${i} / ${total})`, "SYNC");
                 await new Promise((resolve) => setTimeout(resolve, localTimeout));
             }
             i++;
@@ -46,20 +56,22 @@ export async function syncAnilistUsers(data: SyncUsers) {
 
             if (e instanceof YuukoError) {
                 if (e.message.toLowerCase().includes("invalid token")) {
-                    client.log(`User ${user.anilistId} has an invalid token, deleting from the DB...`, "SYNC");
-
-                    await db
-                        .delete(tables.anilistUser)
-                        .where(eq(tables.anilistUser.anilistId, user.anilistId));
+                    await deleteUser(user.anilistId);
                 }
             };
 
             if (i <= total) {
-                client.log(`Waiting ${timeOut}ms before syncing the next user... (${i} / ${total})`, "SYNC");
                 await new Promise((resolve) => setTimeout(resolve, timeOut));
             }
 
             i++;
         }
     }
+}
+
+async function deleteUser(anilistId: number) {
+    client.log(`User ${anilistId} has an invalid token, deleting from the DB...`, "SYNC");
+    await db
+        .delete(tables.anilistUser)
+        .where(eq(tables.anilistUser.anilistId, anilistId));
 }

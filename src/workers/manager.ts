@@ -33,7 +33,7 @@ async function checkUpcomingEpisodes() {
 
 async function updateSyncedUsers() {
     try {
-        const syncEvent = (await db.select().from(tables.workerEvents).limit(1))[0];
+        const syncEvent = (await db.select().from(tables.workerEvents).where(eq(tables.workerEvents.type, "SYNC")).limit(1))[0];
         if (!syncEvent) return;
 
         // so they have same TZ

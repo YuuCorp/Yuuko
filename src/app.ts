@@ -7,6 +7,7 @@ import { runChecks } from "#checks/run";
 import path from "path";
 import fs from "fs";
 import { syncAnilistUsers, type WorkerResponseUnion } from "#workers/index";
+import { subtle } from "crypto";
 
 process.on("SIGINT", () => {
   sqlite.close();
@@ -46,15 +47,15 @@ async function makeRSAPair() {
   const RSAdirectory = path.join(import.meta.dir, 'RSA');
   if (fs.existsSync(path.join(RSAdirectory, 'id_rsa'))) return;
 
-  const keyPair = await globalThis.crypto.subtle.generateKey({
+  const keyPair = await subtle.generateKey({
     name: "RSA-OAEP",
     modulusLength: 4096,
     publicExponent: new Uint8Array([0x01, 0x00, 0x01]), // Value taken from https://developer.mozilla.org/en-US/docs/Web/API/RsaHashedKeyGenParams#publicexponent
     hash: "SHA-256",
   }, true, ['encrypt', 'decrypt'])
 
-  const publicKey = await globalThis.crypto.subtle.exportKey('spki', keyPair.publicKey);
-  const privateKey = await globalThis.crypto.subtle.exportKey('pkcs8', keyPair.privateKey)
+  const publicKey = await subtle.exportKey('spki', keyPair.publicKey);
+  const privateKey = await subtle.exportKey('pkcs8', keyPair.privateKey)
 
   const exportedPublicKey = '-----BEGIN PUBLIC KEY-----\n' +
     btoa(String.fromCharCode.apply(null, [...new Uint8Array(publicKey)])).replace(/.{64}/g, '$&\n') + '\n-----END PUBLIC KEY-----';
