@@ -1,4 +1,4 @@
-import { footer, graphQLRequest, rsaEncryption, getOptions, updateBotStats, getSubcommand, YuukoError } from "#utils/index";
+import { footer, graphQLRequest, getOptions, updateBotStats, getSubcommand, YuukoError } from "#utils/index";
 import { anilistUser } from "#database/models/anilistUser";
 import type { Command } from "#structures/index";
 import { MessageFlags, SlashCommandBuilder } from "discord.js";
@@ -70,7 +70,7 @@ export default {
 
             await db
                 .update(anilistUser)
-                .set({ anilistToken: await rsaEncryption(token, true), anilistId: data.id })
+                .set({ anilistToken: await client.rsa.encrypt(token), anilistId: data.id })
                 .where(eq(anilistUser.discordId, interaction.user.id));
             return void interaction.reply({
                 embeds: [
@@ -92,7 +92,7 @@ export default {
 
         if (!data) throw new YuukoError("Invalid token provided.", null, true);
 
-        await db.insert(anilistUser).values({ discordId: interaction.user.id, anilistToken: await rsaEncryption(token, true), anilistId: data.id });
+        await db.insert(anilistUser).values({ discordId: interaction.user.id, anilistToken: await client.rsa.encrypt(token), anilistId: data.id });
         await updateBotStats(client);
         return void interaction.reply({
             embeds: [

@@ -26,7 +26,10 @@ export interface RunOptions<Args = any> {
   args?: Args;
 }
 
-export type UsableInteraction = ChatInputCommandInteraction<CacheType> & { alID?: number, ALtoken?: string }
+export type UsableInteraction = ChatInputCommandInteraction<CacheType> & {
+  alID?: number,
+  ALtoken?: string
+};
 
 interface CommandStringOption {
   name: string;

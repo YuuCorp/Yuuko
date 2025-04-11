@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { rsaEncryption } from '#utils/rsaEncryption'
+import { RSA } from '#utils/rsaEncryption'
 import { Check } from '#structures/index'
 
 const rsaPublicCheck = new Check({
@@ -28,7 +28,11 @@ const rsaCryptionCheck = new Check({
   description: 'Ensure that the RSA key\'s are valid by encryping & decrypting them seperately using public & private keys.',
   optional: false,
   run: async () => {
-    if (await rsaEncryption(await rsaEncryption('hello', true)) !== 'hello')
+    const rsa = new RSA();
+    const encrypted = await rsa.encrypt("hello");
+    const decrypted = await rsa.decrypt(encrypted);
+
+    if (decrypted !== "hello")
       throw new Error('Public & Private RSA keys don\'t match.')
   },
 })
