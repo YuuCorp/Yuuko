@@ -1,7 +1,7 @@
 import path from "node:path";
 import fs from "node:fs";
 import { Elysia, t } from "elysia";
-import { rsaEncryption } from "#utils/rsaEncryption";
+import { RSA } from "#utils/rsaEncryption";
 import { graphQLRequest } from "#utils/graphQLRequest";
 import { db } from "#database/db";
 import { anilistUser } from "#database/models";
@@ -29,7 +29,9 @@ export const publicController = new Elysia({
             const discordId = headers.authorization;
             const encryptedToken = body.token;
             if (encryptedToken.length < 1000) return { message: "Invalid token" };
-            const decryptedToken = await rsaEncryption(encryptedToken, false);
+
+            const rsa = new RSA();
+            const decryptedToken = await rsa.decrypt(encryptedToken);
             const { Viewer: data } = (await graphQLRequest("Viewer", {}, decryptedToken)).data;
             if (!data) return { message: "Invalid token" };
             const existingUser = (await db.select().from(anilistUser).where(eq(anilistUser.discordId, discordId)).limit(1))[0];

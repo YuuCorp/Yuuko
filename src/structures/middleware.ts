@@ -1,19 +1,17 @@
-import type { Interaction } from 'discord.js'
-import type { UsableInteraction } from '.'
+import type { Client, MaybePromise, UsableInteraction } from '.'
 
-type InteractionRunner = (interaction: UsableInteraction) => void
-type AsyncInteractionRunner = (interaction: UsableInteraction) => Promise<void>
+type InteractionRunner = (interaction: UsableInteraction, client: Client) => MaybePromise<void>
 export interface MiddlewareOptions {
   name: string
   description: string
-  run: InteractionRunner | AsyncInteractionRunner
+  run: InteractionRunner
   defer?: boolean
 }
 
 export class Middleware {
   name: string
   description: string
-  run: InteractionRunner | AsyncInteractionRunner
+  run: InteractionRunner;
   defer: boolean = false
 
   constructor(options: MiddlewareOptions) {

@@ -15,7 +15,7 @@ export const run: YuukoEvent<"interactionCreate"> = async (client, interaction) 
       logging(command, interaction);
       client.log(`Interaction received in: ${Date.now() - interaction.createdTimestamp}ms`, "Debug");
       checkCooldown(client, command, interaction);
-      const args = await runMiddlewares(command.middlewares, interaction);
+      const args = await runMiddlewares(command.middlewares, interaction, client);
       client.log(`Ran middleware in: ${Date.now() - interaction.createdTimestamp}ms`, "Debug");
 
       if (args.isCommand() && args.isChatInputCommand()) {
@@ -29,13 +29,13 @@ export const run: YuukoEvent<"interactionCreate"> = async (client, interaction) 
       if (!command || !interaction) return;
       if (!command.autocomplete) return;
 
-      command.autocomplete(await runMiddlewares(command.middlewares, interaction));
+      command.autocomplete(await runMiddlewares(command.middlewares, interaction, client));
 
       // Check for modal
     } else if (interaction.isModalSubmit()) {
       const component = client.components.find((comp) => comp.name == interaction.customId);
       if (!component) return;
-      component.run(await runMiddlewares(component.middlewares, interaction), null, client);
+      component.run(await runMiddlewares(component.middlewares, interaction, client), null, client);
     }
 
   } catch (e: any) {
@@ -54,11 +54,11 @@ export const run: YuukoEvent<"interactionCreate"> = async (client, interaction) 
     }
   };
 
-  async function runMiddlewares(middlewares: Middleware[] | undefined, interaction: Interaction): Promise<Interaction> {
+  async function runMiddlewares(middlewares: Middleware[] | undefined, interaction: Interaction, client: Client): Promise<Interaction> {
     if (!interaction.isChatInputCommand()) return interaction;
     if (!middlewares) return interaction;
     if (middlewares.some((mw) => mw.defer)) await interaction.deferReply();
-    await Promise.all(middlewares.map((mw) => mw.run(interaction))).catch((e: any) => {
+    await Promise.all(middlewares.map((mw) => mw.run(interaction, client))).catch((e: any) => {
       throw e;
     });
     return interaction;

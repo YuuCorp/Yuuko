@@ -20,6 +20,7 @@ export const client = new Client({ intents: [GatewayIntentBits.GuildMessageReact
 const workerManager = new Worker("#workers/manager.ts");
 
 async function start(token: string | undefined) {
+  await client.rsa.loadKeys();
   await registerEvents(client);
   await runChecks(client);
 
@@ -83,7 +84,7 @@ async function initializeWorkerDB() {
 }
 
 
-await makeRSAPair();
+// await makeRSAPair();
 await start(process.env.TOKEN);
 
 await initializeWorkerDB();

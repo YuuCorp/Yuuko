@@ -2,7 +2,7 @@
 declare var self: Worker;
 
 import { db, tables, type InferTable } from '#database/index';
-import { rsaEncryption } from '#utils/rsaEncryption';
+import { RSA } from "#utils/rsaEncryption";
 import { eq, sql } from 'drizzle-orm';
 
 export type WorkerResponseUnion = ReminderMessage | SyncUsers;
@@ -44,10 +44,11 @@ async function updateSyncedUsers() {
             .where(eq(tables.workerEvents.type, "SYNC"));
 
         const anilistUsers = await db.select().from(tables.anilistUser);
+        const rsa = new RSA();
 
         // we have to decrpyt the tokens
         const decryptedUsers = await Promise.all(anilistUsers.map(async (user) => {
-            const decryptedToken = await rsaEncryption(user.anilistToken, false);
+            const decryptedToken = await rsa.decrypt(user.anilistToken);
             return {
                 ...user,
                 anilistToken: decryptedToken,
