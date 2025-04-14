@@ -6,16 +6,15 @@ export type UsableClientEvents = DiscordClientEvents & {
   interactionCreate: [Interaction]
 }
 export type ClientEvent = keyof UsableClientEvents
-export type YuukoEvent<Event extends ClientEvent> = (client: Client, ...args: UsableClientEvents[Event]) => void
+
 
 type YuukoEventRun<Event extends ClientEvent> = (client: Client, ...args: UsableClientEvents[Event]) => MaybePromise<void>;
-
 interface YuukoEventOptions<Event extends ClientEvent> {
   event: Event
   run: YuukoEventRun<Event>;
 }
 
-export class _YuukoEvent<Event extends ClientEvent> {
+export class YuukoEvent<Event extends ClientEvent> {
   event: Event
   run: YuukoEventRun<Event>;
 
