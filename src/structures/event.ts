@@ -7,3 +7,17 @@ export type UsableClientEvents = DiscordClientEvents & {
 export type ClientEvent = keyof UsableClientEvents
 export type YuukoEvent<Event extends ClientEvent> = (client: Client, ...args: UsableClientEvents[Event]) => void
 
+interface YuukoEventOptions {
+  event: string
+  run: () => void
+}
+
+export class _YuukoEvent {
+  event: string
+  run: () => void
+
+  constructor(options: YuukoEventOptions) {
+    this.event = options.event;
+    this.run = options.run;
+  }
+}
