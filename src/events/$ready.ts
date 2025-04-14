@@ -4,6 +4,7 @@ import { registerCommands, registerComponents, updateBotStats } from "#utils/ind
 
 const ready = new YuukoEvent({
   event: "ready",
+  isOnce: true,
   run: async (client) => {
     if (!client.user) return;
     setInterval(async () => {

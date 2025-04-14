@@ -11,15 +11,18 @@ export type ClientEvent = keyof UsableClientEvents
 type YuukoEventRun<Event extends ClientEvent> = (client: Client, ...args: UsableClientEvents[Event]) => MaybePromise<void>;
 interface YuukoEventOptions<Event extends ClientEvent> {
   event: Event
+  isOnce?: boolean,
   run: YuukoEventRun<Event>;
 }
 
 export class YuukoEvent<Event extends ClientEvent> {
   event: Event
+  isOnce: boolean
   run: YuukoEventRun<Event>;
 
   constructor(options: YuukoEventOptions<Event>) {
     this.event = options.event;
+    this.isOnce = options.isOnce ?? false;
     this.run = options.run;
   }
 }
