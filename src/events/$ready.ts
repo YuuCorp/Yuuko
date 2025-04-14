@@ -1,16 +1,22 @@
 import { ActivityType } from "discord.js";
-import type { YuukoEvent } from "#structures/index";
+import { YuukoEvent } from "#structures/index";
 import { registerCommands, registerComponents, updateBotStats } from "#utils/index";
 
-export const run: YuukoEvent<"ready"> = async (client) => {
-  if (!client.user) return;
-  setInterval(async () => {
-    await updateBotStats(client);
-    client.user?.setPresence({ activities: [{ type: ActivityType.Watching, name: `${client.guilds.cache.size} servers` }], status: "online" });
-  }, 15000);
+const ready = new YuukoEvent({
+  event: "ready",
+  isOnce: true,
+  run: async (client) => {
+    if (!client.user) return;
+    setInterval(async () => {
+      await updateBotStats(client);
+      client.user?.setPresence({ activities: [{ type: ActivityType.Watching, name: `${client.guilds.cache.size} servers` }], status: "online" });
+    }, 15000);
 
-  await registerCommands(client);
-  await registerComponents(client);
+    await registerCommands(client);
+    await registerComponents(client);
 
-  client.log(`${client.user.tag} is ready!`, "Info");
-};
+    client.log(`${client.user.tag} is ready!`, "Info");
+  }
+});
+
+export default [ready];
