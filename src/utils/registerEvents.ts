@@ -1,6 +1,5 @@
 import path from "path";
 import fs from "fs";
-import { removeExtension } from ".";
 import type { Client, YuukoEvent } from "#structures/index";
 
 export async function registerEvents(client: Client) {

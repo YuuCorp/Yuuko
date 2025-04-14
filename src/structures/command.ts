@@ -16,10 +16,6 @@ export interface CommandOptions {
 
 export type MaybePromise<T> = T | Promise<T>;
 
-export type Prettify<T> = {
-  [K in keyof T]: T[K];
-} & {};
-
 export interface RunOptions<Args = any> {
   client: Client;
   interaction: UsableInteraction;

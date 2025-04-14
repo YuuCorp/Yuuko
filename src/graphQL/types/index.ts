@@ -4750,7 +4750,7 @@ export type RecommendationsQueryVariables = Exact<{
 }>;
 
 
-export type RecommendationsQuery = { __typename?: 'Query', Page?: { __typename?: 'Page', media?: Array<{ __typename?: 'Media', genres?: Array<string | null> | null, title?: { __typename?: 'MediaTitle', romaji?: string | null, english?: string | null, native?: string | null } | null } | null> | null } | null };
+export type RecommendationsQuery = { __typename?: 'Query', Page?: { __typename?: 'Page', media?: Array<{ __typename?: 'Media', id: number, genres?: Array<string | null> | null, title?: { __typename?: 'MediaTitle', romaji?: string | null, english?: string | null, native?: string | null } | null } | null> | null } | null };
 
 export type SaveMediaListEntryMutationVariables = Exact<{
   mediaid?: InputMaybe<Scalars['Int']['input']>;

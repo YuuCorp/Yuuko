@@ -26,7 +26,7 @@ export default {
 
     const { type } = getOptions<{ type: MediaType }>(interaction.options, ["type"]);
     const { anilist_user: anilistUser } = getOptions<{ anilist_user: string }>(interaction.options, ["anilist_user"]);
-    const genres = getOptions<{ genres: string }>(interaction.options, ["genres"]).genres.replaceAll(", ", ",");
+    const { genres } = getOptions<{ genres: string }>(interaction.options, ["genres"]);
 
     const vars = { type, userName: anilistUser };
 
@@ -42,9 +42,11 @@ export default {
     if (!data || !data.lists || data.lists.length < 1) throw new YuukoError("Couldn't find any data from the user specified.", vars);
 
     // ^ We filter out the Planning list
-    for (const MediaList of data.lists.filter((MediaList) => MediaList!.name != "Planning")) {
-      if (MediaList && MediaList.entries) MediaList.entries.map((e) => excludeIDs.push(e!.media!.id));
+    for (const mediaList of data.lists) {
+      if (!mediaList || !mediaList.entries || mediaList.name === "Planning") continue;
+      mediaList.entries.forEach((e) => excludeIDs.push(e!.media!.id));
     }
+
     if (!genres.length) throw new YuukoError("Please specify at least one genre.");
 
     const genresArray = genres.split(",").map((genre) => genre.trim());
@@ -57,18 +59,18 @@ export default {
     if (!recommendationData || !recommendationData.media) {
       throw new YuukoError("Couldn't find any data.", recommendationVars);
     }
-    // ^ Filter out the Planning list
-    const recommendations = recommendationData.media.filter((Media) => Media!.title);
-    const random = Math.floor(Math.random() * Math.floor(recommendations.length));
+
+    const recommendations = recommendationData.media.filter((Media) => Media);
+    const random = Math.floor(Math.random() * recommendations.length);
     const recommendedSeries = recommendations[random];
     if (!recommendedSeries) throw new YuukoError("Couldn't find any data.", recommendationVars);
 
     switch (type) {
       case "ANIME":
-        AnimeCmd.run({ interaction, client, hook: true, hookdata: { title: SeriesTitle(recommendedSeries.title || undefined) } });
+        AnimeCmd.run({ interaction, client, hook: true, hookdata: { id: recommendedSeries.id } });
         break;
       case "MANGA":
-        MangaCmd.run({ interaction, client, hook: true, hookdata: { title: SeriesTitle(recommendedSeries.title || undefined) } });
+        MangaCmd.run({ interaction, client, hook: true, hookdata: { id: recommendedSeries.id } });
         break;
     }
   },

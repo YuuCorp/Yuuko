@@ -6,6 +6,7 @@ query Recommendations($type: MediaType, $exclude_ids: [Int], $genres: [String]) 
         english
         native
       }
+      id
       genres
     }
   }
