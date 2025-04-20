@@ -1,0 +1,64 @@
+import { dlopen, suffix, type FFIFunction, type Library } from "bun:ffi";
+import { join } from "path";
+import fs from "fs";
+
+function defineModules<T extends Record<string, Record<string, FFIFunction>>>(defs: T) {
+    return defs;
+}
+
+export const moduleSymbols = defineModules({
+    image: {
+        GenerateRecentImage: {
+            args: ["cstring", "i32"],
+            returns: "pointer",
+        },
+        FreeMemory: {
+            args: ["pointer"]
+        }
+    },
+});
+
+type ModuleSymbols = typeof moduleSymbols;
+
+export class Modules {
+    private static modules: {
+        [K in keyof ModuleSymbols]?: Library<ModuleSymbols[K]>
+    } = {};
+
+    constructor() {
+        this.loadModule("image");
+    }
+
+    private loadModule<M extends keyof ModuleSymbols>(name: M) {
+        const path = join(import.meta.dir, "../modules", `compiled/lib${name}.${suffix}`);
+        const symbols = moduleSymbols[name];
+
+        if (!fs.existsSync(path)) {
+            throw new Error(`[FFI] Module file not found at: ${path}`);
+        }
+
+        const lib = dlopen(path, symbols);
+
+        Modules.modules[name] = lib;
+    }
+
+    getModule<M extends keyof ModuleSymbols>(name: M) {
+        const module = Modules.modules[name];
+        if (!module) throw new Error(`Module ${name} has not been initialized yet`);
+
+        return module;
+    }
+
+    closeModule<M extends keyof ModuleSymbols>(name: M) {
+        Modules.modules[name]?.close();
+
+        delete Modules.modules[name];
+    }
+
+    closeAllModules() {
+        for (const module of Object.keys(Modules.modules) as (keyof ModuleSymbols)[]) {
+            this.closeModule(module);
+        }
+    }
+}
+
