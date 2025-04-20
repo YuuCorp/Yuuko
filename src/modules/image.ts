@@ -1,5 +1,5 @@
 import { YuukoError } from "#utils/types";
-import { dlopen, suffix, ptr, toArrayBuffer, read } from "bun:ffi";
+import { dlopen, suffix, ptr, toArrayBuffer } from "bun:ffi";
 
 const path = `${import.meta.dir}/compiled/libimage.${suffix}`;
 
@@ -24,5 +24,6 @@ export function rawImage(json: object[]) {
     // hacky solution to get the size of the image array
     const imgBuffer = toArrayBuffer(imgPtr, 0, fixedSize);
 
+    lib.close()
     return Buffer.from(imgBuffer);
 }
