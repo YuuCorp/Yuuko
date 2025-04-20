@@ -145,3 +145,5 @@ db.sqlite-*
 src/Local
 src/database/sqlite
 src/database/migration
+
+src/modules/compiled
