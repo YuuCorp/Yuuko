@@ -23,7 +23,7 @@ func main() {}
 var fontBytes []byte
 
 //export GenerateRecentImage
-func GenerateRecentImage(jsonData *C.char) *C.char { // pointer to data of type C.char
+func GenerateRecentImage(jsonData *C.char, fixedSize C.int) *C.char { // pointer to data of type C.char
 	goJsonStr := C.GoString(jsonData)
 
 	var userRecents []struct {
@@ -67,28 +67,27 @@ func GenerateRecentImage(jsonData *C.char) *C.char { // pointer to data of type 
 		}
 	}
 
-	var buf bytes.Buffer
-	err = png.Encode(&buf, recentImage)
+	goFixedSize := int(fixedSize)
+	buf := new(bytes.Buffer)
+	buf.Grow(int(goFixedSize))
+	err = png.Encode(buf, recentImage)
 	if err != nil {
 		fmt.Println("error encoding image:", err)
 	}
 
 	imgBytes := buf.Bytes()
 
-	// because we can't return the pointer to the image & the size in one value
-	// we'll add the size into the buffer, and then in TypeScript remove it
-	sizeBytes := []byte{
-		byte(len(imgBytes) >> 24),
-		byte(len(imgBytes) >> 16),
-		byte(len(imgBytes) >> 8),
-		byte(len(imgBytes)),
-	}
-
 	fmt.Printf("Size is %d", len(imgBytes))
 
-	fullBuffer := C.CBytes(append(sizeBytes, imgBytes...))
+	// pad the array until it fills fixed size
+	if len(imgBytes) < goFixedSize {
+		padding := make([]byte, goFixedSize-len(imgBytes))
+		imgBytes = append(imgBytes, padding...)
+	}
 
-	return (*C.char)(fullBuffer)
+	cBuf := C.CBytes(imgBytes)
+
+	return (*C.char)(cBuf)
 }
 
 func drawText(typeFace font.Face, baseImage *image.RGBA, text string, point image.Point) {
