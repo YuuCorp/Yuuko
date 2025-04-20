@@ -45,9 +45,7 @@ export default {
       data: { Page: data },
     } = await graphQLRequest("RecentChart", vars, interaction.ALtoken);
     if (!data?.mediaList) throw new YuukoError("Unable to find specified user.", vars, true);
-    interaction.editReply({ embeds: [{ description: "Creating image..." }] });
-    const canvas = new Jimp({ width: 999, height: 999 });
-    const useFont = await loadFont(SANS_16_WHITE);
+    await interaction.editReply({ embeds: [{ description: "Creating image..." }] });
 
     let x = 0;
     let y = 0;
@@ -82,12 +80,12 @@ export default {
       }*/
     }
 
-    rawImage(parsedData);
+    const canvasResult = rawImage(parsedData);
 
-    const canvasResult = await canvas.getBuffer("image/png");
+    // const canvasResult = await canvas.getBuffer("image/png");
     if (!canvasResult) throw new YuukoError("Encountered an error whilst trying to create the image.");
     const attachment = new AttachmentBuilder(canvasResult, { name: "recent.png" });
-    return void interaction.editReply({ files: [attachment], embeds: [] });
+    return void await interaction.editReply({ files: [attachment], embeds: [] });
   }
 } satisfies Command;
 
