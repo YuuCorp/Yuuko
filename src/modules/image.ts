@@ -1,9 +1,18 @@
-import { dlopen, FFIType, suffix } from "bun:ffi";
+import { dlopen, suffix, ptr } from "bun:ffi";
 
-const path = `./compiled/libimage.${suffix}`;
+const path = `${import.meta.dir}/compiled/libimage.${suffix}`;
 
-const lib = dlopen(path, {
-    GenerateRecentImage: {},
-});
+export function rawImage(json: object[]) {
+    const lib = dlopen(path, {
+        GenerateRecentImage: {
+            args: ["cstring"],
+        },
+    });
 
-lib.symbols.GenerateRecentImage();
+    const enc = new TextEncoder();
+    const rawJson = enc.encode(JSON.stringify(json));
+    const jsonPtr = ptr(rawJson);
+    lib.symbols.GenerateRecentImage(jsonPtr); // cstring in args is equivalant to a pointer
+
+    lib.close();
+}

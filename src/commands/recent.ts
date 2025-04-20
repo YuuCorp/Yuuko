@@ -5,6 +5,7 @@ import { SANS_16_WHITE } from "jimp/fonts";
 import type { Command } from "#structures/index";
 import { CommandCategories, graphQLRequest, SeriesTitle, getOptions, YuukoError } from "#utils/index";
 import type { MediaList, MediaType, RecentChartQueryVariables } from "#graphQL/types";
+import { rawImage } from "modules/image";
 
 const name = "recent";
 const usage = "recent";
@@ -51,20 +52,25 @@ export default {
     let x = 0;
     let y = 0;
 
+    const parsedData = [];
+
     for (const item of data.mediaList) {
       const media = item?.media;
       if (!media || !item) continue;
       const cover = media.coverImage?.extraLarge || "https://i.imgur.com/Hx8474m.png"; // Placeholder image
-      const canvasImage = await Jimp.read(cover);
+      const title = SeriesTitle(media.title || undefined);
+      const status = parseStatus(item, type);
 
+      parsedData.push({ title, status, "imageUrl": cover });
+
+      /*
+      const canvasImage = await Jimp.read(cover);
       const width = 333;
       const height = (width / canvasImage.width) * canvasImage.height;
       canvasImage.resize({ w: width, h: height });
       const infoRectangle = new Jimp({ width, height: 60, color: "#000000bf" });
 
 
-      const title = SeriesTitle(media.title || undefined);
-      const status = parseStatus(item, type);
       if (status) infoRectangle.print({ maxWidth: width, maxHeight: 40, font: useFont, x: 0, y: 0, text: { text: status, alignmentX: HorizontalAlign.CENTER, alignmentY: VerticalAlign.MIDDLE } });
       infoRectangle.print({ maxWidth: width, maxHeight: 40, font: useFont, x: 0, y: 20, text: { text: title, alignmentX: HorizontalAlign.CENTER, alignmentY: VerticalAlign.MIDDLE } });
       canvas.composite(canvasImage, x, y);
@@ -73,8 +79,10 @@ export default {
       if (x >= 999) {
         x = 0;
         y += width;
-      }
+      }*/
     }
+
+    rawImage(parsedData);
 
     const canvasResult = await canvas.getBuffer("image/png");
     if (!canvasResult) throw new YuukoError("Encountered an error whilst trying to create the image.");
