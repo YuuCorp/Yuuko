@@ -7,10 +7,16 @@ edition = "2024"
 serde_json = "1.0.140"
 serde = { version = "1.0.219", features = ["derive"]}
 imageproc = "0.25.0"
-image = "0.25.6"
+image = { version = "0.25.6", default-features = false, features = ["png", "jpeg"] }
 reqwest = { version = "0.12", features = ["json", "rustls-tls", "blocking"] }
 ab_glyph = "0.2.29"
 anyhow = "1.0.98"
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
+panic = "abort"
 
 [lib]
 crate-type = ["cdylib"]

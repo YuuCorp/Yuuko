@@ -73,6 +73,9 @@ fn internal_generate_recent_image(json_data: String) -> Result<*mut c_char> {
 }
 
 #[unsafe(no_mangle)]
+/// # Safety
+/// This fucntion is called from FFI so it has to be unsafe.
+/// It generates a 3x3 grid image of the user's recent media.
 pub unsafe extern "C" fn GenerateRecentImage(json_ptr: *const c_char) -> *mut c_char {
     unsafe {
         let _json_data = CStr::from_ptr(json_ptr);
@@ -113,7 +116,7 @@ fn draw_text_on_image(image: &mut RgbaImage, text: &str, font: &FontRef, size: f
         let rect_width = text_width + 2 * padding;
         let rect_height = text_height + 2 * padding;
 
-        let rect = imageproc::rect::Rect::at(rect_x as i32, rect_y)
+        let rect = imageproc::rect::Rect::at(rect_x, rect_y)
             .of_size(rect_width as u32, rect_height as u32);
         blend_rectangle(image, rect, background_color);
 

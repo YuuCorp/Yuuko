@@ -7,7 +7,6 @@ import { runChecks } from "#checks/run";
 import path from "path";
 import fs from "fs";
 import { syncAnilistUsers, type WorkerResponseUnion } from "#workers/index";
-import { Modules } from "#structures/modules";
 
 dotenvFlow.config({ silent: true });
 
