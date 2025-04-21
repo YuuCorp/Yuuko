@@ -4,6 +4,7 @@ import type { YuukoComponent } from "#utils/types";
 import type { ClientCommand } from "./command";
 import Logger from "#utils/logger";
 import { RSA } from "#utils/rsaEncryption";
+import { Modules } from "./modules";
 
 export class Client extends DiscordClient {
   public commands: Collection<string, ClientCommand>;
@@ -11,6 +12,7 @@ export class Client extends DiscordClient {
   public cooldowns: Collection<string, Collection<string, number>>; // alternative: { name: string, expire: number}[]>
   public logger: Logger;
   public rsa: RSA;
+  public modules: Modules;
 
   constructor(o: ClientOptions) {
     super(o);
@@ -20,6 +22,7 @@ export class Client extends DiscordClient {
     this.components = new Collection();
     this.cooldowns = new Collection();
     this.rsa = new RSA();
+    this.modules = new Modules();
   }
 
   log(text: string, category: string) {

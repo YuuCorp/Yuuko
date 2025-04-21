@@ -10,6 +10,7 @@ imageproc = "0.25.0"
 image = "0.25.6"
 reqwest = { version = "0.12", features = ["json", "rustls-tls", "blocking"] }
 ab_glyph = "0.2.29"
+anyhow = "1.0.98"
 
 [lib]
 crate-type = ["cdylib"]

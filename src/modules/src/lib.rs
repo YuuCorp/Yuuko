@@ -1,4 +1,5 @@
 use ab_glyph::{Font, FontRef, PxScale, ScaleFont};
+use anyhow::Result;
 use image::{
     GenericImage, ImageEncoder, Pixel, Rgba, RgbaImage,
     codecs::png,
@@ -9,7 +10,10 @@ use imageproc::{
     rect::Rect,
 };
 use serde::Deserialize;
-use std::ffi::{CStr, c_char};
+use std::{
+    ffi::{CStr, c_char},
+    ptr,
+};
 
 #[derive(Deserialize, Debug)]
 struct RecentItem {
@@ -18,67 +22,69 @@ struct RecentItem {
     image_url: String,
 }
 
+fn internal_generate_recent_image(json_data: String) -> Result<*mut c_char> {
+    let data: Vec<RecentItem> = serde_json::from_str(&json_data)?;
+    let mut recent_image = RgbaImage::new(900, 900);
+
+    let mut x = 0;
+    let mut y = 0;
+    let size = 300;
+
+    let font = FontRef::try_from_slice(include_bytes!("../assets/OpenSans-Regular.ttf"))?;
+
+    for item in data.into_iter() {
+        let cover_data = reqwest::blocking::get(item.image_url)?.bytes()?;
+
+        let cover = image::load_from_memory(&cover_data)?;
+        let (orig_width, orig_height) = cover.dimensions();
+        let new_height = (orig_height as f32 * size as f32 / orig_width as f32) as u32;
+        let mut scaled_cover = cover
+            .resize(size, new_height, FilterType::CatmullRom)
+            .into_rgba8();
+
+        let mut cropped_cover = imageops::crop(&mut scaled_cover, 0, 0, size, size).to_image();
+
+        draw_text_on_image(&mut cropped_cover, &item.status, &font, 16.0);
+
+        recent_image.copy_from(&cropped_cover, x, y)?;
+
+        x += size;
+        if x >= 900 {
+            x = 0;
+            y += size;
+        }
+    }
+
+    let mut buf = Vec::new();
+    let encoder = png::PngEncoder::new(&mut buf);
+    encoder.write_image(&recent_image, 900, 900, image::ColorType::Rgba8.into())?;
+
+    let size = buf.len() as u32;
+    let mut final_buf = Vec::with_capacity(4 + buf.len());
+    final_buf.extend_from_slice(&size.to_be_bytes());
+    final_buf.extend_from_slice(&buf);
+
+    let boxed = final_buf.into_boxed_slice();
+    let ptr = boxed.as_ptr() as *mut c_char;
+
+    std::mem::forget(boxed);
+
+    Ok(ptr)
+}
+
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn GenerateRecentImage(json_ptr: *const c_char) -> *mut c_char {
     unsafe {
         let _json_data = CStr::from_ptr(json_ptr);
         let json_data = String::from_utf8_lossy(_json_data.to_bytes()).to_string();
-        let data: Vec<RecentItem> = serde_json::from_str(&json_data).unwrap();
-        let mut recent_image = RgbaImage::new(900, 900);
-
-        let mut x = 0;
-        let mut y = 0;
-        let size = 300;
-
-        let font =
-            FontRef::try_from_slice(include_bytes!("../assets/OpenSans-Regular.ttf")).unwrap();
-
-        for item in data.into_iter() {
-            let cover_data = reqwest::blocking::get(item.image_url)
-                .unwrap()
-                .bytes()
-                .unwrap();
-
-            let cover = image::load_from_memory(&cover_data).unwrap();
-            let (orig_width, orig_height) = cover.dimensions();
-            let new_height = (orig_height as f32 * size as f32 / orig_width as f32) as u32;
-            let mut scaled_cover = cover
-                .resize(size, new_height, FilterType::CatmullRom)
-                .to_rgba8();
-
-            scaled_cover = imageops::crop(&mut scaled_cover, 0, 0, size, size).to_image();
-
-            let mut dst = RgbaImage::new(size, size);
-            dst.copy_from(&scaled_cover, 0, 0).unwrap();
-
-            draw_text_on_image(&mut dst, &item.status, &font, 16.0);
-
-            recent_image.copy_from(&dst, x, y).unwrap();
-
-            x += size;
-            if x >= 900 {
-                x = 0;
-                y += size;
+        let res = internal_generate_recent_image(json_data);
+        match res {
+            Ok(ptr) => ptr,
+            Err(err) => {
+                eprintln!("{}", err);
+                ptr::null_mut()
             }
         }
-
-        let mut buf = Vec::new();
-        let encoder = png::PngEncoder::new(&mut buf);
-        encoder
-            .write_image(&recent_image, 900, 900, image::ColorType::Rgba8.into())
-            .unwrap();
-
-        let size = buf.len() as u32;
-        let mut final_buf = Vec::with_capacity(4 + buf.len());
-        final_buf.extend_from_slice(&size.to_be_bytes());
-        final_buf.extend_from_slice(&buf);
-
-        let boxed = final_buf.into_boxed_slice();
-        let ptr = boxed.as_ptr() as *mut c_char;
-
-        std::mem::forget(boxed);
-
-        ptr
     }
 }
 

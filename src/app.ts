@@ -11,12 +11,11 @@ import { Modules } from "#structures/modules";
 
 dotenvFlow.config({ silent: true });
 
-const modules = new Modules();
 export const client = new Client({ intents: [GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildExpressions, GatewayIntentBits.DirectMessages, GatewayIntentBits.Guilds], allowedMentions: { repliedUser: false } });
 const workerManager = new Worker("#workers/manager.ts");
 
 process.on("SIGINT", () => {
-  modules.closeAllModules();
+  client.modules.closeAllModules();
   sqlite.close();
   process.exit();
 })

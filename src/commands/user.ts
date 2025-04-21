@@ -73,7 +73,7 @@ export default {
       // re: yeah, this is cancer
       titleEmbed.setColor(userColor as ColorResolvable);
     }
-    interaction.editReply({ embeds: [titleEmbed] });
+    interaction.reply({ embeds: [titleEmbed] });
 
   },
 } satisfies Command;
