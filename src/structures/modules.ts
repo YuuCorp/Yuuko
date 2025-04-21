@@ -7,13 +7,10 @@ function defineModules<T extends Record<string, Record<string, FFIFunction>>>(de
 }
 
 export const moduleSymbols = defineModules({
-    image: {
+    modules: {
         GenerateRecentImage: {
-            args: ["cstring", "i32"],
+            args: ["cstring"],
             returns: "pointer",
-        },
-        FreeMemory: {
-            args: ["pointer"]
         }
     },
 });
@@ -26,7 +23,7 @@ export class Modules {
     } = {};
 
     constructor() {
-        this.loadModule("image");
+        this.loadModule("modules");
     }
 
     private loadModule<M extends keyof ModuleSymbols>(name: M) {

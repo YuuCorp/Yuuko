@@ -21,7 +21,7 @@
     "format": "prettier --write .",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "go:build": "sh ./src/modules/build.sh",
+    "module:build": "sh ./src/modules/build.sh",
     "gen:gql": "graphql-codegen",
     "gen:queries": "bun run ./src/scripts/genQueries.ts",
     "db:push": "bun drizzle-kit push",

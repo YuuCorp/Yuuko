@@ -4741,7 +4741,7 @@ export type RecentChartQueryVariables = Exact<{
 }>;
 
 
-export type RecentChartQuery = { __typename?: 'Query', Page?: { __typename?: 'Page', mediaList?: Array<{ __typename?: 'MediaList', status?: MediaListStatus | null, progress?: number | null, media?: { __typename?: 'Media', title?: { __typename?: 'MediaTitle', english?: string | null, romaji?: string | null } | null, coverImage?: { __typename?: 'MediaCoverImage', extraLarge?: string | null } | null } | null } | null> | null } | null };
+export type RecentChartQuery = { __typename?: 'Query', Page?: { __typename?: 'Page', mediaList?: Array<{ __typename?: 'MediaList', status?: MediaListStatus | null, progress?: number | null, media?: { __typename?: 'Media', title?: { __typename?: 'MediaTitle', english?: string | null, romaji?: string | null } | null, coverImage?: { __typename?: 'MediaCoverImage', large?: string | null } | null } | null } | null> | null } | null };
 
 export type RecommendationsQueryVariables = Exact<{
   type?: InputMaybe<MediaType>;

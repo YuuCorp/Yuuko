@@ -7,17 +7,19 @@ import { runChecks } from "#checks/run";
 import path from "path";
 import fs from "fs";
 import { syncAnilistUsers, type WorkerResponseUnion } from "#workers/index";
-import { subtle } from "crypto";
-
-process.on("SIGINT", () => {
-  sqlite.close();
-  process.exit();
-})
+import { Modules } from "#structures/modules";
 
 dotenvFlow.config({ silent: true });
 
+const modules = new Modules();
 export const client = new Client({ intents: [GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildExpressions, GatewayIntentBits.DirectMessages, GatewayIntentBits.Guilds], allowedMentions: { repliedUser: false } });
 const workerManager = new Worker("#workers/manager.ts");
+
+process.on("SIGINT", () => {
+  modules.closeAllModules();
+  sqlite.close();
+  process.exit();
+})
 
 async function start(token: string | undefined) {
   await client.rsa.loadKeys();
@@ -44,33 +46,6 @@ async function start(token: string | undefined) {
   process.env.UPTIME = Date.now();
 }
 
-async function makeRSAPair() {
-  const RSAdirectory = path.join(import.meta.dir, 'RSA');
-  if (fs.existsSync(path.join(RSAdirectory, 'id_rsa'))) return;
-
-  const keyPair = await subtle.generateKey({
-    name: "RSA-OAEP",
-    modulusLength: 4096,
-    publicExponent: new Uint8Array([0x01, 0x00, 0x01]), // Value taken from https://developer.mozilla.org/en-US/docs/Web/API/RsaHashedKeyGenParams#publicexponent
-    hash: "SHA-256",
-  }, true, ['encrypt', 'decrypt'])
-
-  const publicKey = await subtle.exportKey('spki', keyPair.publicKey);
-  const privateKey = await subtle.exportKey('pkcs8', keyPair.privateKey)
-
-  const exportedPublicKey = '-----BEGIN PUBLIC KEY-----\n' +
-    btoa(String.fromCharCode.apply(null, [...new Uint8Array(publicKey)])).replace(/.{64}/g, '$&\n') + '\n-----END PUBLIC KEY-----';
-  const exportedPrivateKey = '-----BEGIN PRIVATE KEY-----\n' + // Inserts a newline every 64 characters
-    btoa(String.fromCharCode.apply(null, [...new Uint8Array(privateKey)])).replace(/.{64}/g, '$&\n') + '\n-----END PRIVATE KEY-----';
-
-  if (!fs.existsSync(RSAdirectory)) fs.mkdirSync(RSAdirectory);
-
-  fs.writeFileSync(path.join(RSAdirectory, 'id_rsa'), exportedPrivateKey);
-  fs.writeFileSync(path.join(RSAdirectory, 'id_rsa.pub'), exportedPublicKey);
-
-  client.log("Successfully generated the RSA key pair!", "RSA")
-}
-
 async function initializeWorkerDB() {
   const syncEvent = await db.select().from(tables.workerEvents).limit(1);
 
@@ -83,8 +58,6 @@ async function initializeWorkerDB() {
   };
 }
 
-
-// await makeRSAPair();
 await start(process.env.TOKEN);
 
 await initializeWorkerDB();
