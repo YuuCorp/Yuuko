@@ -13,5 +13,4 @@ export const mwRequireALToken = new Middleware({
     interaction.alID = alUser.anilistId;
     interaction.ALtoken = await client.rsa.decrypt(alUser.anilistToken);
   },
-  defer: true,
 });

@@ -29,14 +29,14 @@ export default {
     const subcommand = getSubcommand<["sync", "wipe"]>(interaction.options);
 
     if (subcommand === "wipe") {
-      interaction.editReply(`Wiping your lists from DB...`);
+      interaction.reply(`Wiping your lists from DB...`);
       redis.del(await redis.keys(`_user${interaction.alID}-*`))
 
       await db.delete(mediaStatUsers).where(eq(mediaStatUsers.anilistId, interaction.alID!));
 
       return void interaction.editReply(`Successfully wiped your lists from our DB!`);
     } else if (subcommand === "sync") {
-      interaction.editReply(`Syncing your lists...`);
+      interaction.deferReply();
       const { data: animeData } = await graphQLRequest("GetMediaCollection", {
         userId: interaction.alID,
         type: MediaType.Anime,

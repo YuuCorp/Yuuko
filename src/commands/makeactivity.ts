@@ -108,7 +108,7 @@ export default {
         .setDescription(userText)
         .setFooter(footer(headers));
 
-      return void interaction.editReply({ embeds: [statusActivity] });
+      return void interaction.reply({ embeds: [statusActivity] });
     }
 
     if (type === "list") {
@@ -130,7 +130,7 @@ export default {
         .setFooter(footer(headers));
       if (data.media && data.media.bannerImage) mediaListActivity.setImage(data.media.bannerImage);
 
-      return void interaction.editReply({ embeds: [mediaListActivity] });
+      return void interaction.reply({ embeds: [mediaListActivity] });
 
     }
   },
