@@ -164,3 +164,14 @@ fn blend_rectangle(image: &mut RgbaImage, rect: Rect, color: Rgba<u8>) {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn recent_image_error() {
+        let result = internal_generate_recent_image(2.to_string());
+        assert!(result.is_err());
+    }
+}
