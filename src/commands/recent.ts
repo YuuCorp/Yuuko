@@ -3,7 +3,6 @@ import { mwGetUserID } from "#middleware/userEntry";
 import type { Command } from "#structures/index";
 import { CommandCategories, graphQLRequest, SeriesTitle, getOptions, YuukoError } from "#utils/index";
 import type { MediaList, MediaType, RecentChartQueryVariables } from "#graphQL/types";
-import { Modules } from "#structures/modules";
 import { ptr, toBuffer } from "bun:ffi";
 
 const name = "recent";
@@ -73,6 +72,8 @@ export default {
     if (!buffer) throw new YuukoError("Encountered an error whilst trying to create the image buffer.");
     const attachment = new AttachmentBuilder(buffer, { name: "recent.png" });
     await interaction.editReply({ files: [attachment], embeds: [] });
+
+    lib.symbols.Free(imgPtr);
   }
 } satisfies Command;
 

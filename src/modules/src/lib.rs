@@ -11,7 +11,7 @@ use imageproc::{
 };
 use serde::Deserialize;
 use std::{
-    ffi::{CStr, c_char},
+    ffi::{CStr, c_char, c_void},
     ptr,
 };
 
@@ -74,7 +74,7 @@ fn internal_generate_recent_image(json_data: String) -> Result<*mut c_char> {
 
 #[unsafe(no_mangle)]
 /// # Safety
-/// This fucntion is called from FFI so it has to be unsafe.
+/// This fucntion is called via FFI so it has to be unsafe.
 /// It generates a 3x3 grid image of the user's recent media.
 pub unsafe extern "C" fn GenerateRecentImage(json_ptr: *const c_char) -> *mut c_char {
     unsafe {
@@ -91,6 +91,21 @@ pub unsafe extern "C" fn GenerateRecentImage(json_ptr: *const c_char) -> *mut c_
     }
 }
 
+#[unsafe(no_mangle)]
+/// # Safety
+/// Used to later cleanup memory
+pub unsafe extern "C" fn Free(ptr: *mut c_void) {
+    if ptr.is_null() {
+        return;
+    }
+
+    let boxed_ptr = ptr as *mut i32;
+
+    unsafe {
+        drop(Box::from_raw(boxed_ptr));
+    }
+}
+
 fn draw_text_on_image(image: &mut RgbaImage, text: &str, font: &FontRef, size: f32) {
     let font_color = Rgba([255, 255, 255, 255]);
     let background_color = Rgba([0, 0, 0, 192]);
@@ -98,8 +113,8 @@ fn draw_text_on_image(image: &mut RgbaImage, text: &str, font: &FontRef, size: f
     let scale = PxScale { x: size, y: size };
     let lines: Vec<&str> = text.split('\n').collect(); // Split the text into lines
 
-    let max_width = 300; // Maximum width for the text (image width)
-    let line_height = size * 1.2; // Height for each line, including some spacing
+    let max_size = 300; // Maximum width for the text (image width)
+    let line_height = size * 1.1; // Height for each line, including some spacing
 
     let total_text_height = lines.len() as f32 * line_height;
 
@@ -110,11 +125,11 @@ fn draw_text_on_image(image: &mut RgbaImage, text: &str, font: &FontRef, size: f
     for line in lines {
         let (text_width, text_height) = get_text_bounds(font, scale, line);
 
-        let x_pos = (max_width - text_width) / 2;
-        let rect_x = x_pos - padding;
-        let rect_y = y_pos as i32 - padding;
-        let rect_width = text_width + 2 * padding;
-        let rect_height = text_height + 2 * padding;
+        let x_pos = (max_size - text_width) / 2;
+        let rect_x = (x_pos - padding).max(0);
+        let rect_y: i32 = (y_pos as i32 - padding).max(0);
+        let rect_width = (text_width + 2 * padding).min(max_size);
+        let rect_height = (text_height + 2 * padding).min(max_size);
 
         let rect = imageproc::rect::Rect::at(rect_x, rect_y)
             .of_size(rect_width as u32, rect_height as u32);

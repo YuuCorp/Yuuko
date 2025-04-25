@@ -9,19 +9,17 @@ class Logger {
     })
   }
 
-  log(text: string, category: string) {
+  log(text: string, category: string = "Info") {
     if (category === "Debug" && process.env.NODE_ENV !== "development") return;
     const d = new Date()
-    const categoryText = category ? category : 'Info'
     this.logger.log({
       level: 'info',
-      message: `${d.getHours()}:${d.getMinutes
-        } - ${d.getDate()}:${d.getMonth()}:${d.getFullYear()} | [${categoryText}]: ${text}`,
+      message: `${d.getFullYear()}-${d.getMonth()}-${d.getDate()} - ${d.getHours()}:${d.getMinutes()} | [${category}]: ${text}`,
     })
     console.log(
       colors.green(
-        `${d.getDate()}:${d.getMonth()}:${d.getFullYear()} - ${d.getHours()}:${d.getMinutes()}`,
-      ) + colors.yellow(` | [${categoryText}]: ${text}`),
+        `${d.getFullYear()}-${d.getMonth()}-${d.getDate()} - ${d.getHours()}:${d.getMinutes()}`,
+      ) + colors.yellow(` | [${category}]: ${text}`),
     )
   }
 }

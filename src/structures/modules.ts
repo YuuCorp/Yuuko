@@ -11,6 +11,10 @@ export const moduleSymbols = defineModules({
         GenerateRecentImage: {
             args: ["cstring"],
             returns: "pointer",
+        },
+        Free: {
+            args: ["pointer"],
+            returns: "void",
         }
     },
 });

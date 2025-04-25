@@ -47,7 +47,7 @@ const interactionCreate = new YuukoEvent({
       if (e instanceof YuukoError) {
         if (!interaction.isCommand()) return;
 
-        if (interaction.deferred)
+        if (interaction.deferred || interaction.replied)
           return void interaction.editReply({ embeds: [embedError(e)] });
         else
           return void interaction.reply({
