@@ -40,10 +40,11 @@ import type {
 } from '../graphQL/types'
 import Queries from '../graphQL/types/queries'
 import { YuukoError, type GraphQLResponse } from './types'
+import { env } from '#env';
 
 type Query = keyof typeof Queries
 
-const baseUrl = process.env.ANILIST_API || 'https://graphql.anilist.co'
+const baseUrl = env().ANILIST_API;
 
 interface QueryVariables {
   Airing: [AiringQuery, AiringQueryVariables]

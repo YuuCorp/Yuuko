@@ -1,5 +1,6 @@
 import winston from 'winston'
 import colors from 'colors'
+import { env } from '#env';
 
 class Logger {
   public logger: winston.Logger
@@ -10,7 +11,7 @@ class Logger {
   }
 
   log(text: string, category: string = "Info") {
-    if (category === "Debug" && process.env.NODE_ENV !== "development") return;
+    if (category === "Debug" && env().NODE_ENV !== "development") return;
     const d = new Date()
     this.logger.log({
       level: 'info',

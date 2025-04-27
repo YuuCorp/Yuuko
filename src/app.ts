@@ -7,6 +7,7 @@ import { runChecks } from "#checks/run";
 import path from "path";
 import fs from "fs";
 import { syncAnilistUsers, type WorkerResponseUnion } from "#workers/index";
+import { env } from "#env";
 
 dotenvFlow.config({ silent: true });
 
@@ -41,7 +42,7 @@ async function start(token: string | undefined) {
         info: "Initialized log!"
       }]));
 
-  process.env.UPTIME = Date.now();
+  env().UPTIME = Date.now();
 }
 
 async function initializeWorkerDB() {
@@ -56,7 +57,7 @@ async function initializeWorkerDB() {
   };
 }
 
-await start(process.env.TOKEN);
+await start(env().TOKEN);
 
 await initializeWorkerDB();
 

@@ -8,12 +8,12 @@ export class RSA {
   private static publicKey: RSAkey;
   private static privateKey: RSAkey;
 
-  private static enc: TextEncoder;
-  private static dec: TextDecoder;
+  private enc: TextEncoder;
+  private dec: TextDecoder;
 
   constructor() {
-    RSA.enc = new TextEncoder();
-    RSA.dec = new TextDecoder();
+    this.enc = new TextEncoder();
+    this.dec = new TextDecoder();
   }
 
   private async generateRSAPair() {
@@ -59,7 +59,7 @@ export class RSA {
   }
 
   async encrypt(item: string) {
-    const itemBuffer = RSA.enc.encode(item);
+    const itemBuffer = this.enc.encode(item);
     // https://crypto.stackexchange.com/a/42100
     // ^ According to this comment we can calculate the chunk size with the formula ( ( modulusLength / 8 ) - ( 2 * hLenBits / 8 ) - 2 )
     // hLenBits is the length of the hash function output in bits, which is 256 for SHA-256
@@ -80,7 +80,7 @@ export class RSA {
       await this.splitToChunks(itemBuffer, chunkSize, RSA.privateKey, 'decrypt') :
       await subtle.decrypt('RSA-OAEP', RSA.privateKey, itemBuffer);
 
-    return RSA.dec.decode(decryptedItem);
+    return this.dec.decode(decryptedItem);
   }
 
   // Helpers

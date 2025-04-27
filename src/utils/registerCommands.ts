@@ -2,9 +2,10 @@ import path from "path";
 import fs from "fs";
 import { Client, type Command } from "#structures/index";
 import { REST, Routes } from "discord.js";
+import { env } from '#env';
 
 export async function registerCommands(client: Client) {
-  client.log(`Starting Yuuko in ${process.env.NODE_ENV} enviroment.`, "Info");
+  client.log(`Starting Yuuko in ${env().NODE_ENV} enviroment.`, "Info");
   const commandsPath = path.join(import.meta.dir, "..", "commands");
   const commandFiles = fs.readdirSync(commandsPath).filter((file) => file.endsWith(".ts"));
   client.log(`Loading ${commandFiles.length} commands.`, "Info");
@@ -22,10 +23,10 @@ export async function registerCommands(client: Client) {
   client.log(`Loaded ${slashCommands.length} slash (/) commands.`, "Info");
 
   // ^ Register Slash Commands
-  const rest = new REST({ version: "10" }).setToken(process.env.TOKEN!);
+  const rest = new REST({ version: "10" }).setToken(env().TOKEN!);
 
-  const clientId = process.env.CLIENT_ID || "867010131745177621";
-  const guildId = process.env.GUILD_ID || "843208877326860299";
+  const clientId = env().CLIENT_ID;
+  const guildId = env().GUILD_ID;
 
   try {
     client.log(`Started refreshing ${slashCommands.length} slash (/) commands.`, "Info");
@@ -34,7 +35,7 @@ export async function registerCommands(client: Client) {
 
     await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: slashCommands });
 
-    if (process.env.NODE_ENV === "production" || process.env.NODE_ENV === "docker") await rest.put(Routes.applicationCommands(clientId), { body: slashCommands });
+    if (env().NODE_ENV === "production" || env().NODE_ENV === "docker") await rest.put(Routes.applicationCommands(clientId), { body: slashCommands });
 
     client.log(`Refreshed ${slashCommands.length} slash (/) commands.`, "Info");
   } catch (error: any) {
