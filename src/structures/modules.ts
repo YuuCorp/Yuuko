@@ -26,9 +26,7 @@ export class Modules {
         [K in keyof ModuleSymbols]?: Library<ModuleSymbols[K]>
     } = {};
 
-    constructor() {
-        this.loadModule("modules");
-    }
+    constructor() { }
 
     private loadModule<M extends keyof ModuleSymbols>(name: M) {
         const path = join(import.meta.dir, "../modules", `compiled/lib${name}.${suffix}`);
@@ -41,11 +39,13 @@ export class Modules {
         const lib = dlopen(path, symbols);
 
         Modules.modules[name] = lib;
+
+        return lib;
     }
 
     getModule<M extends keyof ModuleSymbols>(name: M) {
         const module = Modules.modules[name];
-        if (!module) throw new Error(`Module ${name} has not been initialized yet`);
+        if (!module) return this.loadModule(name);
 
         return module;
     }

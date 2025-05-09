@@ -107,8 +107,9 @@ fn internal_generate_recent_image(json_data: String) -> Result<*mut c_char> {
 
 #[unsafe(no_mangle)]
 /// # Safety
-/// Make sure `json_ptr` does point to a valid Cstr
-/// It generates a 3x3 grid image of the user's recent media.
+/// Make sure `json_ptr` does point to a valid `CStr`.
+///
+/// Generates a 3x3 grid image of the user's recent media.
 pub unsafe extern "C" fn GenerateRecentImage(json_ptr: *const c_char) -> *mut c_char {
     let _json_data = unsafe { CStr::from_ptr(json_ptr) };
 
