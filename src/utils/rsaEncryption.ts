@@ -16,7 +16,7 @@ export class RSA {
     this.dec = new TextDecoder();
   }
 
-  private async generateRSAPair() {
+  private static async generateRSAPair() {
     const RSAdirectory = path.join(import.meta.dir, 'RSA');
     if (fs.existsSync(path.join(RSAdirectory, 'id_rsa'))) return;
 
@@ -30,10 +30,8 @@ export class RSA {
     const publicKey = await subtle.exportKey('spki', keyPair.publicKey);
     const privateKey = await subtle.exportKey('pkcs8', keyPair.privateKey)
 
-    const exportedPublicKey = '-----BEGIN PUBLIC KEY-----\n' +
-      btoa(String.fromCharCode.apply(null, [...new Uint8Array(publicKey)])).replace(/.{64}/g, '$&\n') + '\n-----END PUBLIC KEY-----';
-    const exportedPrivateKey = '-----BEGIN PRIVATE KEY-----\n' + // Inserts a newline every 64 characters
-      btoa(String.fromCharCode.apply(null, [...new Uint8Array(privateKey)])).replace(/.{64}/g, '$&\n') + '\n-----END PRIVATE KEY-----';
+    const exportedPublicKey = RSA.toPEM(publicKey, "PUBLIC");
+    const exportedPrivateKey = RSA.toPEM(privateKey, "PRIVATE");
 
     if (!fs.existsSync(RSAdirectory)) fs.mkdirSync(RSAdirectory);
 
@@ -41,18 +39,18 @@ export class RSA {
     fs.writeFileSync(path.join(RSAdirectory, 'id_rsa.pub'), exportedPublicKey);
   }
 
-  async loadKeys() {
+  static async loadKeys() {
     const _publicRSA = path.join(import.meta.dir, "..", "RSA", "id_rsa.pub");
     const _privateRSA = path.join(import.meta.dir, "..", "RSA", "id_rsa");
 
     const publicExists = fs.existsSync(_publicRSA);
     const privateExists = fs.existsSync(_privateRSA);
-    if (!publicExists && !privateExists) await this.generateRSAPair();
+    if (!publicExists && !privateExists) await RSA.generateRSAPair();
     else if (!publicExists) throw new Error("Missing public RSA key.");
     else if (!privateExists) throw new Error("Missing private RSA key.");
 
-    const publicKey = await subtle.importKey('spki', this.loadKey("PUBLIC", _publicRSA), { name: 'RSA-OAEP', hash: 'SHA-256' }, false, ['encrypt']);
-    const privateKey = await subtle.importKey('pkcs8', this.loadKey("PRIVATE", _privateRSA), { name: 'RSA-OAEP', hash: 'SHA-256' }, false, ['decrypt']);
+    const publicKey = await subtle.importKey('spki', RSA.loadPEM(_publicRSA), { name: 'RSA-OAEP', hash: 'SHA-256' }, false, ['encrypt']);
+    const privateKey = await subtle.importKey('pkcs8', RSA.loadPEM(_privateRSA), { name: 'RSA-OAEP', hash: 'SHA-256' }, false, ['decrypt']);
 
     RSA.publicKey = publicKey as RSAkey;
     RSA.privateKey = privateKey as RSAkey;
@@ -85,14 +83,19 @@ export class RSA {
 
   // Helpers
 
-  private loadKey(type: "PUBLIC" | "PRIVATE", path: string) {
-    const RSA = fs.readFileSync(path, "utf8")
-      .replace(`-----BEGIN ${type} KEY-----`, '')
-      .replace(`-----END ${type} KEY-----`, '')
-      .replaceAll('\n', '');
+  private static loadPEM(path: string) {
+    return Buffer.from(
+      fs.readFileSync(path, "utf8")
+        .replace(/-----(BEGIN|END) (PUBLIC|PRIVATE) KEY-----|\s+/g, ''),
+      "base64"
+    );
 
-    // replace atob with Buffer.from(RSA, "base64");
-    return Buffer.from(RSA, "base64");
+  }
+
+  private static toPEM(keyData: ArrayBuffer, type: "PUBLIC" | "PRIVATE") {
+    const base64 = Buffer.from(keyData).toString("base64");
+    const formatted = base64.match(/.{1,64}/g)?.join('\n') ?? base64;
+    return `-----BEGIN ${type} KEY-----\n${formatted}\n-----END ${type} KEY-----`;
   }
 
   private async splitToChunks(

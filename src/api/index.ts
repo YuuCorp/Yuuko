@@ -6,8 +6,7 @@ import { env } from "#env";
 
 export async function startApi() {
   const port = env().API_PORT;
-  const rsa = new RSA();
-  await rsa.loadKeys();
+  await RSA.loadKeys();
 
   new Elysia().onError(({ error }) => {
     const err = new Response(error.toString());

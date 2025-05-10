@@ -21,7 +21,6 @@ process.on("SIGINT", () => {
 })
 
 async function start(token: string | undefined) {
-  await client.rsa.loadKeys();
   await registerEvents(client);
   await runChecks(client);
 
@@ -58,7 +57,6 @@ async function initializeWorkerDB() {
 }
 
 await start(env().TOKEN);
-
 await initializeWorkerDB();
 
 // tell the worker to start a check loop
