@@ -2,7 +2,7 @@ import dotenvFlow from "dotenv-flow";
 import { db, sqlite, tables } from "#database/db";
 import { Client } from "#structures/index";
 import { GatewayIntentBits } from "discord.js";
-import { registerEvents, updateBotStats } from "#utils/index";
+import { registerEvents, RSA, updateBotStats } from "#utils/index";
 import { runChecks } from "#checks/run";
 import path from "path";
 import fs from "fs";
@@ -21,6 +21,7 @@ process.on("SIGINT", () => {
 })
 
 async function start(token: string | undefined) {
+  await RSA.loadKeys();
   await registerEvents(client);
   await runChecks(client);
 

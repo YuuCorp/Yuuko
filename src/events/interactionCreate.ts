@@ -15,7 +15,7 @@ const interactionCreate = new YuukoEvent({
         const command = client.commands.find((cmd) => cmd.name == interaction.commandName);
         if (!command) return;
         logging(command, interaction);
-        client.log(`Interaction received in: ${Date.now() - interaction.createdTimestamp}ms`, "Debug");
+        client.log(`Interaction received in: ${Date.now() - interaction.createdTimestamp}ms`, "debug");
         checkCooldown(client, command, interaction);
         const start = performance.now();
         const args = await runMiddlewares(command.middlewares, interaction, client);

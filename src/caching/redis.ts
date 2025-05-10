@@ -16,7 +16,7 @@ redis.on("error", (err) => {
 });
 
 redis.on("connect", () => {
-  client.log(`Connected to ${host}!`, "Redis");
+  client.log(`Connected to ${host}!`, "info");
   redis.set("test", "test");
 });
 
