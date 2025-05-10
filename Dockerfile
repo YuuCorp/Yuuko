@@ -11,13 +11,13 @@ WORKDIR /usr/src/Yuuko
 FROM base AS install
 RUN mkdir -p /temp/prod
 COPY package.json bun.lock /temp/prod/
-# Copy bun patches folder so we can install the patches
-COPY patches /temp/prod/patches
 RUN cd /temp/prod && bun install --frozen-lockfile --production
 
 FROM base AS prerelease
 COPY . .
 ENV NODE_ENV=docker
+
+RUN if [ ! -f ./src/database/sqlite/*.sqlite ]; then bun db:push; fi
 
 FROM base AS release
 COPY --from=install /temp/prod/node_modules node_modules
@@ -32,4 +32,4 @@ EXPOSE 3030/tcp
 
 VOLUME "usr/src/Yuuko/database/sqlite"
 
-ENTRYPOINT [ "sh", "entrypoint.sh" ]
+CMD bun start:prod
