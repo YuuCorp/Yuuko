@@ -86,8 +86,13 @@ export default {
         const components = [new ActionRowBuilder<ButtonBuilder>().addComponents(buttonList)];
 
         const collector = createButtonCollector(interaction, customIDs, msg);
+        let hints = "There are no hints.";
 
-        interaction.editReply({ files: [attachment], components, embeds: [] })
+        const embed = new EmbedBuilder()
+            .setTitle(`Pixel Jumble - Guess the ${type.toLowerCase()}`)
+            .setDescription(`${hints}`);
+
+        await interaction.editReply({ files: [attachment], components, embeds: [embed] })
 
         collector?.on("collect", async (i) => {
             if (!i.isButton()) return;
@@ -102,26 +107,41 @@ export default {
                     [pixelatedImgPtr, pixelatedImgBufferSize] = pixelateImage(lib, originalImgPtr, pixelationLevel);
                     attachment = getAttachment(pixelatedImgPtr, pixelatedImgBufferSize);
 
-                    interaction.editReply({ files: [attachment], components })
+                    await interaction.editReply({ files: [attachment] })
 
                     break;
+                case "forfeit":
+                    collector.stop();
+                    break;
             }
-
-
         })
 
-        collector?.on("end", () => {
-            if (originalImgPtr) lib.symbols.FreeRgbaImage(originalImgPtr);
+        collector?.on("end", async () => {
+            [pixelatedImgPtr, pixelatedImgBufferSize] = pixelateImage(lib, originalImgPtr, 1);
+            attachment = getAttachment(pixelatedImgPtr, pixelatedImgBufferSize);
 
-            if (pixelatedImgPtr && pixelatedImgBufferSize)
+            embed.setDescription(`${hints}\n\n**${interaction.user.displayName}** gave up!\nAnswer was ${title}`)
+            await interaction.editReply({ files: [attachment], components: [], embeds: [embed] })
+
+            if (originalImgPtr) {
+                lib.symbols.FreeRgbaImage(originalImgPtr);
+                originalImgPtr = null;
+            }
+
+            if (pixelatedImgPtr && pixelatedImgBufferSize) {
                 lib.symbols.FreeImageBuffer(pixelatedImgPtr, pixelatedImgBufferSize);
+                pixelatedImgPtr = null;
+                pixelatedImgBufferSize = null;
+            }
         })
 
 
     },
 } satisfies Command;
 
-function pixelateImage<T extends Library<ModuleSymbols["modules"]>>(lib: T, originalImg: Pointer, pixelationLevel: number): [Pointer, number] {
+function pixelateImage<T extends Library<ModuleSymbols["modules"]>>(lib: T, originalImg: Pointer | null, pixelationLevel: number): [Pointer, number] {
+    if (!originalImg) throw new YuukoError("Original image pointerr is null when trying to pixelate it");
+
     const pixelatedImgBuffer = new Uint32Array(1);
     const pixelatedImgPtr = lib.symbols.PixelateImage(originalImg, pixelationLevel, pixelatedImgBuffer);
 
