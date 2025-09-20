@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, Message, type CollectedMessageInteraction, type InteractionReplyOptions, type MessageComponentCollectorOptions } from 'discord.js'
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, ComponentType, EmbedBuilder, InteractionCallbackResponse, Message, type CollectedMessageInteraction, type InteractionReplyOptions, type MessageComponentCollectorOptions } from 'discord.js'
 import type { UsableInteraction } from '#structures/command';
 
 export async function buildPagination(interaction: UsableInteraction, pageList: EmbedBuilder[]) {
@@ -23,20 +23,7 @@ export async function buildPagination(interaction: UsableInteraction, pageList: 
   // if there's not more than 1 page, no need for collectors
   if (totalPages === 1) return;
 
-  let collector;
-  const collectorOptions = {
-    filter: (i) => {
-      if (i.isButton()) return customIDs.has(i.customId) && (i.user.id === interaction.user.id);
-      return false;
-    },
-    time: 20_000 // 20 second timeout
-  } satisfies MessageComponentCollectorOptions<CollectedMessageInteraction>;
-
-  if (pagination instanceof Message) {
-    collector = pagination.createMessageComponentCollector(collectorOptions);
-  } else {
-    collector = pagination.resource?.message?.createMessageComponentCollector(collectorOptions);
-  }
+  const collector = createButtonCollector(interaction, customIDs, pagination);
 
   // When button is pressed
   collector?.on("collect", async (i) => {
@@ -72,6 +59,28 @@ export async function buildPagination(interaction: UsableInteraction, pageList: 
     })
   });
 
+}
+
+export function createButtonCollector(interaction: UsableInteraction, customIDs: Set<string>, interactionAction: Message<boolean> | InteractionCallbackResponse, options?: Partial<MessageComponentCollectorOptions<CollectedMessageInteraction>>) {
+  let collector;
+
+  const collectorOptions = {
+    filter: (i) => {
+      if (i.isButton()) return customIDs.has(i.customId) && (i.user.id === interaction.user.id);
+      return false;
+    },
+    time: 20000, // 20 second timeout
+    ...options,
+    componentType: ComponentType.Button,
+  } satisfies MessageComponentCollectorOptions<CollectedMessageInteraction>;
+
+  if (interactionAction instanceof Message) {
+    collector = interactionAction.createMessageComponentCollector(collectorOptions);
+  } else {
+    collector = interactionAction.resource?.message?.createMessageComponentCollector(collectorOptions);
+  }
+
+  return collector;
 }
 
 function createPaginationData(pageList: EmbedBuilder[], pageNumber: number, totalPages: number, buttonList: ButtonBuilder[]) {

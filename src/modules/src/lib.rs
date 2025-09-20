@@ -234,7 +234,6 @@ pub unsafe extern "C" fn GetImage(image_url: *const c_char) -> *mut c_char {
         Err(_) => return ptr::null_mut(),
     };
 
-    let start = std::time::Instant::now();
     // Fetch the image asynchronously
     let result: Result<DynamicImage> = tokio::runtime::Builder::new_current_thread()
         .enable_all()
@@ -242,7 +241,6 @@ pub unsafe extern "C" fn GetImage(image_url: *const c_char) -> *mut c_char {
         .unwrap()
         .block_on(fetch_cover(url_str));
 
-    println!("Time taken to fetch the image: {:?}", start.elapsed());
     match result {
         Ok(img) => {
             // Convert to RgbaImage
@@ -272,7 +270,6 @@ pub unsafe extern "C" fn PixelateImage(
         return ptr::null_mut();
     }
 
-    let start = std::time::Instant::now();
     let original: &RgbaImage = unsafe { &*(original_ptr as *const RgbaImage) };
     let (width, height) = original.dimensions();
     let resize_width = (width / level as u32).max(1);
@@ -281,13 +278,10 @@ pub unsafe extern "C" fn PixelateImage(
     let pixelated =
         image::imageops::resize(original, resize_width, resize_height, FilterType::Nearest);
     let pixelated = image::imageops::resize(&pixelated, width, height, FilterType::Nearest);
-    println!("Time taken to pixelate image: {:?}", start.elapsed());
-    let start = std::time::Instant::now();
 
     let mut buf = Vec::new();
     let encoder = png::PngEncoder::new(&mut buf);
     let result = encoder.write_image(&pixelated, width, height, image::ColorType::Rgba8.into());
-    println!("Time taken to write image to PNG: {:?}", start.elapsed());
 
     match result {
         Ok(_) => {

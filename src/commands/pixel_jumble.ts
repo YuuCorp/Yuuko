@@ -1,4 +1,4 @@
-import { AttachmentBuilder, SlashCommandBuilder } from "discord.js";
+import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import type { Command } from "#structures/index";
 import getOptions from "#utils/getOptions";
 import type { MediaType } from "#graphQL/types";
@@ -6,7 +6,9 @@ import { YuukoError } from "#utils/types";
 import { mwRequireALToken } from "#middleware/alToken";
 import { graphQLRequest } from "#utils/graphQLRequest";
 import { SeriesTitle } from "#utils/common";
-import { ptr, toBuffer } from "bun:ffi";
+import { ptr, toBuffer, type Library, type Pointer } from "bun:ffi";
+import type { ModuleSymbols } from "#structures/modules";
+import { createButtonCollector } from "#utils/buildPagination";
 
 const name = "pixeljumble";
 const usage = "/pixeljumble";
@@ -57,40 +59,86 @@ export default {
 
         const lib = client.modules.getModule("modules");
 
-        await interaction.reply({ embeds: [{ description: "Creating image..." }] });
-
-        const pixelationLevel = 1;
+        const msg = await interaction.reply({ embeds: [{ description: "Preparing the game..." }], withResponse: true });
 
         const enc = new TextEncoder();
         const encodedImgUrl = enc.encode(coverImage);
         const urlPtr = ptr(encodedImgUrl);
 
-        let originalImgPtr = null;
-        let pixelatedImgPtr = null;
-        let pixelatedImgBufferSize = null;
+        let pixelationLevel = 7;
+        let originalImgPtr: Pointer | null = null;
+        let pixelatedImgPtr: Pointer | null = null;
+        let pixelatedImgBufferSize: number | null = null;
 
-        try {
-            originalImgPtr = lib.symbols.GetImage(urlPtr);
-            if (!originalImgPtr) throw new YuukoError("Fetching image in Rust experienced an error and returned an invalid pointer");
+        originalImgPtr = lib.symbols.GetImage(urlPtr);
+        if (!originalImgPtr) throw new YuukoError("Fetching image in Rust experienced an error and returned an invalid pointer");
 
-            const pixelatedImgBuffer = new Uint32Array(1);
-            let pixelatedImgPtr = lib.symbols.PixelateImage(originalImgPtr, pixelationLevel, pixelatedImgBuffer);
+        [pixelatedImgPtr, pixelatedImgBufferSize] = pixelateImage(lib, originalImgPtr, pixelationLevel);
 
-            if (!pixelatedImgPtr) throw new YuukoError("Pixelating image in Rust experienced an error and returned an invalid pointer");
+        let attachment = getAttachment(pixelatedImgPtr, pixelatedImgBufferSize);
 
-            pixelatedImgBufferSize = pixelatedImgBuffer[0];
-            if (pixelatedImgBufferSize === undefined || pixelatedImgBufferSize === 0) throw new YuukoError("Rust module experienced an error and returned an invalid buffer size");
-            const buffer = toBuffer(pixelatedImgPtr, 0, pixelatedImgBufferSize);
+        const buttonList = [
+            new ButtonBuilder().setCustomId('guess').setLabel('Guess').setStyle(ButtonStyle.Primary),
+            new ButtonBuilder().setCustomId('hint').setLabel('Next Hint').setStyle(ButtonStyle.Primary),
+            new ButtonBuilder().setCustomId('forfeit').setLabel('Give Up').setStyle(ButtonStyle.Primary),
+        ];
+        const customIDs = new Set(['guess', 'hint', 'forfeit']);
+        const components = [new ActionRowBuilder<ButtonBuilder>().addComponents(buttonList)];
 
-            if (!buffer) throw new YuukoError("Encountered an error whilst trying to create the image buffer.");
-            const attachment = new AttachmentBuilder(buffer, { name: "output.png" });
-            await interaction.editReply({ files: [attachment], embeds: [] });
-        } finally {
+        const collector = createButtonCollector(interaction, customIDs, msg);
+
+        interaction.editReply({ files: [attachment], components, embeds: [] })
+
+        collector?.on("collect", async (i) => {
+            if (!i.isButton()) return;
+
+            switch (i.customId) {
+                case "hint":
+                    pixelationLevel = Math.max(1, pixelationLevel - 1.5);
+
+                    if (pixelationLevel <= 1 || originalImgPtr === null) break;
+                    if (!i.deferred) await i.deferUpdate();
+
+                    [pixelatedImgPtr, pixelatedImgBufferSize] = pixelateImage(lib, originalImgPtr, pixelationLevel);
+                    attachment = getAttachment(pixelatedImgPtr, pixelatedImgBufferSize);
+
+                    interaction.editReply({ files: [attachment], components })
+
+                    break;
+            }
+
+
+        })
+
+        collector?.on("end", () => {
             if (originalImgPtr) lib.symbols.FreeRgbaImage(originalImgPtr);
 
             if (pixelatedImgPtr && pixelatedImgBufferSize)
                 lib.symbols.FreeImageBuffer(pixelatedImgPtr, pixelatedImgBufferSize);
-        }
+        })
+
 
     },
 } satisfies Command;
+
+function pixelateImage<T extends Library<ModuleSymbols["modules"]>>(lib: T, originalImg: Pointer, pixelationLevel: number): [Pointer, number] {
+    const pixelatedImgBuffer = new Uint32Array(1);
+    const pixelatedImgPtr = lib.symbols.PixelateImage(originalImg, pixelationLevel, pixelatedImgBuffer);
+
+    if (!pixelatedImgPtr)
+        throw new YuukoError("Pixelating image in Rust experienced an error and returned an invalid pointer");
+
+    const pixelatedImgBufferSize = pixelatedImgBuffer[0];
+    if (pixelatedImgBufferSize === undefined || pixelatedImgBufferSize === 0)
+        throw new YuukoError("Rust module experienced an error and returned an invalid buffer size");
+
+    return [pixelatedImgPtr, pixelatedImgBufferSize];
+}
+
+function getAttachment(imgPtr: Pointer, bufferSize: number) {
+    const buffer = toBuffer(imgPtr, 0, bufferSize);
+    if (!buffer) throw new YuukoError("Encountered an error whilst trying to create the image buffer.");
+    const attachment = new AttachmentBuilder(buffer, { name: "output.png" });
+
+    return attachment;
+};

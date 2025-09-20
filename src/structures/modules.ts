@@ -31,7 +31,7 @@ export const moduleSymbols = defineModules({
     },
 });
 
-type ModuleSymbols = typeof moduleSymbols;
+export type ModuleSymbols = typeof moduleSymbols;
 
 export class Modules {
     private static modules: {
