@@ -4733,6 +4733,14 @@ export type MangaQueryVariables = Exact<{
 
 export type MangaQuery = { __typename?: 'Query', Media?: { __typename?: 'Media', id: number, description?: string | null, format?: MediaFormat | null, chapters?: number | null, source?: MediaSource | null, synonyms?: Array<string | null> | null, volumes?: number | null, genres?: Array<string | null> | null, siteUrl?: string | null, meanScore?: number | null, bannerImage?: string | null, coverImage?: { __typename?: 'MediaCoverImage', large?: string | null, medium?: string | null } | null, title?: { __typename?: 'MediaTitle', romaji?: string | null, english?: string | null, native?: string | null } | null, startDate?: { __typename?: 'FuzzyDate', year?: number | null, month?: number | null, day?: number | null } | null, endDate?: { __typename?: 'FuzzyDate', year?: number | null, month?: number | null, day?: number | null } | null, mediaListEntry?: { __typename?: 'MediaList', status?: MediaListStatus | null, progress?: number | null, score?: number | null, notes?: string | null, user?: { __typename?: 'User', name: string, mediaListOptions?: { __typename?: 'MediaListOptions', scoreFormat?: ScoreFormat | null } | null } | null } | null } | null };
 
+export type PixelJumbleQueryVariables = Exact<{
+  userId?: InputMaybe<Scalars['Int']['input']>;
+  type?: InputMaybe<MediaType>;
+}>;
+
+
+export type PixelJumbleQuery = { __typename?: 'Query', MediaListCollection?: { __typename?: 'MediaListCollection', lists?: Array<{ __typename?: 'MediaListGroup', name?: string | null, entries?: Array<{ __typename?: 'MediaList', media?: { __typename?: 'Media', title?: { __typename?: 'MediaTitle', romaji?: string | null, english?: string | null, native?: string | null } | null, coverImage?: { __typename?: 'MediaCoverImage', large?: string | null, medium?: string | null } | null } | null } | null> | null } | null> | null } | null };
+
 export type RecentChartQueryVariables = Exact<{
   user?: InputMaybe<Scalars['String']['input']>;
   perPage?: InputMaybe<Scalars['Int']['input']>;

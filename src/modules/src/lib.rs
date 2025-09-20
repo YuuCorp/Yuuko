@@ -11,7 +11,7 @@ use imageproc::{
 };
 use serde::Deserialize;
 use std::{
-    ffi::{CStr, c_char, c_void},
+    ffi::{CStr, c_char, c_uchar},
     ptr,
 };
 
@@ -119,7 +119,7 @@ pub unsafe extern "C" fn GenerateRecentImage(json_ptr: *const c_char) -> *mut c_
     match res {
         Ok(ptr) => ptr,
         Err(err) => {
-            eprintln!("{}", err);
+            eprintln!("{err}");
             ptr::null_mut()
         }
     }
@@ -128,7 +128,7 @@ pub unsafe extern "C" fn GenerateRecentImage(json_ptr: *const c_char) -> *mut c_
 #[unsafe(no_mangle)]
 /// # Safety
 /// Used to later cleanup memory
-pub unsafe extern "C" fn Free(ptr: *mut c_void) {
+pub unsafe extern "C" fn Free(ptr: *mut c_char) {
     if ptr.is_null() {
         return;
     }
@@ -195,6 +195,113 @@ fn blend_rectangle(image: &mut RgbaImage, rect: Rect, color: Rgba<u8>) {
         for x in rect.left()..rect.right() {
             let pixel = image.get_pixel_mut(x as u32, y as u32);
             pixel.blend(&color);
+        }
+    }
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn FreeRgbaImage(ptr: *mut c_char) {
+    if ptr.is_null() {
+        return;
+    }
+
+    drop(unsafe { Box::from_raw(ptr as *mut RgbaImage) });
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn FreeImageBuffer(ptr: *mut c_char, len: u32) {
+    if ptr.is_null() {
+        return;
+    }
+
+    unsafe {
+        let _ = Box::from_raw(std::slice::from_raw_parts_mut(ptr as *mut u8, len as usize));
+    };
+}
+
+#[unsafe(no_mangle)]
+/// # Safety
+/// `image_url` must point to a valid null-terminated C string.
+/// Returns a pointer to a heap-allocated RgbaImage, or null on failure.
+pub unsafe extern "C" fn GetImage(image_url: *const c_char) -> *mut c_char {
+    if image_url.is_null() {
+        return ptr::null_mut();
+    }
+
+    let c_str = unsafe { CStr::from_ptr(image_url) };
+    let url_str = match c_str.to_str() {
+        Ok(s) => s,
+        Err(_) => return ptr::null_mut(),
+    };
+
+    let start = std::time::Instant::now();
+    // Fetch the image asynchronously
+    let result: Result<DynamicImage> = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap()
+        .block_on(fetch_cover(url_str));
+
+    println!("Time taken to fetch the image: {:?}", start.elapsed());
+    match result {
+        Ok(img) => {
+            // Convert to RgbaImage
+            let rgba: RgbaImage = img.to_rgba8();
+
+            let boxed = Box::new(rgba);
+            Box::into_raw(boxed) as *mut c_char
+        }
+        Err(err) => {
+            eprintln!("Failed to fetch image: {:?}", err);
+            ptr::null_mut()
+        }
+    }
+}
+
+/// # Safety
+/// `original_ptr` must be a valid pointer to a heap-allocated `RgbaImage`.
+/// Returns a pointer to `Vec<u8>` image data with the pixelation applied.
+/// Caller is responsible for freeing the returned pointer using `FreeImage`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn PixelateImage(
+    original_ptr: *const c_char,
+    level: c_uchar,
+    out_size: *mut u32,
+) -> *mut c_char {
+    if original_ptr.is_null() || level == 0 || out_size.is_null() {
+        return ptr::null_mut();
+    }
+
+    let start = std::time::Instant::now();
+    let original: &RgbaImage = unsafe { &*(original_ptr as *const RgbaImage) };
+    let (width, height) = original.dimensions();
+    let resize_width = (width / level as u32).max(1);
+    let resize_height = (height / level as u32).max(1);
+
+    let pixelated =
+        image::imageops::resize(original, resize_width, resize_height, FilterType::Nearest);
+    let pixelated = image::imageops::resize(&pixelated, width, height, FilterType::Nearest);
+    println!("Time taken to pixelate image: {:?}", start.elapsed());
+    let start = std::time::Instant::now();
+
+    let mut buf = Vec::new();
+    let encoder = png::PngEncoder::new(&mut buf);
+    let result = encoder.write_image(&pixelated, width, height, image::ColorType::Rgba8.into());
+    println!("Time taken to write image to PNG: {:?}", start.elapsed());
+
+    match result {
+        Ok(_) => {
+            unsafe { *out_size = buf.len() as u32 };
+
+            let boxed = buf.into_boxed_slice();
+            let ptr = boxed.as_ptr() as *mut c_char;
+
+            std::mem::forget(boxed);
+            ptr
+        }
+        Err(err) => {
+            eprintln!("{err}");
+            ptr::null_mut()
         }
     }
 }

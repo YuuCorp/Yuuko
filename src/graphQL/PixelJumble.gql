@@ -1,0 +1,20 @@
+query PixelJumble($userId: Int, $type: MediaType) {
+    MediaListCollection(userId: $userId, type: $type) {
+        lists {
+            entries {
+                media {
+                    title {
+                        romaji
+                        english
+                        native
+                    }
+                    coverImage {
+                        large
+                        medium
+                    }
+                }
+            }
+            name
+        }
+    }
+}

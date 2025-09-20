@@ -73,7 +73,7 @@ export default {
     const attachment = new AttachmentBuilder(buffer, { name: "recent.png" });
     await interaction.editReply({ files: [attachment], embeds: [] });
 
-    lib.symbols.Free(imgPtr);
+    lib.symbols.FreeImageBuffer(imgPtr, imgSize);
   }
 } satisfies Command;
 

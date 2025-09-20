@@ -3,7 +3,7 @@ import type { MediaTitle } from '#graphQL/types'
 export function SeriesTitle(media: MediaTitle | null | undefined) {
   if (!media)
     return 'Unknown'
-  return media.romaji || media.english || media.native || 'Unknown'
+  return media.userPreferred || media.english || media.romaji || media.native || 'Unknown'
 }
 
 /**

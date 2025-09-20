@@ -12,10 +12,22 @@ export const moduleSymbols = defineModules({
             args: ["cstring"],
             returns: "pointer",
         },
-        Free: {
+        GetImage: {
+            args: ["cstring"],
+            returns: "pointer",
+        },
+        PixelateImage: {
+            args: ["pointer", "uint8_t", "pointer"],
+            returns: "pointer",
+        },
+        FreeRgbaImage: {
             args: ["pointer"],
             returns: "void",
-        }
+        },
+        FreeImageBuffer: {
+            args: ["pointer", "uint32_t"],
+            returns: "void",
+        },
     },
 });
 
