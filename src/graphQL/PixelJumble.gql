@@ -1,5 +1,5 @@
-query PixelJumble($userId: Int, $type: MediaType) {
-    MediaListCollection(userId: $userId, type: $type) {
+query PixelJumble($userId: Int, $type: MediaType, $chunk: Int) {
+    MediaListCollection(userId: $userId, type: $type, chunk: $chunk, perChunk: 1, status_not: PLANNING) {
         lists {
             entries {
                 media {
@@ -10,7 +10,31 @@ query PixelJumble($userId: Int, $type: MediaType) {
                     }
                     coverImage {
                         large
-                        medium
+                    }
+                    averageScore
+                    genres
+                    popularity
+                    countryOfOrigin
+                    source
+                    startDate {
+                        day
+                        month
+                        year
+                    }
+                    characters(perPage: 1) {
+                        edges {
+                            name
+                        }
+                    }
+                    staff(perPage: 1) {
+                        edges {
+                            node {
+                                name {
+                                    full
+                                }
+                            }
+                            role
+                        }
                     }
                 }
             }
