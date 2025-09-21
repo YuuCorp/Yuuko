@@ -23,7 +23,11 @@ query PixelJumble($userId: Int, $type: MediaType, $chunk: Int) {
                     }
                     characters(perPage: 1) {
                         edges {
-                            name
+                            node {
+                                name {
+                                    full
+                                }
+                            }
                         }
                     }
                     staff(perPage: 1) {

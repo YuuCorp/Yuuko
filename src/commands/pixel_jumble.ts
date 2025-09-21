@@ -101,7 +101,7 @@ export default {
         if (mediaEntry.genres?.length) possibleHints.push(`Has genres **${mediaEntry.genres.join(", ")}**`);
         if (mediaEntry.popularity) possibleHints.push(`Has a popularity of **${mediaEntry.popularity}**`);
         if (mediaEntry.averageScore) possibleHints.push(`Has an average score of **${mediaEntry.averageScore}%**`);
-        if (mediaEntry.characters?.edges?.length) possibleHints.push(`Has a character named **${selectRandom(mediaEntry.characters.edges)!.name}**`);
+        if (mediaEntry.characters?.edges?.length) possibleHints.push(`Has a character named **${selectRandom(mediaEntry.characters.edges)!.node?.name?.full}**`);
         if (mediaEntry.staff?.edges?.length) {
             const randomStaff = selectRandom(mediaEntry.staff.edges)!;
             possibleHints.push(`Has **${randomStaff.node?.name?.full}** who worked as **${randomStaff.role}**`);
@@ -185,6 +185,8 @@ export default {
                     collector.stop();
                     break;
             }
+
+            collector.resetTimer();
         })
 
         collector?.on("end", async () => {
@@ -198,7 +200,7 @@ export default {
                 (gameWon
                     ? " guessed correctly"
                     : `${forfeit ? " gave up" : " failed to guess in time"}`) +
-                `!\nAnswer was **${title}**\nThey took ${game?.guesses} guesses and used ${game?.hintsUsed} extra hints!`;
+                `!\nAnswer was **${title}**\nThey took ${game?.guesses ?? 0} guesses and used ${game?.hintsUsed ?? 0} extra hints!`;
 
             embed.setDescription(endText);
 
