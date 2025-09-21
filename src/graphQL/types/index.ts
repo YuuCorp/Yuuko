@@ -4733,6 +4733,15 @@ export type MangaQueryVariables = Exact<{
 
 export type MangaQuery = { __typename?: 'Query', Media?: { __typename?: 'Media', id: number, description?: string | null, format?: MediaFormat | null, chapters?: number | null, source?: MediaSource | null, synonyms?: Array<string | null> | null, volumes?: number | null, genres?: Array<string | null> | null, siteUrl?: string | null, meanScore?: number | null, bannerImage?: string | null, coverImage?: { __typename?: 'MediaCoverImage', large?: string | null, medium?: string | null } | null, title?: { __typename?: 'MediaTitle', romaji?: string | null, english?: string | null, native?: string | null } | null, startDate?: { __typename?: 'FuzzyDate', year?: number | null, month?: number | null, day?: number | null } | null, endDate?: { __typename?: 'FuzzyDate', year?: number | null, month?: number | null, day?: number | null } | null, mediaListEntry?: { __typename?: 'MediaList', status?: MediaListStatus | null, progress?: number | null, score?: number | null, notes?: string | null, user?: { __typename?: 'User', name: string, mediaListOptions?: { __typename?: 'MediaListOptions', scoreFormat?: ScoreFormat | null } | null } | null } | null } | null };
 
+export type PixelJumbleQueryVariables = Exact<{
+  userId?: InputMaybe<Scalars['Int']['input']>;
+  type?: InputMaybe<MediaType>;
+  chunk?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type PixelJumbleQuery = { __typename?: 'Query', MediaListCollection?: { __typename?: 'MediaListCollection', lists?: Array<{ __typename?: 'MediaListGroup', name?: string | null, entries?: Array<{ __typename?: 'MediaList', media?: { __typename?: 'Media', averageScore?: number | null, genres?: Array<string | null> | null, popularity?: number | null, countryOfOrigin?: any | null, source?: MediaSource | null, title?: { __typename?: 'MediaTitle', romaji?: string | null, english?: string | null, native?: string | null } | null, coverImage?: { __typename?: 'MediaCoverImage', large?: string | null } | null, startDate?: { __typename?: 'FuzzyDate', day?: number | null, month?: number | null, year?: number | null } | null, characters?: { __typename?: 'CharacterConnection', edges?: Array<{ __typename?: 'CharacterEdge', node?: { __typename?: 'Character', name?: { __typename?: 'CharacterName', full?: string | null } | null } | null } | null> | null } | null, staff?: { __typename?: 'StaffConnection', edges?: Array<{ __typename?: 'StaffEdge', role?: string | null, node?: { __typename?: 'Staff', name?: { __typename?: 'StaffName', full?: string | null } | null } | null } | null> | null } | null } | null } | null> | null } | null> | null } | null };
+
 export type RecentChartQueryVariables = Exact<{
   user?: InputMaybe<Scalars['String']['input']>;
   perPage?: InputMaybe<Scalars['Int']['input']>;
@@ -4741,7 +4750,7 @@ export type RecentChartQueryVariables = Exact<{
 }>;
 
 
-export type RecentChartQuery = { __typename?: 'Query', Page?: { __typename?: 'Page', mediaList?: Array<{ __typename?: 'MediaList', status?: MediaListStatus | null, progress?: number | null, media?: { __typename?: 'Media', title?: { __typename?: 'MediaTitle', english?: string | null, romaji?: string | null } | null, coverImage?: { __typename?: 'MediaCoverImage', extraLarge?: string | null } | null } | null } | null> | null } | null };
+export type RecentChartQuery = { __typename?: 'Query', Page?: { __typename?: 'Page', mediaList?: Array<{ __typename?: 'MediaList', status?: MediaListStatus | null, progress?: number | null, media?: { __typename?: 'Media', title?: { __typename?: 'MediaTitle', english?: string | null, romaji?: string | null } | null, coverImage?: { __typename?: 'MediaCoverImage', large?: string | null } | null } | null } | null> | null } | null };
 
 export type RecommendationsQueryVariables = Exact<{
   type?: InputMaybe<MediaType>;
@@ -4804,4 +4813,4 @@ export type UserCardQuery = { __typename?: 'Query', User?: { __typename?: 'User'
 export type ViewerQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ViewerQuery = { __typename?: 'Query', Viewer?: { __typename?: 'User', name: string, id: number } | null };
+export type ViewerQuery = { __typename?: 'Query', Viewer?: { __typename?: 'User', id: number, name: string, statistics?: { __typename?: 'UserStatisticTypes', anime?: { __typename?: 'UserStatistics', count: number } | null, manga?: { __typename?: 'UserStatistics', count: number } | null } | null } | null };

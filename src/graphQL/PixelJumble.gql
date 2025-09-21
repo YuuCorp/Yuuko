@@ -1,0 +1,48 @@
+query PixelJumble($userId: Int, $type: MediaType, $chunk: Int) {
+    MediaListCollection(userId: $userId, type: $type, chunk: $chunk, perChunk: 1, status_not: PLANNING) {
+        lists {
+            entries {
+                media {
+                    title {
+                        romaji
+                        english
+                        native
+                    }
+                    coverImage {
+                        large
+                    }
+                    averageScore
+                    genres
+                    popularity
+                    countryOfOrigin
+                    source
+                    startDate {
+                        day
+                        month
+                        year
+                    }
+                    characters(perPage: 1) {
+                        edges {
+                            node {
+                                name {
+                                    full
+                                }
+                            }
+                        }
+                    }
+                    staff(perPage: 1) {
+                        edges {
+                            node {
+                                name {
+                                    full
+                                }
+                            }
+                            role
+                        }
+                    }
+                }
+            }
+            name
+        }
+    }
+}

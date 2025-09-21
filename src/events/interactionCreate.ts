@@ -15,10 +15,11 @@ const interactionCreate = new YuukoEvent({
         const command = client.commands.find((cmd) => cmd.name == interaction.commandName);
         if (!command) return;
         logging(command, interaction);
-        client.log(`Interaction received in: ${Date.now() - interaction.createdTimestamp}ms`, "Debug");
+        client.log(`Interaction received in: ${Date.now() - interaction.createdTimestamp}ms`, "debug");
         checkCooldown(client, command, interaction);
+        const start = performance.now();
         const args = await runMiddlewares(command.middlewares, interaction, client);
-        client.log(`Ran middleware in: ${Date.now() - interaction.createdTimestamp}ms`, "Debug");
+        client.log(`Ran middleware in: ${Math.round(performance.now() - start)}ms`, "Debug");
 
         if (args.isCommand() && args.isChatInputCommand()) {
           await command.run({ interaction: args, client });
@@ -46,7 +47,7 @@ const interactionCreate = new YuukoEvent({
       if (e instanceof YuukoError) {
         if (!interaction.isCommand()) return;
 
-        if (interaction.deferred)
+        if (interaction.deferred || interaction.replied)
           return void interaction.editReply({ embeds: [embedError(e)] });
         else
           return void interaction.reply({
@@ -57,12 +58,11 @@ const interactionCreate = new YuukoEvent({
     };
 
     async function runMiddlewares(middlewares: Middleware[] | undefined, interaction: Interaction, client: Client): Promise<Interaction> {
-      if (!interaction.isChatInputCommand()) return interaction;
-      if (!middlewares) return interaction;
+      if (!interaction.isChatInputCommand() || !middlewares) return interaction;
       if (middlewares.some((mw) => mw.defer)) await interaction.deferReply();
-      await Promise.all(middlewares.map((mw) => mw.run(interaction, client))).catch((e: any) => {
-        throw e;
-      });
+
+      await Promise.all(middlewares.map((mw) => mw.run(interaction, client)));
+
       return interaction;
     }
 

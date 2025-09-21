@@ -1,28 +1,35 @@
-import winston from 'winston'
-import colors from 'colors'
+import winston, { config } from 'winston'
+import { env } from '#env';
 
 class Logger {
-  public logger: winston.Logger
+  public logger: winston.Logger;
+
   constructor(filename: string) {
     this.logger = winston.createLogger({
       transports: [new winston.transports.File({ filename })],
-    })
+      level: env().NODE_ENV === 'development' ? 'debug' : 'info',
+      format: winston.format.combine(
+        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        winston.format.printf(({ timestamp, level, message }) => {
+          return `${timestamp} | [${level.toUpperCase()}]: ${message}`;
+        })
+      )
+    });
+
+    this.logger.add(new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize({ level: true }),
+        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        winston.format.printf(({ timestamp, level, message }) => {
+          return `${timestamp} | [${level}]: ${message}`;
+        })
+      ),
+    }));
   }
 
-  log(text: string, category: string) {
-    if (category === "Debug" && process.env.NODE_ENV !== "development") return;
-    const d = new Date()
-    const categoryText = category ? category : 'Info'
-    this.logger.log({
-      level: 'info',
-      message: `${d.getHours()}:${d.getMinutes
-        } - ${d.getDate()}:${d.getMonth()}:${d.getFullYear()} | [${categoryText}]: ${text}`,
-    })
-    console.log(
-      colors.green(
-        `${d.getDate()}:${d.getMonth()}:${d.getFullYear()} - ${d.getHours()}:${d.getMinutes()}`,
-      ) + colors.yellow(` | [${categoryText}]: ${text}`),
-    )
+  log(text: string, category: string = "info") {
+    if (category.toLowerCase() === "debug" && env().NODE_ENV !== "development") return;
+    this.logger.log(category.toLowerCase(), text);
   }
 }
 

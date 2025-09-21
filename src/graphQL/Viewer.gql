@@ -1,6 +1,14 @@
 query Viewer {
-  Viewer {
-    name
-    id
-  }
+    Viewer {
+        statistics {
+            anime {
+                count
+            }
+            manga {
+                count
+            }
+        }
+        id
+        name
+    }
 }

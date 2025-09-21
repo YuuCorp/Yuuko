@@ -137,11 +137,16 @@ dist
 .idea/
 
 # Added by Yuuko Devs
-/Local
 /temp
 commit.hash
-db.sqlite-*
 
 src/Local
+
+
+## Database
 src/database/sqlite
 src/database/migration
+
+## FFI Modules
+src/modules/target 
+src/modules/compiled

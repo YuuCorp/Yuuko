@@ -15,19 +15,19 @@ export async function runChecks(client: Client) {
         }),
     )
   ).flat()
-  client.log(`Running ${checks.length} checks...`, "CheckRunner")
+  client.log(`Running ${checks.length} checks...`, "info")
 
   for (const check of checks) {
     try {
       check.run()
-      client.log(`[✅] Check "${check.name}" passed.`, "CheckRunner")
+      client.log(`[✅] Check "${check.name}" passed.`, "info")
     }
     catch (e) {
       if (check.optional === true) {
-        console.warn(`[⚠️] Optional check "${check.name}" failed. This may or may not cause problems in the future.
+        client.log(`[⚠️] Optional check "${check.name}" failed. This may or may not cause problems in the future.
               > Purpose: ${check.description}
               > Why: ${e}
-              `)
+              `, "warn")
       }
       else {
         throw new Error(`[❌] FATAL: Critical check "${check.name}" failed. Cannot continue.
@@ -38,5 +38,5 @@ export async function runChecks(client: Client) {
     }
   }
 
-  client.log(`Checks passed!`, "CheckRunner")
+  client.log(`Checks passed!`, "info")
 }

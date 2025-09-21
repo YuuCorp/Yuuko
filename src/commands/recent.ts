@@ -1,10 +1,9 @@
 import { SlashCommandBuilder, AttachmentBuilder } from "discord.js";
-import { mwGetUserEntry } from "#middleware/userEntry";
-import { HorizontalAlign, Jimp, loadFont, VerticalAlign } from "jimp";
-import { SANS_16_WHITE } from "jimp/fonts";
+import { mwGetUserID } from "#middleware/userEntry";
 import type { Command } from "#structures/index";
 import { CommandCategories, graphQLRequest, SeriesTitle, getOptions, YuukoError } from "#utils/index";
 import type { MediaList, MediaType, RecentChartQueryVariables } from "#graphQL/types";
+import { ptr, toBuffer } from "bun:ffi";
 
 const name = "recent";
 const usage = "recent";
@@ -14,7 +13,7 @@ export default {
   name,
   usage,
   description,
-  middlewares: [mwGetUserEntry],
+  middlewares: [mwGetUserID],
   commandType: CommandCategories.Anilist,
   withBuilder: new SlashCommandBuilder()
     .setName(name)
@@ -44,42 +43,37 @@ export default {
       data: { Page: data },
     } = await graphQLRequest("RecentChart", vars, interaction.ALtoken);
     if (!data?.mediaList) throw new YuukoError("Unable to find specified user.", vars, true);
-    interaction.editReply({ embeds: [{ description: "Creating image..." }] });
-    const canvas = new Jimp({ width: 999, height: 999 });
-    const useFont = await loadFont(SANS_16_WHITE);
+    await interaction.reply({ embeds: [{ description: "Creating image..." }] });
 
-    let x = 0;
-    let y = 0;
+    const parsedData = [];
 
     for (const item of data.mediaList) {
       const media = item?.media;
-      if (!media || !item) continue;
-      const cover = media.coverImage?.extraLarge || "https://i.imgur.com/Hx8474m.png"; // Placeholder image
-      const canvasImage = await Jimp.read(cover);
-
-      const width = 333;
-      const height = (width / canvasImage.width) * canvasImage.height;
-      canvasImage.resize({ w: width, h: height });
-      const infoRectangle = new Jimp({ width, height: 60, color: "#000000bf" });
-
-
-      const title = SeriesTitle(media.title || undefined);
+      if (!media) continue;
+      const cover = media.coverImage?.large || "https://i.imgur.com/Hx8474m.png"; // Placeholder image
+      const title = SeriesTitle(media.title);
       const status = parseStatus(item, type);
-      if (status) infoRectangle.print({ maxWidth: width, maxHeight: 40, font: useFont, x: 0, y: 0, text: { text: status, alignmentX: HorizontalAlign.CENTER, alignmentY: VerticalAlign.MIDDLE } });
-      infoRectangle.print({ maxWidth: width, maxHeight: 40, font: useFont, x: 0, y: 20, text: { text: title, alignmentX: HorizontalAlign.CENTER, alignmentY: VerticalAlign.MIDDLE } });
-      canvas.composite(canvasImage, x, y);
-      canvas.composite(infoRectangle, x, y + width - 60);
-      x += width;
-      if (x >= 999) {
-        x = 0;
-        y += width;
-      }
+
+      parsedData.push({ status: `${status}\n${title}`, imageUrl: cover });
     }
 
-    const canvasResult = await canvas.getBuffer("image/png");
-    if (!canvasResult) throw new YuukoError("Encountered an error whilst trying to create the image.");
-    const attachment = new AttachmentBuilder(canvasResult, { name: "recent.png" });
-    return void interaction.editReply({ files: [attachment], embeds: [] });
+    const lib = client.modules.getModule("modules");
+
+    const enc = new TextEncoder();
+    const rawJson = enc.encode(JSON.stringify(parsedData));
+    const jsonPtr = ptr(rawJson);
+
+    const imgPtr = lib.symbols.GenerateRecentImage(jsonPtr);
+    if (!imgPtr) throw new YuukoError("Rust module experienced an error and returned an invalid pointer");
+
+    const imgSize = toBuffer(imgPtr, 0, 4).readUint32BE();
+    const buffer = toBuffer(imgPtr, 4, imgSize);
+
+    if (!buffer) throw new YuukoError("Encountered an error whilst trying to create the image buffer.");
+    const attachment = new AttachmentBuilder(buffer, { name: "recent.png" });
+    await interaction.editReply({ files: [attachment], embeds: [] });
+
+    lib.symbols.FreeImageBuffer(imgPtr, imgSize);
   }
 } satisfies Command;
 

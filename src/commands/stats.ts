@@ -1,6 +1,7 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 import type { Command } from '#structures/index'
 import { updateBotStats } from '#utils/index'
+import { env } from '#env';
 
 const name = 'stats'
 const description = 'Shows you the statistics of the server & bot.'
@@ -15,7 +16,7 @@ export default {
     if (!interaction.isCommand()) return
     if (!interaction.guild) return
 
-    const uptime = Date.now() - process.env.UPTIME
+    const uptime = Date.now() - env().UPTIME;
     const hours = Math.floor(uptime / 3600000)
     const minutes = Math.floor((uptime % 3600000) / 60000)
     const seconds = Math.floor(((uptime % 3600000) % 60000) / 1000)

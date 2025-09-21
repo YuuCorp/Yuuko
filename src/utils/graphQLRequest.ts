@@ -37,13 +37,16 @@ import type {
   SaveTextActivityMutationVariables,
   GetUserListQuery,
   GetUserListQueryVariables,
+  PixelJumbleQuery,
+  PixelJumbleQueryVariables,
 } from '../graphQL/types'
 import Queries from '../graphQL/types/queries'
 import { YuukoError, type GraphQLResponse } from './types'
+import { env } from '#env';
 
 type Query = keyof typeof Queries
 
-const baseUrl = process.env.ANILIST_API || 'https://graphql.anilist.co'
+const baseUrl = env().ANILIST_API;
 
 interface QueryVariables {
   Airing: [AiringQuery, AiringQueryVariables]
@@ -65,7 +68,9 @@ interface QueryVariables {
   SaveTextActivity: [SaveTextActivityMutation, SaveTextActivityMutationVariables]
   ListQuery: [ListQueryQuery, ListQueryQueryVariables],
   GetUserList: [GetUserListQuery, GetUserListQueryVariables],
+  PixelJumble: [PixelJumbleQuery, PixelJumbleQueryVariables],
 }
+
 export async function graphQLRequest<QueryKey extends Query>(queryKey: QueryKey, vars: QueryVariables[QueryKey][1], token?: string, url = baseUrl) {
   const headers = new Headers()
   if (token && token.length > 1000)

@@ -21,11 +21,11 @@ export async function registerEvents(client: Client) {
   for (const event of events) {
 
     if (!event.run) {
-      client.log(`Event ${event.event} does not have a run function`, "EventRegister");
+      client.log(`Event ${event.event} does not have a run function`, "error");
       process.exit(0);
     }
 
     client[event.isOnce ? "once" : "on"](event.event, (...args) => event.run(client, ...args));
-    client.log(`Registered ${event.isOnce ? "once" : "on"}.${event.event}`, "EventRegister");
+    client.log(`Registered ${event.isOnce ? "once" : "on"}.${event.event}`, "info");
   }
 }

@@ -48,8 +48,8 @@ export default {
       if (mangaId) {
         mangaIdFound = true;
         vars.mID = parseInt(mangaId);
-        client.log(`[MangaCmd] Found cached ID for ${normalizedQuery} : ${vars.mID}`, "Debug");
-        client.log(`[MangaCmd] Querying for ${normalizedQuery} with ID ${vars.mID}`, "Debug");
+        client.log(`[MangaCmd] Found cached ID for ${normalizedQuery} : ${vars.mID}`, "debug");
+        client.log(`[MangaCmd] Querying for ${normalizedQuery} with ID ${vars.mID}`, "debug");
       }
     }
 
@@ -62,11 +62,11 @@ export default {
         const mediaListEntry = _mediaListEntry ? _mediaListEntry[vars.mID] : null;
         if (mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
       }
-      client.log("[MangaCmd] Found cache data, returning data...", "Debug");
+      client.log("[MangaCmd] Found cache data, returning data...", "debug");
       return void handleData({ media: cacheData }, interaction, "MANGA");
     }
 
-    client.log("[MangaCmd] No cache found, fetching from CringeQL", "Debug");
+    client.log("[MangaCmd] No cache found, fetching from CringeQL", "debug");
 
     const {
       data: { Media: data },

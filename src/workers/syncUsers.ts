@@ -43,7 +43,7 @@ export async function syncAnilistUsers(data: SyncUsers) {
 
             if (mangaData) await handleSyncing({ media: mangaData }, user.anilistId, MediaType.Manga);
 
-            client.log(`Synced user ${user.anilistId} (${i} / ${anilistUsers.length})`, "SYNC");
+            client.log(`Synced user ${user.anilistId} (${i} / ${anilistUsers.length})`, "verbose");
 
             const localTimeout = Math.max(0, Math.floor(timeOut - (performance.now() - start)));
             if (i <= total && localTimeout > 0) {
@@ -70,7 +70,7 @@ export async function syncAnilistUsers(data: SyncUsers) {
 }
 
 async function deleteUser(anilistId: number) {
-    client.log(`User ${anilistId} has an invalid token, deleting from the DB...`, "SYNC");
+    client.log(`User ${anilistId} has an invalid token, deleting from the DB...`, "debug");
     await db
         .delete(tables.anilistUser)
         .where(eq(tables.anilistUser.anilistId, anilistId));

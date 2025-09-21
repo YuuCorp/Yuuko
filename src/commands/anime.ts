@@ -33,7 +33,7 @@ export default {
       vars.query = query;
     } else if (hook && hookdata) {
       if (hookdata.id) {
-        client.log(`Hookdata Anime ID: ${hookdata.id}`, "AnimeCmd");
+        client.log(`Hookdata Anime ID: ${hookdata.id}`, "debug");
         vars.aID = hookdata.id;
       } else if (hookdata.title) {
         vars.query = hookdata.title;
@@ -41,19 +41,19 @@ export default {
       }
     } else throw new YuukoError("AnimeCmd was hooked, yet there was no title or ID provided in hookdata.");
 
-    client.log(`Anime ID: ${vars.aID}`, "AnimeCmd");
+    client.log(`Anime ID: ${vars.aID}`, "debug");
 
     if (!vars.aID) {
       const cachedId = await redis.get(`_animeId-${normalizedQuery}`);
       if (cachedId) {
         animeIdFound = true;
         vars.aID = parseInt(cachedId);
-        client.log(`Found cached ID for ${normalizedQuery} : ${vars.aID}`, "AnimeCmd");
-        client.log(`Querying for ${normalizedQuery} with ID ${vars.aID}`, "AnimeCmd");
+        client.log(`Found cached ID for ${normalizedQuery} : ${vars.aID}`, "debug");
+        client.log(`Querying for ${normalizedQuery} with ID ${vars.aID}`, "debug");
       }
     }
 
-    client.log(`Querying Redis with hook animeId ${vars.aID}`, "AnimeCmd");
+    client.log(`Querying Redis with hook animeId ${vars.aID}`, "debug");
     const cacheData = (await redis.json.get(`_anime-${vars.aID}`)) as AnimeQuery["Media"] | null;
 
     if (cacheData) {
@@ -64,10 +64,10 @@ export default {
 
         if (mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
       }
-      client.log("Found cache data, returning data...", "AnimeCmd");
+      client.log("Found cache data, returning data...", "debug");
       return void handleData({ media: cacheData }, interaction, "ANIME");
     }
-    client.log("No cache found, fetching from CringeQL", "AnimeCmd");
+    client.log("No cache found, fetching from CringeQL", "debug");
     const {
       data: { Media: data },
       headers,
@@ -86,7 +86,7 @@ export default {
       redis.set(`_animeId-${normalize(synonym)}`, data.id);
     }
     if (redisData.nextAiringEpisode?.airingAt) {
-      client.log(`[AnimeCmd] Expiring anime-${redisData.id} at ${redisData.nextAiringEpisode.airingAt}`, "Debug");
+      client.log(`Expiring anime-${redisData.id} at ${redisData.nextAiringEpisode.airingAt}`, "debug");
       redis.expireAt(`_anime-${data.id}`, redisData.nextAiringEpisode.airingAt);
     }
     return void await handleData({ media: data, headers: headers }, interaction, "ANIME", hookdata);
