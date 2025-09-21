@@ -1,4 +1,4 @@
-import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, Collection, EmbedBuilder, ModalBuilder, SlashCommandBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
 import type { Command } from "#structures/index";
 import getOptions from "#utils/getOptions";
 import type { MediaType } from "#graphQL/types";
@@ -114,14 +114,43 @@ export default {
             .setTitle(`Pixel Jumble - Guess the ${type.toLowerCase()}`)
             .setDescription(`${hints}`);
 
+        let pixelJumbleGames = client.modalData.get("pixelJumbleGames");
+        if (!pixelJumbleGames) {
+            pixelJumbleGames = new Collection();
+            client.modalData.set("pixelJumbleGames", pixelJumbleGames);
+        }
+
         await interaction.editReply({ files: [attachment], components, embeds: [embed] })
 
+        let guesses = 0;
+        let hintsUsed = 0;
         let forfeit = false;
         collector?.on("collect", async (i) => {
             if (!i.isButton()) return;
 
             switch (i.customId) {
+                case "guess":
+                    const modal = new ModalBuilder()
+                        .setCustomId("pixel_jumble_modal")
+                        .setTitle("Enter your guess");
+
+                    const guessInput = new TextInputBuilder()
+                        .setCustomId("guess_input")
+                        .setLabel("What's your guess?")
+                        .setStyle(TextInputStyle.Short)
+                        .setPlaceholder("Type your guess here...")
+                        .setRequired(true);
+
+                    const row = new ActionRowBuilder<TextInputBuilder>().addComponents(guessInput);
+                    modal.addComponents(row);
+
+                    guesses++
+                    pixelJumbleGames.set(interaction.user.id, { answer: title, collector, won: false, guesses, hintsUsed })
+
+                    await i.showModal(modal);
+                    break;
                 case "hint":
+                    hintsUsed++;
                     pixelationLevel = Math.max(0, pixelationLevel - 1.5);
 
                     if (pixelationLevel < 1 || originalImgPtr === null) {
@@ -137,7 +166,7 @@ export default {
                     if (pixelationLevel === 5.5) hints += `- ${selectRandom(possibleHints)}\n`; // First hint
                     else if (pixelationLevel === 4) hints += `- ${selectRandom(possibleHints)}\n`; // Second hint
                     else if (pixelationLevel === 2.5) hints += `- ${selectRandom(possibleHints)}\n`; // Third hint
-                    else if (pixelationLevel === 1) hints += `- **${scrambleSentence(title)}**`; // Fourth hint
+                    else if (pixelationLevel === 1) hints += `- **${scrambleSentence(title)}**\n`; // Fourth hint
 
                     embed.setDescription(hints);
 
@@ -162,8 +191,20 @@ export default {
             [pixelatedImgPtr, pixelatedImgBufferSize] = pixelateImage(lib, originalImgPtr, 1);
             attachment = getAttachment(pixelatedImgPtr, pixelatedImgBufferSize);
 
-            embed.setDescription(`${hints}\n\n**${interaction.user.displayName}** ${forfeit ? "gave up" : "failed to guess in time"}!\nAnswer was **${title}**`)
+            const game = client.modalData.get("pixelJumbleGames")?.get(interaction.user.id);
+            const gameWon = game?.won ?? false;
+            const endText =
+                `${hints}\n**${interaction.user.displayName}**` +
+                (gameWon
+                    ? " guessed correctly"
+                    : `${forfeit ? " gave up" : " failed to guess in time"}`) +
+                `!\nAnswer was **${title}**\nThey took ${game?.guesses} guesses and used ${game?.hintsUsed} extra hints!`;
+
+            embed.setDescription(endText);
+
             await interaction.editReply({ files: [attachment], components: [], embeds: [embed] })
+
+            client.modalData.get("pixelJumbleGames")?.delete(interaction.user.id);
 
             if (originalImgPtr) {
                 lib.symbols.FreeRgbaImage(originalImgPtr);
