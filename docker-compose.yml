@@ -24,6 +24,10 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
+        volumes:
+            # Mount the RSA key folder and the database folder
+            - ./src/RSA:/usr/src/Yuuko/src/RSA
+            - ./src/database/sqlite:/usr/src/Yuuko/src/database/sqlite
         entrypoint: ["bun", "api"]
 
     dragonfly:

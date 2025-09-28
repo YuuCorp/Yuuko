@@ -14,8 +14,9 @@
   "main": "src/app.js",
   "scripts": {
     "api": "bun run ./src/api.ts",
-    "start": "pm2 start ecosystem.config.cjs --env production",
     "dev": "NODE_ENV=development bun run --watch ./src/app.ts",
+    "start": "bun run ./src/app.ts",
+    "start:pm2": "pm2 start ecosystem.config.cjs --env production",
     "start:prod": "NODE_ENV=production bun run ./src/app.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "prettier --write .",

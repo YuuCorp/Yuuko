@@ -23,11 +23,17 @@ COPY . .
 RUN bun run module:build
 
 # Run DB migrations if SQLite database doesn't exist
+RUN mkdir -p ./src/database/sqlite
 RUN if [ ! -f ./src/database/sqlite/*.sqlite ]; then bun db:push; fi
 
 # Stage 2: Release
 FROM node:20-bullseye-slim AS release
 WORKDIR /usr/src/Yuuko
+
+# Install production dependencies and CA certificates
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
+    && update-ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /root/.bun /root/.bun
 ENV PATH="/root/.bun/bin:${PATH}"
@@ -46,4 +52,4 @@ COPY --from=builder /usr/src/Yuuko/package.json \
 EXPOSE 3030/tcp
 VOLUME "/usr/src/Yuuko/src/database/sqlite"
 
-CMD bun start:prod
+CMD bun start
