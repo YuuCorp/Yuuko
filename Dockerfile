@@ -1,46 +1,49 @@
-FROM node:20 AS base
-RUN useradd -m -u 1001 -s /bin/bash bun
+# Stage 1: Builder
+FROM node:20-bullseye-slim AS builder
 
-RUN curl -fsSL https://bun.sh/install | bash && \
-    ln -s $HOME/.bun/bin/bun /usr/local/bin/bun
+# Install prerequisites
+RUN apt-get update && apt-get install -y curl unzip build-essential pkg-config libssl-dev
 
+# Install Rust for FFI build
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Install Bun
+RUN curl -fsSL https://bun.sh/install | bash \
+    && ln -s $HOME/.bun/bin/bun /usr/local/bin/bun
+
+# Install all base packages
 WORKDIR /usr/src/Yuuko
-
-# Stage: Install dependencies
-FROM base AS install
 COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile --production
-
-# Stage: Prerelease (prepare database & dev steps)
-FROM base AS prerelease
-WORKDIR /usr/src/Yuuko
-
-COPY package.json bun.lock ./
-
-# Install dev dependencies to run drizzle-kit
 RUN bun install --frozen-lockfile
 
 COPY . .
 
+# Build the Rust FFI module
+RUN bun run module:build
+
 # Run DB migrations if SQLite database doesn't exist
 RUN if [ ! -f ./src/database/sqlite/*.sqlite ]; then bun db:push; fi
 
-FROM base AS release
+# Stage 2: Release
+FROM node:20-bullseye-slim AS release
 WORKDIR /usr/src/Yuuko
 
-# Copy only production node_modules
-COPY --from=install /usr/src/Yuuko/node_modules node_modules
+COPY --from=builder /root/.bun /root/.bun
+ENV PATH="/root/.bun/bin:${PATH}"
 
-# Copy source code
-COPY --from=prerelease /usr/src/Yuuko/src ./src
+# Install production-only dependencies
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile -p
 
-# Copy config and entrypoint
-COPY --from=prerelease /usr/src/Yuuko/package.json .
-COPY --from=prerelease /usr/src/Yuuko/tsconfig.json .
-COPY --from=prerelease /usr/src/Yuuko/drizzle.config.ts .
-COPY --from=prerelease /usr/src/Yuuko/entrypoint.sh .
+# Copy source and compiled FFI
+COPY --from=builder /usr/src/Yuuko/src ./src
+COPY --from=builder /usr/src/Yuuko/package.json \
+                     /usr/src/Yuuko/tsconfig.json \
+                     /usr/src/Yuuko/drizzle.config.ts \
+                     /usr/src/Yuuko/entrypoint.sh ./
 
 EXPOSE 3030/tcp
-VOLUME "/usr/src/Yuuko/database/sqlite"
+VOLUME "/usr/src/Yuuko/src/database/sqlite"
 
 CMD bun start:prod

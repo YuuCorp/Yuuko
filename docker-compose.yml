@@ -1,40 +1,40 @@
 services:
-  bot:
-    container_name: yuuko
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      # Mount the RSA key folder and the database folder
-      - ./src/RSA:/usr/src/Yuuko/src/RSA
-      - ./src/database/sqlite:/usr/src/Yuuko/src/database/sqlite
-    env_file:
-      - .env.local
-    environment:
-      - NODE_ENV=docker
-    depends_on:
-      - dragonfly
+    bot:
+        container_name: yuuko
+        build:
+            context: .
+            dockerfile: Dockerfile
+        volumes:
+            # Mount the RSA key folder and the database folder
+            - ./src/RSA:/usr/src/Yuuko/src/RSA
+            - ./src/database/sqlite:/usr/src/Yuuko/src/database/sqlite
+        env_file:
+            - ./.env.local
+        environment:
+            - NODE_ENV=docker
+        depends_on:
+            - dragonfly
 
-  api:
-    container_name: yuuko-api
-    env_file:
-      - .env.local
-    ports:
-      - ${PORT}:${PORT}
-    build:
-      context: .
-      dockerfile: Dockerfile
-    entrypoint: [ "bun", "api" ]
+    api:
+        container_name: yuuko-api
+        env_file:
+            - ./.env.local
+        ports:
+            - ${PORT}:${PORT}
+        build:
+            context: .
+            dockerfile: Dockerfile
+        entrypoint: ["bun", "api"]
 
-  dragonfly:
-    container_name: dragonfly
-    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
-    ulimits:
-      memlock: -1
-    ports:
-      - "6379:6379"
-    volumes:
-      - dragonflydata:/data
+    dragonfly:
+        container_name: dragonfly
+        image: "docker.dragonflydb.io/dragonflydb/dragonfly"
+        ulimits:
+            memlock: -1
+        ports:
+            - "6379:6379"
+        volumes:
+            - dragonflydata:/data
 
 volumes:
-  dragonflydata:
+    dragonflydata:
