@@ -6,17 +6,23 @@ import { env } from "#env";
 
 export async function startApi() {
   const port = env().API_PORT;
+  const isDev = env().NODE_ENV !== "production";
+
   await RSA.loadKeys();
 
-  new Elysia().onError(({ error }) => {
-    const err = new Response(error.toString());
-    console.error(err);
+  const app = new Elysia().onError(({ error }) => {
+    console.error(error);
+    return new Response(error.toString(), { status: 500 });
+  });
 
-    return err;
-  }).use(cors({
-    origin: /.*\.yuuko\.dev$/,
-    methods: ["POST", "GET"]
-  })).use(api).listen(port)
+  if (!isDev) {
+    app.use(cors({
+      origin: /.*\.yuuko\.dev$/,
+      methods: ["POST", "GET"]
+    }));
+  }
+
+  app.use(api).listen(port);
 
   console.log(`API is open on port ${port}`)
 }
