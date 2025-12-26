@@ -15,12 +15,10 @@ export async function startApi() {
     return new Response(error.toString(), { status: 500 });
   });
 
-  if (!isDev) {
-    app.use(cors({
-      origin: /.*\.yuuko\.dev$/,
-      methods: ["POST", "GET"]
-    }));
-  }
+  app.use(cors({
+    origin: isDev ? true : /.*\.yuuko\.dev$/,
+    methods: ["POST", "GET"]
+  }));
 
   app.use(api).listen(port);
 
