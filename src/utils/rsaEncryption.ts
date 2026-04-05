@@ -17,7 +17,7 @@ export class RSA {
   }
 
   private static async generateRSAPair() {
-    const RSAdirectory = path.join(import.meta.dir, 'RSA');
+    const RSAdirectory = path.join(import.meta.dir, '..', 'RSA');
     if (fs.existsSync(path.join(RSAdirectory, 'id_rsa'))) return;
 
     const keyPair = await subtle.generateKey({
