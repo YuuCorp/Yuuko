@@ -493,6 +493,25 @@ export type CharacterSubmissionEdge = {
   voiceActors?: Maybe<Array<Maybe<Staff>>>;
 };
 
+/** Notification for when a character submission is accepted, partially accepted, or rejected */
+export type CharacterSubmissionUpdateNotification = {
+  __typename?: 'CharacterSubmissionUpdateNotification';
+  /** The character that was modified. */
+  character?: Maybe<Character>;
+  /** The notification context text */
+  contexts?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** The time the notification was created at */
+  createdAt?: Maybe<Scalars['Int']['output']>;
+  /** The id of the Notification */
+  id: Scalars['Int']['output'];
+  /** The notes of the submission */
+  notes?: Maybe<Scalars['String']['output']>;
+  /** The status of the submission */
+  status?: Maybe<Scalars['String']['output']>;
+  /** The type of notification */
+  type?: Maybe<NotificationType>;
+};
+
 /** Deleted data type */
 export type Deleted = {
   __typename?: 'Deleted';
@@ -1938,6 +1957,27 @@ export type MediaSubmissionEdge = {
   voiceActorSubmission?: Maybe<Staff>;
 };
 
+/** Notification for when a media submission is accepted, partially accepted, or rejected */
+export type MediaSubmissionUpdateNotification = {
+  __typename?: 'MediaSubmissionUpdateNotification';
+  /** The notification context text */
+  contexts?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** The time the notification was created at */
+  createdAt?: Maybe<Scalars['Int']['output']>;
+  /** The id of the Notification */
+  id: Scalars['Int']['output'];
+  /** The media that was created or modified. If this submission was to create a new media and it was rejected, this will be null. */
+  media?: Maybe<Media>;
+  /** The notes of the submission */
+  notes?: Maybe<Scalars['String']['output']>;
+  /** The status of the submission */
+  status?: Maybe<Scalars['String']['output']>;
+  /** The title of the media that was submitted. If this submission was to edit an existing media, this will be null. */
+  submittedTitle?: Maybe<Scalars['String']['output']>;
+  /** The type of notification */
+  type?: Maybe<NotificationType>;
+};
+
 /** A tag that describes a theme or element of the media */
 export type MediaTag = {
   __typename?: 'MediaTag';
@@ -2513,6 +2553,8 @@ export enum NotificationType {
   ActivityReplySubscribed = 'ACTIVITY_REPLY_SUBSCRIBED',
   /** An anime you are currently watching has aired */
   Airing = 'AIRING',
+  /** A user's character submission has been accepted, partially accepted, or rejected */
+  CharacterSubmissionUpdate = 'CHARACTER_SUBMISSION_UPDATE',
   /** A user has followed you */
   Following = 'FOLLOWING',
   /** An anime or manga has had a data change that affects how a user may track it in their lists */
@@ -2521,8 +2563,12 @@ export enum NotificationType {
   MediaDeletion = 'MEDIA_DELETION',
   /** Anime or manga entries on the user's list have been merged into a single entry */
   MediaMerge = 'MEDIA_MERGE',
+  /** A user's submission has been accepted, partially accepted, or rejected */
+  MediaSubmissionUpdate = 'MEDIA_SUBMISSION_UPDATE',
   /** A new anime or manga has been added to the site where its related media is on the user's list */
   RelatedMediaAddition = 'RELATED_MEDIA_ADDITION',
+  /** A user's staff submission has been accepted, partially accepted, or rejected */
+  StaffSubmissionUpdate = 'STAFF_SUBMISSION_UPDATE',
   /** A user has liked your forum comment */
   ThreadCommentLike = 'THREAD_COMMENT_LIKE',
   /** A user has mentioned you in a forum comment */
@@ -2536,7 +2582,7 @@ export enum NotificationType {
 }
 
 /** Notification union type */
-export type NotificationUnion = ActivityLikeNotification | ActivityMentionNotification | ActivityMessageNotification | ActivityReplyLikeNotification | ActivityReplyNotification | ActivityReplySubscribedNotification | AiringNotification | FollowingNotification | MediaDataChangeNotification | MediaDeletionNotification | MediaMergeNotification | RelatedMediaAdditionNotification | ThreadCommentLikeNotification | ThreadCommentMentionNotification | ThreadCommentReplyNotification | ThreadCommentSubscribedNotification | ThreadLikeNotification;
+export type NotificationUnion = ActivityLikeNotification | ActivityMentionNotification | ActivityMessageNotification | ActivityReplyLikeNotification | ActivityReplyNotification | ActivityReplySubscribedNotification | AiringNotification | CharacterSubmissionUpdateNotification | FollowingNotification | MediaDataChangeNotification | MediaDeletionNotification | MediaMergeNotification | MediaSubmissionUpdateNotification | RelatedMediaAdditionNotification | StaffSubmissionUpdateNotification | ThreadCommentLikeNotification | ThreadCommentMentionNotification | ThreadCommentReplyNotification | ThreadCommentSubscribedNotification | ThreadLikeNotification;
 
 /** Page of data */
 export type Page = {
@@ -2915,9 +2961,9 @@ export type Query = {
   Character?: Maybe<Character>;
   /** ExternalLinkSource collection query */
   ExternalLinkSourceCollection?: Maybe<Array<Maybe<MediaExternalLink>>>;
-  /** Follow query */
+  /** Follower query */
   Follower?: Maybe<User>;
-  /** Follow query */
+  /** Following query */
   Following?: Maybe<User>;
   /** Collection of all the possible media genres */
   GenreCollection?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
@@ -3840,6 +3886,25 @@ export type StaffSubmission = {
   submission?: Maybe<Staff>;
   /** Submitter for the submission */
   submitter?: Maybe<User>;
+};
+
+/** Notification for when a staff submission is accepted, partially accepted, or rejected */
+export type StaffSubmissionUpdateNotification = {
+  __typename?: 'StaffSubmissionUpdateNotification';
+  /** The notification context text */
+  contexts?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** The time the notification was created at */
+  createdAt?: Maybe<Scalars['Int']['output']>;
+  /** The id of the Notification */
+  id: Scalars['Int']['output'];
+  /** The notes of the submission */
+  notes?: Maybe<Scalars['String']['output']>;
+  /** The staff that was modified. */
+  staff?: Maybe<Staff>;
+  /** The status of the submission */
+  status?: Maybe<Scalars['String']['output']>;
+  /** The type of notification */
+  type?: Maybe<NotificationType>;
 };
 
 /** The distribution of the watching/reading status of media or a user's list */
@@ -4801,7 +4866,7 @@ export type UserQueryVariables = Exact<{
 }>;
 
 
-export type UserQuery = { __typename?: 'Query', User?: { __typename?: 'User', id: number, name: string, bannerImage?: string | null, siteUrl?: string | null, createdAt?: number | null, avatar?: { __typename?: 'UserAvatar', large?: string | null, medium?: string | null } | null, options?: { __typename?: 'UserOptions', profileColor?: string | null } | null, statistics?: { __typename?: 'UserStatisticTypes', anime?: { __typename?: 'UserStatistics', count: number, meanScore: number } | null, manga?: { __typename?: 'UserStatistics', count: number, meanScore: number } | null } | null } | null };
+export type UserQuery = { __typename?: 'Query', User?: { __typename?: 'User', id: number, name: string, bannerImage?: string | null, siteUrl?: string | null, createdAt?: number | null, avatar?: { __typename?: 'UserAvatar', large?: string | null, medium?: string | null } | null, options?: { __typename?: 'UserOptions', profileColor?: string | null } | null, statistics?: { __typename?: 'UserStatisticTypes', anime?: { __typename?: 'UserStatistics', count: number, meanScore: number, minutesWatched: number } | null, manga?: { __typename?: 'UserStatistics', count: number, meanScore: number, chaptersRead: number } | null } | null } | null };
 
 export type UserCardQueryVariables = Exact<{
   username?: InputMaybe<Scalars['String']['input']>;

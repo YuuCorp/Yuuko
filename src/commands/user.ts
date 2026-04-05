@@ -56,8 +56,8 @@ export default {
 
     if (statistics) {
       titleEmbed.addFields(
-        { name: "< Anime >\n\n", value: `**Watched:** ${statistics.anime?.count.toString()}\n**Average score**: ${statistics.anime?.meanScore.toString()}`, inline: true },
-        { name: "< Manga >\n\n", value: `**Read:** ${statistics.manga?.count.toString()}\n**Average score**: ${statistics.manga?.meanScore.toString()}`, inline: true },
+        { name: "Anime\n", value: `**Total Anime**\n${statistics.anime?.count.toString()}\n**Hours Watched**\n${((statistics.anime?.minutesWatched ?? 0) / 60).toFixed(2)}\n**Mean Score**\n${statistics.anime?.meanScore.toString()}`, inline: true },
+        { name: "Manga\n", value: `**Total Manga**\n${statistics.manga?.count.toString()}\n**Chapters Read**\n${statistics.manga?.chaptersRead}\n**Mean Score**\n${statistics.manga?.meanScore.toString()}`, inline: true },
       );
     }
 
