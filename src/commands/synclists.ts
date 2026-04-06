@@ -36,7 +36,7 @@ export default {
 
       return void interaction.editReply(`Successfully wiped your lists from our DB!`);
     } else if (subcommand === "sync") {
-      interaction.deferReply();
+      await interaction.deferReply();
       const { data: animeData } = await graphQLRequest("GetMediaCollection", {
         userId: interaction.alID,
         type: MediaType.Anime,

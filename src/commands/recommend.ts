@@ -22,7 +22,7 @@ export default {
     .addStringOption((option) => option.setName("genres").setDescription('A comma separated list of genres (e.g. "romance, drama")').setRequired(true)),
 
   run: async ({ interaction, client }, hookData): Promise<void> => {
-    interaction.deferReply();
+    await interaction.deferReply();
 
     const type = hookData?.type ?? interaction.options.getString("type", true) as MediaType;
     const anilistUser = hookData?.anilistUser ?? interaction.options.getString("anilist_user", true);

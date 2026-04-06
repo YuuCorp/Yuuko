@@ -20,7 +20,7 @@ export default {
     .addStringOption((option) => option.setName("in").setDescription('Airing *in* (e.g. "1 week")')),
 
   run: async ({ interaction }, hookData): Promise<void> => {
-    interaction.deferReply();
+    await interaction.deferReply();
 
     const vars: AiringQueryVariables = {
       dateStart: 0,
