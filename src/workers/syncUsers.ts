@@ -26,11 +26,21 @@ export async function syncAnilistUsers(data: SyncUsers) {
                 await deleteUser(user.anilistId);
                 continue;
             }
-            const { data: animeData } = await graphQLRequest("GetUserList", { userId: user.anilistId, type: MediaType.Anime }, user.anilistToken);
+            const { data: animeData, headers: animeHeaders } = await graphQLRequest("GetUserList", { userId: user.anilistId, type: MediaType.Anime }, user.anilistToken);
             if (animeData) await handleSyncing({ media: animeData }, user.anilistId, MediaType.Anime);
+
+            const remaining = parseInt(animeHeaders.get("x-ratelimit-remaining") ?? "1");
+
+            if (remaining <= 2) {
+                client.log(`Rate limit nearly exhausted (${remaining} remaining), pausing for 60s...`, "warn");
+                await new Promise((resolve) => setTimeout(resolve, 60 * 1000));
+            }
+
             const { data: mangaData } = await graphQLRequest("GetUserList", { userId: user.anilistId, type: MediaType.Manga }, user.anilistToken);
             if (mangaData) await handleSyncing({ media: mangaData }, user.anilistId, MediaType.Manga);
+
             client.log(`Synced user ${user.anilistId} (${i + 1} / ${total})`, "verbose");
+
             const localTimeout = Math.max(0, Math.floor(timeOut - (performance.now() - start)));
             if (i < total - 1 && localTimeout > 0) {
                 await new Promise((resolve) => setTimeout(resolve, localTimeout));

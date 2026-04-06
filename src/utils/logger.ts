@@ -7,7 +7,7 @@ class Logger {
   constructor(filename: string) {
     this.logger = winston.createLogger({
       transports: [new winston.transports.File({ filename })],
-      level: env().NODE_ENV === 'development' ? 'debug' : 'info',
+      level: env().NODE_ENV === 'development' ? 'debug' : 'verbose',
       format: winston.format.combine(
         winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
         winston.format.printf(({ timestamp, level, message }) => {
@@ -28,7 +28,6 @@ class Logger {
   }
 
   log(text: string, category: string = "info") {
-    if (category.toLowerCase() === "debug" && env().NODE_ENV !== "development") return;
     this.logger.log(category.toLowerCase(), text);
   }
 }
