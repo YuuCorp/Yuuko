@@ -131,6 +131,7 @@ export async function handleSyncing(
   }
 
   const mediasArray = Array.from(bulkMedia);
+  if (mediasArray.length === 0) return;
   // bulk insert media_id, do nothing if exists already
   await db
     .insert(mediaStats)
