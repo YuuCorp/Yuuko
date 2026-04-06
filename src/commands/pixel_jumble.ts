@@ -82,9 +82,9 @@ export default {
         let attachment = getAttachment(pixelatedImgPtr, pixelatedImgBufferSize);
 
         const buttonList = [
-            new ButtonBuilder().setCustomId('guess').setLabel('Guess').setStyle(ButtonStyle.Primary),
+            new ButtonBuilder().setCustomId('guess').setLabel('Guess').setStyle(ButtonStyle.Success),
             new ButtonBuilder().setCustomId('hint').setLabel('Next Hint').setStyle(ButtonStyle.Primary),
-            new ButtonBuilder().setCustomId('forfeit').setLabel('Give Up').setStyle(ButtonStyle.Primary),
+            new ButtonBuilder().setCustomId('forfeit').setLabel('Give Up').setStyle(ButtonStyle.Danger),
         ];
         const customIDs = new Set(['guess', 'hint', 'forfeit']);
         const components = [new ActionRowBuilder<ButtonBuilder>().addComponents(buttonList)];

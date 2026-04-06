@@ -1,7 +1,7 @@
 import { footer, getSubcommandOption, updateBotStats, YuukoError } from "#utils/index";
 import { anilistUser } from "#database/models/anilistUser";
 import type { Command } from "#structures/index";
-import { MessageFlags, SlashCommandBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags, SlashCommandBuilder } from "discord.js";
 import { db } from "#database/db";
 import { eq } from "drizzle-orm";
 
@@ -34,6 +34,7 @@ export default {
                         footer: footer(),
                     },
                 ],
+                components: [new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setLabel('Visit auth page').setStyle(ButtonStyle.Link).setURL("https://auth.yuuko.dev"))],
                 flags: MessageFlags.Ephemeral,
             }));
         }

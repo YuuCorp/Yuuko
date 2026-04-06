@@ -38,7 +38,7 @@ export async function syncAnilistUsers(data: SyncUsers) {
 
             const { data: mangaData } = await graphQLRequest("GetUserList", {
                 userId: user.anilistId,
-                type: MediaType.Anime,
+                type: MediaType.Manga,
             }, user.anilistToken);
 
             if (mangaData) await handleSyncing({ media: mangaData }, user.anilistId, MediaType.Manga);

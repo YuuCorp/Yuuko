@@ -74,7 +74,7 @@ export default {
 
         generateReplayEmbeds(data, pageList);
 
-        const reply = await buildPagination(interaction, pageList, new ButtonBuilder().setLabel('View series?').setStyle(ButtonStyle.Success));
+        const reply = await buildPagination(interaction, pageList, new ButtonBuilder().setLabel('View series info?').setStyle(ButtonStyle.Primary));
         if (reply && data.media) {
           if (data.media.type === "MANGA") {
             await MangaCmd.run({ interaction: reply, client }, {

@@ -46,7 +46,16 @@ export async function buildPagination(interaction: UsableInteraction, pageList: 
         // If we skip deferring the update and pass it to a command as an
         // interaction it replies as a new message.
         // await i.deferUpdate();
-        collector.stop("followup");
+
+        buttonList.map((b) => {
+          if (b === followUpButton) b.setDisabled(true)
+        })
+
+        interaction.editReply({
+          components: [new ActionRowBuilder<ButtonBuilder>().addComponents(buttonList)],
+        });
+
+        collector.resetTimer();
         resolve(i);
         return;
       }
