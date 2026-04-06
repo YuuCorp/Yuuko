@@ -21,7 +21,7 @@ export default {
   // .setRequired(true)),
 
   run: async ({ interaction }, hookData): Promise<void> => {
-    const anilistUser = getStringOption(interaction, hookData, "username", true);
+    const anilistUser = getStringOption(interaction, hookData, "username");
 
     let vars: UserQueryVariables = {
       username: anilistUser,
