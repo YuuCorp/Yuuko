@@ -76,12 +76,11 @@ workerManager.onmessage = async (e) => {
       break;
     }
     case "SYNC": {
-      await syncAnilistUsers(data);
-
       await db.update(tables.workerEvents)
         .set({ updatedAt: sql`current_timestamp` })
         .where(eq(tables.workerEvents.type, "SYNC"));
 
+      await syncAnilistUsers(data);
       break;
     }
   }
