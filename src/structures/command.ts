@@ -61,7 +61,7 @@ export type CommonCommandWithHook = Omit<Command, "run"> & {
 
 export type CommandType = (typeof CommandCategories)[keyof typeof CommandCategories];
 
-export interface Command<OverrideData = null> {
+export interface Command<hookData = null> {
   name: string;
   description: string;
   usage?: string;
@@ -72,7 +72,7 @@ export interface Command<OverrideData = null> {
   autocomplete?: (interaction: Interaction) => void;
 
   withBuilder: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder;
-  run: <Args = any>(o: RunOptions<Args>, override?: OverrideData) => MaybePromise<void>;
+  run: <Args = any>(o: RunOptions<Args>, hookData?: hookData) => MaybePromise<void>;
 }
 
 export type CommandWithHook = CommonCommandWithHook & {

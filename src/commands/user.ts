@@ -20,8 +20,8 @@ export default {
     .addStringOption((option) => option.setName("username").setRequired(false).setDescription("The user to search for")),
   // .setRequired(true)),
 
-  run: async ({ interaction, client }, override): Promise<void> => {
-    const anilistUser = override?.username ?? interaction.options.getString("username");
+  run: async ({ interaction, client }, hookData): Promise<void> => {
+    const anilistUser = hookData?.username ?? interaction.options.getString("username");
 
     let vars: UserQueryVariables = {
       username: anilistUser,
@@ -75,4 +75,4 @@ export default {
     interaction.reply({ embeds: [titleEmbed] });
 
   },
-} satisfies Command<{ username?: string }>;
+} satisfies Command<{ username: string }>;
