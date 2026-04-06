@@ -17,12 +17,11 @@ export default {
   withBuilder: new SlashCommandBuilder()
     .setName(name)
     .setDescription(description)
-    .addStringOption((option) => option.setName("query").setRequired(false).setDescription("The user to search for")),
+    .addStringOption((option) => option.setName("username").setRequired(false).setDescription("The user to search for")),
   // .setRequired(true)),
 
-  run: async ({ interaction, client }): Promise<void> => {
-
-    const { query: anilistUser } = getOptions<{ query: string }>(interaction.options, ["query"]);
+  run: async ({ interaction, client }, override): Promise<void> => {
+    const anilistUser = override?.username ?? interaction.options.getString("username");
 
     let vars: UserQueryVariables = {
       username: anilistUser,
@@ -76,4 +75,4 @@ export default {
     interaction.reply({ embeds: [titleEmbed] });
 
   },
-} satisfies Command;
+} satisfies Command<{ username?: string }>;

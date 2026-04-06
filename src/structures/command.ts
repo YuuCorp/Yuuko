@@ -1,4 +1,4 @@
-import type { SlashCommandBuilder, APIEmbedField, ApplicationCommandOptionType, CacheType, ChatInputCommandInteraction, Interaction } from "discord.js";
+import type { SlashCommandBuilder, APIEmbedField, ApplicationCommandOptionType, CacheType, ChatInputCommandInteraction, Interaction, SlashCommandOptionsOnlyBuilder, SlashCommandSubcommandsOnlyBuilder } from "discord.js";
 import type { CommandCategories } from "#utils/commandCategories";
 import type { Middleware, Client } from "./index";
 
@@ -55,32 +55,30 @@ export type RunOptionsWithHooks<Args = any> = RunOptions<Args> &
     hookdata: HookData;
   }>;
 
-export type CommonCommandWithHook = Omit<CommonCommand, "run"> & {
+export type CommonCommandWithHook = Omit<Command, "run"> & {
   run: <Args = any>(o: RunOptionsWithHooks<Args>) => MaybePromise<void>;
 };
 
 export type CommandType = (typeof CommandCategories)[keyof typeof CommandCategories];
 
-export interface CommonCommand {
+export interface Command<OverrideData = null> {
   name: string;
   description: string;
   usage?: string;
   cooldown?: number;
   commandType: CommandType;
-  run: <Args = any>(o: RunOptions<Args>) => MaybePromise<void>;
   guildOnly?: boolean;
   middlewares?: Middleware[];
   autocomplete?: (interaction: Interaction) => void;
-}
 
-export type Command = CommonCommand & {
-  withBuilder?: any;
+  withBuilder: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder;
+  run: <Args = any>(o: RunOptions<Args>, override?: OverrideData) => MaybePromise<void>;
 }
 
 export type CommandWithHook = CommonCommandWithHook & {
   withBuilder?: any;
 }
 
-export type ClientCommand = CommonCommand & {
+export type ClientCommand = Command & {
   options?: CommandStringOption[];
 }
