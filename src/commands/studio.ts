@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import type { Command } from "#structures/index";
-import { footer, graphQLRequest, SeriesTitle, YuukoError } from "#utils/index";
+import { footer, getStringOption, graphQLRequest, SeriesTitle, YuukoError } from "#utils/index";
 
 const name = "studio";
 const usage = "studio <?>";
@@ -17,7 +17,8 @@ export default {
     .addStringOption((option) => option.setName("query").setDescription("The query to search for").setRequired(true)),
 
   run: async ({ interaction }, hookData): Promise<void> => {
-    const studioName = hookData?.name ?? interaction.options.getString("query");
+    const studioName = getStringOption(interaction, hookData, "query", true);
+
     const {
       data: { Studio: data },
       headers,
@@ -42,4 +43,4 @@ export default {
     interaction.reply({ embeds: [studioEmbed] });
 
   },
-} satisfies Command<{ name: string }>;
+} satisfies Command<{ query: string }>;

@@ -1,4 +1,4 @@
-import { buildPagination, footer } from "#utils/index";
+import { buildPagination, footer, getStringOption, getSubcommandOption, getUserOption } from "#utils/index";
 import { EmbedBuilder, MessageFlags, SlashCommandBuilder, User } from "discord.js";
 import { db, tables } from "#database/db";
 import { eq, sql } from "drizzle-orm";
@@ -33,11 +33,11 @@ export default {
 
   run: async ({ interaction }, hookData): Promise<void> => {
     if (!interaction.guild) return void interaction.reply({ content: "This command can only be used in a server.", flags: MessageFlags.Ephemeral });
-    const subcommandType = hookData?.subcommandType ?? interaction.options.getSubcommand() as "user" | "list" | "set" | "wipe";
+    const subcommandType = getSubcommandOption(interaction, hookData, "subcommandType", true) as "user" | "list" | "set" | "wipe";
 
     if (subcommandType === "set") {
       const setData = hookData?.subcommandType === "set" ? hookData : undefined;
-      const date = setData?.date ?? interaction.options.getString("date", true);
+      const date = getStringOption(interaction, setData, "date", true);
 
       const birthday = new Date(date);
       if (birthday.toString() === "Invalid Date") return void interaction.reply({ content: "Invalid date format. Please use YYYY-MM-DD.", flags: MessageFlags.Ephemeral });
@@ -59,7 +59,7 @@ export default {
       return void interaction.reply({ content: `Your birthday has been set to ${getReadableDate(birthday)}.`, flags: MessageFlags.Ephemeral });
     } else if (subcommandType === "user") {
       const userData = hookData?.subcommandType === "user" ? hookData : undefined;
-      const user = userData?.user ?? interaction.options.getUser("user", true);
+      const user = getUserOption(interaction, userData, "user", true);
 
       const birthday = (await db.select().from(tables.userBirthday).where(eq(tables.userBirthday.userId, user.id)).limit(1))[0]
       if (!birthday) return void interaction.reply({ content: `${user.tag} has not set their birthday.`, flags: MessageFlags.Ephemeral });

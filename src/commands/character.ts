@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import type { Command } from "#structures/index";
-import { buildPagination, footer, graphQLRequest, SeriesTitle, YuukoError } from "#utils/index";
+import { buildPagination, footer, getStringOption, graphQLRequest, SeriesTitle, YuukoError } from "#utils/index";
 
 const name = "character";
 const usage = "character <name>";
@@ -17,8 +17,8 @@ export default {
     .addStringOption((option) => option.setName("query").setDescription("The query to search for").setRequired(true)),
 
   run: async ({ interaction }, hookData): Promise<void> => {
+    const charName = getStringOption(interaction, hookData, "query", true);
 
-    const charName = hookData?.name ?? interaction.options.getString("query", true);
     const {
       data: { Character: data },
       headers,
@@ -69,4 +69,4 @@ export default {
     }
     await buildPagination(interaction, embeds);
   },
-} satisfies Command<{ name: string }>;
+} satisfies Command<{ query: string }>;

@@ -97,7 +97,7 @@ export async function graphQLRequest<QueryKey extends Query>(queryKey: QueryKey,
     }
 
     const data = resJson as GraphQLResponse<QueryVariables[QueryKey][0]>
-    return data;
+    return { data: data.data, headers: data.headers };
   } catch (e: any) {
     console.error(e)
     throw new YuukoError(e?.message || e, vars);

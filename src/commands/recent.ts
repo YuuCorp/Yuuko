@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, AttachmentBuilder } from "discord.js";
 import { mwGetUserID } from "#middleware/userEntry";
 import type { Command } from "#structures/index";
-import { CommandCategories, graphQLRequest, SeriesTitle, YuukoError } from "#utils/index";
+import { CommandCategories, getStringOption, graphQLRequest, SeriesTitle, YuukoError } from "#utils/index";
 import type { MediaList, MediaType, RecentChartQueryVariables } from "#graphQL/types";
 import { ptr, toBuffer } from "bun:ffi";
 
@@ -22,8 +22,8 @@ export default {
     .addStringOption((option) => option.setName("user").setDescription("The user to search for").setRequired(false)),
 
   run: async ({ interaction, client }, hookData): Promise<void> => {
-    const userName = hookData?.user ?? interaction.options.getString("user");
-    const type = hookData?.type ?? interaction.options.getString("type", true) as MediaType;
+    const userName = getStringOption(interaction, hookData, "user");
+    const type = getStringOption(interaction, hookData, "type", true) as MediaType;
 
     const vars: RecentChartQueryVariables = {
       perPage: 9,

@@ -8,6 +8,7 @@ import { SeriesTitle } from "#utils/common";
 import { ptr, toBuffer, type Library, type Pointer } from "bun:ffi";
 import type { ModuleSymbols } from "#structures/modules";
 import { createButtonCollector } from "#utils/buildPagination";
+import { getStringOption } from "#utils/getOption";
 
 const name = "pixeljumble";
 const usage = "/pixeljumble";
@@ -34,7 +35,7 @@ export default {
         ),
 
     run: async ({ interaction, client }, hookData): Promise<void> => {
-        const type = hookData?.type ?? interaction.options.getString("type", true) as MediaType;
+        const type = getStringOption(interaction, hookData, "type", true) as MediaType;
 
         const msg = await interaction.deferReply({ withResponse: true });
 

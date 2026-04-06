@@ -35,6 +35,8 @@ export default {
     .addAttachmentOption((option) => option.setName("image").setDescription("Attach the image of the anime.").setRequired(true)),
 
   run: async ({ interaction, client }): Promise<void> => {
+    if (!interaction.isChatInputCommand()) return;
+
     await interaction.deferReply();
     const image = interaction.options.getAttachment("image");
 

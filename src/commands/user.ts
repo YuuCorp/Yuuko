@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, EmbedBuilder, type ColorResolvable } from "discord.js";
 import { mwGetUserEntry } from "#middleware/userEntry";
 import type { Command } from "#structures/index";
-import { graphQLRequest, footer, YuukoError } from "#utils/index";
+import { graphQLRequest, footer, YuukoError, getStringOption } from "#utils/index";
 import type { UserQueryVariables } from "#graphQL/types";
 
 const name = "user";
@@ -21,7 +21,7 @@ export default {
   // .setRequired(true)),
 
   run: async ({ interaction }, hookData): Promise<void> => {
-    const anilistUser = hookData?.username ?? interaction.options.getString("username");
+    const anilistUser = getStringOption(interaction, hookData, "username", true);
 
     let vars: UserQueryVariables = {
       username: anilistUser,

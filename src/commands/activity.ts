@@ -1,8 +1,10 @@
-import { graphQLRequest, SeriesTitle, buildPagination, YuukoError } from "#utils/index";
-import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { graphQLRequest, SeriesTitle, buildPagination, YuukoError, getStringOption } from "#utils/index";
+import { ButtonBuilder, ButtonStyle, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { mwGetUserEntry } from "#middleware/userEntry";
 import type { Command } from "#structures/index";
 import type { ActivityQuery, UserQueryVariables } from "#graphQL/types";
+import AnimeCmd from "#commands/anime";
+import MangaCmd from "#commands/manga";
 
 const name = "activity";
 const usage = "activity <user>";
@@ -19,8 +21,8 @@ export default {
     .setDescription(description)
     .addStringOption((option) => option.setName("user").setDescription("The user to search for").setRequired(false)),
 
-  run: async ({ interaction }, hookData): Promise<void> => {
-    const username = hookData?.username ?? interaction.options.getString("user");
+  run: async ({ interaction, client }, hookData): Promise<void> => {
+    const username = getStringOption(interaction, hookData, "user");
 
     const vars: UserQueryVariables = {
       username,
@@ -72,6 +74,19 @@ export default {
 
         generateReplayEmbeds(data, pageList);
 
+        const reply = await buildPagination(interaction, pageList, new ButtonBuilder().setLabel('View series?').setStyle(ButtonStyle.Success));
+        if (reply && data.media) {
+          if (data.media.type === "MANGA") {
+            await MangaCmd.run({ interaction: reply, client }, {
+              id: data.media.id
+            });
+          } else {
+            await AnimeCmd.run({ interaction: reply, client }, {
+              id: data.media.id
+            })
+          }
+        }
+
         break;
 
       case "TextActivity":
@@ -85,14 +100,15 @@ export default {
 
         generateReplayEmbeds(data, pageList);
 
+        await buildPagination(interaction, pageList);
+
         break;
 
       case "MessageActivity":
         break;
     }
-    return void await buildPagination(interaction, pageList);
   },
-} satisfies Command<{ username: string }>;
+} satisfies Command<{ user: string }>;
 
 function generateReplayEmbeds(data: ActivityQuery['Activity'], pageList: any[]) {
   if (!data || data.__typename !== "ListActivity" && data.__typename !== "TextActivity" || !data.replies) return;

@@ -1,4 +1,4 @@
-import { footer, updateBotStats, YuukoError } from "#utils/index";
+import { footer, getSubcommandOption, updateBotStats, YuukoError } from "#utils/index";
 import { anilistUser } from "#database/models/anilistUser";
 import type { Command } from "#structures/index";
 import { MessageFlags, SlashCommandBuilder } from "discord.js";
@@ -21,7 +21,7 @@ export default {
         .addSubcommand((subcommand) => subcommand.setName("wipe").setDescription("Unlink your AniList token from the bot.")),
 
     run: async ({ interaction, client }, hookData): Promise<void> => {
-        const subcommandType = hookData?.subcommandType ?? interaction.options.getSubcommand() as "help" | "wipe";
+        const subcommandType = getSubcommandOption(interaction, hookData, "subcommandType", true) as "help" | "wipe";
 
         db.query.anilistUser.findFirst({ where: (user, { eq }) => eq(user.discordId, interaction.user.id) });
 

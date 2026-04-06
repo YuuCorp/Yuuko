@@ -1,61 +1,63 @@
 query Activity($userid: Int) {
-  Activity(userId: $userid, sort: ID_DESC, type_not: MESSAGE) {
-    __typename
-    ... on TextActivity {
-      text
-      siteUrl
-      createdAt
-      user {
-        name
-        avatar {
-          large
+    Activity(userId: $userid, sort: ID_DESC, type_not: MESSAGE) {
+        __typename
+        ... on TextActivity {
+            text
+            siteUrl
+            createdAt
+            user {
+                name
+                avatar {
+                    large
+                }
+            }
+            likeCount
+            replyCount
+            replies {
+                text
+                user {
+                    name
+                }
+            }
         }
-      }
-      likeCount
-      replyCount
-      replies {
-        text
-        user {
-          name
+        ... on ListActivity {
+            user {
+                name
+                avatar {
+                    large
+                }
+            }
+            likeCount
+            replies {
+                text
+                user {
+                    name
+                }
+            }
+            replyCount
+            status
+            progress
+            media {
+                siteUrl
+                bannerImage
+                title {
+                    romaji
+                    native
+                    english
+                }
+                coverImage {
+                    extraLarge
+                    large
+                    medium
+                }
+                id
+                type
+            }
+            createdAt
+            siteUrl
         }
-      }
+        ... on MessageActivity {
+            createdAt
+        }
     }
-    ... on ListActivity {
-      user {
-        name
-        avatar {
-          large
-        }
-      }
-      likeCount
-      replies {
-        text
-        user {
-          name
-        }
-      }
-      replyCount
-      status
-      progress
-      media {
-        siteUrl
-        bannerImage
-        title {
-          romaji
-          native
-          english
-        }
-        coverImage {
-          extraLarge
-          large
-          medium
-        }
-      }
-      createdAt
-      siteUrl
-    }
-    ... on MessageActivity {
-      createdAt
-    }
-  }
 }

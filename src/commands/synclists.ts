@@ -4,7 +4,7 @@ import { MediaType, type GetMediaCollectionQuery } from "#graphQL/types";
 import { mwRequireALToken } from "#middleware/alToken";
 import type { Command } from "#structures/index";
 import { db } from "#database/db";
-import { normalize, graphQLRequest, type AlwaysExist, type CacheEntry, type GraphQLResponse, YuukoError } from "#utils/index";
+import { normalize, graphQLRequest, type AlwaysExist, type CacheEntry, type GraphQLResponse, YuukoError, getSubcommandOption } from "#utils/index";
 import { eq } from "drizzle-orm";
 import { mediaStats, mediaStatUsers } from "#database/models";
 
@@ -26,7 +26,7 @@ export default {
     .addSubcommand((subcommand) => subcommand.setName("sync").setDescription("Sync your lists with our bot."))
     .addSubcommand((subcommand) => subcommand.setName("wipe").setDescription("Wipe your lists from our bot. (This will not wipe your AniList lists.)")),
   run: async ({ interaction, client }, hookData): Promise<void> => {
-    const subcommand = hookData?.subcommandType ?? interaction.options.getSubcommand() as "sync" | "wipe";
+    const subcommand = getSubcommandOption(interaction, hookData, "subcommandType", true) as "sync" | "wipe";
 
     if (subcommand === "wipe") {
       interaction.reply(`Wiping your lists from DB...`);

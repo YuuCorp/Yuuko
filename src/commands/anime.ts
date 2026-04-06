@@ -1,4 +1,4 @@
-import { graphQLRequest, handleData, normalize, type CacheEntry, YuukoError } from "#utils/index";
+import { graphQLRequest, handleData, normalize, type CacheEntry, YuukoError, getStringOption } from "#utils/index";
 import { SlashCommandBuilder } from "discord.js";
 import { redis } from "#caching/redis";
 import type { AnimeQuery, AnimeQueryVariables } from "#graphQL/types";
@@ -25,7 +25,7 @@ export default {
     let animeIdFound = false;
 
     if (!hookData?.id) {
-      const query = hookData?.title ?? interaction.options.getString("anime");
+      const query = getStringOption(interaction, hookData, "anime", true);
       if (!query || query.length < 3) throw new YuukoError("Query must be at least 3 characters long.");
       const normalizedQuery = normalize(query);
       vars.query = normalizedQuery;
@@ -84,4 +84,4 @@ export default {
     }
     return void await handleData({ media: data, headers: headers }, interaction, "ANIME", hookData);
   },
-} satisfies Command<{ id?: number, title?: string }>;
+} satisfies Command<{ id?: number, anime?: string }>;

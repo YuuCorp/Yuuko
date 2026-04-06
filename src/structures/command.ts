@@ -1,4 +1,4 @@
-import type { SlashCommandBuilder, APIEmbedField, ApplicationCommandOptionType, CacheType, ChatInputCommandInteraction, Interaction, SlashCommandOptionsOnlyBuilder, SlashCommandSubcommandsOnlyBuilder } from "discord.js";
+import type { SlashCommandBuilder, APIEmbedField, ApplicationCommandOptionType, CacheType, ChatInputCommandInteraction, Interaction, SlashCommandOptionsOnlyBuilder, SlashCommandSubcommandsOnlyBuilder, ButtonInteraction } from "discord.js";
 import type { CommandCategories } from "#utils/commandCategories";
 import type { Middleware, Client } from "./index";
 
@@ -26,10 +26,14 @@ export interface RunOptions<Args = any> {
   args?: Args;
 }
 
-export type UsableInteraction = ChatInputCommandInteraction<CacheType> & {
-  alID?: number,
-  ALtoken?: string
+type BaseExtension = {
+  alID?: number;
+  ALtoken?: string;
 };
+
+export type UsableInteraction =
+  | (ChatInputCommandInteraction<CacheType> & BaseExtension)
+  | (ButtonInteraction<CacheType> & BaseExtension);
 
 interface CommandStringOption {
   name: string;

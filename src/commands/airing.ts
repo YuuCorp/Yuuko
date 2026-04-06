@@ -1,4 +1,4 @@
-import { buildPagination, footer, graphQLRequest, SeriesTitle, YuukoError } from "#utils/index";
+import { buildPagination, footer, getStringOption, graphQLRequest, SeriesTitle, YuukoError } from "#utils/index";
 import { EmbedBuilder, SlashCommandBuilder, TimestampStyles, time } from "discord.js";
 import ms from "ms";
 import { MediaType, type AiringQueryVariables } from "#graphQL/types";
@@ -30,8 +30,8 @@ export default {
     // ^ Check if the user wants to search for a specific day
     let airingIn = 0;
 
-    const username = hookData?.username ?? interaction.options.getString("user");
-    const period = hookData?.period ?? interaction.options.getString("in");
+    const username = getStringOption(interaction, hookData, "user");
+    const period = getStringOption(interaction, hookData, "in");
     const mediaIDs = [];
 
     if (period) {
@@ -110,4 +110,4 @@ export default {
 
     await buildPagination(interaction, pageList);
   },
-} satisfies Command<{ username?: string, period?: string }>;
+} satisfies Command<{ user?: string, in?: string }>;
