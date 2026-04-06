@@ -14,7 +14,6 @@ const interactionCreate = new YuukoEvent({
         // We run the command based on the interaction
         const command = client.commands.find((cmd) => cmd.name == interaction.commandName);
         if (!command) return;
-        logging(command, interaction);
         client.log(`Interaction received in: ${Date.now() - interaction.createdTimestamp}ms`, "debug");
         checkCooldown(client, command, interaction);
         const start = performance.now();
@@ -22,8 +21,9 @@ const interactionCreate = new YuukoEvent({
         client.log(`Ran middleware in: ${Math.round(performance.now() - start)}ms`, "Debug");
 
         if (args.isCommand() && args.isChatInputCommand()) {
+          logging(command, interaction);
           await command.run({ interaction: args, client });
-          client.log(`Ran command in: ${Date.now() - interaction.createdTimestamp}ms`, "Debug");
+          client.log(`Ran command ${command.name} in: ${Date.now() - interaction.createdTimestamp}ms`, "Debug");
         }
 
         // Check for autocomplete

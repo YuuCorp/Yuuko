@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import type { Command } from "#structures/index";
-import { footer, graphQLRequest, SeriesTitle, getOptions, YuukoError } from "#utils/index";
+import { footer, graphQLRequest, SeriesTitle, YuukoError } from "#utils/index";
 
 const name = "studio";
 const usage = "studio <?>";
@@ -16,15 +16,14 @@ export default {
     .setDescription(description)
     .addStringOption((option) => option.setName("query").setDescription("The query to search for").setRequired(true)),
 
-  run: async ({ interaction, client }): Promise<void> => {
-    const { query: query } = getOptions<{ query: string }>(interaction.options, ["query"]);
-
+  run: async ({ interaction }, hookData): Promise<void> => {
+    const studioName = hookData?.name ?? interaction.options.getString("query");
     const {
       data: { Studio: data },
       headers,
-    } = await graphQLRequest("Studio", { query });
+    } = await graphQLRequest("Studio", { query: studioName });
 
-    if (!data || !data.media?.nodes) throw new YuukoError("Couldn't find any data.", { query });
+    if (!data || !data.media?.nodes) throw new YuukoError("Couldn't find any data.", { studioName });
 
     let animes: string[] | string = [];
     for (const anime of data.media.nodes) animes = animes.concat(`[${SeriesTitle(anime?.title || undefined)}]` + `(https://anilist.co/anime/${anime!.id})`);
@@ -43,4 +42,4 @@ export default {
     interaction.reply({ embeds: [studioEmbed] });
 
   },
-} satisfies Command;
+} satisfies Command<{ name: string }>;

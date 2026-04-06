@@ -1,8 +1,7 @@
-import { footer, graphQLRequest, getSubcommand, YuukoError } from "#utils/index";
+import { footer, graphQLRequest, YuukoError, getAnilistUser } from "#utils/index";
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { mwRequireALToken } from "#middleware/alToken";
 import type { Command } from "#structures/index";
-import { db } from "#database/db";
 
 const name = "makeactivity";
 const usage = "makeactivity <list | status>";
@@ -53,12 +52,13 @@ export default {
     if (!interaction.isAutocomplete()) return;
     try {
       // Get the users media lists
-      const alUser = await db.query.anilistUser.findFirst({ where: (user, { eq }) => eq(user.anilistId, Number(interaction.user.id)) });
-      if (!alUser) return interaction.respond([{ name: "No Anilist account linked", value: "No Anilist account linked" }]);
+      const alUser = await getAnilistUser(interaction.user.id);
+      if (!alUser) return interaction.respond([{ name: "No Anilist account linked", value: "NaN" }]);
 
       const vars = { userId: +alUser.anilistId };
       const response = (await graphQLRequest("ListQuery", vars)).data;
-      if (!response.User || !response.User.mediaListOptions) return interaction.respond([{ name: "No Anilist account linked", value: "No Anilist account linked" }]);
+      if (!response.User || !response.User.mediaListOptions) return interaction.respond([{ name: "No lists found for linked account", value: "NaN" }]);
+
       let animeLists: {
         name: string;
         value: string;
@@ -67,6 +67,7 @@ export default {
         name: string;
         value: string;
       }[] = [];
+
       if (response.User.mediaListOptions) {
         if (response.User.mediaListOptions.animeList?.customLists)
           animeLists = response?.User.mediaListOptions.animeList.customLists.map((list) => {
@@ -84,14 +85,14 @@ export default {
     }
   },
 
-  run: async ({ interaction, client }): Promise<void> => {
+  run: async ({ interaction }, hookData): Promise<void> => {
     if (!interaction.isChatInputCommand()) return;
-    // const type = (interaction.options as CommandInteractionOptionResolver).getSubcommand() <- from auth command
-    const type = getSubcommand<["list", "status"]>(interaction.options);
-    if (!type || (type != "status" && type != "list")) throw new YuukoError(`Please use either the status or list subcommand. (Yours was "${type}")`);
+    const type = hookData?.subcommandType ?? interaction.options.getSubcommand() as "list" | "status";
 
     if (type === "status") {
-      const vars = { text: getEmojis(interaction.options.getString("text", true)), asHtml: true };
+      const statusData = hookData?.subcommandType === "status" ? hookData : undefined;
+      const statusText = statusData?.text ?? interaction.options.getString("text", true);
+      const vars = { text: getEmojis(statusText), asHtml: true };
       if (!interaction.ALtoken) throw new YuukoError("No Anilist token found.", null, true);
 
       const {
@@ -112,10 +113,18 @@ export default {
     }
 
     if (type === "list") {
-      const listOptions = ["mediaid", "status", "hide", "private", "lists", "score", "progress"].filter((x) => interaction.options.get(x));
+      const listData = hookData?.subcommandType === "list" ? hookData : undefined;
+      const optionKeys = ["mediaid", "status", "hide", "private", "lists", "score", "progress"] as const;
 
       const vars: { [key: string]: any } = {};
-      for (const option of listOptions) vars[option] = interaction.options.get(option)?.value;
+      for (const key of optionKeys) {
+        if (listData && key in listData) {
+          vars[key] = listData[key as keyof typeof listData];
+        } else {
+          const opt = interaction.options.get(key);
+          if (opt) vars[key] = opt.value;
+        }
+      }
 
       if (!interaction.ALtoken) throw new YuukoError("No Anilist token found.", null, true);
 
@@ -134,7 +143,21 @@ export default {
 
     }
   },
-} satisfies Command;
+} satisfies Command<{
+  subcommandType: "status",
+  text: string
+} |
+{
+  subcommandType: "list",
+  mediaid: number,
+  status: "CURRENT" | "PLANNING" | "COMPLETED" | "DROPPED" | "PAUSED" | "REPEATING",
+  hide?: boolean,
+  private?: boolean,
+  lists?: string,
+  score?: number,
+  progress?: number,
+}
+>;
 
 function getEmojis(messageString: string) {
   const matchedResults = Array.from(messageString.matchAll(/<\w*:.*?:(\d+)>/gm), (x) => x[1]);

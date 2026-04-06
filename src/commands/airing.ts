@@ -1,4 +1,4 @@
-import { buildPagination, footer, graphQLRequest, SeriesTitle, getOptions, YuukoError } from "#utils/index";
+import { buildPagination, footer, graphQLRequest, SeriesTitle, YuukoError } from "#utils/index";
 import { EmbedBuilder, SlashCommandBuilder, TimestampStyles, time } from "discord.js";
 import ms from "ms";
 import { MediaType, type AiringQueryVariables } from "#graphQL/types";
@@ -19,8 +19,8 @@ export default {
     .addStringOption((option) => option.setName("user").setDescription("The users whose list you want to use for airing anime."))
     .addStringOption((option) => option.setName("in").setDescription('Airing *in* (e.g. "1 week")')),
 
-  run: async ({ interaction, client }): Promise<void> => {
-    interaction.deferReply();
+  run: async ({ interaction }, hookData): Promise<void> => {
+    await interaction.deferReply();
 
     const vars: AiringQueryVariables = {
       dateStart: 0,
@@ -30,8 +30,8 @@ export default {
     // ^ Check if the user wants to search for a specific day
     let airingIn = 0;
 
-    const { user: username } = getOptions<{ user: string | undefined }>(interaction.options, ["user"]);
-    const { in: period } = getOptions<{ in: string | undefined }>(interaction.options, ["in"]);
+    const username = hookData?.username ?? interaction.options.getString("user");
+    const period = hookData?.period ?? interaction.options.getString("in");
     const mediaIDs = [];
 
     if (period) {
@@ -110,4 +110,4 @@ export default {
 
     await buildPagination(interaction, pageList);
   },
-} satisfies Command;
+} satisfies Command<{ username?: string, period?: string }>;

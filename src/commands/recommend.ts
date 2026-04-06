@@ -1,6 +1,6 @@
 import MangaCmd from "#commands/manga";
 import AnimeCmd from "#commands/anime";
-import { graphQLRequest, SeriesTitle, getOptions, YuukoError } from "#utils/index";
+import { graphQLRequest, SeriesTitle, YuukoError } from "#utils/index";
 import { SlashCommandBuilder } from "discord.js";
 import type { Command } from "#structures/index";
 import type { MediaType } from "#graphQL/types";
@@ -21,12 +21,12 @@ export default {
     .addStringOption((option) => option.setName("anilist_user").setDescription("The AniList user the recommendation targets").setRequired(true))
     .addStringOption((option) => option.setName("genres").setDescription('A comma separated list of genres (e.g. "romance, drama")').setRequired(true)),
 
-  run: async ({ interaction, client }): Promise<void> => {
-    interaction.deferReply();
+  run: async ({ interaction, client }, hookData): Promise<void> => {
+    await interaction.deferReply();
 
-    const { type } = getOptions<{ type: MediaType }>(interaction.options, ["type"]);
-    const { anilist_user: anilistUser } = getOptions<{ anilist_user: string }>(interaction.options, ["anilist_user"]);
-    const genres = getOptions<{ genres: string }>(interaction.options, ["genres"]).genres.replaceAll(", ", ",");
+    const type = hookData?.type ?? interaction.options.getString("type", true) as MediaType;
+    const anilistUser = hookData?.anilistUser ?? interaction.options.getString("anilist_user", true);
+    const genres = (hookData?.genres ?? interaction.options.getString("genres", true)).replaceAll(", ", ",");
 
     const vars = { type, userName: anilistUser };
 
@@ -65,11 +65,11 @@ export default {
 
     switch (type) {
       case "ANIME":
-        AnimeCmd.run({ interaction, client, hook: true, hookdata: { title: SeriesTitle(recommendedSeries.title || undefined) } });
+        AnimeCmd.run({ interaction, client }, { title: SeriesTitle(recommendedSeries.title) });
         break;
       case "MANGA":
-        MangaCmd.run({ interaction, client, hook: true, hookdata: { title: SeriesTitle(recommendedSeries.title || undefined) } });
+        MangaCmd.run({ interaction, client }, { title: SeriesTitle(recommendedSeries.title) });
         break;
     }
   },
-} satisfies Command;
+} satisfies Command<{ type: MediaType, anilistUser: string, genres: string }>;

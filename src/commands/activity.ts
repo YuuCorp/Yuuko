@@ -1,4 +1,4 @@
-import { graphQLRequest, SeriesTitle, getOptions, buildPagination, YuukoError } from "#utils/index";
+import { graphQLRequest, SeriesTitle, buildPagination, YuukoError } from "#utils/index";
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { mwGetUserEntry } from "#middleware/userEntry";
 import type { Command } from "#structures/index";
@@ -19,15 +19,15 @@ export default {
     .setDescription(description)
     .addStringOption((option) => option.setName("user").setDescription("The user to search for").setRequired(false)),
 
-  run: async ({ interaction, client }): Promise<void> => {
-    const { user: username } = getOptions<{ user: string | undefined }>(interaction.options, ["user"]);
+  run: async ({ interaction }, hookData): Promise<void> => {
+    const username = hookData?.username ?? interaction.options.getString("user");
 
     const vars: UserQueryVariables = {
       username,
       userid: interaction.alID,
     };
 
-    if (!interaction.options.get("user") && !vars.userid) throw new YuukoError("You need to provide a user to search for or link your AniList account. (check /auth help for more info)");
+    if (!username && !vars.userid) throw new YuukoError("You need to provide a user to search for or link your AniList account. (check /auth help for more info)");
 
     if (vars.username) {
       const uData = (
@@ -92,7 +92,7 @@ export default {
     }
     return void await buildPagination(interaction, pageList);
   },
-} satisfies Command;
+} satisfies Command<{ username: string }>;
 
 function generateReplayEmbeds(data: ActivityQuery['Activity'], pageList: any[]) {
   if (!data || data.__typename !== "ListActivity" && data.__typename !== "TextActivity" || !data.replies) return;

@@ -1,9 +1,9 @@
-import { graphQLRequest, getOptions, handleData, normalize, type CacheEntry, YuukoError } from "#utils/index";
+import { graphQLRequest, handleData, normalize, type CacheEntry, YuukoError } from "#utils/index";
 import { SlashCommandBuilder } from "discord.js";
 import { redis } from "#caching/redis";
 import type { AnimeQuery, AnimeQueryVariables } from "#graphQL/types";
 import { mwGetUserEntry } from "#middleware/userEntry";
-import type { CommandWithHook } from "#structures/index";
+import type { Command } from "#structures/index";
 
 const name = "anime";
 const usage = "anime <title>";
@@ -18,40 +18,30 @@ export default {
   withBuilder: new SlashCommandBuilder()
     .setName(name)
     .setDescription(description)
-    .addStringOption((option) => option.setName("query").setDescription("The query to search for").setRequired(true)),
+    .addStringOption((option) => option.setName("anime").setDescription("The anime to search for").setRequired(true)),
 
-  run: async ({ interaction, client, hook = false, hookdata = null }): Promise<void> => {
-    const { query } = getOptions<{ query: string }>(interaction.options, ["query"]);
-    let normalizedQuery = "";
-    if (query) normalizedQuery = normalize(query);
-
+  run: async ({ interaction, client }, hookData): Promise<void> => {
+    const vars: AnimeQueryVariables = {};
     let animeIdFound = false;
 
-    const vars: AnimeQueryVariables = {};
-    if (!hook) {
-      if (query.length < 3) throw new YuukoError("Query must be at least 3 characters long.");
-      vars.query = query;
-    } else if (hook && hookdata) {
-      if (hookdata.id) {
-        client.log(`Hookdata Anime ID: ${hookdata.id}`, "debug");
-        vars.aID = hookdata.id;
-      } else if (hookdata.title) {
-        vars.query = hookdata.title;
-        normalizedQuery = normalize(hookdata.title);
-      }
-    } else throw new YuukoError("AnimeCmd was hooked, yet there was no title or ID provided in hookdata.");
+    if (!hookData?.id) {
+      const query = hookData?.title ?? interaction.options.getString("anime");
+      if (!query || query.length < 3) throw new YuukoError("Query must be at least 3 characters long.");
+      const normalizedQuery = normalize(query);
+      vars.query = normalizedQuery;
 
-    client.log(`Anime ID: ${vars.aID}`, "debug");
-
-    if (!vars.aID) {
       const cachedId = await redis.get(`_animeId-${normalizedQuery}`);
       if (cachedId) {
         animeIdFound = true;
         vars.aID = parseInt(cachedId);
-        client.log(`Found cached ID for ${normalizedQuery} : ${vars.aID}`, "debug");
-        client.log(`Querying for ${normalizedQuery} with ID ${vars.aID}`, "debug");
+        client.log(`Found cached data for ${normalizedQuery}, ID ${vars.aID}`, "debug");
       }
+
+    } else {
+      vars.aID = hookData.id;
     }
+
+    client.log(`Anime ID: ${vars.aID}`, "debug");
 
     client.log(`Querying Redis with hook animeId ${vars.aID}`, "debug");
     const cacheData = (await redis.json.get(`_anime-${vars.aID}`)) as AnimeQuery["Media"] | null;
@@ -64,9 +54,12 @@ export default {
 
         if (mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
       }
+
       client.log("Found cache data, returning data...", "debug");
+
       return void handleData({ media: cacheData }, interaction, "ANIME");
     }
+
     client.log("No cache found, fetching from CringeQL", "debug");
     const {
       data: { Media: data },
@@ -77,7 +70,7 @@ export default {
       throw new YuukoError("No anime found.", vars);
     }
 
-    if (!animeIdFound) redis.set(`_animeId-${normalizedQuery}`, data.id);
+    if (!animeIdFound) redis.set(`_animeId-${vars.query}`, data.id);
     const { mediaListEntry, ...redisData } = data;
     redis.json.set(`_anime-${redisData.id}`, "$", redisData);
     redis.expireAt(`_anime-${redisData.id}`, new Date(Date.now() + 604800000));
@@ -89,6 +82,6 @@ export default {
       client.log(`Expiring anime-${redisData.id} at ${redisData.nextAiringEpisode.airingAt}`, "debug");
       redis.expireAt(`_anime-${data.id}`, redisData.nextAiringEpisode.airingAt);
     }
-    return void await handleData({ media: data, headers: headers }, interaction, "ANIME", hookdata);
+    return void await handleData({ media: data, headers: headers }, interaction, "ANIME", hookData);
   },
-} satisfies CommandWithHook;
+} satisfies Command<{ id?: number, title?: string }>;

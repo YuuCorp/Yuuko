@@ -35,7 +35,7 @@ export default {
     .addAttachmentOption((option) => option.setName("image").setDescription("Attach the image of the anime.").setRequired(true)),
 
   run: async ({ interaction, client }): Promise<void> => {
-    interaction.deferReply();
+    await interaction.deferReply();
     const image = interaction.options.getAttachment("image");
 
     if (!image) throw new YuukoError("No image attached.");
@@ -61,6 +61,6 @@ export default {
         { name: "Video", value: `[Link](${response.video})`, inline: true },
       ],
     };
-    AnimeCmd.run({ interaction, client, hook: true, hookdata });
+    AnimeCmd.run({ interaction, client, }, hookdata);
   },
 } satisfies Command;

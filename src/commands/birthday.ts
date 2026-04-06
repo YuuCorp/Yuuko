@@ -1,5 +1,5 @@
-import { getOptions, buildPagination, footer, getSubcommand } from "#utils/index";
-import { EmbedBuilder, MessageFlags, SlashCommandBuilder } from "discord.js";
+import { buildPagination, footer } from "#utils/index";
+import { EmbedBuilder, MessageFlags, SlashCommandBuilder, User } from "discord.js";
 import { db, tables } from "#database/db";
 import { eq, sql } from "drizzle-orm";
 import type { Command } from "#structures/index";
@@ -31,19 +31,21 @@ export default {
         .addStringOption((option) => option.setName("date").setDescription("The date of your birthday. Format: YYYY-MM-DD").setMinLength(10).setMaxLength(10).setRequired(true)),
     ),
 
-  run: async ({ interaction, client }): Promise<void> => {
+  run: async ({ interaction }, hookData): Promise<void> => {
     if (!interaction.guild) return void interaction.reply({ content: "This command can only be used in a server.", flags: MessageFlags.Ephemeral });
-    const subcommand = getSubcommand<["user", "list", "set", "wipe"]>(interaction.options)
+    const subcommandType = hookData?.subcommandType ?? interaction.options.getSubcommand() as "user" | "list" | "set" | "wipe";
 
-    if (subcommand === "set") {
-      const { date } = getOptions<{ date: string }>(interaction.options, ["date"]);
+    if (subcommandType === "set") {
+      const setData = hookData?.subcommandType === "set" ? hookData : undefined;
+      const date = setData?.date ?? interaction.options.getString("date", true);
+
       const birthday = new Date(date);
       if (birthday.toString() === "Invalid Date") return void interaction.reply({ content: "Invalid date format. Please use YYYY-MM-DD.", flags: MessageFlags.Ephemeral });
+
       const userBirthday = await db.query.userBirthday.findFirst({ where: (birthday, { eq }) => eq(birthday.userId, interaction.user.id) });
       if (userBirthday) {
         await db.update(tables.userBirthday).set({ birthday, updatedAt: sql`CURRENT_TIMESTAMP` }).where(eq(tables.userBirthday.userId, interaction.user.id));
       } else {
-        const data = { userId: interaction.user.id, birthday, guildId: interaction.guild.id }
         const bOpt = {
           birthday,
           userId: interaction.user.id,
@@ -53,12 +55,12 @@ export default {
         }
         await db.insert(tables.userBirthday).values(bOpt);
       }
-      return void interaction.reply({ content: `Your birthday has been set to ${getReadableDate(birthday)}.`, flags: MessageFlags.Ephemeral });
-    }
 
-    if (subcommand === "user") {
-      const user = interaction.options.getUser("user");
-      if (!user) return void interaction.reply({ content: "Please provide a user.", flags: MessageFlags.Ephemeral });
+      return void interaction.reply({ content: `Your birthday has been set to ${getReadableDate(birthday)}.`, flags: MessageFlags.Ephemeral });
+    } else if (subcommandType === "user") {
+      const userData = hookData?.subcommandType === "user" ? hookData : undefined;
+      const user = userData?.user ?? interaction.options.getUser("user", true);
+
       const birthday = (await db.select().from(tables.userBirthday).where(eq(tables.userBirthday.userId, user.id)).limit(1))[0]
       if (!birthday) return void interaction.reply({ content: `${user.tag} has not set their birthday.`, flags: MessageFlags.Ephemeral });
       const userBirthday = new Date(birthday.birthday);
@@ -80,9 +82,7 @@ export default {
         },
       );
       return void interaction.reply({ embeds: [embed] });
-    }
-
-    if (subcommand === "list") {
+    } else if (subcommandType === "list") {
       const birthdays = await db.query.userBirthday.findMany({ where: (birthday, { eq }) => eq(birthday.guildId, interaction.guild!.id) });
       if (birthdays.length === 0) return void interaction.reply({ content: "There are no birthdays registered for this server.", flags: MessageFlags.Ephemeral });
       const embeds = [];
@@ -118,9 +118,7 @@ export default {
         }
       }
       await buildPagination(interaction, embeds);
-    }
-
-    if (subcommand === "wipe") {
+    } else if (subcommandType === "wipe") {
       const birthday = (await db.query.userBirthday.findFirst({ where: (birthday, { eq }) => eq(birthday.userId, interaction.user.id) }));
       if (!birthday) return void interaction.reply({ content: "You have not set your birthday.", flags: MessageFlags.Ephemeral });
       await db.delete(tables.userBirthday).where(eq(tables.userBirthday.userId, interaction.user.id));
@@ -136,38 +134,38 @@ export default {
         flags: MessageFlags.Ephemeral
       })
     }
-
-    function daysLeftUntilBirthday(date: Date) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const nextBirthday = new Date(today.getFullYear(), date.getMonth(), date.getDate());
-      if (today > nextBirthday) nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
-      const daysLeft = Math.ceil((nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-      return daysLeft;
-    }
-
-    function getReadableDate(date: Date) {
-      const day = date.getDate();
-      const month = date.toLocaleString("default", { month: "long" });
-      const year = date.getFullYear();
-      return `${day}${getDaySuffix(day)} of ${month}, ${year}`;
-    }
-
-    function getDaySuffix(day: number) {
-      if (day > 3 && day < 21) return "th";
-      const lastDigit = day % 10;
-      if (lastDigit === 1) return "st";
-      if (lastDigit === 2) return "nd";
-      if (lastDigit === 3) return "rd";
-      return "th";
-    }
-
-    function calculateAge(date: Date) {
-      const today = new Date();
-      const m = today.getMonth() - date.getMonth();
-      let age = today.getFullYear() - date.getFullYear();
-      if (m < 0 || (m === 0 && today.getDate() < date.getDate())) age--;
-      return age;
-    }
   },
-} satisfies Command;
+} satisfies Command<{ subcommandType: "user", user: User } | { subcommandType: "set", date: string } | { subcommandType: "list" | "wipe" }>;
+
+function daysLeftUntilBirthday(date: Date) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const nextBirthday = new Date(today.getFullYear(), date.getMonth(), date.getDate());
+  if (today > nextBirthday) nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
+  const daysLeft = Math.ceil((nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  return daysLeft;
+}
+
+function getReadableDate(date: Date) {
+  const day = date.getDate();
+  const month = date.toLocaleString("default", { month: "long" });
+  const year = date.getFullYear();
+  return `${day}${getDaySuffix(day)} of ${month}, ${year}`;
+}
+
+function getDaySuffix(day: number) {
+  if (day > 3 && day < 21) return "th";
+  const lastDigit = day % 10;
+  if (lastDigit === 1) return "st";
+  if (lastDigit === 2) return "nd";
+  if (lastDigit === 3) return "rd";
+  return "th";
+}
+
+function calculateAge(date: Date) {
+  const today = new Date();
+  const m = today.getMonth() - date.getMonth();
+  let age = today.getFullYear() - date.getFullYear();
+  if (m < 0 || (m === 0 && today.getDate() < date.getDate())) age--;
+  return age;
+}
