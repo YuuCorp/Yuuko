@@ -1,4 +1,4 @@
-import { getOptions, buildPagination, footer, getSubcommand } from "#utils/index";
+import { buildPagination, footer } from "#utils/index";
 import { EmbedBuilder, MessageFlags, SlashCommandBuilder, User } from "discord.js";
 import { db, tables } from "#database/db";
 import { eq, sql } from "drizzle-orm";

@@ -1,6 +1,5 @@
 import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, Collection, EmbedBuilder, ModalBuilder, SlashCommandBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
 import type { Command } from "#structures/index";
-import getOptions from "#utils/getOptions";
 import type { MediaType } from "#graphQL/types";
 import { YuukoError } from "#utils/types";
 import { mwRequireALToken } from "#middleware/alToken";
@@ -34,10 +33,8 @@ export default {
                 )
         ),
 
-    run: async ({ interaction, client }): Promise<void> => {
-        const { type } = getOptions<{ type: MediaType }>(interaction.options, ["type"]);
-
-        if (type != "ANIME" && type != "MANGA") throw new YuukoError(`Please specify either manga, or anime as your content type. (Yours was "${type}")`);
+    run: async ({ interaction, client }, hookData): Promise<void> => {
+        const type = hookData?.type ?? interaction.options.getString("type", true) as MediaType;
 
         const msg = await interaction.deferReply({ withResponse: true });
 
@@ -222,7 +219,7 @@ export default {
 
 
     },
-} satisfies Command;
+} satisfies Command<{ type: MediaType }>;
 
 function pixelateImage<T extends Library<ModuleSymbols["modules"]>>(lib: T, originalImg: Pointer | null, pixelationLevel: number): [Pointer, number] {
     if (!originalImg) throw new YuukoError("Original image pointerr is null when trying to pixelate it");

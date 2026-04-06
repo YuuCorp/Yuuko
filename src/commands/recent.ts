@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, AttachmentBuilder } from "discord.js";
 import { mwGetUserID } from "#middleware/userEntry";
 import type { Command } from "#structures/index";
-import { CommandCategories, graphQLRequest, SeriesTitle, getOptions, YuukoError } from "#utils/index";
+import { CommandCategories, graphQLRequest, SeriesTitle, YuukoError } from "#utils/index";
 import type { MediaList, MediaType, RecentChartQueryVariables } from "#graphQL/types";
 import { ptr, toBuffer } from "bun:ffi";
 
@@ -21,10 +21,9 @@ export default {
     .addStringOption((option) => option.setName("type").setDescription("The type of media to search for").addChoices({ name: "Anime", value: "ANIME" }, { name: "Manga", value: "MANGA" }).setRequired(true))
     .addStringOption((option) => option.setName("user").setDescription("The user to search for").setRequired(false)),
 
-  run: async ({ interaction, client }): Promise<void> => {
-
-    const { user: userName } = getOptions<{ user: string }>(interaction.options, ["user"]);
-    const { type } = getOptions<{ type: MediaType }>(interaction.options, ["type"]);
+  run: async ({ interaction, client }, hookData): Promise<void> => {
+    const userName = hookData?.user ?? interaction.options.getString("user");
+    const type = hookData?.type ?? interaction.options.getString("type", true) as MediaType;
 
     const vars: RecentChartQueryVariables = {
       perPage: 9,
@@ -75,7 +74,7 @@ export default {
 
     lib.symbols.FreeImageBuffer(imgPtr, imgSize);
   }
-} satisfies Command;
+} satisfies Command<{ type: MediaType, user?: string }>;
 
 function parseStatus(data: Pick<MediaList, "progress" | "status">, mediaType: MediaType) {
   if (!data.status) return "Unknown";

@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, EmbedBuilder, type ColorResolvable } from "discord.js";
 import { mwGetUserEntry } from "#middleware/userEntry";
 import type { Command } from "#structures/index";
-import { graphQLRequest, footer, getOptions, YuukoError } from "#utils/index";
+import { graphQLRequest, footer, YuukoError } from "#utils/index";
 import type { UserQueryVariables } from "#graphQL/types";
 
 const name = "user";
@@ -20,7 +20,7 @@ export default {
     .addStringOption((option) => option.setName("username").setRequired(false).setDescription("The user to search for")),
   // .setRequired(true)),
 
-  run: async ({ interaction, client }, hookData): Promise<void> => {
+  run: async ({ interaction }, hookData): Promise<void> => {
     const anilistUser = hookData?.username ?? interaction.options.getString("username");
 
     let vars: UserQueryVariables = {
