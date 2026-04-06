@@ -16,7 +16,6 @@ export const workerEvents = sqliteTable("workerevents", {
     updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
         .notNull()
         .default(sql`current_timestamp`)
-        .$onUpdateFn(() => sql`current_timestamp`),
 });
 
 export const reminderUsers = sqliteTable("reminderusers", {

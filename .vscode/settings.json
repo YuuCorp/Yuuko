@@ -1,6 +1,4 @@
 {
-    "rust-analyzer.linkedProjects": [
-      "src/modules/Cargo.toml"
-    ]
-  }
-  
+    "rust-analyzer.linkedProjects": ["src/modules/Cargo.toml"],
+    "discord.enabled": true
+}

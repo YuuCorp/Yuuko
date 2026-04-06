@@ -3,15 +3,21 @@ declare var self: Worker;
 
 import { db, tables, type InferTable } from '#database/index';
 import { RSA } from "#utils/rsaEncryption";
-import { eq, sql } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
-export type WorkerResponseUnion = ReminderMessage | SyncUsers;
+export type WorkerResponseUnion = ReminderMessage | SyncUsers | LogMessage;
 
 export type ReminderMessage = {
     type: 'REMINDER'
     discordId: string;
     animeId: string;
     episode: number;
+};
+
+export type LogMessage = {
+    type: 'LOG';
+    text: string;
+    category: string;
 };
 
 export type SyncUsers = {
@@ -29,19 +35,22 @@ async function checkUpcomingEpisodes() {
 
 async function updateSyncedUsers() {
     try {
+
         const syncEvent = (await db.select().from(tables.workerEvents).where(eq(tables.workerEvents.type, "SYNC")).limit(1))[0];
         if (!syncEvent) return;
 
         // so they have same TZ
-        const updateAt = new Date(syncEvent.updatedAt + "Z");
-        updateAt.setMilliseconds(updateAt.getMilliseconds() + syncEvent.period);
-
+        const updateAt = new Date(syncEvent.updatedAt.getTime() + syncEvent.period);
         const currentDate = new Date();
+
         if (updateAt > currentDate) return;
 
-        await db.update(tables.workerEvents)
-            .set({ updatedAt: sql`current_timestamp` })
-            .where(eq(tables.workerEvents.type, "SYNC"));
+        self.postMessage({
+            type: 'LOG',
+            text: `Preparing to sync all users...`,
+            category: 'verbose',
+        } satisfies LogMessage);
+
 
         const anilistUsers = await db.select().from(tables.anilistUser);
         const rsa = new RSA();
@@ -69,9 +78,15 @@ async function updateSyncedUsers() {
     }
 }
 
-self.onmessage = (e) => {
-    setInterval(async () => {
-        // await checkUpcomingEpisodes();
+await RSA.loadKeys();
+let isSyncing = false;
+
+setInterval(async () => {
+    if (isSyncing) return;
+    isSyncing = true;
+    try {
         await updateSyncedUsers();
-    }, CHECK_INTERVAL);
-};
+    } finally {
+        isSyncing = false;
+    }
+}, CHECK_INTERVAL);

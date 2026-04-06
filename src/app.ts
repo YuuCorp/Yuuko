@@ -8,6 +8,7 @@ import path from "path";
 import fs from "fs";
 import { syncAnilistUsers, type WorkerResponseUnion } from "#workers/index";
 import { env } from "#env";
+import { eq, sql } from "drizzle-orm";
 
 dotenvFlow.config({ silent: true });
 
@@ -55,22 +56,32 @@ async function initializeWorkerDB() {
       period: 24 * 60 * 60 * 1000, // 1 day in milliseconds
     });
   };
+
+  // always reset so sync fires immediately on boot
+  await db.update(tables.workerEvents)
+    .set({ updatedAt: new Date(0) })
+    .where(eq(tables.workerEvents.type, "SYNC"));
 }
 
 await start(env().TOKEN);
 await initializeWorkerDB();
-
-// tell the worker to start a check loop
-workerManager.postMessage(null);
 
 workerManager.onmessage = async (e) => {
   if (!e.data.type) return;
   const data = e.data as WorkerResponseUnion;
 
   switch (data.type) {
+    case 'LOG': {
+      client.log(data.text, data.category);
+      break;
+    }
     case "SYNC": {
-      console.log("syncing users...");
       await syncAnilistUsers(data);
+
+      await db.update(tables.workerEvents)
+        .set({ updatedAt: sql`current_timestamp` })
+        .where(eq(tables.workerEvents.type, "SYNC"));
+
       break;
     }
   }
