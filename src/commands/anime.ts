@@ -34,7 +34,7 @@ export default {
       if (cachedId) {
         animeIdFound = true;
         vars.aID = parseInt(cachedId);
-        client.log(`Querying for ${normalizedQuery} with ID ${vars.aID}`, "debug");
+        client.log(`Found cached data for ${normalizedQuery}, ID ${vars.aID}`, "debug");
       }
 
     } else {

@@ -61,7 +61,7 @@ export type CommonCommandWithHook = Omit<Command, "run"> & {
 
 export type CommandType = (typeof CommandCategories)[keyof typeof CommandCategories];
 
-export interface Command<hookData = null> {
+export interface Command<hookData = undefined> {
   name: string;
   description: string;
   usage?: string;

@@ -2,8 +2,8 @@ import { SlashCommandBuilder } from "discord.js";
 import { redis } from "#caching/redis";
 import type { MangaQuery } from "#graphQL/types";
 import { mwGetUserEntry } from "#middleware/userEntry";
-import type { CommandWithHook } from "#structures/index";
-import { graphQLRequest, getOptions, handleData, normalize, type CacheEntry, YuukoError } from "#utils/index";
+import type { Command } from "#structures/index";
+import { graphQLRequest, handleData, normalize, type CacheEntry, YuukoError } from "#utils/index";
 
 const name = "manga";
 const usage = "manga <title>";
@@ -18,39 +18,31 @@ export default {
   withBuilder: new SlashCommandBuilder()
     .setName(name)
     .setDescription(description)
-    .addStringOption((option) => option.setName("query").setDescription("The query to search for").setRequired(true)),
+    .addStringOption((option) => option.setName("manga").setDescription("The manga to search for").setRequired(true)),
 
-  run: async ({ interaction, client, hook = false, hookdata = null }): Promise<void> => {
-
-    const { query: manga } = getOptions<{ query: string }>(interaction.options, ["query"]);
-    let normalizedQuery = "";
-    if (manga) normalizedQuery = normalize(manga);
+  run: async ({ interaction, client }, hookData): Promise<void> => {
 
     const vars: Partial<{
       query: string;
       mID: number;
     }> = {};
-
     let mangaIdFound = false;
 
-    if (!hook) {
-      if (manga.length < 3) throw new YuukoError("Please enter a search query of at least 3 characters.");
-      vars.query = manga;
-    } else if (hook && hookdata) {
-      if (hookdata.title) {
-        vars.query = hookdata.title;
-        normalizedQuery = normalize(hookdata.title);
-      }
-    } else throw new YuukoError("MangaCmd was hooked, yet there was no title or ID provided in hookdata.");
+    if (!hookData?.id) {
+      const query = hookData?.title ?? interaction.options.getString("manga");
+      if (!query || query.length < 3) throw new YuukoError("Query must be at least 3 characters long.");
+      const normalizedQuery = normalize(query);
+      vars.query = normalizedQuery;
 
-    if (!vars.mID) {
-      const mangaId = await redis.get(`_mangaId-${normalizedQuery}`);
-      if (mangaId) {
+      const cachedId = await redis.get(`_mangaId-${normalizedQuery}`);
+      if (cachedId) {
         mangaIdFound = true;
-        vars.mID = parseInt(mangaId);
-        client.log(`[MangaCmd] Found cached ID for ${normalizedQuery} : ${vars.mID}`, "debug");
-        client.log(`[MangaCmd] Querying for ${normalizedQuery} with ID ${vars.mID}`, "debug");
+        vars.mID = parseInt(cachedId);
+        client.log(`Found cached data for ${normalizedQuery}, ID ${vars.mID}`, "debug");
       }
+
+    } else {
+      vars.mID = hookData.id;
     }
 
     const cacheData = await redis.json.get(`_manga-${vars.mID}`) as MangaQuery["Media"] | null;
@@ -77,7 +69,7 @@ export default {
       throw new YuukoError("Couldn't find any data.", vars);
     }
 
-    if (!mangaIdFound) redis.set(`_mangaId-${normalizedQuery}`, data.id);
+    if (!mangaIdFound) redis.set(`_mangaId-${vars.query}`, data.id);
     const { mediaListEntry, ...redisData } = data;
     redis.json.set(`_manga-${data.id}`, "$", redisData);
     redis.expireAt(`_manga-${redisData.id}`, new Date(Date.now() + 604800000))
@@ -85,6 +77,6 @@ export default {
       if (!synonym) continue;
       redis.set(`_mangaId-${normalize(synonym)}`, data.id.toString());
     }
-    return void handleData({ media: data, headers: headers }, interaction, "MANGA", hookdata);
+    return void handleData({ media: data, headers: headers }, interaction, "MANGA", hookData);
   },
-} satisfies CommandWithHook;
+} satisfies Command<{ id?: number, title?: string }>;

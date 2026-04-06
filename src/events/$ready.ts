@@ -3,7 +3,7 @@ import { YuukoEvent } from "#structures/index";
 import { registerCommands, registerComponents, updateBotStats } from "#utils/index";
 
 const ready = new YuukoEvent({
-  event: "ready",
+  event: "clientReady",
   isOnce: true,
   run: async (client) => {
     if (!client.user) return;

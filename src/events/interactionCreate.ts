@@ -23,7 +23,7 @@ const interactionCreate = new YuukoEvent({
 
         if (args.isCommand() && args.isChatInputCommand()) {
           await command.run({ interaction: args, client });
-          client.log(`Ran command in: ${Date.now() - interaction.createdTimestamp}ms`, "Debug");
+          client.log(`Ran command ${command.name} in: ${Date.now() - interaction.createdTimestamp}ms`, "Debug");
         }
 
         // Check for autocomplete
