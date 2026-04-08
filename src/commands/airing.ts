@@ -37,7 +37,7 @@ export default {
     if (period) {
       // @ts-ignore can't think of any other way to get around this
       airingIn = ms(period);
-      if (!airingIn) throw new YuukoError("Invalid time format. See `/help` for more information.", { period });
+      if (!airingIn) throw new YuukoError("Invalid time format. See `/help` for more information.", { vars: { period } });
     }
 
     // ^ Get current day and time in UTC
@@ -75,7 +75,7 @@ export default {
       data: { Page: data },
       headers,
     } = await graphQLRequest("Airing", vars);
-    if (!data || !data.airingSchedules) throw new YuukoError("No airing anime found.", vars);
+    if (!data || !data.airingSchedules) throw new YuukoError("No airing anime found.", { vars });
     const { airingSchedules } = data;
 
     const chunkSize = 5;

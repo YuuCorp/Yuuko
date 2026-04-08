@@ -46,9 +46,10 @@ const interactionCreate = new YuukoEvent({
       }
 
     } catch (e: any) {
-      console.error(e);
+      client.logger.error(e);
 
       if (e instanceof YuukoError) {
+        client.logger.error("Yuuko Error", { type: "generic", message: e.message, vars: e.vars, cause: e.cause });
         if (!interaction.isCommand()) return;
 
         if (interaction.deferred || interaction.replied)
@@ -83,7 +84,7 @@ const interactionCreate = new YuukoEvent({
         console.log(cooldownExpires);
         if (!cooldownExpires) return interaction;
         if (cooldownExpires > Date.now()) {
-          throw new YuukoError(`User ${interaction.user.tag} is on cooldown for command ${command.name}`, null, false, `Cooldown expires on ${time(Math.ceil(cooldownExpires / 1000), "f")} (${time(Math.ceil(cooldownExpires / 1000), "R")})`);
+          throw new YuukoError(`User ${interaction.user.tag} is on cooldown for command ${command.name}`, { cause: `Cooldown expires on ${time(Math.ceil(cooldownExpires / 1000), "f")} (${time(Math.ceil(cooldownExpires / 1000), "R")})` });
         }
       }
       return interaction;

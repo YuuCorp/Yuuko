@@ -93,7 +93,7 @@ export default {
       const statusData = hookData?.subcommandType === "status" ? hookData : undefined;
       const statusText = statusData?.text ?? interaction.options.getString("text", true);
       const vars = { text: getEmojis(statusText), asHtml: true };
-      if (!interaction.ALtoken) throw new YuukoError("No Anilist token found.", null, true);
+      if (!interaction.ALtoken) throw new YuukoError("No Anilist token found.", { ephemeral: true });
 
       const {
         data: { SaveTextActivity: data },
@@ -126,13 +126,13 @@ export default {
         }
       }
 
-      if (!interaction.ALtoken) throw new YuukoError("No Anilist token found.", null, true);
+      if (!interaction.ALtoken) throw new YuukoError("No Anilist token found.", { ephemeral: true });
 
       const {
         data: { SaveMediaListEntry: data },
         headers,
       } = await graphQLRequest("SaveMediaList", vars, interaction.ALtoken);
-      if (!data) throw new YuukoError("Something went wrong while making the activity.", null, true);
+      if (!data) throw new YuukoError("Something went wrong while making the activity.", { ephemeral: true });
       const mediaListActivity = new EmbedBuilder()
         .setURL(`https://anilist.co/${data?.media?.type || ""}/${data?.mediaId || ""}`)
         .setTitle(`${data.user?.name || "Unknown"} added ${data?.media?.title?.userPreferred || "Unknown"} to ${data?.status || "Unknown"}!`)

@@ -39,7 +39,7 @@ export default {
       data: { MediaListCollection: data },
     } = await graphQLRequest("GetMediaCollection", vars);
 
-    if (!data || !data.lists || data.lists.length < 1) throw new YuukoError("Couldn't find any data from the user specified.", vars);
+    if (!data || !data.lists || data.lists.length < 1) throw new YuukoError("Couldn't find any data from the user specified.", { vars });
 
     // ^ We filter out the Planning list
     for (const MediaList of data.lists.filter((MediaList) => MediaList!.name != "Planning")) {
@@ -55,13 +55,13 @@ export default {
     } = await graphQLRequest("Recommendations", recommendationVars);
 
     if (!recommendationData || !recommendationData.media) {
-      throw new YuukoError("Couldn't find any data.", recommendationVars);
+      throw new YuukoError("Couldn't find any data.", { vars: recommendationVars });
     }
     // ^ Filter out the Planning list
     const recommendations = recommendationData.media.filter((Media) => Media!.title);
     const random = Math.floor(Math.random() * Math.floor(recommendations.length));
     const recommendedSeries = recommendations[random];
-    if (!recommendedSeries) throw new YuukoError("Couldn't find any data.", recommendationVars);
+    if (!recommendedSeries) throw new YuukoError("Couldn't find any data.", { vars: recommendationVars });
 
     switch (type) {
       case "ANIME":

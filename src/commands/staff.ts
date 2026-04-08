@@ -23,7 +23,7 @@ export default {
       data: { Staff: data },
       headers
     } = await graphQLRequest("Staff", { staffName });
-    if (!data) throw new YuukoError("Couldn't find any data.", { staffName });
+    if (!data) throw new YuukoError("Couldn't find any data.", { vars: { staffName } });
     const staffMedia = data.staffMedia;
     const characterMedia = data.characterMedia;
 

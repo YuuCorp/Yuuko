@@ -186,6 +186,7 @@ export async function handleData(
     });
 
     const userData = (await Promise.all(mediaPool)).filter((u) => u != null);
+    client.logger.debug("Media user cached data", { type: "generic", total: userData.length, mediaId: media.id })
 
     if (userData.every((e) => e == null)) return await buildPagination(interaction, pageList);
 
@@ -209,7 +210,11 @@ function fixScoring(user: CacheEntry | null, scoreType: Maybe<ScoreFormat> | und
     score = scoreValue.toString();
     if (scoreType === "POINT_10_DECIMAL" || scoreType === "POINT_10") score = `${score} / 10`;
     else if (scoreType === "POINT_100" || scoreType === "POINT_5") score = `${score} / ${scoreType.split("POINT_")[1]}`;
-    else if (scoreType === "POINT_3") score = score === "1" ? "☹️" : score === "2" ? "😐" : "🙂";
+    else if (scoreType === "POINT_3") {
+      if (scoreValue > 3) {
+        score = scoreValue >= 3.5 ? "☹️" : scoreValue >= 6 ? "😐" : "🙂";
+      } else score = score === "0" ? "?" : score === "1" ? "☹️" : score === "2" ? "😐" : "🙂";
+    }
   } else if (user && user.status) score = capitalize(user.status.toString());
   return score;
 }

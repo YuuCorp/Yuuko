@@ -63,7 +63,7 @@ export default {
     } = await graphQLRequest("Anime", vars, interaction.ALtoken);
 
     if (!data) {
-      throw new YuukoError("No anime found.", vars);
+      throw new YuukoError("No anime found.", { vars });
     }
 
     if (!animeIdFound) redis.set(`_animeId-${vars.query}`, data.id);

@@ -24,7 +24,7 @@ export default {
       headers,
     } = await graphQLRequest("Studio", { query: studioName });
 
-    if (!data || !data.media?.nodes) throw new YuukoError("Couldn't find any data.", { studioName });
+    if (!data || !data.media?.nodes) throw new YuukoError("Couldn't find any data.", { vars: { studioName } });
 
     let animes: string[] | string = [];
     for (const anime of data.media.nodes) animes = animes.concat(`[${SeriesTitle(anime?.title || undefined)}]` + `(https://anilist.co/anime/${anime!.id})`);

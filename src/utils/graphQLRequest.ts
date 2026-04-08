@@ -94,7 +94,7 @@ export async function graphQLRequest<QueryKey extends Query>(queryKey: QueryKey,
     if (!res.ok) {
       let errorMessage = "";
       if (resJson.errors) errorMessage = resJson.errors[0].message;
-      throw new YuukoError(`${res.status} ${errorMessage} ${res.statusText}`, vars);
+      throw new YuukoError(`${res.status} ${errorMessage} ${res.statusText}`, { vars });
     }
 
     const data = resJson as GraphQLResponse<QueryVariables[QueryKey][0]>
@@ -110,6 +110,6 @@ export async function graphQLRequest<QueryKey extends Query>(queryKey: QueryKey,
     return { data: data.data, headers: res.headers };
   } catch (e: any) {
     client.logger.error(e);
-    throw new YuukoError(e?.message || e, vars);
+    throw new YuukoError(e?.message || e, { vars });
   }
 }

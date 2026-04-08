@@ -55,17 +55,17 @@ export type YuukoLog = {
 }
 
 export class YuukoError extends Error {
-  vars?: any
+  vars?: Record<string, any>
   ephemeral?: boolean
   cause?: string
 
-  constructor(message: string, vars?: any, ephemeral: boolean = false, cause?: string) {
+  constructor(message: string, options?: { vars?: Record<string, any>, ephemeral?: boolean, cause?: string }) {
     super(message);
     this.name = 'YuukoError';
     this.message = message;
-    this.vars = vars;
-    this.ephemeral = ephemeral;
-    this.cause = cause;
+    this.vars = options?.vars;
+    this.ephemeral = options?.ephemeral;
+    this.cause = options?.cause;
 
     Object.setPrototypeOf(this, YuukoError.prototype);
   }

@@ -24,7 +24,7 @@ export default {
       headers,
     } = await graphQLRequest("Character", { charName });
 
-    if (!data) throw new YuukoError("Couldn't find this character.", { charName });
+    if (!data) throw new YuukoError("Couldn't find this character.", { vars: { charName } });
 
     const embeds = [];
     const description =

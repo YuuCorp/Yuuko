@@ -7,6 +7,7 @@ import { db } from "#database/db";
 import { normalize, graphQLRequest, type AlwaysExist, type CacheEntry, type GraphQLResponse, YuukoError, getSubcommandOption } from "#utils/index";
 import { eq } from "drizzle-orm";
 import { mediaStats, mediaStatUsers } from "#database/models";
+import { client } from "#src/app";
 
 const name = "synclists";
 const usage = "/synclists";
@@ -131,6 +132,7 @@ export async function handleSyncing(
   }
 
   const mediasArray = Array.from(bulkMedia);
+  client.logger.debug("Sync media stats", { type: "generic", total: mediasArray.length, anilistId: alID, mediaType: type });
   if (mediasArray.length === 0) return;
   // bulk insert media_id, do nothing if exists already
   await db
@@ -138,7 +140,9 @@ export async function handleSyncing(
     .values(mediasArray)
     .onConflictDoNothing();
 
+
   const userFromMedias = mediasArray.map((m) => ({ mediaId: m.mediaId, anilistId: alID }));
+  client.logger.debug("Sync media stats users", { type: "generic", total: userFromMedias.length, anilistId: alID, mediaType: type });
   // bulk insert user into given media(s)
   await db
     .insert(mediaStatUsers)

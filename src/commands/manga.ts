@@ -50,7 +50,7 @@ export default {
     if (cacheData) {
       if (interaction.alID) {
         const _mediaListEntry = await redis.json.get(`_user${interaction.alID}-MANGA`) as Record<number, CacheEntry>;
-        if (!vars.mID) throw new YuukoError("No mID found in cache data.", vars);
+        if (!vars.mID) throw new YuukoError("No mID found in cache data.", { vars });
         const mediaListEntry = _mediaListEntry ? _mediaListEntry[vars.mID] : null;
         if (mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
       }
@@ -66,7 +66,7 @@ export default {
     } = await graphQLRequest("Manga", vars, interaction.ALtoken);
 
     if (!data) {
-      throw new YuukoError("Couldn't find any data.", vars);
+      throw new YuukoError("Couldn't find any data.", { vars });
     }
 
     if (!mangaIdFound) redis.set(`_mangaId-${vars.query}`, data.id);
