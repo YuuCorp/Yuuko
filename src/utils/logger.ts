@@ -4,7 +4,7 @@ import type { Command, UsableInteraction } from "#structures/command";
 
 export type LogLevel = "error" | "warn" | "info" | "http" | "verbose" | "debug" | "silly";
 
-type LogMeta = GenericMeta | GraphQLMeta | CheckMeta;
+type LogMeta = GenericMeta | GraphQLMeta | CheckMeta | CommandMeta | EventMeta | StartupMeta | CommandDebugMeta;
 
 type GenericMeta = {
   type: "generic",
@@ -15,6 +15,28 @@ type GenericMeta = {
   guildId?: string;
   [key: string]: unknown;
 };
+
+type CommandMeta = {
+  type: "command",
+  command: string;
+  subcommand?: string;
+  user: string;
+  userId: string;
+  guildId: string | null;
+}
+
+type CommandDebugMeta = {
+  type: "commandDebug";
+  command: string;
+  subcommand?: string;
+  [key: string]: unknown;
+}
+
+type EventMeta = {
+  type: "event",
+  name: string,
+  isOnce: boolean,
+}
 
 type GraphQLMeta = {
   type: "graphql";
@@ -32,6 +54,16 @@ type CheckMeta = {
   purpose?: string,
   why?: unknown,
   total?: number,
+};
+
+type StartupMeta = {
+  type: "startup";
+  environment?: string;
+  user?: string;
+  total?: number;
+  commands?: string[];
+  error?: string;
+  component?: string;
 };
 
 class Logger {
@@ -84,11 +116,12 @@ class Logger {
     const subcommand = interaction.options.getSubcommand(false) ?? "";
 
     this.debug("Command executed", {
-      type: "generic",
+      type: "command",
       command: command.name,
       subcommand,
       user: interaction.user.tag,
       userId: interaction.user.id,
+      guildId: interaction.guildId,
     });
   }
 }

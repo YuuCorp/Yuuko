@@ -5,12 +5,12 @@ import { REST, Routes } from "discord.js";
 import { env } from '#env';
 
 export async function registerCommands(client: Client) {
-  client.logger.info("Starting bot", { type: "generic", environment: env().NODE_ENV })
+  client.logger.info("Starting bot", { type: "startup", environment: env().NODE_ENV })
 
   const commandsPath = path.join(import.meta.dir, "..", "commands");
   const commandFiles = fs.readdirSync(commandsPath).filter((file) => file.endsWith(".ts"));
 
-  client.logger.info("Loaded commands", { type: "generic", total: commandFiles.length })
+  client.logger.info("Loaded commands", { type: "startup", total: commandFiles.length, commands: commandFiles })
 
   const slashCommands = commandFiles.map((file) => {
     const cmd = require(path.join(commandsPath, file)).default as Command;
@@ -21,7 +21,7 @@ export async function registerCommands(client: Client) {
     return data;
   });
 
-  client.logger.info("Loaded slash commands", { type: "generic", total: slashCommands.length })
+  client.logger.info("Loaded slash commands", { type: "startup", total: slashCommands.length })
 
   // ^ Register Slash Commands
   const rest = new REST({ version: "10" }).setToken(env().TOKEN!);
@@ -31,7 +31,7 @@ export async function registerCommands(client: Client) {
 
   try {
     client.logger.info(`Started refreshing ${slashCommands.length} slash (/) commands.`, {
-      type: "generic",
+      type: "startup",
       commands: slashCommands.map((x) => x.name),
     });
 
@@ -41,10 +41,10 @@ export async function registerCommands(client: Client) {
       await rest.put(Routes.applicationCommands(clientId), { body: slashCommands });
 
     client.logger.info(`Refreshed ${slashCommands.length} slash (/) commands.`, {
-      type: "generic",
+      type: "startup",
       commands: slashCommands.map((x) => x.name),
     });
   } catch (error: any) {
-    client.logger.error("Failed to refresh slash commands", { type: "generic", error: error?.message ?? error });
+    client.logger.error("Failed to refresh slash commands", { type: "startup", error: error?.message ?? error });
   }
 }

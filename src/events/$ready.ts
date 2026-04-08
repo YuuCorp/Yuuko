@@ -15,7 +15,7 @@ const ready = new YuukoEvent({
     await registerCommands(client);
     await registerComponents(client);
 
-    client.logger.info("Bot ready", { type: "generic", user: client.user.tag });
+    client.logger.info("Bot ready", { type: "startup", user: client.user.tag });
   }
 });
 

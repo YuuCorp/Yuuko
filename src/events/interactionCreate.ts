@@ -15,28 +15,19 @@ const interactionCreate = new YuukoEvent({
         const command = client.commands.find((cmd) => cmd.name == interaction.commandName);
         if (!command) return;
 
-        client.logger.debug("Interaction latency", {
-          type: "generic",
-          latencyMs: Date.now() - interaction.createdTimestamp,
-        });
-
         checkCooldown(client, command, interaction);
-        const start = performance.now();
+
         const args = await runMiddlewares(command.middlewares, interaction, client);
+
         client.logger.debug("Middleware execution", {
           type: "generic",
-          durationMs: Math.round(performance.now() - start),
           command: command.name,
+          middlewares: command.middlewares?.map((m) => m.name),
         });
 
         if (args.isCommand() && args.isChatInputCommand()) {
           client.logger.logCommand(command, interaction);
           await command.run({ interaction: args, client });
-          client.logger.debug("Command execution", {
-            type: "generic",
-            command: command.name,
-            durationMs: Date.now() - interaction.createdTimestamp,
-          });
         }
 
         // Check for autocomplete
