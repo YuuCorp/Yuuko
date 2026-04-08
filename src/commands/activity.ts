@@ -38,7 +38,7 @@ export default {
         }, interaction.ALtoken)
       ).data.User;
 
-      if (!uData?.id) throw new YuukoError("Couldn't find user id.", vars);
+      if (!uData?.id) throw new YuukoError("Couldn't find user id.", { vars });
       vars.userid = uData?.id;
 
     }
@@ -48,7 +48,7 @@ export default {
     } = await graphQLRequest("Activity", vars, interaction.ALtoken);
 
     if (!data) {
-      throw new YuukoError("Couldn't find any data.", vars);
+      throw new YuukoError("Couldn't find any data.", { vars });
     }
 
     const embed = new EmbedBuilder().setTimestamp(data?.createdAt * 1000);

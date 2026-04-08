@@ -1,35 +1,129 @@
-import winston, { config } from 'winston'
-import { env } from '#env';
+import winston from "winston";
+import { env } from "#env";
+import type { Command, UsableInteraction } from "#structures/command";
+
+export type LogLevel = "error" | "warn" | "info" | "http" | "verbose" | "debug" | "silly";
+
+type LogMeta = GenericMeta | GraphQLMeta | CheckMeta | CommandMeta | EventMeta | StartupMeta | CommandDebugMeta;
+
+type GenericMeta = {
+  type: "generic",
+  command?: string;
+  subcommand?: string;
+  user?: string;
+  userId?: string;
+  guildId?: string;
+  [key: string]: unknown;
+};
+
+type CommandMeta = {
+  type: "command",
+  command: string;
+  subcommand?: string;
+  user: string;
+  userId: string;
+  guildId: string | null;
+}
+
+type CommandDebugMeta = {
+  type: "commandDebug";
+  command: string;
+  subcommand?: string;
+  [key: string]: unknown;
+}
+
+type EventMeta = {
+  type: "event",
+  name: string,
+  isOnce: boolean,
+}
+
+type GraphQLMeta = {
+  type: "graphql";
+  query: string;
+  vars: Record<string, any>,
+  durationMs?: number;
+  rateLimitRemaining?: number;
+  authenticated: boolean;
+};
+
+type CheckMeta = {
+  type: "check";
+  name?: string,
+  optional?: boolean,
+  purpose?: string,
+  why?: unknown,
+  total?: number,
+};
+
+type StartupMeta = {
+  type: "startup";
+  environment?: string;
+  user?: string;
+  total?: number;
+  commands?: string[];
+  error?: string;
+  component?: string;
+};
 
 class Logger {
   public logger: winston.Logger;
 
   constructor(filename: string) {
     this.logger = winston.createLogger({
-      transports: [new winston.transports.File({ filename })],
-      level: env().NODE_ENV === 'development' ? 'debug' : 'verbose',
-      format: winston.format.combine(
-        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-        winston.format.printf(({ timestamp, level, message }) => {
-          return `${timestamp} | [${level.toUpperCase()}]: ${message}`;
-        })
-      )
+      level: "debug",
+      transports: [
+        new winston.transports.File({
+          filename,
+          format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
+        }),
+      ],
     });
 
-    this.logger.add(new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize({ level: true }),
-        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-        winston.format.printf(({ timestamp, level, message }) => {
-          return `${timestamp} | [${level}]: ${message}`;
-        })
-      ),
-    }));
+    this.logger.add(
+      new winston.transports.Console({
+        level: env().NODE_ENV === "development" ? "debug" : "info",
+        format: winston.format.combine(
+          winston.format.colorize(),
+          winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+          winston.format.printf(({ timestamp, level, message, ...meta }) => {
+            const metaStr = Object.keys(meta).length ? JSON.stringify(meta) : "";
+            return `${timestamp} | [${level}]: ${message} ${metaStr}`;
+          }),
+        ),
+      }),
+    );
   }
 
-  log(text: string, category: string = "info") {
-    this.logger.log(category.toLowerCase(), text);
+  log(level: LogLevel, message: string, meta?: LogMeta) {
+    this.logger.log(level, message, meta);
+  }
+
+  info(message: string, meta?: LogMeta) {
+    this.logger.info(message, meta);
+  }
+
+  error(message: string, meta?: LogMeta) {
+    this.logger.error(message, meta);
+  }
+
+  debug(message: string, meta?: LogMeta) {
+    this.logger.debug(message, meta);
+  }
+
+  logCommand(command: Command, interaction: UsableInteraction) {
+    if (!interaction.isChatInputCommand()) return;
+    const subcommand = interaction.options.getSubcommand(false) ?? "";
+
+    this.debug("Command executed", {
+      type: "command",
+      command: command.name,
+      subcommand,
+      user: interaction.user.tag,
+      userId: interaction.user.id,
+      guildId: interaction.guildId,
+    });
   }
 }
 
-export default Logger
+export default Logger;

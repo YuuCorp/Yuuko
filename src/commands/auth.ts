@@ -42,7 +42,7 @@ export default {
         const user = (await db.select().from(anilistUser).where(eq(anilistUser.discordId, interaction.user.id)).limit(1))[0];
 
         if (subcommandType === "wipe") {
-            if (!user) throw new YuukoError("You don't have an AniList account bound to your Discord account.", null, true)
+            if (!user) throw new YuukoError("You don't have an AniList account bound to your Discord account.", { ephemeral: true })
             await db.delete(anilistUser).where(eq(anilistUser.discordId, interaction.user.id));
 
             await updateBotStats(client);

@@ -34,16 +34,13 @@ export default {
       if (cachedId) {
         animeIdFound = true;
         vars.aID = parseInt(cachedId);
-        client.log(`Found cached data for ${normalizedQuery}, ID ${vars.aID}`, "debug");
+        client.logger.debug("Series cache hit", { type: "commandDebug", command: name, query: normalizedQuery, seriesId: vars.aID, mediaType: "ANIME" })
       }
 
     } else {
       vars.aID = hookData.id;
     }
 
-    client.log(`Anime ID: ${vars.aID}`, "debug");
-
-    client.log(`Querying Redis with hook animeId ${vars.aID}`, "debug");
     const cacheData = (await redis.json.get(`_anime-${vars.aID}`)) as AnimeQuery["Media"] | null;
 
     if (cacheData) {
@@ -55,19 +52,18 @@ export default {
         if (mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
       }
 
-      client.log("Found cache data, returning data...", "debug");
+      client.logger.debug("User cache hit", { type: "commandDebug", command: name, seriesId: vars.aID, anilistId: interaction.alID })
 
-      return void handleData({ media: cacheData }, interaction, "ANIME");
+      return void handleData({ media: cacheData }, interaction, client, "ANIME");
     }
 
-    client.log("No cache found, fetching from CringeQL", "debug");
     const {
       data: { Media: data },
       headers,
     } = await graphQLRequest("Anime", vars, interaction.ALtoken);
 
     if (!data) {
-      throw new YuukoError("No anime found.", vars);
+      throw new YuukoError("No anime found.", { vars });
     }
 
     if (!animeIdFound) redis.set(`_animeId-${vars.query}`, data.id);
@@ -79,9 +75,9 @@ export default {
       redis.set(`_animeId-${normalize(synonym)}`, data.id);
     }
     if (redisData.nextAiringEpisode?.airingAt) {
-      client.log(`Expiring anime-${redisData.id} at ${redisData.nextAiringEpisode.airingAt}`, "debug");
+      client.logger.debug("Adding expiration date", { type: "commandDebug", command: name, seriesId: redisData.id, airingAt: redisData.nextAiringEpisode.airingAt })
       redis.expireAt(`_anime-${data.id}`, redisData.nextAiringEpisode.airingAt);
     }
-    return void await handleData({ media: data, headers: headers }, interaction, "ANIME", hookData);
+    return void await handleData({ media: data, headers: headers }, interaction, client, "ANIME", hookData);
   },
 } satisfies Command<{ id?: number, anime?: string }>;

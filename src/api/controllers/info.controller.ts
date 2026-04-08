@@ -75,6 +75,7 @@ export const infoController = new Elysia({
     );
 
 function readLogFile() {
-    const logPath = path.join(srcFolder, "Logging", "logs.json");
-    return JSON.parse(fs.readFileSync(logPath, "utf-8"));
+    const logPath = path.join(srcFolder, "logging", "logs.json");
+    const lines = fs.readFileSync(logPath, "utf-8").split("\n").filter(Boolean);
+    return lines.map((line) => JSON.parse(line));
 }

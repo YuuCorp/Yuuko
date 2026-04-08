@@ -1,7 +1,7 @@
 import { type Interaction, Collection, MessageFlags, time } from "discord.js";
 
-import { embedError, logging, YuukoError } from "#utils/index";
-import { type Client, type ClientCommand, type UsableInteraction, YuukoEvent, type Middleware } from "#structures/index";
+import { embedError, YuukoError } from "#utils/index";
+import { type Client, type Command, type UsableInteraction, YuukoEvent, type Middleware } from "#structures/index";
 
 /* discord doesn't have the commands property in their class for somea reason */
 const interactionCreate = new YuukoEvent({
@@ -14,16 +14,22 @@ const interactionCreate = new YuukoEvent({
         // We run the command based on the interaction
         const command = client.commands.find((cmd) => cmd.name == interaction.commandName);
         if (!command) return;
-        client.log(`Interaction received in: ${Date.now() - interaction.createdTimestamp}ms`, "debug");
+
         checkCooldown(client, command, interaction);
-        const start = performance.now();
+
         const args = await runMiddlewares(command.middlewares, interaction, client);
-        client.log(`Ran middleware in: ${Math.round(performance.now() - start)}ms`, "Debug");
+
+        if (command.middlewares) {
+          client.logger.debug("Middleware execution", {
+            type: "generic",
+            command: command.name,
+            middlewares: command.middlewares?.map((m) => m.name),
+          });
+        }
 
         if (args.isCommand() && args.isChatInputCommand()) {
-          logging(command, interaction);
+          client.logger.logCommand(command, interaction);
           await command.run({ interaction: args, client });
-          client.log(`Ran command ${command.name} in: ${Date.now() - interaction.createdTimestamp}ms`, "Debug");
         }
 
         // Check for autocomplete
@@ -42,9 +48,10 @@ const interactionCreate = new YuukoEvent({
       }
 
     } catch (e: any) {
-      console.error(e);
+      client.logger.error(e);
 
       if (e instanceof YuukoError) {
+        client.logger.error("Yuuko Error", { type: "generic", message: e.message, vars: e.vars, cause: e.cause });
         if (!interaction.isCommand()) return;
 
         if (interaction.deferred || interaction.replied)
@@ -67,7 +74,7 @@ const interactionCreate = new YuukoEvent({
     }
 
 
-    function checkCooldown(client: Client, command: ClientCommand, interaction: UsableInteraction): UsableInteraction {
+    function checkCooldown(client: Client, command: Command, interaction: UsableInteraction): UsableInteraction {
       if (!interaction.isChatInputCommand()) return interaction;
       const commandCooldown = client.cooldowns.get(command.name);
       if (!commandCooldown) {
@@ -79,7 +86,7 @@ const interactionCreate = new YuukoEvent({
         console.log(cooldownExpires);
         if (!cooldownExpires) return interaction;
         if (cooldownExpires > Date.now()) {
-          throw new YuukoError(`User ${interaction.user.tag} is on cooldown for command ${command.name}`, null, false, `Cooldown expires on ${time(Math.ceil(cooldownExpires / 1000), "f")} (${time(Math.ceil(cooldownExpires / 1000), "R")})`);
+          throw new YuukoError(`User ${interaction.user.tag} is on cooldown for command ${command.name}`, { cause: `Cooldown expires on ${time(Math.ceil(cooldownExpires / 1000), "f")} (${time(Math.ceil(cooldownExpires / 1000), "R")})` });
         }
       }
       return interaction;

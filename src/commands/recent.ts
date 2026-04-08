@@ -32,7 +32,7 @@ export default {
 
     if (!userName) {
       // We try to use the one the user set
-      if (!interaction.alID) throw new YuukoError("You have yet to set an AniList token.", null, true)
+      if (!interaction.alID) throw new YuukoError("You have yet to set an AniList token.", { ephemeral: true })
       vars.userId = interaction.alID;
     } else {
       vars.user = userName;
@@ -41,7 +41,7 @@ export default {
     const {
       data: { Page: data },
     } = await graphQLRequest("RecentChart", vars, interaction.ALtoken);
-    if (!data?.mediaList) throw new YuukoError("Unable to find specified user.", vars, true);
+    if (!data?.mediaList) throw new YuukoError("Unable to find specified user.", { vars, ephemeral: true });
     await interaction.deferReply();
 
     const parsedData = [];
@@ -55,6 +55,8 @@ export default {
 
       parsedData.push({ status: `${status}\n${title}`, imageUrl: cover });
     }
+
+    client.logger.debug("Recent command", { type: "generic", total: parsedData.length, userName: vars.user });
 
     const lib = client.modules.getModule("modules");
 

@@ -50,7 +50,7 @@ export default {
         const vars = { type, userId: interaction.alID, chunk: Math.floor(Math.random() * totalSize) };
         const { data: { MediaListCollection: data } } = await graphQLRequest("PixelJumble", vars);
 
-        if (!data || !data.lists || data.lists.length < 1) throw new YuukoError("Couldn't find any data from the user specified.", vars);
+        if (!data || !data.lists || data.lists.length < 1) throw new YuukoError("Couldn't find any data from the user specified.", { vars });
 
         const allMediaItems = data.lists
             .flatMap(list => list?.entries);

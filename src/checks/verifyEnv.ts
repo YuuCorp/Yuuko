@@ -22,8 +22,7 @@ const clientIDCheck = new Check({
 
 const guildIDCheck = new Check({
   name: 'Guild ID Check',
-  description: `Check if process.env.GUILD_ID is present and valid.
-    This is required for slash commands to be instantly visible in a guild when developing.`,
+  description: `Check if process.env.GUILD_ID is present and valid. This is required for slash commands to be instantly visible in a guild when developing.`,
   optional: true,
   run: () => {
     if (!process.env.GUILD_ID)

@@ -2,6 +2,8 @@
 declare var self: Worker;
 
 import { db, tables, type InferTable } from '#database/index';
+import { env } from '#src/env';
+import type { LogLevel } from '#utils/logger';
 import { RSA } from "#utils/rsaEncryption";
 import { eq } from 'drizzle-orm';
 
@@ -17,7 +19,7 @@ export type ReminderMessage = {
 export type LogMessage = {
     type: 'LOG';
     text: string;
-    category: string;
+    level: LogLevel;
 };
 
 export type SyncUsers = {
@@ -34,6 +36,8 @@ async function checkUpcomingEpisodes() {
 }
 
 async function updateSyncedUsers() {
+    if (env().NODE_ENV === "development") return;
+
     try {
 
         const syncEvent = (await db.select().from(tables.workerEvents).where(eq(tables.workerEvents.type, "SYNC")).limit(1))[0];
@@ -44,12 +48,6 @@ async function updateSyncedUsers() {
         const currentDate = new Date();
 
         if (updateAt > currentDate) return;
-
-        self.postMessage({
-            type: 'LOG',
-            text: `Preparing to sync all users...`,
-            category: 'verbose',
-        } satisfies LogMessage);
 
 
         const anilistUsers = await db.select().from(tables.anilistUser);

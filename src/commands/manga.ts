@@ -38,7 +38,7 @@ export default {
       if (cachedId) {
         mangaIdFound = true;
         vars.mID = parseInt(cachedId);
-        client.log(`Found cached data for ${normalizedQuery}, ID ${vars.mID}`, "debug");
+        client.logger.debug("Series cache hit", { query: normalizedQuery, seriesId: vars.mID, type: "generic", mediaType: "MANGA" })
       }
 
     } else {
@@ -50,15 +50,15 @@ export default {
     if (cacheData) {
       if (interaction.alID) {
         const _mediaListEntry = await redis.json.get(`_user${interaction.alID}-MANGA`) as Record<number, CacheEntry>;
-        if (!vars.mID) throw new YuukoError("No mID found in cache data.", vars);
+        if (!vars.mID) throw new YuukoError("No mID found in cache data.", { vars });
         const mediaListEntry = _mediaListEntry ? _mediaListEntry[vars.mID] : null;
         if (mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
       }
-      client.log("[MangaCmd] Found cache data, returning data...", "debug");
-      return void handleData({ media: cacheData }, interaction, "MANGA");
-    }
 
-    client.log("[MangaCmd] No cache found, fetching from CringeQL", "debug");
+      client.logger.debug("User cache hit", { seriesId: vars.mID, anilistId: interaction.alID, type: "generic" })
+
+      return void handleData({ media: cacheData }, interaction, client, "MANGA");
+    }
 
     const {
       data: { Media: data },
@@ -66,17 +66,20 @@ export default {
     } = await graphQLRequest("Manga", vars, interaction.ALtoken);
 
     if (!data) {
-      throw new YuukoError("Couldn't find any data.", vars);
+      throw new YuukoError("Couldn't find any data.", { vars });
     }
 
     if (!mangaIdFound) redis.set(`_mangaId-${vars.query}`, data.id);
+
     const { mediaListEntry, ...redisData } = data;
     redis.json.set(`_manga-${data.id}`, "$", redisData);
     redis.expireAt(`_manga-${redisData.id}`, new Date(Date.now() + 604800000))
+
     for (const synonym of redisData.synonyms || []) {
       if (!synonym) continue;
       redis.set(`_mangaId-${normalize(synonym)}`, data.id.toString());
     }
-    return void handleData({ media: data, headers: headers }, interaction, "MANGA", hookData);
+
+    return void handleData({ media: data, headers: headers }, interaction, client, "MANGA", hookData);
   },
 } satisfies Command<{ id?: number, manga?: string }>;

@@ -33,7 +33,7 @@ export default {
       if (interaction.alID) {
         vars = { userid: interaction.alID };
       } else {
-        throw new YuukoError("You have yet to set an AniList token.", null, true);
+        throw new YuukoError("You have yet to set an AniList token.", { ephemeral: true });
       }
     }
 
@@ -41,7 +41,7 @@ export default {
     const { data, headers } = await graphQLRequest("User", vars, interaction.ALtoken);
     const response = data.User;
 
-    if (!response) throw new YuukoError("Couldn't find any data.", vars);
+    if (!response) throw new YuukoError("Couldn't find any data.", { vars });
 
     const titleEmbed = new EmbedBuilder()
       // TODO: Fix depricated function calls 101
