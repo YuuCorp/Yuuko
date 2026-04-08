@@ -19,11 +19,13 @@ const interactionCreate = new YuukoEvent({
 
         const args = await runMiddlewares(command.middlewares, interaction, client);
 
-        client.logger.debug("Middleware execution", {
-          type: "generic",
-          command: command.name,
-          middlewares: command.middlewares?.map((m) => m.name),
-        });
+        if (command.middlewares) {
+          client.logger.debug("Middleware execution", {
+            type: "generic",
+            command: command.name,
+            middlewares: command.middlewares?.map((m) => m.name),
+          });
+        }
 
         if (args.isCommand() && args.isChatInputCommand()) {
           client.logger.logCommand(command, interaction);
