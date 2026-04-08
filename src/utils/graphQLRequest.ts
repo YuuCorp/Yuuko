@@ -43,6 +43,7 @@ import type {
 import Queries from '../graphQL/types/queries'
 import { YuukoError, type GraphQLResponse } from './types'
 import { env } from '#env';
+import { client } from '#src/app';
 
 type Query = keyof typeof Queries
 
@@ -98,9 +99,17 @@ export async function graphQLRequest<QueryKey extends Query>(queryKey: QueryKey,
 
     const data = resJson as GraphQLResponse<QueryVariables[QueryKey][0]>
 
+    client.logger.debug("GraphQL Request", {
+      type: "graphql",
+      query: queryKey,
+      vars,
+      authenticated: token !== undefined,
+      rateLimitRemaining: parseInt(res.headers.get("x-ratelimit-remaining") ?? ""),
+    });
+
     return { data: data.data, headers: res.headers };
   } catch (e: any) {
-    console.error(e)
+    client.logger.error(e);
     throw new YuukoError(e?.message || e, vars);
   }
 }

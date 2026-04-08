@@ -16,6 +16,7 @@ const interactionCreate = new YuukoEvent({
         if (!command) return;
 
         client.logger.debug("Interaction latency", {
+          type: "generic",
           latencyMs: Date.now() - interaction.createdTimestamp,
         });
 
@@ -23,6 +24,7 @@ const interactionCreate = new YuukoEvent({
         const start = performance.now();
         const args = await runMiddlewares(command.middlewares, interaction, client);
         client.logger.debug("Middleware execution", {
+          type: "generic",
           durationMs: Math.round(performance.now() - start),
           command: command.name,
         });
@@ -31,6 +33,7 @@ const interactionCreate = new YuukoEvent({
           client.logger.logCommand(command, interaction);
           await command.run({ interaction: args, client });
           client.logger.debug("Command execution", {
+            type: "generic",
             command: command.name,
             durationMs: Date.now() - interaction.createdTimestamp,
           });

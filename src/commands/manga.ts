@@ -38,7 +38,7 @@ export default {
       if (cachedId) {
         mangaIdFound = true;
         vars.mID = parseInt(cachedId);
-        client.logger.debug("Cache ID hit", { query: normalizedQuery, seriesId: vars.mID, type: "MANGA" })
+        client.logger.debug("Series cache hit", { query: normalizedQuery, seriesId: vars.mID, type: "generic", mediaType: "MANGA" })
       }
 
     } else {
@@ -55,9 +55,9 @@ export default {
         if (mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
       }
 
-      client.logger.debug("User cache hit", { seriesId: vars.mID, anilistId: interaction.alID, type: "MANGA" })
+      client.logger.debug("User cache hit", { seriesId: vars.mID, anilistId: interaction.alID, type: "generic" })
 
-      return void handleData({ media: cacheData }, interaction, "MANGA");
+      return void handleData({ media: cacheData }, interaction, client, "MANGA");
     }
 
     const {
@@ -80,6 +80,6 @@ export default {
       redis.set(`_mangaId-${normalize(synonym)}`, data.id.toString());
     }
 
-    return void handleData({ media: data, headers: headers }, interaction, "MANGA", hookData);
+    return void handleData({ media: data, headers: headers }, interaction, client, "MANGA", hookData);
   },
 } satisfies Command<{ id?: number, manga?: string }>;

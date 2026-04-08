@@ -4,8 +4,6 @@ import { Client } from "#structures/index";
 import { GatewayIntentBits } from "discord.js";
 import { registerEvents, RSA, updateBotStats } from "#utils/index";
 import { runChecks } from "#checks/run";
-import path from "path";
-import fs from "fs";
 import { syncAnilistUsers, type WorkerResponseUnion } from "#workers/index";
 import { env } from "#env";
 import { eq, sql } from "drizzle-orm";

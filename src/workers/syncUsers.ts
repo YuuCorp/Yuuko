@@ -13,7 +13,7 @@ export async function syncAnilistUsers(data: SyncUsers) {
 
     const total = anilistUsers.length;
 
-    client.logger.log("verbose", "Preparing to sync users", { total });
+    client.logger.log("verbose", "Preparing to sync users", { type: "generic", total });
 
     const date = Math.floor(Date.now() / 1000);
 
@@ -32,14 +32,14 @@ export async function syncAnilistUsers(data: SyncUsers) {
             const remaining = parseInt(animeHeaders.get("x-ratelimit-remaining") ?? "1");
 
             if (remaining <= 2) {
-                client.logger.log("warn", "Rate limit nearly exhausted, waiting 60s", { remaining });
+                client.logger.log("warn", "Rate limit nearly exhausted, waiting 60s", { type: "generic", remaining });
                 await new Promise((resolve) => setTimeout(resolve, 60 * 1000));
             }
 
             const { data: mangaData } = await graphQLRequest("GetUserList", { userId: user.anilistId, type: MediaType.Manga }, user.anilistToken);
             if (mangaData) await handleSyncing({ media: mangaData }, user.anilistId, MediaType.Manga);
 
-            client.logger.log("verbose", "Synced user", { anilistId: user.anilistId, idx: i + 1, total });
+            client.logger.log("verbose", "Synced user", { type: "generic", anilistId: user.anilistId, idx: i + 1, total });
 
             const localTimeout = Math.max(0, Math.floor(timeOut - (performance.now() - start)));
             if (i < total - 1 && localTimeout > 0) {
@@ -58,7 +58,7 @@ export async function syncAnilistUsers(data: SyncUsers) {
 }
 
 async function deleteUser(anilistId: number) {
-    client.logger.log("warn", "User has invalid token, deleting from DB", { anilistId });
+    client.logger.log("warn", "User has invalid token, deleting from DB", { type: "generic", anilistId });
     await db
         .delete(tables.anilistUser)
         .where(eq(tables.anilistUser.anilistId, anilistId));

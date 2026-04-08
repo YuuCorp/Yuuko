@@ -34,7 +34,7 @@ export default {
       if (cachedId) {
         animeIdFound = true;
         vars.aID = parseInt(cachedId);
-        client.logger.debug("Cache ID hit", { query: normalizedQuery, seriesId: vars.aID, type: "ANIME" })
+        client.logger.debug("Series cache hit", { query: normalizedQuery, seriesId: vars.aID, type: "generic", mediaType: "ANIME" })
       }
 
     } else {
@@ -52,9 +52,9 @@ export default {
         if (mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
       }
 
-      client.logger.debug("User cache hit", { seriesId: vars.aID, anilistId: interaction.alID, type: "ANIME" })
+      client.logger.debug("User cache hit", { seriesId: vars.aID, anilistId: interaction.alID, type: "generic" })
 
-      return void handleData({ media: cacheData }, interaction, "ANIME");
+      return void handleData({ media: cacheData }, interaction, client, "ANIME");
     }
 
     const {
@@ -75,9 +75,9 @@ export default {
       redis.set(`_animeId-${normalize(synonym)}`, data.id);
     }
     if (redisData.nextAiringEpisode?.airingAt) {
-      client.logger.debug("Adding expiration date", { seriesId: redisData.id, airingAt: redisData.nextAiringEpisode.airingAt, type: "ANIME" })
+      client.logger.debug("Adding expiration date", { seriesId: redisData.id, airingAt: redisData.nextAiringEpisode.airingAt, type: "generic" })
       redis.expireAt(`_anime-${data.id}`, redisData.nextAiringEpisode.airingAt);
     }
-    return void await handleData({ media: data, headers: headers }, interaction, "ANIME", hookData);
+    return void await handleData({ media: data, headers: headers }, interaction, client, "ANIME", hookData);
   },
 } satisfies Command<{ id?: number, anime?: string }>;

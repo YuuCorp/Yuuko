@@ -1,4 +1,4 @@
-import type { HookData, UsableInteraction } from "#structures/index";
+import type { Client, HookData, UsableInteraction } from "#structures/index";
 import type { AnimeQuery, MangaQuery, Maybe, ScoreFormat } from "#graphQL/types";
 import type { AlwaysExist, CacheEntry, GraphQLResponse } from "./types";
 import { buildPagination, footer, SeriesTitle } from ".";
@@ -14,6 +14,7 @@ export async function handleData(
     headers?: GraphQLResponse["headers"];
   },
   interaction: UsableInteraction,
+  client: Client,
   mediaType: "ANIME" | "MANGA",
   hookdata?: HookData | null,
 ) {
@@ -175,13 +176,11 @@ export async function handleData(
   if (mediaUsers.length > 1) {
     const mediaPool = mediaUsers.map(async (user) => {
       const result = await redis.json.get(`_user${user.anilistId}-${media.id}`,).catch((e) => {
-        return console.log(e);
+        client.logger.error(e);
+        return;
       });
 
-      if (!result) {
-        console.log(`No data found for user ${user.anilistId}`)
-        return null;
-      }
+      if (!result) return null;
 
       return result as CacheEntry
     });
@@ -189,6 +188,7 @@ export async function handleData(
     const userData = (await Promise.all(mediaPool)).filter((u) => u != null);
 
     if (userData.every((e) => e == null)) return await buildPagination(interaction, pageList);
+
     const statisticsEmbed = new EmbedBuilder()
       .setAuthor({ name: `${media.title?.english || media.title?.romaji || "N/A"} | Statistics for Yuuko Users!` })
       .setImage(media.bannerImage!)

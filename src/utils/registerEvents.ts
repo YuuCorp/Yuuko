@@ -21,14 +21,14 @@ export async function registerEvents(client: Client) {
   for (const event of events) {
 
     if (!event.run) {
-      client.logger.error("Event has no run function", { event: event.event })
+      client.logger.error("Event has no run function", { type: "generic", event: event.event })
       process.exit(0);
     }
 
     client[event.isOnce ? "once" : "on"](event.event, (...args) => event.run(client, ...args));
     client.logger.info(`Registered event listener`, {
       event: event.event,
-      type: event.isOnce ? "once" : "on",
+      type: "generic"
     });
   }
 }

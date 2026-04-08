@@ -4,13 +4,34 @@ import type { Command, UsableInteraction } from "#structures/command";
 
 export type LogLevel = "error" | "warn" | "info" | "http" | "verbose" | "debug" | "silly";
 
-type LogMeta = {
+type LogMeta = GenericMeta | GraphQLMeta | CheckMeta;
+
+type GenericMeta = {
+  type: "generic",
   command?: string;
   subcommand?: string;
   user?: string;
   userId?: string;
   guildId?: string;
   [key: string]: unknown;
+};
+
+type GraphQLMeta = {
+  type: "graphql";
+  query: string;
+  vars: Record<string, any>,
+  durationMs?: number;
+  rateLimitRemaining?: number;
+  authenticated: boolean;
+};
+
+type CheckMeta = {
+  type: "check";
+  name?: string,
+  optional?: boolean,
+  purpose?: string,
+  why?: unknown,
+  total?: number,
 };
 
 class Logger {
@@ -62,7 +83,8 @@ class Logger {
     if (!interaction.isChatInputCommand()) return;
     const subcommand = interaction.options.getSubcommand(false) ?? "";
 
-    this.log("info", "Command executed", {
+    this.debug("Command executed", {
+      type: "generic",
       command: command.name,
       subcommand,
       user: interaction.user.tag,

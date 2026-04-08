@@ -15,19 +15,20 @@ export async function runChecks(client: Client) {
         }),
     )
   ).flat()
-  client.logger.info("Running checks", { total: checks.length });
+  client.logger.info("Running checks", { type: "check", total: checks.length });
 
   for (const check of checks) {
     try {
       check.run()
-      client.logger.info("Check passed", { check: check.name });
+      client.logger.info("Check passed", { type: "check", name: check.name, optional: check.optional });
     }
     catch (e) {
       if (check.optional === true) {
         client.logger.log("warn", "Optional check failed", {
-          check: check.name,
+          type: "check",
+          name: check.name,
           purpose: check.description,
-          why: e,
+          why: serializeError(e),
         });
       }
       else {
@@ -40,4 +41,15 @@ export async function runChecks(client: Client) {
   }
 
   client.logger.info("Checks passed!");
+}
+
+function serializeError(e: unknown) {
+  if (e instanceof Error) {
+    return {
+      message: e.message,
+      stack: e.stack,
+      name: e.name,
+    };
+  }
+  return e;
 }
