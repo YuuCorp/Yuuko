@@ -48,14 +48,22 @@ pub unsafe extern "C" fn FreeImageBuffer(ptr: *mut c_char, len: u32) {
 /// # Safety
 /// `json_ptr` must point to a valid null-terminated C string.
 /// Returns a pointer to a heap-allocated 3x3 grid image of the user's recent media, or null on failure.
-pub unsafe extern "C" fn GenerateRecentImage(json_ptr: *const c_char) -> *mut c_char {
+pub unsafe extern "C" fn GenerateRecentImage(
+    json_ptr: *const c_char,
+    out_size: *mut u32,
+) -> *mut c_char {
     let _json_data = unsafe { CStr::from_ptr(json_ptr) };
 
     let json_data = String::from_utf8_lossy(_json_data.to_bytes()).to_string();
 
     let res = recent_image::internal_generate_recent_image(json_data);
     match res {
-        Ok(ptr) => ptr,
+        Ok(buf) => {
+            unsafe { *out_size = buf.len() as u32 };
+
+            let boxed = buf.into_boxed_slice();
+            Box::into_raw(boxed) as *mut c_char
+        }
         Err(err) => {
             eprintln!("{err}");
             ptr::null_mut()
@@ -86,7 +94,11 @@ pub unsafe extern "C" fn GetImage(image_url: *const c_char) -> *mut c_char {
             let rgba: RgbaImage = img.to_rgba8();
 
             let boxed = Box::new(rgba);
-            Box::into_raw(boxed) as *mut c_char
+            let ptr = boxed.as_ptr() as *mut c_char;
+
+            std::mem::forget(boxed);
+
+            ptr
         }
         Err(err) => {
             eprintln!("Failed to fetch image: {:?}", err);

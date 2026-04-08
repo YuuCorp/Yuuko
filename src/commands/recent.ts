@@ -42,7 +42,7 @@ export default {
       data: { Page: data },
     } = await graphQLRequest("RecentChart", vars, interaction.ALtoken);
     if (!data?.mediaList) throw new YuukoError("Unable to find specified user.", { vars, ephemeral: true });
-    await interaction.reply({ embeds: [{ description: "Creating image..." }] });
+    await interaction.deferReply();
 
     const parsedData = [];
 
@@ -61,18 +61,26 @@ export default {
     const lib = client.modules.getModule("modules");
 
     const enc = new TextEncoder();
-    const rawJson = enc.encode(JSON.stringify(parsedData));
+    const json = JSON.stringify(parsedData);
+
+    // add a null-terminator?
+    const rawJson = enc.encode(json);
     const jsonPtr = ptr(rawJson);
 
-    const imgPtr = lib.symbols.GenerateRecentImage(jsonPtr);
+    const imgSizeBuffer = new Uint32Array(1);
+    const imgPtr = lib.symbols.GenerateRecentImage(jsonPtr, imgSizeBuffer);
     if (!imgPtr) throw new YuukoError("Rust module experienced an error and returned an invalid pointer");
 
-    const imgSize = toBuffer(imgPtr, 0, 4).readUint32BE();
-    const buffer = toBuffer(imgPtr, 4, imgSize);
+    const imgSize = imgSizeBuffer[0];
+    if (imgSize === undefined || imgSize === 0)
+      throw new YuukoError("Rust module experienced an error and returned an invalid buffer size");
+
+    const buffer = toBuffer(imgPtr, 0, imgSize);
 
     if (!buffer) throw new YuukoError("Encountered an error whilst trying to create the image buffer.");
     const attachment = new AttachmentBuilder(buffer, { name: "recent.png" });
-    await interaction.editReply({ files: [attachment], embeds: [] });
+    await interaction.editReply({ files: [attachment] });
+
 
     lib.symbols.FreeImageBuffer(imgPtr, imgSize);
   }
