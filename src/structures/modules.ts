@@ -9,7 +9,7 @@ function defineModules<T extends Record<string, Record<string, FFIFunction>>>(de
 export const moduleSymbols = defineModules({
     modules: {
         GenerateRecentImage: {
-            args: ["cstring"],
+            args: ["cstring", "pointer"],
             returns: "pointer",
         },
         GetImage: {

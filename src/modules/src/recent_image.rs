@@ -1,5 +1,3 @@
-use std::ffi::c_char;
-
 use ab_glyph::{Font, FontRef, PxScale, ScaleFont};
 use anyhow::Result;
 use image::{
@@ -22,7 +20,7 @@ pub struct RecentItem {
     image_url: String,
 }
 
-pub fn internal_generate_recent_image(json_data: String) -> Result<*mut c_char> {
+pub fn internal_generate_recent_image(json_data: String) -> Result<Vec<u8>> {
     let data: Vec<RecentItem> = serde_json::from_str(&json_data)?;
     let mut recent_image = RgbaImage::new(900, 900);
 
@@ -82,17 +80,7 @@ pub fn internal_generate_recent_image(json_data: String) -> Result<*mut c_char> 
     let encoder = png::PngEncoder::new(&mut buf);
     encoder.write_image(&recent_image, 900, 900, image::ColorType::Rgba8.into())?;
 
-    let size = buf.len() as u32;
-    let mut final_buf = Vec::with_capacity(4 + buf.len());
-    final_buf.extend_from_slice(&size.to_be_bytes());
-    final_buf.append(&mut buf);
-
-    let boxed = final_buf.into_boxed_slice();
-    let ptr = boxed.as_ptr() as *mut c_char;
-
-    std::mem::forget(boxed);
-
-    Ok(ptr)
+    Ok(buf)
 }
 
 fn draw_text_on_image(image: &mut RgbaImage, text: &str, font: &FontRef, size: f32) {

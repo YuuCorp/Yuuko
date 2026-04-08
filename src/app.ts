@@ -80,7 +80,7 @@ workerManager.onmessage = async (e) => {
         .set({ updatedAt: sql`current_timestamp` })
         .where(eq(tables.workerEvents.type, "SYNC"));
 
-      await syncAnilistUsers(data);
+      // await syncAnilistUsers(data);
       break;
     }
   }
