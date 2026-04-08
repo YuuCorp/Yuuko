@@ -12,14 +12,14 @@ export async function registerCommands(client: Client) {
 
   client.logger.info("Loaded commands", { type: "startup", total: commandFiles.length, commands: commandFiles })
 
-  const slashCommands = commandFiles.map((file) => {
-    const cmd = require(path.join(commandsPath, file)).default as Command;
+  const slashCommands = await Promise.all(commandFiles.map(async (file) => {
+    const cmd = (await import(path.join(commandsPath, file))).default as Command;
     const builder = cmd?.withBuilder ?? {};
 
     const data = { ...builder, ...cmd };
     client.commands.set(data.name, data);
     return data;
-  });
+  }));
 
   client.logger.info("Loaded slash commands", { type: "startup", total: slashCommands.length })
 

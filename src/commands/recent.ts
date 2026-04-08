@@ -64,7 +64,7 @@ export default {
     const json = JSON.stringify(parsedData);
 
     // add a null-terminator?
-    const rawJson = enc.encode(json);
+    const rawJson = enc.encode(json + "\0");
     const jsonPtr = ptr(rawJson);
 
     const imgSizeBuffer = new Uint32Array(1);

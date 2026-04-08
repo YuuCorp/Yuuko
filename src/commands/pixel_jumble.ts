@@ -15,248 +15,259 @@ const usage = "/pixeljumble";
 const description = "Play a game where you have to guess an anime or manga based off hints and a pixelated cover.";
 
 export default {
-    name,
-    usage,
-    description,
-    middlewares: [mwRequireALToken],
-    commandType: "Anilist",
-    withBuilder: new SlashCommandBuilder()
-        .setName(name)
-        .setDescription(description)
-        .addStringOption((option) =>
-            option
-                .setName("type")
-                .setRequired(true)
-                .setDescription("The media type you want the game to choose")
-                .addChoices(
-                    { name: "Anime", value: "ANIME" },
-                    { name: "Manga", value: "MANGA" }
-                )
-        ),
+  name,
+  usage,
+  description,
+  middlewares: [mwRequireALToken],
+  commandType: "Anilist",
+  withBuilder: new SlashCommandBuilder()
+    .setName(name)
+    .setDescription(description)
+    .addStringOption((option) =>
+      option
+        .setName("type")
+        .setRequired(true)
+        .setDescription("The media type you want the game to choose")
+        .addChoices(
+          { name: "Anime", value: "ANIME" },
+          { name: "Manga", value: "MANGA" }
+        )
+    ),
 
-    run: async ({ interaction, client }, hookData): Promise<void> => {
-        const type = getStringOption(interaction, hookData, "type", true) as MediaType;
+  run: async ({ interaction, client }, hookData): Promise<void> => {
+    const type = getStringOption(interaction, hookData, "type", true) as MediaType;
 
-        const msg = await interaction.deferReply({ withResponse: true });
+    const msg = await interaction.deferReply({ withResponse: true });
 
-        const { data: viewer } = await graphQLRequest("Viewer", {}, interaction.ALtoken);
-        if (!viewer) throw new YuukoError("Couldn't fetch your profile using your token to get an entry");
+    const { data: viewer } = await graphQLRequest("Viewer", {}, interaction.ALtoken);
+    if (!viewer) throw new YuukoError("Couldn't fetch your profile using your token to get an entry");
 
-        const statistics = viewer.Viewer?.statistics;
-        const totalSize = type === "ANIME" ? statistics?.anime?.count : statistics?.manga?.count;;
+    const statistics = viewer.Viewer?.statistics;
+    const totalSize = type === "ANIME" ? statistics?.anime?.count : statistics?.manga?.count;;
 
-        if (!totalSize) throw new YuukoError(`We could not find enough entries in your list for the specified media type (got ${totalSize})`)
+    if (!totalSize) throw new YuukoError(`We could not find enough entries in your list for the specified media type (got ${totalSize})`)
 
-        const vars = { type, userId: interaction.alID, chunk: Math.floor(Math.random() * totalSize) };
-        const { data: { MediaListCollection: data } } = await graphQLRequest("PixelJumble", vars);
+    const vars = { type, userId: interaction.alID, chunk: Math.floor(Math.random() * totalSize) };
+    const { data: { MediaListCollection: data } } = await graphQLRequest("PixelJumble", vars);
 
-        if (!data || !data.lists || data.lists.length < 1) throw new YuukoError("Couldn't find any data from the user specified.", { vars });
+    if (!data || !data.lists || data.lists.length < 1) throw new YuukoError("Couldn't find any data from the user specified.", { vars });
 
-        const allMediaItems = data.lists
-            .flatMap(list => list?.entries);
+    const allMediaItems = data.lists
+      .flatMap(list => list?.entries);
 
-        const random = Math.floor(Math.random() * Math.floor(allMediaItems.length));
-        const mediaEntry = allMediaItems[random]!.media;
+    const random = Math.floor(Math.random() * Math.floor(allMediaItems.length));
+    const mediaEntry = allMediaItems[random]!.media;
 
-        if (!mediaEntry) throw new YuukoError("Error fetching media entry from list");
+    if (!mediaEntry) throw new YuukoError("Error fetching media entry from list");
 
-        const title = SeriesTitle(mediaEntry.title);
-        const coverImage = mediaEntry.coverImage?.large || "https://i.imgur.com/Hx8474m.png";
+    const title = SeriesTitle(mediaEntry.title);
+    const coverImage = mediaEntry.coverImage?.large || "https://i.imgur.com/Hx8474m.png";
 
-        const lib = client.modules.getModule("modules");
+    const lib = client.modules.getModule("modules");
 
-        const enc = new TextEncoder();
-        const encodedImgUrl = enc.encode(coverImage);
-        const urlPtr = ptr(encodedImgUrl);
+    const enc = new TextEncoder();
+    const encodedImgUrl = enc.encode(coverImage);
+    const urlPtr = ptr(encodedImgUrl);
 
-        let pixelationLevel = 7;
-        let originalImgPtr: Pointer | null = null;
-        let pixelatedImgPtr: Pointer | null = null;
-        let pixelatedImgBufferSize: number | null = null;
+    let pixelationLevel = 7;
+    let originalImgPtr: Pointer | null = null;
+    let pixelatedImgPtr: Pointer | null = null;
+    let pixelatedImgBufferSize: number | null = null;
 
-        originalImgPtr = lib.symbols.GetImage(urlPtr);
-        if (!originalImgPtr) throw new YuukoError("Fetching image in Rust experienced an error and returned an invalid pointer");
+    originalImgPtr = lib.symbols.GetImage(urlPtr);
+    if (!originalImgPtr) throw new YuukoError("Fetching image in Rust experienced an error and returned an invalid pointer");
 
-        [pixelatedImgPtr, pixelatedImgBufferSize] = pixelateImage(lib, originalImgPtr, pixelationLevel);
+    [pixelatedImgPtr, pixelatedImgBufferSize] = pixelateImage(lib, originalImgPtr, pixelationLevel);
 
-        let attachment = getAttachment(pixelatedImgPtr, pixelatedImgBufferSize);
+    let attachment = getAttachment(pixelatedImgPtr, pixelatedImgBufferSize);
 
-        const buttonList = [
-            new ButtonBuilder().setCustomId('guess').setLabel('Guess').setStyle(ButtonStyle.Success),
-            new ButtonBuilder().setCustomId('hint').setLabel('Next Hint').setStyle(ButtonStyle.Primary),
-            new ButtonBuilder().setCustomId('forfeit').setLabel('Give Up').setStyle(ButtonStyle.Danger),
-        ];
-        const customIDs = new Set(['guess', 'hint', 'forfeit']);
-        const components = [new ActionRowBuilder<ButtonBuilder>().addComponents(buttonList)];
+    const buttonList = [
+      new ButtonBuilder().setCustomId('guess').setLabel('Guess').setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId('hint').setLabel('Next Hint').setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId('forfeit').setLabel('Give Up').setStyle(ButtonStyle.Danger),
+    ];
+    const customIDs = new Set(['guess', 'hint', 'forfeit']);
+    const components = [new ActionRowBuilder<ButtonBuilder>().addComponents(buttonList)];
 
-        const collector = createButtonCollector(interaction, customIDs, msg, { time: 30_000 });
+    const collector = createButtonCollector(interaction, customIDs, msg, { time: 30_000 });
 
-        const possibleHints: string[] = [];
+    const possibleHints: string[] = [];
 
-        const { year: startYear, month: startMonth, day: startDay } = mediaEntry.startDate ?? {};
-        if (startYear !== null) possibleHints.push(`Has a start date of **${startYear}-${startMonth}-${startDay}**`);
-        if (mediaEntry.source) possibleHints.push(`Has a source of **${mediaEntry.source}**`);
-        if (mediaEntry.genres?.length) possibleHints.push(`Has genres **${mediaEntry.genres.join(", ")}**`);
-        if (mediaEntry.popularity) possibleHints.push(`Has a popularity of **${mediaEntry.popularity}**`);
-        if (mediaEntry.averageScore) possibleHints.push(`Has an average score of **${mediaEntry.averageScore}%**`);
-        if (mediaEntry.characters?.edges?.length) possibleHints.push(`Has a character named **${selectRandom(mediaEntry.characters.edges)!.node?.name?.full}**`);
-        if (mediaEntry.staff?.edges?.length) {
-            const randomStaff = selectRandom(mediaEntry.staff.edges)!;
-            possibleHints.push(`Has **${randomStaff.node?.name?.full}** who worked as **${randomStaff.role}**`);
-        }
-        if (mediaEntry.countryOfOrigin) possibleHints.push(`Has an origin of ${mediaEntry.countryOfOrigin}`);
+    const { year: startYear, month: startMonth, day: startDay } = mediaEntry.startDate ?? {};
+    if (startYear !== null) possibleHints.push(`Has a start date of **${startYear}-${startMonth}-${startDay}**`);
+    if (mediaEntry.source) possibleHints.push(`Has a source of **${mediaEntry.source}**`);
+    if (mediaEntry.genres?.length) possibleHints.push(`Has genres **${mediaEntry.genres.join(", ")}**`);
+    if (mediaEntry.popularity) possibleHints.push(`Has a popularity of **${mediaEntry.popularity}**`);
+    if (mediaEntry.averageScore) possibleHints.push(`Has an average score of **${mediaEntry.averageScore}%**`);
+    if (mediaEntry.characters?.edges?.length) possibleHints.push(`Has a character named **${selectRandom(mediaEntry.characters.edges)!.node?.name?.full}**`);
+    if (mediaEntry.staff?.edges?.length) {
+      const randomStaff = selectRandom(mediaEntry.staff.edges)!;
+      possibleHints.push(`Has **${randomStaff.node?.name?.full}** who worked as **${randomStaff.role}**`);
+    }
+    if (mediaEntry.countryOfOrigin) possibleHints.push(`Has an origin of ${mediaEntry.countryOfOrigin}`);
 
-        let hints = `- ${selectRandom(possibleHints)}\n- ${selectRandom(possibleHints)}\n- ${selectRandom(possibleHints)}\n`;
+    let hints = `- ${selectRandom(possibleHints)}\n- ${selectRandom(possibleHints)}\n- ${selectRandom(possibleHints)}\n`;
 
-        const embed = new EmbedBuilder()
-            .setTitle(`Pixel Jumble - Guess the ${type.toLowerCase()}`)
-            .setDescription(`${hints}`);
+    const embed = new EmbedBuilder()
+      .setTitle(`Pixel Jumble - Guess the ${type.toLowerCase()}`)
+      .setDescription(`${hints}`);
 
-        let pixelJumbleGames = client.modalData.get("pixelJumbleGames");
-        if (!pixelJumbleGames) {
-            pixelJumbleGames = new Collection();
-            client.modalData.set("pixelJumbleGames", pixelJumbleGames);
-        }
+    let pixelJumbleGames = client.modalData.get("pixelJumbleGames");
+    if (!pixelJumbleGames) {
+      pixelJumbleGames = new Collection();
+      client.modalData.set("pixelJumbleGames", pixelJumbleGames);
+    }
 
-        await interaction.editReply({ files: [attachment], components, embeds: [embed] })
+    await interaction.editReply({ files: [attachment], components, embeds: [embed] })
 
-        let guesses = 0;
-        let hintsUsed = 0;
-        let forfeit = false;
-        collector?.on("collect", async (i) => {
-            if (!i.isButton()) return;
+    let guesses = 0;
+    let hintsUsed = 0;
+    let forfeit = false;
+    collector?.on("collect", async (i) => {
+      if (!i.isButton()) return;
 
-            switch (i.customId) {
-                case "guess":
-                    const modal = new ModalBuilder()
-                        .setCustomId("pixel_jumble_modal")
-                        .setTitle("Enter your guess");
+      switch (i.customId) {
+        case "guess":
+          const modal = new ModalBuilder()
+            .setCustomId("pixel_jumble_modal")
+            .setTitle("Enter your guess");
 
-                    const guessInput = new TextInputBuilder()
-                        .setCustomId("guess_input")
-                        .setLabel("What's your guess?")
-                        .setStyle(TextInputStyle.Short)
-                        .setPlaceholder("Type your guess here...")
-                        .setRequired(true);
+          const guessInput = new TextInputBuilder()
+            .setCustomId("guess_input")
+            .setLabel("What's your guess?")
+            .setStyle(TextInputStyle.Short)
+            .setPlaceholder("Type your guess here...")
+            .setRequired(true);
 
-                    const row = new ActionRowBuilder<TextInputBuilder>().addComponents(guessInput);
-                    modal.addComponents(row);
+          const row = new ActionRowBuilder<TextInputBuilder>().addComponents(guessInput);
+          modal.addComponents(row);
 
-                    guesses++
-                    pixelJumbleGames.set(interaction.user.id, { answer: title, collector, won: false, guesses, hintsUsed })
+          guesses++
+          pixelJumbleGames.set(interaction.user.id, { answer: title, collector, won: false, guesses, hintsUsed })
 
-                    await i.showModal(modal);
-                    break;
-                case "hint":
-                    hintsUsed++;
-                    pixelationLevel = Math.max(0, pixelationLevel - 1.5);
+          await i.showModal(modal);
+          break;
+        case "hint":
+          hintsUsed++;
+          pixelationLevel = Math.max(0, pixelationLevel - 1.5);
 
-                    if (pixelationLevel < 1 || originalImgPtr === null) {
-                        i.deferUpdate();
-                        break;
-                    };
+          if (pixelationLevel < 1 || originalImgPtr === null) {
+            i.deferUpdate();
+            break;
+          };
 
-                    if (!i.deferred) await i.deferUpdate();
+          if (!i.deferred) await i.deferUpdate();
 
-                    [pixelatedImgPtr, pixelatedImgBufferSize] = pixelateImage(lib, originalImgPtr, pixelationLevel);
-                    attachment = getAttachment(pixelatedImgPtr, pixelatedImgBufferSize);
+          if (pixelatedImgPtr && pixelatedImgBufferSize) {
+            lib.symbols.FreeImageBuffer(pixelatedImgPtr, pixelatedImgBufferSize);
+            pixelatedImgPtr = null;
+            pixelatedImgBufferSize = null;
+          }
 
-                    if (pixelationLevel === 5.5) hints += `- ${selectRandom(possibleHints)}\n`; // First hint
-                    else if (pixelationLevel === 4) hints += `- ${selectRandom(possibleHints)}\n`; // Second hint
-                    else if (pixelationLevel === 2.5) hints += `- ${selectRandom(possibleHints)}\n`; // Third hint
-                    else if (pixelationLevel === 1) hints += `- **${scrambleSentence(title)}**\n`; // Fourth hint
+          [pixelatedImgPtr, pixelatedImgBufferSize] = pixelateImage(lib, originalImgPtr, pixelationLevel);
+          attachment = getAttachment(pixelatedImgPtr, pixelatedImgBufferSize);
 
-                    embed.setDescription(hints);
+          if (pixelationLevel === 5.5) hints += `- ${selectRandom(possibleHints)}\n`; // First hint
+          else if (pixelationLevel === 4) hints += `- ${selectRandom(possibleHints)}\n`; // Second hint
+          else if (pixelationLevel === 2.5) hints += `- ${selectRandom(possibleHints)}\n`; // Third hint
+          else if (pixelationLevel === 1) hints += `- **${scrambleSentence(title)}**\n`; // Fourth hint
 
-                    if (pixelationLevel === 1) {
-                        buttonList[1]?.setDisabled(true)
-                        components[0]!.setComponents(buttonList);
-                        await interaction.editReply({ files: [attachment], components, embeds: [embed] })
-                        break;
-                    }
+          embed.setDescription(hints);
 
-                    await interaction.editReply({ files: [attachment], embeds: [embed] })
+          if (pixelationLevel === 1) {
+            buttonList[1]?.setDisabled(true)
+            components[0]!.setComponents(buttonList);
+            await interaction.editReply({ files: [attachment], components, embeds: [embed] })
+            break;
+          }
 
-                    break;
-                case "forfeit":
-                    forfeit = true;
-                    collector.stop();
-                    break;
-            }
+          await interaction.editReply({ files: [attachment], embeds: [embed] })
 
-            collector.resetTimer();
-        })
+          break;
+        case "forfeit":
+          forfeit = true;
+          collector.stop();
+          break;
+      }
 
-        collector?.on("end", async () => {
-            [pixelatedImgPtr, pixelatedImgBufferSize] = pixelateImage(lib, originalImgPtr, 1);
-            attachment = getAttachment(pixelatedImgPtr, pixelatedImgBufferSize);
+      collector.resetTimer();
+    })
 
-            const game = client.modalData.get("pixelJumbleGames")?.get(interaction.user.id);
-            const gameWon = game?.won ?? false;
-            const endText =
-                `${hints}\n**${interaction.user.displayName}**` +
-                (gameWon
-                    ? " guessed correctly"
-                    : `${forfeit ? " gave up" : " failed to guess in time"}`) +
-                `!\nAnswer was **${title}**\nThey took ${game?.guesses ?? 0} guesses and used ${game?.hintsUsed ?? 0} extra hints!`;
+    collector?.on("end", async () => {
+      if (pixelatedImgPtr && pixelatedImgBufferSize) {
+        lib.symbols.FreeImageBuffer(pixelatedImgPtr, pixelatedImgBufferSize);
+        pixelatedImgPtr = null;
+        pixelatedImgBufferSize = null;
+      }
+      [pixelatedImgPtr, pixelatedImgBufferSize] = pixelateImage(lib, originalImgPtr, 1);
+      attachment = getAttachment(pixelatedImgPtr, pixelatedImgBufferSize);
 
-            embed.setDescription(endText);
+      const game = client.modalData.get("pixelJumbleGames")?.get(interaction.user.id);
+      const gameWon = game?.won ?? false;
+      const endText =
+        `${hints}\n**${interaction.user.displayName}**` +
+        (gameWon
+          ? " guessed correctly"
+          : `${forfeit ? " gave up" : " failed to guess in time"}`) +
+        `!\nAnswer was **${title}**\nThey took ${game?.guesses ?? 0} guesses and used ${game?.hintsUsed ?? 0} extra hints!`;
 
-            await interaction.editReply({ files: [attachment], components: [], embeds: [embed] })
+      embed.setDescription(endText);
 
-            client.modalData.get("pixelJumbleGames")?.delete(interaction.user.id);
+      await interaction.editReply({ files: [attachment], components: [], embeds: [embed] })
 
-            if (originalImgPtr) {
-                lib.symbols.FreeRgbaImage(originalImgPtr);
-                originalImgPtr = null;
-            }
+      client.modalData.get("pixelJumbleGames")?.delete(interaction.user.id);
 
-            if (pixelatedImgPtr && pixelatedImgBufferSize) {
-                lib.symbols.FreeImageBuffer(pixelatedImgPtr, pixelatedImgBufferSize);
-                pixelatedImgPtr = null;
-                pixelatedImgBufferSize = null;
-            }
-        })
+      if (originalImgPtr) {
+        lib.symbols.FreeRgbaImage(originalImgPtr);
+        originalImgPtr = null;
+      }
+
+      if (pixelatedImgPtr && pixelatedImgBufferSize) {
+        lib.symbols.FreeImageBuffer(pixelatedImgPtr, pixelatedImgBufferSize);
+        pixelatedImgPtr = null;
+        pixelatedImgBufferSize = null;
+      }
+    })
 
 
-    },
+  },
 } satisfies Command<{ type: MediaType }>;
 
 function pixelateImage<T extends Library<ModuleSymbols["modules"]>>(lib: T, originalImg: Pointer | null, pixelationLevel: number): [Pointer, number] {
-    if (!originalImg) throw new YuukoError("Original image pointerr is null when trying to pixelate it");
+  if (!originalImg) throw new YuukoError("Original image pointerr is null when trying to pixelate it");
 
-    const pixelatedImgBuffer = new Uint32Array(1);
-    const pixelatedImgPtr = lib.symbols.PixelateImage(originalImg, pixelationLevel, pixelatedImgBuffer);
+  const pixelatedImgBuffer = new Uint32Array(1);
+  const pixelatedImgPtr = lib.symbols.PixelateImage(originalImg, pixelationLevel, pixelatedImgBuffer);
 
-    if (!pixelatedImgPtr)
-        throw new YuukoError("Pixelating image in Rust experienced an error and returned an invalid pointer");
+  if (!pixelatedImgPtr)
+    throw new YuukoError("Pixelating image in Rust experienced an error and returned an invalid pointer");
 
-    const pixelatedImgBufferSize = pixelatedImgBuffer[0];
-    if (pixelatedImgBufferSize === undefined || pixelatedImgBufferSize === 0)
-        throw new YuukoError("Rust module experienced an error and returned an invalid buffer size");
+  const pixelatedImgBufferSize = pixelatedImgBuffer[0];
+  if (pixelatedImgBufferSize === undefined || pixelatedImgBufferSize === 0)
+    throw new YuukoError("Rust module experienced an error and returned an invalid buffer size");
 
-    return [pixelatedImgPtr, pixelatedImgBufferSize];
+  return [pixelatedImgPtr, pixelatedImgBufferSize];
 }
 
 function getAttachment(imgPtr: Pointer, bufferSize: number) {
-    const buffer = toBuffer(imgPtr, 0, bufferSize);
-    if (!buffer) throw new YuukoError("Encountered an error whilst trying to create the image buffer.");
-    const attachment = new AttachmentBuilder(buffer, { name: "output.png" });
+  const buffer = toBuffer(imgPtr, 0, bufferSize);
+  if (!buffer) throw new YuukoError("Encountered an error whilst trying to create the image buffer.");
+  const attachment = new AttachmentBuilder(buffer, { name: "output.png" });
 
-    return attachment;
+  return attachment;
 };
 
 function scrambleSentence(input: string) {
-    const scrambleWord = (word: string) => word
-        .split("")
-        .sort(() => Math.random() - 0.5)
-        .join("");
+  const scrambleWord = (word: string) => word
+    .split("")
+    .sort(() => Math.random() - 0.5)
+    .join("");
 
-    return input.split(" ").map(scrambleWord).join(" ").toLocaleUpperCase();
+  return input.split(" ").map(scrambleWord).join(" ").toLocaleUpperCase();
 }
 
 function selectRandom<T>(source: T[]) {
-    if (source.length === 0) return undefined;
-    const idx = Math.floor(Math.random() * source.length);
-    return source.splice(idx, 1)[0];
+  if (source.length === 0) return undefined;
+  const idx = Math.floor(Math.random() * source.length);
+  return source.splice(idx, 1)[0];
 }

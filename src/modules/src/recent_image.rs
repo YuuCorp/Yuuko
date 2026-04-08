@@ -1,14 +1,9 @@
 use ab_glyph::{Font, FontRef, PxScale, ScaleFont};
 use anyhow::Result;
 use image::{
-    GenericImage, ImageEncoder, Pixel, Rgba, RgbaImage,
-    codecs::png,
-    imageops::{self, FilterType},
+    GenericImage, ImageEncoder, Pixel, Rgba, RgbaImage, codecs::png, imageops::FilterType,
 };
-use imageproc::{
-    drawing::{Canvas, draw_text_mut},
-    rect::Rect,
-};
+use imageproc::{drawing::draw_text_mut, rect::Rect};
 use serde::Deserialize;
 
 use crate::statics::{RUNTIME, fetch_cover};
@@ -57,13 +52,9 @@ pub fn internal_generate_recent_image(json_data: String) -> Result<Vec<u8>> {
     });
 
     for (i, cover) in cover_images.into_iter().enumerate() {
-        let (orig_width, orig_height) = cover.dimensions();
-        let new_height = (orig_height as f32 * size as f32 / orig_width as f32) as u32;
-        let mut scaled_cover = cover
-            .resize(size, new_height, FilterType::CatmullRom)
+        let mut cropped_cover = cover
+            .resize_to_fill(size, size, FilterType::CatmullRom)
             .into_rgba8();
-
-        let mut cropped_cover = imageops::crop(&mut scaled_cover, 0, 0, size, size).to_image();
 
         draw_text_on_image(&mut cropped_cover, &data[i].status, &font, 16.0);
 

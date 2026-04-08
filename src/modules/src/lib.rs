@@ -94,11 +94,7 @@ pub unsafe extern "C" fn GetImage(image_url: *const c_char) -> *mut c_char {
             let rgba: RgbaImage = img.to_rgba8();
 
             let boxed = Box::new(rgba);
-            let ptr = boxed.as_ptr() as *mut c_char;
-
-            std::mem::forget(boxed);
-
-            ptr
+            Box::into_raw(boxed) as *mut c_char
         }
         Err(err) => {
             eprintln!("Failed to fetch image: {:?}", err);
