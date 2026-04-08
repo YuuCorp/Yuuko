@@ -3,7 +3,6 @@ export * from "./commandCategories";
 export * from "./embedError";
 export * from "./footer";
 export * from "./graphQLRequest";
-export * from "./logging";
 export * from "./rsaEncryption";
 export * from "./types";
 export * from "./registerCommands";

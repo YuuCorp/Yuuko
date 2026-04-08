@@ -35,33 +35,12 @@ export type UsableInteraction =
   | (ChatInputCommandInteraction<CacheType> & BaseExtension)
   | (ButtonInteraction<CacheType> & BaseExtension);
 
-interface CommandStringOption {
-  name: string;
-  description: string;
-  required?: boolean;
-  type: ApplicationCommandOptionType;
-  choices?: {
-    name: string;
-    value: string;
-  }[];
-}
-
 export type HookData = Partial<{
   fields: APIEmbedField[];
   title: string;
   id: number;
   image: string;
 }>
-
-export type RunOptionsWithHooks<Args = any> = RunOptions<Args> &
-  Partial<{
-    hook: boolean;
-    hookdata: HookData;
-  }>;
-
-export type CommonCommandWithHook = Omit<Command, "run"> & {
-  run: <Args = any>(o: RunOptionsWithHooks<Args>) => MaybePromise<void>;
-};
 
 export type CommandType = (typeof CommandCategories)[keyof typeof CommandCategories];
 
@@ -77,12 +56,4 @@ export interface Command<hookData = undefined> {
 
   withBuilder: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder;
   run: <Args = any>(o: RunOptions<Args>, hookData?: hookData) => MaybePromise<void>;
-}
-
-export type CommandWithHook = CommonCommandWithHook & {
-  withBuilder?: any;
-}
-
-export type ClientCommand = Command & {
-  options?: CommandStringOption[];
 }

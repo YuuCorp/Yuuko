@@ -29,20 +29,6 @@ async function start(token: string | undefined) {
   client.login(token);
   await updateBotStats(client);
 
-  const logPath = path.join(import.meta.dir, 'Logging/logs.json')
-  const currentDate = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
-
-  if (!fs.existsSync(path.join(import.meta.dir, 'Logging')))
-    fs.mkdirSync(path.join(import.meta.dir, 'Logging'))
-
-  if (!fs.existsSync(logPath))
-    fs.writeFileSync(logPath, JSON.stringify(
-      [{
-        date: currentDate,
-        user: "SYSTEM_LOGGER",
-        info: "Initialized log!"
-      }]));
-
   env().UPTIME = Date.now();
 }
 
@@ -72,7 +58,7 @@ workerManager.onmessage = async (e) => {
 
   switch (data.type) {
     case 'LOG': {
-      client.log(data.text, data.category);
+      client.logger.log(data.level, data.text);
       break;
     }
     case "SYNC": {

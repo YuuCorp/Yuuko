@@ -1,7 +1,7 @@
 import { type Interaction, Collection, MessageFlags, time } from "discord.js";
 
-import { embedError, logging, YuukoError } from "#utils/index";
-import { type Client, type ClientCommand, type UsableInteraction, YuukoEvent, type Middleware } from "#structures/index";
+import { embedError, YuukoError } from "#utils/index";
+import { type Client, type Command, type UsableInteraction, YuukoEvent, type Middleware } from "#structures/index";
 
 /* discord doesn't have the commands property in their class for somea reason */
 const interactionCreate = new YuukoEvent({
@@ -14,16 +14,26 @@ const interactionCreate = new YuukoEvent({
         // We run the command based on the interaction
         const command = client.commands.find((cmd) => cmd.name == interaction.commandName);
         if (!command) return;
-        client.log(`Interaction received in: ${Date.now() - interaction.createdTimestamp}ms`, "debug");
+
+        client.logger.debug("Interaction latency", {
+          latencyMs: Date.now() - interaction.createdTimestamp,
+        });
+
         checkCooldown(client, command, interaction);
         const start = performance.now();
         const args = await runMiddlewares(command.middlewares, interaction, client);
-        client.log(`Ran middleware in: ${Math.round(performance.now() - start)}ms`, "Debug");
+        client.logger.debug("Middleware execution", {
+          durationMs: Math.round(performance.now() - start),
+          command: command.name,
+        });
 
         if (args.isCommand() && args.isChatInputCommand()) {
-          logging(command, interaction);
+          client.logger.logCommand(command, interaction);
           await command.run({ interaction: args, client });
-          client.log(`Ran command ${command.name} in: ${Date.now() - interaction.createdTimestamp}ms`, "Debug");
+          client.logger.debug("Command execution", {
+            command: command.name,
+            durationMs: Date.now() - interaction.createdTimestamp,
+          });
         }
 
         // Check for autocomplete
@@ -67,7 +77,7 @@ const interactionCreate = new YuukoEvent({
     }
 
 
-    function checkCooldown(client: Client, command: ClientCommand, interaction: UsableInteraction): UsableInteraction {
+    function checkCooldown(client: Client, command: Command, interaction: UsableInteraction): UsableInteraction {
       if (!interaction.isChatInputCommand()) return interaction;
       const commandCooldown = client.cooldowns.get(command.name);
       if (!commandCooldown) {

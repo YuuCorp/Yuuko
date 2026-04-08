@@ -38,7 +38,7 @@ export default {
       if (cachedId) {
         mangaIdFound = true;
         vars.mID = parseInt(cachedId);
-        client.log(`Found cached data for ${normalizedQuery}, ID ${vars.mID}`, "debug");
+        client.logger.debug("Cache ID hit", { query: normalizedQuery, seriesId: vars.mID, type: "MANGA" })
       }
 
     } else {
@@ -54,11 +54,11 @@ export default {
         const mediaListEntry = _mediaListEntry ? _mediaListEntry[vars.mID] : null;
         if (mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
       }
-      client.log("[MangaCmd] Found cache data, returning data...", "debug");
+
+      client.logger.debug("User cache hit", { seriesId: vars.mID, anilistId: interaction.alID, type: "MANGA" })
+
       return void handleData({ media: cacheData }, interaction, "MANGA");
     }
-
-    client.log("[MangaCmd] No cache found, fetching from CringeQL", "debug");
 
     const {
       data: { Media: data },
@@ -70,13 +70,16 @@ export default {
     }
 
     if (!mangaIdFound) redis.set(`_mangaId-${vars.query}`, data.id);
+
     const { mediaListEntry, ...redisData } = data;
     redis.json.set(`_manga-${data.id}`, "$", redisData);
     redis.expireAt(`_manga-${redisData.id}`, new Date(Date.now() + 604800000))
+
     for (const synonym of redisData.synonyms || []) {
       if (!synonym) continue;
       redis.set(`_mangaId-${normalize(synonym)}`, data.id.toString());
     }
+
     return void handleData({ media: data, headers: headers }, interaction, "MANGA", hookData);
   },
 } satisfies Command<{ id?: number, manga?: string }>;
