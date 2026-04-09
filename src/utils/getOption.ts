@@ -3,6 +3,12 @@ import type { User } from "discord.js";
 import { YuukoError } from "./types";
 import { client } from "#src/app";
 
+/**
+ * Reads a string option from either the chat-input interaction or the
+ * hookData passed by another command. Hook data takes precedence so commands
+ * can be invoked programmatically by other commands.
+ * @example const query = getStringOption(interaction, hookData, "anime", true)
+ */
 export function getStringOption<T extends Record<string, string | unknown> | undefined>(interaction: UsableInteraction, hookData: T, key: keyof NonNullable<T> & string, required: true): string;
 export function getStringOption<T extends Record<string, string | unknown> | undefined>(interaction: UsableInteraction, hookData: T, key: keyof NonNullable<T> & string, required?: false): string | null;
 export function getStringOption<T extends Record<string, string | unknown> | undefined>(interaction: UsableInteraction, hookData: T, key: keyof NonNullable<T> & string, required = false) {
@@ -23,6 +29,11 @@ export function getStringOption<T extends Record<string, string | unknown> | und
   return returnValue;
 }
 
+/**
+ * Reads a Discord User option from either the interaction or hookData.
+ * Hook data takes precedence so commands can be invoked programmatically.
+ * @example const target = getUserOption(interaction, hookData, "user", true)
+ */
 export function getUserOption<T extends Record<string, User | unknown> | undefined>(interaction: UsableInteraction, hookData: T, key: keyof NonNullable<T> & string, required: true): User;
 export function getUserOption<T extends Record<string, User | unknown> | undefined>(interaction: UsableInteraction, hookData: T, key: keyof NonNullable<T> & string, required?: false): User | null;
 export function getUserOption<T extends Record<string, User | unknown> | undefined>(interaction: UsableInteraction, hookData: T, key: keyof NonNullable<T> & string, required = false) {
@@ -43,6 +54,12 @@ export function getUserOption<T extends Record<string, User | unknown> | undefin
   return returnValue;
 }
 
+/**
+ * Reads the active subcommand from either the interaction or hookData.
+ * Hook data is keyed by `key` (typically "subcommandType") so the calling
+ * command can pretend it received a slash subcommand.
+ * @example const sub = getSubcommandOption(interaction, hookData, "subcommandType", true)
+ */
 export function getSubcommandOption<T extends Record<string, string | unknown> | undefined>(interaction: UsableInteraction, hookData: T, key: keyof NonNullable<T> & string, required: true): string;
 export function getSubcommandOption<T extends Record<string, string | unknown> | undefined>(interaction: UsableInteraction, hookData: T, key: keyof NonNullable<T> & string, required?: false): string | null;
 export function getSubcommandOption<T extends Record<string, string | unknown> | undefined>(interaction: UsableInteraction, hookData: T, key: keyof NonNullable<T> & string, required = false) {
