@@ -29,7 +29,7 @@ esac
     echo "🛠️  Building $SRC_FILE → $OUT_DIR/$OUT_FILE"
     cargo build --release
 
-    mv "./target/release/libmodules.so" "$OUT_DIR/$OUT_FILE"
+    mv "./target/release/$OUT_FILE" "$OUT_DIR/$OUT_FILE"
 
     echo "✅ Done: $OUT_DIR/$OUT_FILE"
 )
