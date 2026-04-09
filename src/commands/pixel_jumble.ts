@@ -1,4 +1,4 @@
-import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, Collection, EmbedBuilder, ModalBuilder, SlashCommandBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
+import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, Collection, EmbedBuilder, LabelBuilder, ModalBuilder, SlashCommandBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
 import type { Command } from "#structures/index";
 import type { MediaType } from "#graphQL/types";
 import { YuukoError } from "#utils/types";
@@ -134,19 +134,22 @@ export default {
 
           const guessInput = new TextInputBuilder()
             .setCustomId("guess_input")
-            .setLabel("What's your guess?")
             .setStyle(TextInputStyle.Short)
             .setPlaceholder("Type your guess here...")
             .setRequired(true);
 
-          const row = new ActionRowBuilder<TextInputBuilder>().addComponents(guessInput);
-          modal.addComponents(row);
+          const guessLabel = new LabelBuilder()
+            .setLabel("What's your guess?")
+            .setTextInputComponent(guessInput);
+
+          modal.addLabelComponents(guessLabel);
 
           guesses++
           pixelJumbleGames.set(interaction.user.id, { answer: title, collector, won: false, guesses, hintsUsed })
 
           await i.showModal(modal);
           break;
+
         case "hint":
           hintsUsed++;
           pixelationLevel = Math.max(0, pixelationLevel - 1.5);

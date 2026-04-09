@@ -1,12 +1,11 @@
 import { buildPagination, footer, getStringOption, graphQLRequest, SeriesTitle, YuukoError } from "#utils/index";
 import { EmbedBuilder, SlashCommandBuilder, TimestampStyles, time } from "discord.js";
-import ms from "ms";
 import { MediaType, type AiringQueryVariables } from "#graphQL/types";
 import type { Command } from "#structures/index";
 
 const name = "airing";
 const usage = "airing <?in>";
-const description = "Gets the airing schedule for today or `period`. (e.g. `1 week` means today the next week.)";
+const description = "Gets the airing schedule for today or a certain period";
 
 export default {
   name,
@@ -17,7 +16,14 @@ export default {
     .setName(name)
     .setDescription(description)
     .addStringOption((option) => option.setName("user").setDescription("The users whose list you want to use for airing anime."))
-    .addStringOption((option) => option.setName("in").setDescription('Airing *in* (e.g. "1 week")')),
+    .addStringOption((option) => option.setName("period").setDescription("Choose the period when the anime is airing").addChoices(
+      { name: "Today", value: "today" },
+      { name: "Tomorrow", value: "tomorrow" },
+      { name: "Next 7 days", value: "this_week" },
+      { name: "Next 7-14 days", value: "next_week" },
+      { name: "Next 2 weeks", value: "2weeks" },
+      { name: "Next month (30 days)", value: "1month" },
+    )),
 
   run: async ({ interaction }, hookData): Promise<void> => {
     await interaction.deferReply();
@@ -27,27 +33,51 @@ export default {
       nextDay: 0,
       getID: undefined
     };
-    // ^ Check if the user wants to search for a specific day
-    let airingIn = 0;
 
     const username = getStringOption(interaction, hookData, "user");
-    const period = getStringOption(interaction, hookData, "in");
+    const period = getStringOption(interaction, hookData, "period") as "today" | "tomorrow" | "this_week" | "next_week" | "2weeks" | "1month";
     const mediaIDs = [];
 
-    if (period) {
-      // @ts-ignore can't think of any other way to get around this
-      airingIn = ms(period);
-      if (!airingIn) throw new YuukoError("Invalid time format. See `/help` for more information.", { vars: { period } });
+    let startOffset = 0;
+    let periodLength = 7; // in days
+
+    switch (period) {
+      case "today":
+        startOffset = 0;
+        periodLength = 1;
+        break;
+      case "tomorrow":
+        startOffset = 1;
+        periodLength = 1;
+        break;
+      case "this_week":
+        startOffset = 0;
+        periodLength = 7;
+        break;
+      case "next_week":
+        startOffset = 7;
+        periodLength = 7;
+        break;
+      case "2weeks":
+        startOffset = 14;
+        periodLength = 14;
+        break;
+      case "1month":
+        startOffset = 30;
+        periodLength = 30;
+        break;
     }
 
-    // ^ Get current day and time in UTC
-    const _day = new Date(Date.now() + airingIn);
-    const day = new Date(Date.UTC(_day.getFullYear(), _day.getMonth(), _day.getDate()));
-    const nextWeek = new Date(day.getTime());
-    nextWeek.setHours(23, 59, 59, 999);
-    nextWeek.setDate(day.getDate() + 7);
-    vars.dateStart = Math.floor(day.getTime() / 1000);
-    vars.nextDay = Math.floor(nextWeek.getTime() / 1000);
+    const startDate = new Date();
+    startDate.setUTCDate(startDate.getUTCDate() + startOffset);
+    startDate.setUTCHours(0, 0, 0, 0);
+
+    const endDate = new Date(startDate);
+    endDate.setUTCDate(startDate.getUTCDate() + periodLength - 1);
+    endDate.setUTCHours(23, 59, 59, 999);
+
+    vars.dateStart = Math.floor(startDate.getTime() / 1000);
+    vars.nextDay = Math.floor(endDate.getTime() / 1000);
 
     if (username) {
       const {
@@ -81,7 +111,7 @@ export default {
     const chunkSize = 5;
     const fields = [];
 
-    // Sort the airing anime alphabetically by title
+    // Sort the airing anime by date
     airingSchedules.sort((a, b) => (a?.timeUntilAiring || 0) - (b?.timeUntilAiring || 0));
     for (let i = 0; i < airingSchedules.length; i += chunkSize) {
       fields.push(airingSchedules.slice(i, i + chunkSize));
@@ -91,7 +121,7 @@ export default {
     const pageList: EmbedBuilder[] = [];
     fields.forEach((fieldSet, index) => {
       const embed = new EmbedBuilder();
-      embed.setTitle(`Airing between ${day.toDateString()} to ${nextWeek.toDateString()}`);
+      embed.setTitle(`Airing between ${startDate.toDateString()} to ${endDate.toDateString()}`);
       embed.setColor("Green");
       embed.setFooter(footer(headers));
 
@@ -110,4 +140,4 @@ export default {
 
     await buildPagination(interaction, pageList);
   },
-} satisfies Command<{ user?: string, in?: string }>;
+} satisfies Command<{ user?: string, period?: string }>;
