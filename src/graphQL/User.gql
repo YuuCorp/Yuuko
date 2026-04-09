@@ -16,12 +16,28 @@ query User($username: String, $userid: Int) {
             anime {
                 count
                 meanScore
+                standardDeviation
                 minutesWatched
+                episodesWatched
+                genres(limit: 1, sort: [COUNT_DESC]) {
+                    genre
+                    count
+                }
+                formats(limit: 1, sort: [COUNT_DESC]) {
+                    format
+                    count
+                }
             }
             manga {
                 count
                 meanScore
+                standardDeviation
                 chaptersRead
+                volumesRead
+                genres(limit: 1, sort: [COUNT_DESC]) {
+                    genre
+                    count
+                }
             }
         }
     }
