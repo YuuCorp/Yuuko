@@ -21,14 +21,14 @@ export default {
   // .setRequired(true)),
 
   run: async ({ interaction }, hookData): Promise<void> => {
-    const anilistUser = getStringOption(interaction, hookData, "username");
+    const username = getStringOption(interaction, hookData, "username");
 
     let vars: UserQueryVariables = {
-      username: anilistUser,
+      username,
     };
 
     // If the user hasn't provided a user
-    if (!anilistUser) {
+    if (!username) {
       // We try to use the one the user set
       if (interaction.alID) {
         vars = { userid: interaction.alID };

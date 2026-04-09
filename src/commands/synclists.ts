@@ -33,7 +33,7 @@ export default {
       interaction.reply(`Wiping your lists from DB...`);
       redis.del(await redis.keys(`_user${interaction.alID}-*`))
 
-      await db.delete(mediaStatUsers).where(eq(mediaStatUsers.anilistId, interaction.alID!));
+      await db.delete(mediaStatUsers).where(eq(mediaStatUsers.aniListId, interaction.alID!));
 
       return void interaction.editReply(`Successfully wiped your lists from our DB!`);
     } else if (subcommand === "sync") {
@@ -132,7 +132,7 @@ export async function handleSyncing(
   }
 
   const mediasArray = Array.from(bulkMedia);
-  client.logger.debug("Sync media stats", { type: "generic", total: mediasArray.length, anilistId: alID, mediaType: type });
+  client.logger.debug("Sync media stats", { type: "generic", total: mediasArray.length, aniListId: alID, mediaType: type });
   if (mediasArray.length === 0) return;
   // bulk insert media_id, do nothing if exists already
   await db
@@ -141,8 +141,8 @@ export async function handleSyncing(
     .onConflictDoNothing();
 
 
-  const userFromMedias = mediasArray.map((m) => ({ mediaId: m.mediaId, anilistId: alID }));
-  client.logger.debug("Sync media stats users", { type: "generic", total: userFromMedias.length, anilistId: alID, mediaType: type });
+  const userFromMedias = mediasArray.map((m) => ({ mediaId: m.mediaId, aniListId: alID }));
+  client.logger.debug("Sync media stats users", { type: "generic", total: userFromMedias.length, aniListId: alID, mediaType: type });
   // bulk insert user into given media(s)
   await db
     .insert(mediaStatUsers)

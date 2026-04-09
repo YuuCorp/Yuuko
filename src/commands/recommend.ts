@@ -25,10 +25,10 @@ export default {
     await interaction.deferReply();
 
     const type = getStringOption(interaction, hookData, "type", true) as MediaType;
-    const anilistUser = getStringOption(interaction, hookData, "anilistuser", true);
+    const aniListUsername = getStringOption(interaction, hookData, "anilistuser", true);
     const genres = getStringOption(interaction, hookData, "genres", true).replaceAll(", ", "");
 
-    const vars = { type, userName: anilistUser };
+    const vars = { type, userName: aniListUsername };
 
     if (type != "ANIME" && type != "MANGA") throw new YuukoError(`Please specify either manga, or anime as your content type. (Yours was "${type}")`);
 

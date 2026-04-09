@@ -1,4 +1,4 @@
-import { getAnilistUser, YuukoError } from "#utils/index";
+import { getAniListUser, YuukoError } from "#utils/index";
 import { Middleware } from "#structures/index";
 
 export const mwRequireALToken = new Middleware({
@@ -7,10 +7,10 @@ export const mwRequireALToken = new Middleware({
   run: async (interaction, client) => {
     if (!interaction.isCommand()) return;
     const id = interaction.user.id;
-    const alUser = await getAnilistUser(id);
-    if (!alUser || !alUser.anilistToken) throw new YuukoError("You must link your AniList account to use this command!");
+    const alUser = await getAniListUser(id);
+    if (!alUser || !alUser.aniListToken) throw new YuukoError("You must link your AniList account to use this command!");
 
-    interaction.alID = alUser.anilistId;
-    interaction.ALtoken = await client.rsa.decrypt(alUser.anilistToken);
+    interaction.alID = alUser.aniListId;
+    interaction.ALtoken = await client.rsa.decrypt(alUser.aniListToken);
   },
 });

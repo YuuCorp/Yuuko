@@ -1,5 +1,5 @@
 import { footer, getSubcommandOption, updateBotStats, YuukoError } from "#utils/index";
-import { anilistUser } from "#database/models/anilistUser";
+import { aniListUser } from "#database/models/anilistUser";
 import type { Command } from "#structures/index";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags, SlashCommandBuilder } from "discord.js";
 import { db } from "#database/db";
@@ -23,7 +23,7 @@ export default {
     run: async ({ interaction, client }, hookData): Promise<void> => {
         const subcommandType = getSubcommandOption(interaction, hookData, "subcommandType", true) as "help" | "wipe";
 
-        db.query.anilistUser.findFirst({ where: (user, { eq }) => eq(user.discordId, interaction.user.id) });
+        db.query.aniListUser.findFirst({ where: (user, { eq }) => eq(user.discordId, interaction.user.id) });
 
         if (subcommandType === "help") {
             return void (await interaction.reply({
@@ -39,11 +39,11 @@ export default {
             }));
         }
 
-        const user = (await db.select().from(anilistUser).where(eq(anilistUser.discordId, interaction.user.id)).limit(1))[0];
+        const user = (await db.select().from(aniListUser).where(eq(aniListUser.discordId, interaction.user.id)).limit(1))[0];
 
         if (subcommandType === "wipe") {
             if (!user) throw new YuukoError("You don't have an AniList account bound to your Discord account.", { ephemeral: true })
-            await db.delete(anilistUser).where(eq(anilistUser.discordId, interaction.user.id));
+            await db.delete(aniListUser).where(eq(aniListUser.discordId, interaction.user.id));
 
             await updateBotStats(client);
             return void interaction.reply({

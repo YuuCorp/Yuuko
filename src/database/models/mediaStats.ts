@@ -1,6 +1,6 @@
 import { sql, relations } from "drizzle-orm";
 import { sqliteTable, integer, primaryKey, text } from "drizzle-orm/sqlite-core";
-import { anilistUser } from "./anilistUser";
+import { aniListUser } from "./anilistUser";
 
 export const mediaStats = sqliteTable("mediastats", {
     mediaId: integer("media_id", { mode: "number" }).primaryKey(),
@@ -19,13 +19,13 @@ export const mediaStatUsers = sqliteTable("mediastats_users", {
         .notNull()
         .references(() => mediaStats.mediaId, { onDelete: "cascade" }),
 
-    anilistId: integer("anilist_id")
+    aniListId: integer("anilist_id")
         .notNull()
-        .references(() => anilistUser.id, { onDelete: "cascade" }),
-}, (table) => [primaryKey({ columns: [table.mediaId, table.anilistId] })]);
+        .references(() => aniListUser.id, { onDelete: "cascade" }),
+}, (table) => [primaryKey({ columns: [table.mediaId, table.aniListId] })]);
 
 export const mediaStatsRelations = relations(mediaStats, ({ many }) => ({
-    users: many(anilistUser),
+    users: many(aniListUser),
 }));
 
 export const mediaStatsUsersRelations = relations(mediaStatUsers, ({ one }) => ({
@@ -33,8 +33,8 @@ export const mediaStatsUsersRelations = relations(mediaStatUsers, ({ one }) => (
         fields: [mediaStatUsers.mediaId],
         references: [mediaStats.mediaId],
     }),
-    user: one(anilistUser, {
-        fields: [mediaStatUsers.anilistId],
-        references: [anilistUser.anilistId],
+    user: one(aniListUser, {
+        fields: [mediaStatUsers.aniListId],
+        references: [aniListUser.aniListId],
     })
 }))

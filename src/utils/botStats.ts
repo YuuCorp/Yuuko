@@ -10,7 +10,7 @@ export async function getStats() {
 export async function updateBotStats(client: Client) {
     const servers = client.guilds.cache.size;
     const members = client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0);
-    const registered = (await db.query.anilistUser.findMany()).length;
+    const registered = (await db.query.aniListUser.findMany()).length;
     await db.update(tables.botStats).set({ servers, members, registered });
 
 

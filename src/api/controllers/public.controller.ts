@@ -4,7 +4,7 @@ import { RSA } from "#utils/rsaEncryption";
 import { graphQLRequest } from "#utils/graphQLRequest";
 import { srcPath } from "#utils/paths";
 import { db } from "#database/db";
-import { anilistUser } from "#database/models";
+import { aniListUser } from "#database/models";
 import { eq } from "drizzle-orm";
 
 export const publicController = new Elysia({
@@ -32,9 +32,9 @@ export const publicController = new Elysia({
             const decryptedToken = await rsa.decrypt(encryptedToken);
             const { Viewer: data } = (await graphQLRequest("Viewer", {}, decryptedToken)).data;
             if (!data) return { message: "Invalid token" };
-            const existingUser = (await db.select().from(anilistUser).where(eq(anilistUser.discordId, discordId)).limit(1))[0];
+            const existingUser = (await db.select().from(aniListUser).where(eq(aniListUser.discordId, discordId)).limit(1))[0];
             if (existingUser) return { message: "User already registered" };
-            await db.insert(anilistUser).values({ discordId, anilistToken: encryptedToken, anilistId: data.id });
+            await db.insert(aniListUser).values({ discordId, aniListToken: encryptedToken, aniListId: data.id });
 
             console.log(`Registered ${discordId} as ${data.name}`);
             set.status = 201;

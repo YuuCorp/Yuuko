@@ -55,7 +55,7 @@ export default {
         if (mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
       }
 
-      client.logger.debug("User cache hit", { seriesId: vars.mID, anilistId: interaction.alID, type: "generic" })
+      client.logger.debug("User cache hit", { seriesId: vars.mID, aniListId: interaction.alID, type: "generic" })
 
       return void handleData({ media: cacheData }, interaction, client, "MANGA");
     }

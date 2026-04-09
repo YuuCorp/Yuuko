@@ -1,4 +1,4 @@
-import { footer, graphQLRequest, YuukoError, getAnilistUser } from "#utils/index";
+import { footer, graphQLRequest, YuukoError, getAniListUser } from "#utils/index";
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { mwRequireALToken } from "#middleware/alToken";
 import type { Command } from "#structures/index";
@@ -52,10 +52,10 @@ export default {
     if (!interaction.isAutocomplete()) return;
     try {
       // Get the users media lists
-      const alUser = await getAnilistUser(interaction.user.id);
+      const alUser = await getAniListUser(interaction.user.id);
       if (!alUser) return interaction.respond([{ name: "No Anilist account linked", value: "NaN" }]);
 
-      const vars = { userId: +alUser.anilistId };
+      const vars = { userId: +alUser.aniListId };
       const response = (await graphQLRequest("ListQuery", vars)).data;
       if (!response.User || !response.User.mediaListOptions) return interaction.respond([{ name: "No lists found for linked account", value: "NaN" }]);
 

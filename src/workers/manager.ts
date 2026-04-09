@@ -24,7 +24,7 @@ export type LogMessage = {
 
 export type SyncUsers = {
     type: "SYNC",
-    anilistUsers: InferTable<"anilistUser">[];
+    aniListUsers: InferTable<"aniListUser">[];
     usersPerMinute: number;
 };
 
@@ -50,15 +50,15 @@ async function updateSyncedUsers() {
         if (updateAt > currentDate) return;
 
 
-        const anilistUsers = await db.select().from(tables.anilistUser);
+        const aniListUsers = await db.select().from(tables.aniListUser);
         const rsa = new RSA();
 
         // we have to decrpyt the tokens
-        const decryptedUsers = await Promise.all(anilistUsers.map(async (user) => {
-            const decryptedToken = await rsa.decrypt(user.anilistToken);
+        const decryptedUsers = await Promise.all(aniListUsers.map(async (user) => {
+            const decryptedToken = await rsa.decrypt(user.aniListToken);
             return {
                 ...user,
-                anilistToken: decryptedToken,
+                aniListToken: decryptedToken,
             }
         }));
 
@@ -66,7 +66,7 @@ async function updateSyncedUsers() {
 
         self.postMessage({
             type: "SYNC",
-            anilistUsers: decryptedUsers,
+            aniListUsers: decryptedUsers,
             usersPerMinute,
         } satisfies SyncUsers);
 
