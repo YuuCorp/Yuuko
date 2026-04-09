@@ -32,15 +32,15 @@ export default {
 
     if (!userName) {
       // We try to use the one the user set
-      if (!interaction.alID) throw new YuukoError("You have yet to set an AniList token.", { ephemeral: true })
-      vars.userId = interaction.alID;
+      if (!interaction.aniListId) throw new YuukoError("You have yet to set an AniList token.", { ephemeral: true })
+      vars.userId = interaction.aniListId;
     } else {
       vars.user = userName;
     }
 
     const {
       data: { Page: data },
-    } = await graphQLRequest("RecentChart", vars, interaction.ALtoken);
+    } = await graphQLRequest("RecentChart", vars, interaction.aniListToken);
     if (!data?.mediaList) throw new YuukoError("Unable to find specified user.", { vars, ephemeral: true });
     await interaction.deferReply();
 

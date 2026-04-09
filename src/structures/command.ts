@@ -27,8 +27,8 @@ export interface RunOptions<Args = any> {
 }
 
 type BaseExtension = {
-  alID?: number;
-  ALtoken?: string;
+  aniListId?: number;
+  aniListToken?: string;
 };
 
 export type UsableInteraction =

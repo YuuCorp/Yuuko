@@ -44,15 +44,15 @@ export default {
     const cacheData = (await redis.json.get(`_anime-${vars.aID}`)) as AnimeQuery["Media"] | null;
 
     if (cacheData) {
-      if (interaction.alID) {
-        const _mediaListEntry = (await redis.json.get(`_user${interaction.alID}-ANIME`)) as Record<number, CacheEntry>;
+      if (interaction.aniListId) {
+        const _mediaListEntry = (await redis.json.get(`_user${interaction.aniListId}-ANIME`)) as Record<number, CacheEntry>;
         if (!vars.aID) throw new YuukoError("No anime ID found");
         const mediaListEntry = _mediaListEntry ? _mediaListEntry[vars.aID] : null;
 
         if (mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
       }
 
-      client.logger.debug("User cache hit", { type: "commandDebug", command: name, seriesId: vars.aID, aniListId: interaction.alID })
+      client.logger.debug("User cache hit", { type: "commandDebug", command: name, seriesId: vars.aID, aniListId: interaction.aniListId })
 
       return void handleData({ media: cacheData }, interaction, client, "ANIME");
     }
@@ -60,7 +60,7 @@ export default {
     const {
       data: { Media: data },
       headers,
-    } = await graphQLRequest("Anime", vars, interaction.ALtoken);
+    } = await graphQLRequest("Anime", vars, interaction.aniListToken);
 
     if (!data) {
       throw new YuukoError("No anime found.", { vars });

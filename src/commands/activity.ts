@@ -26,7 +26,7 @@ export default {
 
     const vars: UserQueryVariables = {
       username,
-      userid: interaction.alID,
+      userid: interaction.aniListId,
     };
 
     if (!username && !vars.userid) throw new YuukoError("You need to provide a user to search for or link your AniList account. (check /auth help for more info)");
@@ -35,7 +35,7 @@ export default {
       const uData = (
         await graphQLRequest("User", {
           username: vars.username,
-        }, interaction.ALtoken)
+        }, interaction.aniListToken)
       ).data.User;
 
       if (!uData?.id) throw new YuukoError("Couldn't find user id.", { vars });
@@ -45,7 +45,7 @@ export default {
 
     const {
       data: { Activity: data },
-    } = await graphQLRequest("Activity", vars, interaction.ALtoken);
+    } = await graphQLRequest("Activity", vars, interaction.aniListToken);
 
     if (!data) {
       throw new YuukoError("Couldn't find any data.", { vars });
