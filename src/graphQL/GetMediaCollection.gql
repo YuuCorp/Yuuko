@@ -46,7 +46,7 @@ query GetMediaCollection($type: MediaType, $userName: String, $userId: Int, $sor
             name
           }
         }
-        score(format: POINT_10_DECIMAL)
+        score
         status
         notes
         progress
