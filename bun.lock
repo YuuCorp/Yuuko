@@ -6,7 +6,7 @@
       "name": "yuuko",
       "dependencies": {
         "@elysiajs/cors": "^1.2.0",
-        "discord.js": "^14.26.0",
+        "discord.js": "^14.26.2",
         "dotenv-flow": "^4.1.0",
         "drizzle-orm": "^0.39.3",
         "elysia": "^1.2.12",

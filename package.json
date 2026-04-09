@@ -25,13 +25,14 @@
     "module:build": "sh ./src/modules/build.sh",
     "gen:gql": "graphql-codegen",
     "gen:queries": "bun run ./src/scripts/genQueries.ts",
+    "local:link": "bun run ./src/scripts/localLink.ts",
     "db:push": "bun drizzle-kit push",
     "db:generate": "bun drizzle-kit generate",
     "db:studio": "bun drizzle-kit studio"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.2.0",
-    "discord.js": "^14.26.0",
+    "discord.js": "^14.26.2",
     "dotenv-flow": "^4.1.0",
     "drizzle-orm": "^0.39.3",
     "elysia": "^1.2.12",
