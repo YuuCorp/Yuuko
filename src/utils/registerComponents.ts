@@ -2,9 +2,10 @@ import type { YuukoComponent } from ".";
 import type { Client } from "#structures/index";
 import path from "path";
 import fs from "fs";
+import { srcPath } from "./paths";
 
 export async function registerComponents(client: Client) {
-  const compPath = path.join(import.meta.dir, "..", "components");
+  const compPath = srcPath("components");
   fs.readdirSync(compPath)
     .filter((file) => file.endsWith(".ts"))
     .forEach(file => {

@@ -1,8 +1,8 @@
 import { execSync, spawnSync } from "child_process";
 import { Elysia, t } from "elysia";
 import { sqlite } from "#database/db";
-import path from "path";
 import fs from "fs";
+import { srcPath } from "#utils/paths";
 
 export const triggerController = new Elysia({
   prefix: "/trigger",
@@ -27,7 +27,7 @@ export const triggerController = new Elysia({
   .post(
     "/wipe-logs",
     async () => {
-      const logPath = path.join(import.meta.dir, "..", "..", "logging", "logs.json");
+      const logPath = srcPath("logging", "logs.json");
       fs.writeFileSync(logPath, JSON.stringify([]), "utf8");
       return { message: "Wiped all logs!" };
     },

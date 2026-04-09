@@ -15,3 +15,4 @@ export * from "./common";
 export * from "./botStats";
 export * from "./decodeJWT";
 export * from "./getOption";
+export * from "./paths";

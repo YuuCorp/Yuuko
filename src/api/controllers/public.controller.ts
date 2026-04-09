@@ -1,13 +1,11 @@
-import path from "node:path";
 import fs from "node:fs";
 import { Elysia, t } from "elysia";
 import { RSA } from "#utils/rsaEncryption";
 import { graphQLRequest } from "#utils/graphQLRequest";
+import { srcPath } from "#utils/paths";
 import { db } from "#database/db";
 import { anilistUser } from "#database/models";
 import { eq } from "drizzle-orm";
-
-const srcFolder = path.join(import.meta.dir, "..", "..");
 
 export const publicController = new Elysia({
     prefix: "/public",
@@ -18,7 +16,7 @@ export const publicController = new Elysia({
         async ({ set }) => {
             set.headers["content-type"] = "text/plain";
             set.status = 200;
-            return fs.readFileSync(path.join(srcFolder, "RSA", "id_rsa.pub"), "utf-8");
+            return fs.readFileSync(srcPath("RSA", "id_rsa.pub"), "utf-8");
         },
         { response: t.String(), }
     )

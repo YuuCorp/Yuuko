@@ -1,16 +1,16 @@
 import fs from 'node:fs'
-import path from 'node:path'
 import { Client, type Check } from "#structures/index";
+import { srcPath } from "#utils/paths";
 
 export async function runChecks(client: Client) {
   // Flatten the array of checks
   const checks: Check[] = (
     await Promise.all(
       fs
-        .readdirSync(path.join(import.meta.dir))
+        .readdirSync(srcPath("checks"))
         .filter(file => file.endsWith('.ts') && file !== 'run.ts')
         .map(async (file) => {
-          const check = await import(path.join(import.meta.dir, file))
+          const check = await import(srcPath("checks", file))
           return check.default
         }),
     )

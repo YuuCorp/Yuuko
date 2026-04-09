@@ -1,9 +1,8 @@
 import { EmbedBuilder, SlashCommandBuilder, time } from "discord.js";
 import fs from "fs";
-import path from "path";
 import { db, tables } from "#database/db";
 import type { Command, CommandType } from "#structures/index";
-import { buildPagination, CommandCategories } from "#utils/index";
+import { buildPagination, CommandCategories, srcPath } from "#utils/index";
 import { desc } from "drizzle-orm";
 
 function generateHelpEmbeds(cmdsArr: string[], category: keyof typeof CommandCategories) {
@@ -53,7 +52,7 @@ export default {
 
   run: async ({ interaction, client }): Promise<void> => {
     // Require all files from the commands folder and fetch description
-    const cmds = fs.readdirSync(import.meta.dir).filter((x) => x.endsWith(".ts") && x != "help.ts");
+    const cmds = fs.readdirSync(srcPath("commands")).filter((x) => x.endsWith(".ts") && x != "help.ts");
     const cmdsDesc = [];
     const cmdGroups: Record<CommandType, Partial<Command>[]> = {
       "User": [],
@@ -63,7 +62,7 @@ export default {
       "Misc": [],
     };
     for (const cmd of cmds) {
-      const cmdEntry = (await import(path.join(import.meta.dir, cmd))).default as Command;
+      const cmdEntry = (await import(srcPath("commands", cmd))).default as Command;
       if (cmdEntry.commandType === "Internal") continue;
       if (!cmdGroups[cmdEntry.commandType]) cmdGroups[cmdEntry.commandType] = [];
       cmdGroups[cmdEntry.commandType].push({ usage: cmdEntry.usage, name: cmdEntry.name, description: cmdEntry.description });

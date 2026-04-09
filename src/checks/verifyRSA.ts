@@ -1,14 +1,14 @@
 import fs from 'fs'
-import path from 'path'
 import { RSA } from '#utils/rsaEncryption'
 import { Check } from '#structures/index'
+import { srcPath } from '#utils/paths'
 
 const rsaPublicCheck = new Check({
   name: 'RSA Public Key Check',
   description: 'Ensure that RSA/id_rsa.pub is present and valid. This is required to encrypt sensitive content.',
   optional: false,
   run: () => {
-    if (!fs.existsSync(path.join(import.meta.dir, '..', 'RSA', 'id_rsa.pub')))
+    if (!fs.existsSync(srcPath('RSA', 'id_rsa.pub')))
       throw new Error('RSA/id_rsa.pub does not exist.')
   },
 })
@@ -18,7 +18,7 @@ const rsaPrivateCheck = new Check({
   description: 'Ensure that RSA/id_rsa is present and valid. This is required to decrypt sensitive content.',
   optional: false,
   run: () => {
-    if (!fs.existsSync(path.join(import.meta.dir, '..', 'RSA', 'id_rsa')))
+    if (!fs.existsSync(srcPath('RSA', 'id_rsa')))
       throw new Error('RSA/id_rsa does not exist.')
   },
 })
