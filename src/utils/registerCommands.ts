@@ -14,9 +14,10 @@ export async function registerCommands(client: Client) {
 
   const slashCommands = await Promise.all(commandFiles.map(async (file) => {
     const cmd = (await import(path.join(commandsPath, file))).default as Command;
-    const builder = cmd?.withBuilder ?? {};
+    const builder = cmd?.withBuilder;
+    const builderJson = builder && typeof (builder as any).toJSON === "function" ? (builder as any).toJSON() : (builder ?? {});
 
-    const data = { ...builder, ...cmd };
+    const data = { ...builderJson, ...cmd };
     client.commands.set(data.name, data);
     return data;
   }));
