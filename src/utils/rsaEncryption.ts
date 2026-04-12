@@ -1,6 +1,7 @@
 import { subtle } from "crypto";
 import fs from "fs";
 import path from "path";
+import { srcPath } from "./paths";
 
 type RSAkey = CryptoKey & { algorithm: { modulusLength: number } };
 
@@ -17,7 +18,7 @@ export class RSA {
   }
 
   private static async generateRSAPair() {
-    const RSAdirectory = path.join(import.meta.dir, '..', 'RSA');
+    const RSAdirectory = srcPath('RSA');
     if (fs.existsSync(path.join(RSAdirectory, 'id_rsa'))) return;
 
     const keyPair = await subtle.generateKey({
@@ -40,8 +41,8 @@ export class RSA {
   }
 
   static async loadKeys() {
-    const _publicRSA = path.join(import.meta.dir, "..", "RSA", "id_rsa.pub");
-    const _privateRSA = path.join(import.meta.dir, "..", "RSA", "id_rsa");
+    const _publicRSA = srcPath("RSA", "id_rsa.pub");
+    const _privateRSA = srcPath("RSA", "id_rsa");
 
     const publicExists = fs.existsSync(_publicRSA);
     const privateExists = fs.existsSync(_privateRSA);

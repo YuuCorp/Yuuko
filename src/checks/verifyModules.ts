@@ -1,9 +1,9 @@
 import fs from 'fs'
-import path from 'path'
 import { Check } from '#structures/index'
 import { suffix } from "bun:ffi";
+import { srcPath } from '#utils/paths'
 
-const getLibPath = (name: string) => path.join(import.meta.dir, "../modules", `compiled/lib${name}.${suffix}`);
+const getLibPath = (name: string) => srcPath("modules", "compiled", `lib${name}.${suffix}`);
 
 const defaultModule = new Check({
     name: 'FFI default module check',

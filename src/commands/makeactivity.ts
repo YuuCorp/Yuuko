@@ -1,6 +1,6 @@
-import { footer, graphQLRequest, YuukoError, getAnilistUser } from "#utils/index";
+import { footer, graphQLRequest, YuukoError, getAniListUser } from "#utils/index";
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import { mwRequireALToken } from "#middleware/alToken";
+import { mwRequireAniListToken } from "#middleware/alToken";
 import type { Command } from "#structures/index";
 
 const name = "makeactivity";
@@ -11,7 +11,7 @@ export default {
   name,
   usage,
   description,
-  middlewares: [mwRequireALToken],
+  middlewares: [mwRequireAniListToken],
   commandType: "Anilist",
   withBuilder: new SlashCommandBuilder()
     .setName(name)
@@ -52,10 +52,10 @@ export default {
     if (!interaction.isAutocomplete()) return;
     try {
       // Get the users media lists
-      const alUser = await getAnilistUser(interaction.user.id);
-      if (!alUser) return interaction.respond([{ name: "No Anilist account linked", value: "NaN" }]);
+      const aniListUser = await getAniListUser(interaction.user.id);
+      if (!aniListUser) return interaction.respond([{ name: "No Anilist account linked", value: "NaN" }]);
 
-      const vars = { userId: +alUser.anilistId };
+      const vars = { userId: +aniListUser.aniListId };
       const response = (await graphQLRequest("ListQuery", vars)).data;
       if (!response.User || !response.User.mediaListOptions) return interaction.respond([{ name: "No lists found for linked account", value: "NaN" }]);
 
@@ -93,12 +93,12 @@ export default {
       const statusData = hookData?.subcommandType === "status" ? hookData : undefined;
       const statusText = statusData?.text ?? interaction.options.getString("text", true);
       const vars = { text: getEmojis(statusText), asHtml: true };
-      if (!interaction.ALtoken) throw new YuukoError("No Anilist token found.", { ephemeral: true });
+      if (!interaction.aniListToken) throw new YuukoError("No Anilist token found.", { ephemeral: true });
 
       const {
         data: { SaveTextActivity: data },
         headers,
-      } = await graphQLRequest("SaveTextActivity", vars, interaction.ALtoken);
+      } = await graphQLRequest("SaveTextActivity", vars, interaction.aniListToken);
       const userName = data?.user?.name || "Unknown";
       const userText = data?.text || "Unknown";
       if (!userName || !userText) return;
@@ -126,12 +126,12 @@ export default {
         }
       }
 
-      if (!interaction.ALtoken) throw new YuukoError("No Anilist token found.", { ephemeral: true });
+      if (!interaction.aniListToken) throw new YuukoError("No Anilist token found.", { ephemeral: true });
 
       const {
         data: { SaveMediaListEntry: data },
         headers,
-      } = await graphQLRequest("SaveMediaList", vars, interaction.ALtoken);
+      } = await graphQLRequest("SaveMediaList", vars, interaction.aniListToken);
       if (!data) throw new YuukoError("Something went wrong while making the activity.", { ephemeral: true });
       const mediaListActivity = new EmbedBuilder()
         .setURL(`https://anilist.co/${data?.media?.type || ""}/${data?.mediaId || ""}`)

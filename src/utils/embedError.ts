@@ -1,6 +1,11 @@
 import { EmbedBuilder } from 'discord.js'
 import type { YuukoError } from './types'
 
+/**
+ * Converts a YuukoError into a red Discord embed with the message, optional
+ * params, and optional cause.
+ * @example interaction.reply({ embeds: [embedError(err)] })
+ */
 export function embedError(err: YuukoError): EmbedBuilder {
   const embed = new EmbedBuilder()
     .setTitle('Error')

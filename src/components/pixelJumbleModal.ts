@@ -1,10 +1,10 @@
-import { mwRequireALToken } from "#middleware/alToken";
+import { mwRequireAniListToken } from "#middleware/alToken";
 import { YuukoError, type YuukoComponent } from "#utils/types";
 import { MessageFlags } from "discord.js";
 
 export default {
     name: "pixel_jumble_modal",
-    middlewares: [mwRequireALToken],
+    middlewares: [mwRequireAniListToken],
     run: async (interaction, args, client) => {
         if (!interaction.isModalSubmit()) return;
 

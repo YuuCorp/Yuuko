@@ -1,9 +1,10 @@
 import path from "path";
 import fs from "fs";
 import type { Client, ClientEvent, YuukoEvent } from "#structures/index";
+import { srcPath } from "./paths";
 
 export async function registerEvents(client: Client) {
-  const eventsPath = path.join(import.meta.dir, "..", "events");
+  const eventsPath = srcPath("events");
 
   const events: YuukoEvent<ClientEvent>[] = (
     await Promise.all(

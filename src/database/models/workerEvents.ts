@@ -1,4 +1,4 @@
-import { anilistUser } from "#models/index";
+import { aniListUser } from "#models/index";
 import { relations, sql } from "drizzle-orm";
 import { integer, primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
@@ -23,10 +23,10 @@ export const reminderUsers = sqliteTable("reminderusers", {
         .notNull()
         .references(() => workerEvents.id, { onDelete: "cascade" }),
 
-    anilistId: integer("anilist_id")
+    aniListId: integer("anilist_id")
         .notNull()
-        .references(() => anilistUser.id, { onDelete: "cascade" })
-}, (table) => [primaryKey({ columns: [table.id, table.anilistId] })]);
+        .references(() => aniListUser.id, { onDelete: "cascade" })
+}, (table) => [primaryKey({ columns: [table.id, table.aniListId] })]);
 
 export const workerEventsRelations = relations(workerEvents, ({ many }) => ({
     reminderUsers: many(reminderUsers),
@@ -37,8 +37,8 @@ export const reminderUsersRelations = relations(reminderUsers, ({ one }) => ({
         fields: [reminderUsers.id],
         references: [workerEvents.id],
     }),
-    anilistUser: one(anilistUser, {
-        fields: [reminderUsers.anilistId],
-        references: [anilistUser.anilistId],
+    aniListUser: one(aniListUser, {
+        fields: [reminderUsers.aniListId],
+        references: [aniListUser.aniListId],
     }),
 }));

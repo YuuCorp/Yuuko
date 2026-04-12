@@ -1,6 +1,11 @@
 import { eq } from 'drizzle-orm';
 import { db, tables } from "#database/db";
 
-export async function getAnilistUser(discordId: string) {
-     return (await db.select().from(tables.anilistUser).where(eq(tables.anilistUser.discordId, discordId)).limit(1))[0]
+/**
+ * Looks up a linked AniList account by Discord user ID. Returns the row or
+ * undefined if the user has not linked their account.
+ * @example const user = await getAniListUser(interaction.user.id)
+ */
+export async function getAniListUser(discordId: string) {
+     return (await db.select().from(tables.aniListUser).where(eq(tables.aniListUser.discordId, discordId)).limit(1))[0]
 }

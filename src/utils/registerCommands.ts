@@ -3,11 +3,12 @@ import fs from "fs";
 import { Client, type Command } from "#structures/index";
 import { REST, Routes } from "discord.js";
 import { env } from '#env';
+import { srcPath } from "./paths";
 
 export async function registerCommands(client: Client) {
   client.logger.info("Starting bot", { type: "startup", environment: env().NODE_ENV })
 
-  const commandsPath = path.join(import.meta.dir, "..", "commands");
+  const commandsPath = srcPath("commands");
   const commandFiles = fs.readdirSync(commandsPath).filter((file) => file.endsWith(".ts"));
 
   client.logger.info("Loaded commands", { type: "startup", total: commandFiles.length, commands: commandFiles })

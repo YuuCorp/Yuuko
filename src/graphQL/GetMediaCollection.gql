@@ -1,65 +1,65 @@
 query GetMediaCollection($type: MediaType, $userName: String, $userId: Int, $sort: [MediaListSort]) {
-  MediaListCollection(type: $type, userName: $userName, userId: $userId, sort: $sort) {
-    lists {
-      entries {
-        media {
-          id
-          title {
-            english
-            romaji
-            native
-          }
-          genres
-          nextAiringEpisode {
-            airingAt
-            timeUntilAiring
-            episode
-          }
-          description
-          coverImage {
-            large
-            medium
-          }
-          format
-          siteUrl
-          source
-          duration
-          synonyms
-          episodes
-          chapters
-          meanScore
-          volumes
-          isAdult
-          startDate {
-            day
-            month
-            year
-          }
-          endDate {
-            day
-            month
-            year
-          }
-          bannerImage
-          tags {
-            rank
+    MediaListCollection(type: $type, userName: $userName, userId: $userId, sort: $sort) {
+        lists {
+            entries {
+                media {
+                    id
+                    title {
+                        english
+                        romaji
+                        native
+                    }
+                    genres
+                    nextAiringEpisode {
+                        airingAt
+                        timeUntilAiring
+                        episode
+                    }
+                    description
+                    coverImage {
+                        large
+                        medium
+                    }
+                    format
+                    siteUrl
+                    source
+                    duration
+                    synonyms
+                    episodes
+                    chapters
+                    meanScore
+                    volumes
+                    isAdult
+                    startDate {
+                        day
+                        month
+                        year
+                    }
+                    endDate {
+                        day
+                        month
+                        year
+                    }
+                    bannerImage
+                    tags {
+                        rank
+                        name
+                    }
+                }
+                score
+                status
+                notes
+                progress
+                updatedAt
+            }
             name
-          }
         }
-        score
-        status
-        notes
-        progress
-        updatedAt
-      }
-      name
+        user {
+            name
+            mediaListOptions {
+                scoreFormat
+            }
+            id
+        }
     }
-    user {
-      name
-      mediaListOptions {
-        scoreFormat
-      }
-      id
-    }
-  }
 }

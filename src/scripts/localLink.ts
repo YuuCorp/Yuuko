@@ -21,7 +21,7 @@ import { spawn } from "node:child_process";
 import dotenvFlow from "dotenv-flow";
 import { eq } from "drizzle-orm";
 import { db } from "#database/db";
-import { anilistUser } from "#database/models";
+import { aniListUser } from "#database/models";
 import { RSA } from "#utils/rsaEncryption";
 import { graphQLRequest } from "#utils/graphQLRequest";
 
@@ -131,19 +131,19 @@ if (!data?.Viewer) {
   process.exit(1);
 }
 
-const { id: anilistId, name } = data.Viewer;
+const { id: aniListId, name } = data.Viewer;
 const encryptedToken = await rsa.encrypt(token);
 
-const existing = (await db.select().from(anilistUser).where(eq(anilistUser.discordId, discordId)).limit(1))[0];
+const existing = (await db.select().from(aniListUser).where(eq(aniListUser.discordId, discordId)).limit(1))[0];
 if (existing) {
   await db
-    .update(anilistUser)
-    .set({ anilistToken: encryptedToken, anilistId })
-    .where(eq(anilistUser.discordId, discordId));
-  console.log(`Updated link: discord ${discordId} ↔ anilist ${name} (${anilistId})`);
+    .update(aniListUser)
+    .set({ aniListToken: encryptedToken, aniListId })
+    .where(eq(aniListUser.discordId, discordId));
+  console.log(`Updated link: discord ${discordId} ↔ anilist ${name} (${aniListId})`);
 } else {
-  await db.insert(anilistUser).values({ discordId, anilistToken: encryptedToken, anilistId });
-  console.log(`Linked: discord ${discordId} ↔ anilist ${name} (${anilistId})`);
+  await db.insert(aniListUser).values({ discordId, aniListToken: encryptedToken, aniListId });
+  console.log(`Linked: discord ${discordId} ↔ anilist ${name} (${aniListId})`);
 }
 
 process.exit(0);

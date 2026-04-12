@@ -1,9 +1,9 @@
-import path from "path";
 import { Collection, Client as DiscordClient, InteractionCollector, type ClientOptions } from "discord.js";
 import type { YuukoComponent } from "#utils/types";
 import type { Command } from "./command";
 import Logger from "#utils/logger";
 import { RSA } from "#utils/rsaEncryption";
+import { srcPath } from "#utils/paths";
 import { Modules } from "./modules";
 
 export class Client extends DiscordClient {
@@ -18,7 +18,7 @@ export class Client extends DiscordClient {
   constructor(o: ClientOptions) {
     super(o);
 
-    this.logger = new Logger(path.join(import.meta.dir, "..", "logging", "logs.json"));
+    this.logger = new Logger(srcPath("logging", "logs.json"));
     this.commands = new Collection();
     this.components = new Collection();
     this.cooldowns = new Collection();

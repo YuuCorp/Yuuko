@@ -1,3 +1,8 @@
+/**
+ * Decodes a JWT's header and payload from base64 without verifying the
+ * signature. Use only for inspection (e.g. checking expiry), never for trust.
+ * @example decodeJWT(token).payload.exp // => 1735689600
+ */
 export function decodeJWT(JWT: string) {
     const splitJWT = JWT.split(".");
     const decodeBase64 = (a: string) => Buffer.from(a, "base64").toString()

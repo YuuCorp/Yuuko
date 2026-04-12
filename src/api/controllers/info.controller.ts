@@ -1,11 +1,9 @@
-import path from "node:path";
 import fs from "node:fs";
 import { desc } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db, tables } from "#database/db";
 import { getStats } from "#utils/botStats";
-
-const srcFolder = path.join(import.meta.dir, "..", "..");
+import { srcPath } from "#utils/paths";
 
 export const infoController = new Elysia({
     prefix: "/info",
@@ -53,7 +51,7 @@ export const infoController = new Elysia({
         async ({ set }) => {
             set.headers["content-type"] = "text/plain";
             set.status = 200;
-            return fs.readFileSync(path.join(import.meta.dir, "..", "..", "RSA", "id_rsa.pub"), "utf-8");
+            return fs.readFileSync(srcPath("RSA", "id_rsa.pub"), "utf-8");
         },
         { response: t.String(), }
     )
@@ -75,7 +73,7 @@ export const infoController = new Elysia({
     );
 
 function readLogFile() {
-    const logPath = path.join(srcFolder, "logging", "logs.json");
+    const logPath = srcPath("logging", "logs.json");
     const lines = fs.readFileSync(logPath, "utf-8").split("\n").filter(Boolean);
     return lines.map((line) => JSON.parse(line));
 }

@@ -2,7 +2,7 @@ import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, Collec
 import type { Command } from "#structures/index";
 import type { MediaType } from "#graphQL/types";
 import { YuukoError } from "#utils/types";
-import { mwRequireALToken } from "#middleware/alToken";
+import { mwRequireAniListToken } from "#middleware/alToken";
 import { graphQLRequest } from "#utils/graphQLRequest";
 import { SeriesTitle } from "#utils/common";
 import { ptr, toBuffer, type Library, type Pointer } from "bun:ffi";
@@ -18,7 +18,7 @@ export default {
   name,
   usage,
   description,
-  middlewares: [mwRequireALToken],
+  middlewares: [mwRequireAniListToken],
   commandType: "Anilist",
   withBuilder: new SlashCommandBuilder()
     .setName(name)
@@ -39,7 +39,7 @@ export default {
 
     const msg = await interaction.deferReply({ withResponse: true });
 
-    const { data: viewer } = await graphQLRequest("Viewer", {}, interaction.ALtoken);
+    const { data: viewer } = await graphQLRequest("Viewer", {}, interaction.aniListToken);
     if (!viewer) throw new YuukoError("Couldn't fetch your profile using your token to get an entry");
 
     const statistics = viewer.Viewer?.statistics;
@@ -47,7 +47,7 @@ export default {
 
     if (!totalSize) throw new YuukoError(`We could not find enough entries in your list for the specified media type (got ${totalSize})`)
 
-    const vars = { type, userId: interaction.alID, chunk: Math.floor(Math.random() * totalSize) };
+    const vars = { type, userId: interaction.aniListId, chunk: Math.floor(Math.random() * totalSize) };
     const { data: { MediaListCollection: data } } = await graphQLRequest("PixelJumble", vars);
 
     if (!data || !data.lists || data.lists.length < 1) throw new YuukoError("Couldn't find any data from the user specified.", { vars });

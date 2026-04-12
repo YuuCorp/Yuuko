@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "discord.js";
 import { redis } from "#caching/redis";
 import { MediaType, type GetMediaCollectionQuery } from "#graphQL/types";
-import { mwRequireALToken } from "#middleware/alToken";
+import { mwRequireAniListToken } from "#middleware/alToken";
 import type { Command } from "#structures/index";
 import { db } from "#database/db";
 import { normalize, graphQLRequest, type AlwaysExist, type CacheEntry, type GraphQLResponse, YuukoError, getSubcommandOption } from "#utils/index";
@@ -19,7 +19,7 @@ export default {
   usage,
   description,
   cooldown,
-  middlewares: [mwRequireALToken],
+  middlewares: [mwRequireAniListToken],
   commandType: "Anilist",
   withBuilder: new SlashCommandBuilder()
     .setName(name)
@@ -31,26 +31,26 @@ export default {
 
     if (subcommand === "wipe") {
       interaction.reply(`Wiping your lists from DB...`);
-      redis.del(await redis.keys(`_user${interaction.alID}-*`))
+      redis.del(await redis.keys(`_user${interaction.aniListId}-*`))
 
-      await db.delete(mediaStatUsers).where(eq(mediaStatUsers.anilistId, interaction.alID!));
+      await db.delete(mediaStatUsers).where(eq(mediaStatUsers.aniListId, interaction.aniListId!));
 
       return void interaction.editReply(`Successfully wiped your lists from our DB!`);
     } else if (subcommand === "sync") {
       await interaction.deferReply();
       const { data: animeData } = await graphQLRequest("GetMediaCollection", {
-        userId: interaction.alID,
+        userId: interaction.aniListId,
         type: MediaType.Anime,
-      }, interaction.ALtoken);
+      }, interaction.aniListToken);
 
-      if (animeData) await handleSyncing({ media: animeData }, interaction.alID!, MediaType.Anime);
+      if (animeData) await handleSyncing({ media: animeData }, interaction.aniListId!, MediaType.Anime);
 
       const { data: mangaData } = await graphQLRequest("GetMediaCollection", {
-        userId: interaction.alID,
+        userId: interaction.aniListId,
         type: MediaType.Manga,
-      }, interaction.ALtoken);
+      }, interaction.aniListToken);
 
-      if (mangaData) await handleSyncing({ media: mangaData }, interaction.alID!, MediaType.Manga);
+      if (mangaData) await handleSyncing({ media: mangaData }, interaction.aniListId!, MediaType.Manga);
 
       const commandCooldown = client.cooldowns.get(name);
       if (commandCooldown) commandCooldown.set(interaction.user.id, Date.now() + cooldown * 1000);
@@ -65,7 +65,7 @@ export async function handleSyncing(
     media: AlwaysExist<GetMediaCollectionQuery>;
     headers?: GraphQLResponse["headers"];
   },
-  alID: number,
+  aniListId: number,
   type: MediaType,
 ) {
 
@@ -85,7 +85,7 @@ export async function handleSyncing(
       const cacheEntry: CacheEntry = {
         user: {
           name: user.name,
-          id: alID,
+          id: aniListId,
           mediaListOptions: user.mediaListOptions,
         },
         status: entry.status,
@@ -132,7 +132,7 @@ export async function handleSyncing(
   }
 
   const mediasArray = Array.from(bulkMedia);
-  client.logger.debug("Sync media stats", { type: "generic", total: mediasArray.length, anilistId: alID, mediaType: type });
+  client.logger.debug("Sync media stats", { type: "generic", total: mediasArray.length, aniListId: aniListId, mediaType: type });
   if (mediasArray.length === 0) return;
   // bulk insert media_id, do nothing if exists already
   await db
@@ -141,8 +141,8 @@ export async function handleSyncing(
     .onConflictDoNothing();
 
 
-  const userFromMedias = mediasArray.map((m) => ({ mediaId: m.mediaId, anilistId: alID }));
-  client.logger.debug("Sync media stats users", { type: "generic", total: userFromMedias.length, anilistId: alID, mediaType: type });
+  const userFromMedias = mediasArray.map((m) => ({ mediaId: m.mediaId, aniListId: aniListId }));
+  client.logger.debug("Sync media stats users", { type: "generic", total: userFromMedias.length, aniListId: aniListId, mediaType: type });
   // bulk insert user into given media(s)
   await db
     .insert(mediaStatUsers)

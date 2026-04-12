@@ -175,7 +175,7 @@ export async function handleData(
 
   if (mediaUsers.length > 1) {
     const mediaPool = mediaUsers.map(async (user) => {
-      const result = await redis.json.get(`_user${user.anilistId}-${media.id}`,).catch((e) => {
+      const result = await redis.json.get(`_user${user.aniListId}-${media.id}`,).catch((e) => {
         client.logger.error(e);
         return;
       });

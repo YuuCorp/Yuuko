@@ -21,24 +21,24 @@ export default {
   // .setRequired(true)),
 
   run: async ({ interaction }, hookData): Promise<void> => {
-    const anilistUser = getStringOption(interaction, hookData, "username");
+    const username = getStringOption(interaction, hookData, "username");
 
     let vars: UserQueryVariables = {
-      username: anilistUser,
+      username,
     };
 
     // If the user hasn't provided a user
-    if (!anilistUser) {
+    if (!username) {
       // We try to use the one the user set
-      if (interaction.alID) {
-        vars = { userid: interaction.alID };
+      if (interaction.aniListId) {
+        vars = { userid: interaction.aniListId };
       } else {
         throw new YuukoError("You have yet to set an AniList token.", { ephemeral: true });
       }
     }
 
     // Make the HTTP Api request
-    const { data, headers } = await graphQLRequest("User", vars, interaction.ALtoken);
+    const { data, headers } = await graphQLRequest("User", vars, interaction.aniListToken);
     const response = data.User;
 
     if (!response) throw new YuukoError("Couldn't find any data.", { vars });
