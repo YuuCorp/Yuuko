@@ -7,7 +7,7 @@ query GetUserList($type: MediaType, $userId: Int) {
                 }
                 status
                 progress
-                score(format: POINT_10_DECIMAL)
+                score
                 notes
             }
         }
