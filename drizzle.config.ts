@@ -6,5 +6,5 @@ export default defineConfig({
     dialect: "sqlite",
     dbCredentials: {
         url: "file:./src/database/sqlite/db.sqlite",
-    }
+    },
 });
