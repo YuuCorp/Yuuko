@@ -40,7 +40,7 @@ ENV PATH="/root/.bun/bin:${PATH}"
 
 # Install production-only dependencies
 COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile -p
+RUN bun install --frozen-lockfile --production
 
 # Copy source and compiled FFI
 COPY --from=builder /usr/src/Yuuko/src ./src
