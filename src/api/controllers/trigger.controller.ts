@@ -69,7 +69,7 @@ export const triggerController = new Elysia({
     {
       detail: {
         summary: "Create Announcement",
-        tags: ["Protected / Info"],
+        tags: ["Protected / Admin"],
       }, body: t.Object({ announcement: t.String(), date: t.String() }), response: {
         201: t.Object({ message: t.String() }),
       },
