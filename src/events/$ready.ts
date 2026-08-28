@@ -1,6 +1,7 @@
 import { ActivityType } from "discord.js";
 import { YuukoEvent } from "#structures/index";
 import { registerCommands, registerComponents, updateBotStats } from "#utils/index";
+import { logger } from "#src/utils/logger";
 
 const ready = new YuukoEvent({
   event: "clientReady",
@@ -15,7 +16,7 @@ const ready = new YuukoEvent({
     await registerCommands(client);
     await registerComponents(client);
 
-    client.logger.info("Bot ready", { type: "startup", user: client.user.tag });
+    logger.info("Bot ready", { type: "startup", user: client.user.tag });
   }
 });
 

@@ -43,7 +43,7 @@ import type {
 import Queries from '../graphQL/types/queries'
 import { YuukoError, type GraphQLResponse } from './types'
 import { env } from '#env';
-import { client } from '#src/app';
+import { logger } from "#src/utils/logger";
 
 type Query = keyof typeof Queries
 
@@ -99,7 +99,7 @@ export async function graphQLRequest<QueryKey extends Query>(queryKey: QueryKey,
 
     const data = resJson as GraphQLResponse<QueryVariables[QueryKey][0]>
 
-    client.logger.debug("GraphQL Request", {
+    logger.debug("GraphQL Request", {
       type: "graphql",
       query: queryKey,
       vars,
@@ -109,7 +109,7 @@ export async function graphQLRequest<QueryKey extends Query>(queryKey: QueryKey,
 
     return { data: data.data, headers: res.headers };
   } catch (e: any) {
-    client.logger.error(e);
+    logger.error(e);
     throw new YuukoError(e?.message || e, { vars });
   }
 }

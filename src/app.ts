@@ -7,6 +7,7 @@ import { runChecks } from "#checks/run";
 import { syncAnilistUsers, type WorkerResponseUnion } from "#workers/index";
 import { env } from "#env";
 import { eq, sql } from "drizzle-orm";
+import { logger } from "#src/utils/logger";
 
 dotenvFlow.config({ silent: true });
 
@@ -56,7 +57,7 @@ workerManager.onmessage = async (e) => {
 
   switch (data.type) {
     case 'LOG': {
-      client.logger.log(data.level, data.text);
+      logger.log(data.level, data.text);
       break;
     }
     case "SYNC": {

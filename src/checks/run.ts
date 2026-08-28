@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import { Client, type Check } from "#structures/index";
 import { srcPath } from "#utils/paths";
+import { logger } from "#src/utils/logger";
 
 export async function runChecks(client: Client) {
   // Flatten the array of checks
@@ -15,16 +16,16 @@ export async function runChecks(client: Client) {
         }),
     )
   ).flat()
-  client.logger.info("Running checks", { type: "check", total: checks.length });
+  logger.info("Running checks", { type: "check", total: checks.length });
 
   for (const check of checks) {
     try {
       check.run()
-      client.logger.info("Check passed", { type: "check", name: check.name, optional: check.optional });
+      logger.info("Check passed", { type: "check", name: check.name, optional: check.optional });
     }
     catch (e) {
       if (check.optional === true) {
-        client.logger.log("warn", "Optional check failed", {
+        logger.log("warn", "Optional check failed", {
           type: "check",
           name: check.name,
           purpose: check.description,
@@ -40,7 +41,7 @@ export async function runChecks(client: Client) {
     }
   }
 
-  client.logger.info("Checks passed!");
+  logger.info("Checks passed!");
 }
 
 function serializeError(e: unknown) {

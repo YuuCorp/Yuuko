@@ -1,6 +1,6 @@
 import { execSync, spawnSync } from "child_process";
 import { Elysia, t } from "elysia";
-import { sqlite } from "#database/db";
+import { db, sqlite, tables } from "#database/db";
 import fs from "fs";
 import { srcPath } from "#utils/paths";
 
@@ -17,19 +17,61 @@ export const triggerController = new Elysia({
       return { message: "Successfully restarted the bot!" };
     },
     {
+      detail: {
+        summary: "Trigger Bot & API Restart",
+        description: "Executes update script, closes database connection, and restarts PM2 processes.",
+        tags: ["Protected / Admin"],
+      },
       afterHandle() {
         execSync('pm2 restart "Yuuko Production"', { encoding: "utf-8" });
         setTimeout(() => execSync('pm2 restart "Yuuko Production API"', { encoding: "utf-8" }), 500);
       },
-      response: t.Object({ message: t.String() }),
+      response: {
+        202: t.Object({ message: t.String() }),
+      },
     },
   )
   .post(
     "/wipe-logs",
-    async () => {
+    async ({ set }) => {
       const logPath = srcPath("logging", "logs.json");
-      fs.writeFileSync(logPath, JSON.stringify([]), "utf8");
+
+      if (fs.existsSync(logPath)) {
+        fs.writeFileSync(logPath, "", "utf8");
+      }
+
+      set.status = 200;
       return { message: "Wiped all logs!" };
     },
-    { response: t.Object({ message: t.String() }) },
+    {
+      detail: {
+        summary: "Wipe Audit Logs",
+        description: "Truncates the logs.json file.",
+        tags: ["Protected / Admin"],
+      }, response: {
+        200: t.Object({ message: t.String() }),
+      },
+    },
+  ).post(
+    "/create-announcement",
+    async ({ body, set }) => {
+      const entryDate = new Date(body.date);
+      const dbEntry = {
+        announcement: body.announcement,
+        date: entryDate,
+      };
+
+      const announcementID = (await db.insert(tables.announcementModel).values(dbEntry).returning({ id: tables.announcementModel.id }))[0];
+      set.status = 201;
+
+      return { message: `Succesfully created announcement #${announcementID?.id || "Unknown"}!` };
+    },
+    {
+      detail: {
+        summary: "Create Announcement",
+        tags: ["Protected / Info"],
+      }, body: t.Object({ announcement: t.String(), date: t.String() }), response: {
+        201: t.Object({ message: t.String() }),
+      },
+    },
   );

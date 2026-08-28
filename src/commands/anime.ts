@@ -4,6 +4,7 @@ import { redis } from "#caching/redis";
 import type { AnimeQuery, AnimeQueryVariables } from "#graphQL/types";
 import { mwGetUserEntry } from "#middleware/userEntry";
 import type { Command } from "#structures/index";
+import { logger } from "#src/utils/logger";
 
 const name = "anime";
 const usage = "anime <title>";
@@ -34,7 +35,7 @@ export default {
       if (cachedId) {
         animeIdFound = true;
         vars.aID = parseInt(cachedId);
-        client.logger.debug("Series cache hit", { type: "commandDebug", command: name, query: normalizedQuery, seriesId: vars.aID, mediaType: "ANIME" })
+        logger.debug("Series cache hit", { type: "commandDebug", command: name, query: normalizedQuery, seriesId: vars.aID, mediaType: "ANIME" })
       }
 
     } else {
@@ -52,7 +53,7 @@ export default {
         if (mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
       }
 
-      client.logger.debug("User cache hit", { type: "commandDebug", command: name, seriesId: vars.aID, aniListId: interaction.aniListId })
+      logger.debug("User cache hit", { type: "commandDebug", command: name, seriesId: vars.aID, aniListId: interaction.aniListId })
 
       return void handleData({ media: cacheData }, interaction, client, "ANIME");
     }
@@ -75,7 +76,7 @@ export default {
       redis.set(`_animeId-${normalize(synonym)}`, data.id);
     }
     if (redisData.nextAiringEpisode?.airingAt) {
-      client.logger.debug("Adding expiration date", { type: "commandDebug", command: name, seriesId: redisData.id, airingAt: redisData.nextAiringEpisode.airingAt })
+      logger.debug("Adding expiration date", { type: "commandDebug", command: name, seriesId: redisData.id, airingAt: redisData.nextAiringEpisode.airingAt })
       redis.expireAt(`_anime-${data.id}`, redisData.nextAiringEpisode.airingAt);
     }
     return void await handleData({ media: data, headers: headers }, interaction, client, "ANIME", hookData);

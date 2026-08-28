@@ -7,6 +7,7 @@ import { EmbedBuilder, hyperlink } from "discord.js";
 import { redis } from "#caching/redis";
 import { eq } from "drizzle-orm";
 import { mediaStats } from "#database/models";
+import { logger } from "#src/utils/logger";
 
 export async function handleData(
   data: {
@@ -176,7 +177,7 @@ export async function handleData(
   if (mediaUsers.length > 1) {
     const mediaPool = mediaUsers.map(async (user) => {
       const result = await redis.json.get(`_user${user.aniListId}-${media.id}`,).catch((e) => {
-        client.logger.error(e);
+        logger.error(e);
         return;
       });
 
@@ -186,7 +187,7 @@ export async function handleData(
     });
 
     const userData = (await Promise.all(mediaPool)).filter((u) => u != null);
-    client.logger.debug("Media user cached data", { type: "generic", total: userData.length, mediaId: media.id })
+    logger.debug("Media user cached data", { type: "generic", total: userData.length, mediaId: media.id })
 
     if (userData.every((e) => e == null)) return await buildPagination(interaction, pageList);
 

@@ -4,6 +4,7 @@ import { Elysia, t } from "elysia";
 import { db, tables } from "#database/db";
 import { getStats } from "#utils/botStats";
 import { srcPath } from "#utils/paths";
+import { LogEntrySchema } from "#src/utils/logger";
 
 export const infoController = new Elysia({
     prefix: "/info",
@@ -16,25 +17,47 @@ export const infoController = new Elysia({
             set.status = 200;
             return readLogFile();
         },
-        { response: t.Array(t.Object({ date: t.String(), user: t.String(), info: t.String() })) },
+        {
+            detail: {
+                summary: "Get Audit Logs",
+                description: "Retrieves Winston log entries typed by LogLevel and LogMeta variants.",
+                tags: ["Protected / Info"],
+            },
+            response: {
+                200: t.Array(LogEntrySchema),
+                401: t.Object({ message: t.String() }),
+            },
+        }
     )
     .get(
         "/announcements",
         async ({ set }) => {
             set.headers["content-type"] = "application/json";
             set.status = 200;
-            return db.query.announcementModel.findMany({ orderBy: desc(tables.announcementModel.id) });
+
+            const announcements = await db.query.announcementModel.findMany({
+                orderBy: desc(tables.announcementModel.id),
+            });
+
+            return announcements.map((a) => ({
+                ...a,
+                date: a.date instanceof Date ? a.date.toISOString() : String(a.date),
+            }));
         },
         {
-            response: t.Array(
-                t.MaybeEmpty(
+            detail: {
+                summary: "List Announcements",
+                tags: ["Protected / Info"],
+            },
+            response: {
+                200: t.Array(
                     t.Object({
                         id: t.Number(),
                         announcement: t.String(),
-                        date: t.Date(),
-                    }),
+                        date: t.String(),
+                    })
                 ),
-            ),
+            },
         },
     )
     .get(
@@ -44,32 +67,19 @@ export const infoController = new Elysia({
             set.status = 200;
             return await getStats();
         },
-        { response: t.Object({ servers: t.Number(), members: t.Number(), registered: t.Number() }) },
-    )
-    .get(
-        "/rsa",
-        async ({ set }) => {
-            set.headers["content-type"] = "text/plain";
-            set.status = 200;
-            return fs.readFileSync(srcPath("RSA", "id_rsa.pub"), "utf-8");
+        {
+            detail: {
+                summary: "Get Bot Metrics",
+                tags: ["Protected / Info"],
+            }, response: {
+                200: t.Object({
+                    servers: t.Number(),
+                    members: t.Number(),
+                    registered: t.Number(),
+                }),
+            },
         },
-        { response: t.String(), }
-    )
-    .post(
-        "/create-announcement",
-        async ({ body, set }) => {
-            const entryDate = new Date(body.date);
-            const dbEntry = {
-                announcement: body.announcement,
-                date: entryDate,
-            };
 
-            const announcementID = (await db.insert(tables.announcementModel).values(dbEntry).returning({ id: tables.announcementModel.id }))[0];
-            set.status = 201;
-
-            return { message: `Succesfully created announcement #${announcementID?.id || "Unknown"}!` };
-        },
-        { body: t.Object({ announcement: t.String(), date: t.String() }), response: t.Object({ message: t.String() }) },
     );
 
 function readLogFile() {

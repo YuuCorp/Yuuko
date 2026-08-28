@@ -2,6 +2,7 @@ import { type Interaction, Collection, MessageFlags, time } from "discord.js";
 
 import { embedError, YuukoError } from "#utils/index";
 import { type Client, type Command, type UsableInteraction, YuukoEvent, type Middleware } from "#structures/index";
+import { logger } from "#src/utils/logger";
 
 /* discord doesn't have the commands property in their class for somea reason */
 const interactionCreate = new YuukoEvent({
@@ -20,7 +21,7 @@ const interactionCreate = new YuukoEvent({
         const args = await runMiddlewares(command.middlewares, interaction, client);
 
         if (command.middlewares) {
-          client.logger.debug("Middleware execution", {
+          logger.debug("Middleware execution", {
             type: "generic",
             command: command.name,
             middlewares: command.middlewares?.map((m) => m.name),
@@ -28,7 +29,7 @@ const interactionCreate = new YuukoEvent({
         }
 
         if (args.isCommand() && args.isChatInputCommand()) {
-          client.logger.logCommand(command, interaction);
+          logger.logCommand(command, interaction);
           await command.run({ interaction: args, client });
         }
 
@@ -48,10 +49,10 @@ const interactionCreate = new YuukoEvent({
       }
 
     } catch (e: any) {
-      client.logger.error(e);
+      logger.error(e);
 
       if (e instanceof YuukoError) {
-        client.logger.error("Yuuko Error", { type: "generic", message: e.message, vars: e.vars, cause: e.cause });
+        logger.error("Yuuko Error", { type: "generic", message: e.message, vars: e.vars, cause: e.cause });
         if (!interaction.isCommand()) return;
 
         if (interaction.deferred || interaction.replied)

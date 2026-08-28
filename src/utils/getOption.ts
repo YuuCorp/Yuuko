@@ -1,7 +1,7 @@
 import type { UsableInteraction } from "#structures/command";
 import type { User } from "discord.js";
 import { YuukoError } from "./types";
-import { client } from "#src/app";
+import { logger } from "#src/utils/logger";
 
 /**
  * Reads a string option from either the chat-input interaction or the
@@ -20,7 +20,7 @@ export function getStringOption<T extends Record<string, string | unknown> | und
     returnValue = interaction.options.getString(key, required);
   }
 
-  client.logger.debug("getStringOption", { type: "generic", key, required, value: returnValue });
+  logger.debug("getStringOption", { type: "generic", key, required, value: returnValue });
 
   if (required && returnValue == null) {
     throw new YuukoError(`Missing required option: ${key}`);
@@ -45,7 +45,7 @@ export function getUserOption<T extends Record<string, User | unknown> | undefin
     returnValue = interaction.options.getUser(key, required);
   }
 
-  client.logger.debug("getUserOption", { type: "generic", key, required, value: returnValue });
+  logger.debug("getUserOption", { type: "generic", key, required, value: returnValue });
 
   if (required && returnValue == null) {
     throw new YuukoError(`Missing required user: ${key}`);
@@ -71,7 +71,7 @@ export function getSubcommandOption<T extends Record<string, string | unknown> |
     returnValue = interaction.options.getSubcommand(required);
   }
 
-  client.logger.debug("getSubcommandOption", { type: "generic", key, required, value: returnValue });
+  logger.debug("getSubcommandOption", { type: "generic", key, required, value: returnValue });
 
   if (required && returnValue == null) {
     throw new YuukoError(`Missing required subcommand: ${key}`);
