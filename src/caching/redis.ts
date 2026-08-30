@@ -1,6 +1,6 @@
 import { createClient } from "redis";
-import { client } from "#src/app";
 import { env } from "#env";
+import { logger } from "#src/utils/logger";
 
 const host = env().NODE_ENV === "docker" ? "dragonfly" : "localhost";
 
@@ -12,11 +12,11 @@ export const redis = createClient({
 });
 
 redis.on("error", (err) => {
-  console.error(err);
+  logger.error(err);
 });
 
 redis.on("connect", () => {
-  client.logger.info(`Connected to ${host}!`);
+  logger.info(`Connected to ${host}!`);
   redis.set("test", "test");
 });
 

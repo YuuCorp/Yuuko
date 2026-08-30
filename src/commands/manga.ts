@@ -4,6 +4,7 @@ import type { MangaQuery } from "#graphQL/types";
 import { mwGetUserEntry } from "#middleware/userEntry";
 import type { Command } from "#structures/index";
 import { graphQLRequest, handleData, normalize, type CacheEntry, YuukoError, getStringOption } from "#utils/index";
+import { logger } from "#src/utils/logger";
 
 const name = "manga";
 const usage = "manga <title>";
@@ -38,7 +39,7 @@ export default {
       if (cachedId) {
         mangaIdFound = true;
         vars.mID = parseInt(cachedId);
-        client.logger.debug("Series cache hit", { query: normalizedQuery, seriesId: vars.mID, type: "generic", mediaType: "MANGA" })
+        logger.debug("Series cache hit", { query: normalizedQuery, seriesId: vars.mID, type: "generic", mediaType: "MANGA" })
       }
 
     } else {
@@ -55,7 +56,7 @@ export default {
         if (mediaListEntry) cacheData.mediaListEntry = mediaListEntry;
       }
 
-      client.logger.debug("User cache hit", { seriesId: vars.mID, aniListId: interaction.aniListId, type: "generic" })
+      logger.debug("User cache hit", { seriesId: vars.mID, aniListId: interaction.aniListId, type: "generic" })
 
       return void handleData({ media: cacheData }, interaction, client, "MANGA");
     }

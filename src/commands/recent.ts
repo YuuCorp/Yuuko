@@ -4,6 +4,7 @@ import type { Command } from "#structures/index";
 import { CommandCategories, getStringOption, graphQLRequest, SeriesTitle, YuukoError } from "#utils/index";
 import type { MediaList, MediaType, RecentChartQueryVariables } from "#graphQL/types";
 import { ptr, toBuffer } from "bun:ffi";
+import { logger } from "#src/utils/logger";
 
 const name = "recent";
 const usage = "recent";
@@ -56,7 +57,7 @@ export default {
       parsedData.push({ status: `${status}\n${title}`, imageUrl: cover });
     }
 
-    client.logger.debug("Recent command", { type: "generic", total: parsedData.length, userName: vars.user });
+    logger.debug("Recent command", { type: "generic", total: parsedData.length, userName: vars.user });
 
     const lib = client.modules.getModule("modules");
 
