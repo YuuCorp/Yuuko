@@ -166,7 +166,22 @@ class Logger {
     this.logger.info(message, meta);
   }
 
-  error(message: string, meta?: LogMeta) {
+  error(message: string | Error, meta?: LogMeta) {
+    if (message instanceof Error) {
+      const errMeta: Record<string, unknown> = {
+        ...meta,
+        errorName: message.name,
+        stack: message.stack,
+      };
+
+      if (message instanceof AggregateError) {
+        errMeta.errors = message.errors.map((e) => (e instanceof Error ? e.message : e));
+      }
+
+      this.logger.error(message.message || message.name, errMeta);
+      return;
+    }
+
     this.logger.error(message, meta);
   }
 
