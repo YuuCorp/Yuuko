@@ -20,8 +20,8 @@
     "start:prod": "NODE_ENV=production bun run ./src/app.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "prettier --write .",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "eslint ./src",
+    "lint:fix": "eslint ./src --fix",
     "module:build": "sh ./src/modules/build.sh",
     "gen:gql": "graphql-codegen",
     "gen:queries": "bun run ./src/scripts/genQueries.ts",
@@ -43,7 +43,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^8.1.1",
+    "@antfu/eslint-config": "^9.5.1",
     "@graphql-codegen/cli": "^6.2.1",
     "@graphql-codegen/typescript": "^5.0.9",
     "@graphql-codegen/typescript-operations": "^5.0.9",
@@ -57,7 +57,7 @@
     "drizzle-kit": "^0.31.10",
     "eslint": "^10.2.0",
     "prettier": "^3.8.1",
-    "prettier-eslint": "^16.4.2",
+    "prettier-eslint": "^17.1.2",
     "typescript": "^6.0.2"
   }
 }

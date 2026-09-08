@@ -1,17 +1,18 @@
-import antfu from '@antfu/eslint-config'
-import { FlatCompat } from '@eslint/eslintrc'
+import antfu from "@antfu/eslint-config";
 
-const compat = new FlatCompat()
-
-export default antfu(
-  {
-    ignores: ['n/prefer-global/process'],
-  },
-
-  ...compat.config({
-    extends: [
-      'eslint:recommended',
-    ],
-  }),
-
-)
+export default antfu({
+    stylistic: false,
+    ignores: ["n/prefer-global/process"],
+    perfectionist: false,
+    typescript: {
+        tsconfigPath: "tsconfig.json",
+        tsconfigRootDir: import.meta.dirname,
+        overrides: {
+            "ts/no-floating-promises": "error",
+            "ts/no-misused-promises": "error",
+            "ts/await-thenable": "error",
+            "ts/consistent-type-definitions": "off",
+            "import/consistent-type-specifier-style": "off",
+        },
+    },
+});

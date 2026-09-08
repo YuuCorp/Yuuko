@@ -22,12 +22,14 @@ export async function syncAnilistUsers(data: SyncUsers) {
         try {
             const start = performance.now();
             const { payload } = decodeJWT(user.aniListToken);
+
             if (date >= payload.exp) {
                 await deleteUser(user.aniListId);
                 continue;
             }
+
             const { data: animeData, headers: animeHeaders } = await graphQLRequest("GetUserList", { userId: user.aniListId, type: MediaType.Anime }, user.aniListToken);
-            if (animeData) await handleSyncing({ media: animeData }, user.aniListId, MediaType.Anime);
+            if (animeData?.MediaListCollection) await handleSyncing({ media: animeData }, user.aniListId, MediaType.Anime);
 
             const remaining = parseInt(animeHeaders.get("x-ratelimit-remaining") ?? "1");
 
@@ -37,7 +39,7 @@ export async function syncAnilistUsers(data: SyncUsers) {
             }
 
             const { data: mangaData } = await graphQLRequest("GetUserList", { userId: user.aniListId, type: MediaType.Manga }, user.aniListToken);
-            if (mangaData) await handleSyncing({ media: mangaData }, user.aniListId, MediaType.Manga);
+            if (mangaData?.MediaListCollection) await handleSyncing({ media: mangaData }, user.aniListId, MediaType.Manga);
 
             logger.log("verbose", "Synced user", { type: "generic", aniListId: user.aniListId, idx: i + 1, total });
 

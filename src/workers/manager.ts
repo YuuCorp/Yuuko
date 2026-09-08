@@ -1,6 +1,3 @@
-// prevents TS errors
-declare var self: Worker;
-
 import { db, tables, type InferTable } from '#database/index';
 import { env } from '#src/env';
 import type { LogLevel } from '#utils/logger';
@@ -31,10 +28,6 @@ export type SyncUsers = {
 
 const CHECK_INTERVAL = 5000;
 
-// TODO! rest of the magic
-async function checkUpcomingEpisodes() {
-}
-
 async function updateSyncedUsers() {
     if (env().NODE_ENV === "development") return;
 
@@ -64,7 +57,7 @@ async function updateSyncedUsers() {
 
         const usersPerMinute = Math.min(15, decryptedUsers.length);
 
-        self.postMessage({
+        postMessage({
             type: "SYNC",
             aniListUsers: decryptedUsers,
             usersPerMinute,
@@ -72,19 +65,20 @@ async function updateSyncedUsers() {
 
     } catch (e) {
         console.error(e);
-        return;
     }
 }
 
-await RSA.loadKeys();
+RSA.loadKeys().catch((err) => {
+    console.error("Failed to load RSA keys in worker:", err);
+});
+
 let isSyncing = false;
 
-setInterval(async () => {
+setInterval(() => {
     if (isSyncing) return;
     isSyncing = true;
-    try {
-        await updateSyncedUsers();
-    } finally {
+
+    void updateSyncedUsers().finally(() => {
         isSyncing = false;
-    }
+    });
 }, CHECK_INTERVAL);

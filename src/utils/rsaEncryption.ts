@@ -1,7 +1,8 @@
-import { subtle } from "crypto";
-import fs from "fs";
-import path from "path";
+import { subtle } from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
 import { srcPath } from "./paths";
+import { Buffer } from "node:buffer";
 
 type RSAkey = CryptoKey & { algorithm: { modulusLength: number } };
 
@@ -87,10 +88,9 @@ export class RSA {
   private static loadPEM(path: string) {
     return Buffer.from(
       fs.readFileSync(path, "utf8")
-        .replace(/-----(BEGIN|END) (PUBLIC|PRIVATE) KEY-----|\s+/g, ''),
+        .replace(/-----(?:BEGIN|END) (?:PUBLIC|PRIVATE) KEY-----|\s+/g, ''),
       "base64"
     );
-
   }
 
   private static toPEM(keyData: ArrayBuffer, type: "PUBLIC" | "PRIVATE") {
