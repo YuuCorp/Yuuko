@@ -1,6 +1,6 @@
-import type { Client, HookData, UsableInteraction } from "#structures/index";
+import type { HookData, UsableInteraction } from "#structures/index";
 import type { AnimeQuery, MangaQuery, Maybe, ScoreFormat } from "#graphQL/types";
-import type { AlwaysExist, CacheEntry, GraphQLResponse } from "./types";
+import type { AlwaysExist, CacheEntry } from "./types";
 import { buildPagination, footer, SeriesTitle } from ".";
 import { db } from "#database/db";
 import { EmbedBuilder, hyperlink } from "discord.js";
@@ -12,10 +12,9 @@ import { logger } from "#src/utils/logger";
 export async function handleData(
   data: {
     media: AlwaysExist<AnimeQuery["Media"]> | AlwaysExist<MangaQuery["Media"]>;
-    headers?: GraphQLResponse["headers"];
+    headers?: Headers;
   },
   interaction: UsableInteraction,
-  client: Client,
   mediaType: "ANIME" | "MANGA",
   hookdata?: HookData | null,
 ) {
@@ -64,7 +63,7 @@ export async function handleData(
       },
       {
         name: "Mean Score",
-        value: media.meanScore?.toString() == "undefined" ? media.meanScore?.toString() : "Unknown",
+        value: media.meanScore?.toString() === "undefined" ? media.meanScore?.toString() : "Unknown",
         inline: true,
       },
       {
@@ -155,7 +154,7 @@ export async function handleData(
         },
         {
           name: "Score",
-          value: fixScoring(null, scoring!, media.mediaListEntry?.score!),
+          value: fixScoring(null, scoring, media.mediaListEntry?.score),
           inline: true,
         },
         {
@@ -178,7 +177,6 @@ export async function handleData(
     const mediaPool = mediaUsers.map(async (user) => {
       const result = await redis.json.get(`_user${user.aniListId}-${media.id}`,).catch((e) => {
         logger.error(e);
-        return;
       });
 
       if (!result) return null;
@@ -189,20 +187,20 @@ export async function handleData(
     const userData = (await Promise.all(mediaPool)).filter((u) => u != null);
     logger.debug("Media user cached data", { type: "generic", total: userData.length, mediaId: media.id })
 
-    if (userData.every((e) => e == null)) return await buildPagination(interaction, pageList);
+    if (userData.every((e) => e == null)) return buildPagination(interaction, pageList);
 
     const statisticsEmbed = new EmbedBuilder()
       .setAuthor({ name: `${media.title?.english || media.title?.romaji || "N/A"} | Statistics for Yuuko Users!` })
       .setImage(media.bannerImage!)
       .setDescription(
-        userData.map((user) => `${hyperlink(user.user!.name, `https://anilist.co/user/${user.user.id}`)}: ${user.progress} ${episodeValue
-          ? ("/ " + episodeValue)
+        userData.map((user) => `${hyperlink(user.user.name, `https://anilist.co/user/${user.user.id}`)}: ${user.progress} ${episodeValue
+          ? `/ ${episodeValue}`
           : (mediaType === "ANIME" ? "episodes" : "chapters")} | ${fixScoring(user, user.user?.mediaListOptions!.scoreFormat, user.score)}`).join("\n"),
       );
     pageList.push(statisticsEmbed);
   }
 
-  return await buildPagination(interaction, pageList);
+  return buildPagination(interaction, pageList);
 }
 
 function fixScoring(user: CacheEntry | null, scoreType: Maybe<ScoreFormat> | undefined, scoreValue: Maybe<number> | undefined) {

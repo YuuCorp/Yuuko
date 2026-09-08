@@ -1,36 +1,41 @@
-import path from "path";
-import fs from "fs";
-import { Client, type Command } from "#structures/index";
+import path from "node:path";
+import fs from "node:fs";
+import type { Client, Command } from "#structures/index";
 import { REST, Routes } from "discord.js";
 import { env } from '#env';
 import { srcPath } from "./paths";
 import { logger } from "#src/utils/logger";
 
 export async function registerCommands(client: Client) {
-  logger.info("Starting bot", { type: "startup", environment: env().NODE_ENV })
+  const environment = env().NODE_ENV;
+  logger.info("Starting bot", { type: "startup", environment })
 
   const commandsPath = srcPath("commands");
   const commandFiles = fs.readdirSync(commandsPath).filter((file) => file.endsWith(".ts"));
 
   logger.info("Loaded commands", { type: "startup", total: commandFiles.length, commands: commandFiles })
+  const slashCommands: Command[] = [];
 
-  const slashCommands = await Promise.all(commandFiles.map(async (file) => {
-    const cmd = (await import(path.join(commandsPath, file))).default as Command;
-    const builder = cmd?.withBuilder;
-    const builderJson = builder && typeof (builder as any).toJSON === "function" ? (builder as any).toJSON() : (builder ?? {});
+  for (const file of commandFiles) {
+    const filePath = path.join(commandsPath, file);
+    const module = await import(filePath) as { default: Command };
 
-    const data = { ...builderJson, ...cmd };
-    client.commands.set(data.name, data);
-    return data;
-  }));
+    slashCommands.push(module.default);
+  }
+
+  const commandPayloads = slashCommands.map((command) => {
+    client.commands.set(command.name, command);
+    return command.withBuilder.toJSON();
+  });
 
   logger.info("Loaded slash commands", { type: "startup", total: slashCommands.length })
 
   // ^ Register Slash Commands
-  const rest = new REST({ version: "10" }).setToken(env().TOKEN!);
+  const rest = new REST({ version: "10" }).setToken(env().TOKEN);
 
   const clientId = env().CLIENT_ID;
   const guildId = env().GUILD_ID;
+  const isProduction = environment === "production" || environment === "docker";
 
   try {
     logger.info(`Started refreshing ${slashCommands.length} slash (/) commands.`, {
@@ -38,16 +43,20 @@ export async function registerCommands(client: Client) {
       commands: slashCommands.map((x) => x.name),
     });
 
-    await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: slashCommands });
+    if (isProduction) {
+      await rest.put(Routes.applicationCommands(clientId), { body: commandPayloads });
+    } else {
+      await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commandPayloads });
+    }
 
-    if (env().NODE_ENV === "production" || env().NODE_ENV === "docker")
-      await rest.put(Routes.applicationCommands(clientId), { body: slashCommands });
+    await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: slashCommands });
 
     logger.info(`Refreshed ${slashCommands.length} slash (/) commands.`, {
       type: "startup",
       commands: slashCommands.map((x) => x.name),
     });
-  } catch (error: any) {
-    logger.error("Failed to refresh slash commands", { type: "startup", error: error?.message ?? error });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    logger.error("Failed to refresh slash commands", { type: "startup", error: message });
   }
 }

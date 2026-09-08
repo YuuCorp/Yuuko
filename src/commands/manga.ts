@@ -58,7 +58,7 @@ export default {
 
       logger.debug("User cache hit", { seriesId: vars.mID, aniListId: interaction.aniListId, type: "generic" })
 
-      return void handleData({ media: cacheData }, interaction, client, "MANGA");
+      return void handleData({ media: cacheData }, interaction, "MANGA");
     }
 
     const {
@@ -81,6 +81,6 @@ export default {
       redis.set(`_mangaId-${normalize(synonym)}`, data.id.toString());
     }
 
-    return void handleData({ media: data, headers: headers }, interaction, client, "MANGA", hookData);
+    return void handleData({ media: data, headers: headers }, interaction, "MANGA", hookData);
   },
 } satisfies Command<{ id?: number, manga?: string }>;

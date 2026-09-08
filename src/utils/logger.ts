@@ -151,7 +151,12 @@ class Logger {
           winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
           winston.format.printf(({ timestamp, level, message, ...meta }) => {
             const metaStr = Object.keys(meta).length ? JSON.stringify(meta) : "";
-            return `${timestamp} | [${level}]: ${message} ${metaStr}`;
+
+            const timeStr = String(timestamp);
+            const levelStr = String(level);
+            const msgStr = String(message);
+
+            return `${timeStr} | [${levelStr}]: ${msgStr} ${metaStr}`;
           }),
         ),
       }),
@@ -166,7 +171,7 @@ class Logger {
     this.logger.info(message, meta);
   }
 
-  error(message: string | Error, meta?: LogMeta) {
+  error(message: string | Error | unknown, meta?: LogMeta) {
     if (message instanceof Error) {
       const errMeta: Record<string, unknown> = {
         ...meta,
@@ -175,14 +180,15 @@ class Logger {
       };
 
       if (message instanceof AggregateError) {
-        errMeta.errors = message.errors.map((e) => (e instanceof Error ? e.message : e));
+        errMeta.errors = message.errors.map((e) => (e instanceof Error ? e.message : String(e)));
       }
 
       this.logger.error(message.message || message.name, errMeta);
       return;
     }
 
-    this.logger.error(message, meta);
+    const logMessage = typeof message === "string" ? message : String(message);
+    this.logger.error(logMessage, meta);
   }
 
   debug(message: string, meta?: LogMeta) {

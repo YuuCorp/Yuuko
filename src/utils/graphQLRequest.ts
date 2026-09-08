@@ -107,7 +107,7 @@ export async function graphQLRequest<QueryKey extends Query>(queryKey: QueryKey,
       rateLimitRemaining: parseInt(res.headers.get("x-ratelimit-remaining") ?? ""),
     });
 
-    return { data: data.data, headers: res.headers };
+    return { data: data.data, headers: res.headers as Headers };
   } catch (e: any) {
     logger.error(e);
     throw new YuukoError(e?.message || e, { vars });

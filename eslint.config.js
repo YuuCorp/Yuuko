@@ -15,4 +15,8 @@ export default antfu({
             "import/consistent-type-specifier-style": "off",
         },
     },
+    rules: {
+        "ts/strict-boolean-expressions": "off",
+        "ts/no-non-null-asserted-optional-chain": "off",
+    },
 });

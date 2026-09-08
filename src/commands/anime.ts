@@ -55,7 +55,7 @@ export default {
 
       logger.debug("User cache hit", { type: "commandDebug", command: name, seriesId: vars.aID, aniListId: interaction.aniListId })
 
-      return void handleData({ media: cacheData }, interaction, client, "ANIME");
+      return void handleData({ media: cacheData }, interaction, "ANIME");
     }
 
     const {
@@ -79,6 +79,6 @@ export default {
       logger.debug("Adding expiration date", { type: "commandDebug", command: name, seriesId: redisData.id, airingAt: redisData.nextAiringEpisode.airingAt })
       redis.expireAt(`_anime-${data.id}`, redisData.nextAiringEpisode.airingAt);
     }
-    return void await handleData({ media: data, headers: headers }, interaction, client, "ANIME", hookData);
+    return void await handleData({ media: data, headers: headers }, interaction, "ANIME", hookData);
   },
 } satisfies Command<{ id?: number, anime?: string }>;
