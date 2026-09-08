@@ -55,7 +55,7 @@ export default {
     const pageList = [];
 
     switch (data?.__typename) {
-      case "ListActivity":
+      case "ListActivity": {
         embed.setURL(data?.siteUrl!);
         embed.setTitle(`Here's ${data?.user?.name?.toString() || "Unknown Name"}'s most recent activity!`);
         embed.setDescription(
@@ -89,7 +89,9 @@ export default {
 
         break;
 
-      case "TextActivity":
+      }
+
+      case "TextActivity": {
         embed
           .setTitle(`Here's ${data?.user?.name?.toString() || "Unknown Name"}'s most recent activity!`)
           .setDescription(anilistToMarkdown(data.text, 4096))
@@ -104,6 +106,8 @@ export default {
 
         break;
 
+      }
+
       case "MessageActivity":
         break;
     }
@@ -117,8 +121,8 @@ function generateReplayEmbeds(data: ActivityQuery['Activity'], pageList: any[]) 
   for (let i = 0; i < replyPages; i++) {
     const replyEmbed = new EmbedBuilder().setTitle(`Replies to ${data?.user?.name?.toString() || "Unknown Name"}'s activity!`);
 
-    const replies = data.replies.slice(i * 25, i * 25 + 25).map((reply) => {
-      if (!reply || !reply.user || !reply.text) return;
+    const replies = data.replies.slice(i * 25, i * 25 + 25).flatMap((reply) => {
+      if (!reply || !reply.user || !reply.text) return [];
       const replyText = anilistToMarkdown(reply.text, 1024);
       const replyName = reply.user.name;
 
@@ -144,7 +148,7 @@ function anilistToMarkdown(string: string | undefined | null, filterLength: numb
     .replace(/\n\n/g, "\n")
     .replaceAll("~", ``) || "No text found.";
 
-  if (filterLength && text.length > filterLength) text = text.slice(0, filterLength - 3) + "...";
+  if (filterLength && text.length > filterLength) text = `${text.slice(0, filterLength - 3)}...`;
 
   return replaceUrls(text);
 }

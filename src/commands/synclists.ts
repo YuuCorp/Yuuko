@@ -30,8 +30,8 @@ export default {
     const subcommand = getSubcommandOption(interaction, hookData, "subcommandType", true) as "sync" | "wipe";
 
     if (subcommand === "wipe") {
-      interaction.reply(`Wiping your lists from DB...`);
-      redis.del(await redis.keys(`_user${interaction.aniListId}-*`))
+      await interaction.reply(`Wiping your lists from DB...`);
+      await redis.del(await redis.keys(`_user${interaction.aniListId}-*`))
 
       await db.delete(mediaStatUsers).where(eq(mediaStatUsers.aniListId, interaction.aniListId!));
 
@@ -95,7 +95,7 @@ export async function handleSyncing(
       };
 
       bulkMedia.add({ mediaId: entry.media.id, type });
-      redis.json.set(`_user${user.id}-${entry.media.id}`, "$", cacheEntry);
+      await redis.json.set(`_user${user.id}-${entry.media.id}`, "$", cacheEntry);
       // should be all we need, but then we need to also update the wipe part
 
       if (entry.media && entry.media.title) {
@@ -104,14 +104,15 @@ export async function handleSyncing(
           delete redisData.chapters;
           delete redisData.volumes;
 
-          redis.json.set(`_anime-${redisData.id}`, "$", redisData);
-          redis.expireAt(`_anime-${redisData.id}`, new Date(Date.now() + 604800000));
+          await redis.json.set(`_anime-${redisData.id}`, "$", redisData);
+          await redis.expireAt(`_anime-${redisData.id}`, new Date(Date.now() + 604800000));
           for (const synonym of redisData.synonyms || []) {
             if (!synonym) continue;
-            redis.set(`_animeId-${normalize(synonym)}`, redisData.id);
+            await redis.set(`_animeId-${normalize(synonym)}`, redisData.id);
           }
+
           if (redisData.nextAiringEpisode?.airingAt) {
-            redis.expireAt(`_anime-${redisData.id}`, redisData.nextAiringEpisode.airingAt);
+            await redis.expireAt(`_anime-${redisData.id}`, redisData.nextAiringEpisode.airingAt);
           }
 
         } else if (type === MediaType.Manga) {
@@ -119,11 +120,11 @@ export async function handleSyncing(
           delete redisData.duration;
           delete redisData.nextAiringEpisode;
 
-          redis.json.set(`_manga-${redisData.id}`, "$", redisData);
-          redis.expireAt(`_manga-${redisData.id}`, new Date(Date.now() + 604800000))
+          await redis.json.set(`_manga-${redisData.id}`, "$", redisData);
+          await redis.expireAt(`_manga-${redisData.id}`, new Date(Date.now() + 604800000))
           for (const synonym of redisData.synonyms || []) {
             if (!synonym) continue;
-            redis.set(`_mangaId-${normalize(synonym)}`, redisData.id);
+            await redis.set(`_mangaId-${normalize(synonym)}`, redisData.id);
           }
 
         }
@@ -132,7 +133,7 @@ export async function handleSyncing(
   }
 
   const mediasArray = Array.from(bulkMedia);
-  logger.debug("Sync media stats", { type: "generic", total: mediasArray.length, aniListId: aniListId, mediaType: type });
+  logger.debug("Sync media stats", { type: "generic", total: mediasArray.length, aniListId, mediaType: type });
   if (mediasArray.length === 0) return;
   // bulk insert media_id, do nothing if exists already
   await db
@@ -141,8 +142,8 @@ export async function handleSyncing(
     .onConflictDoNothing();
 
 
-  const userFromMedias = mediasArray.map((m) => ({ mediaId: m.mediaId, aniListId: aniListId }));
-  logger.debug("Sync media stats users", { type: "generic", total: userFromMedias.length, aniListId: aniListId, mediaType: type });
+  const userFromMedias = mediasArray.map((m) => ({ mediaId: m.mediaId, aniListId }));
+  logger.debug("Sync media stats users", { type: "generic", total: userFromMedias.length, aniListId, mediaType: type });
   // bulk insert user into given media(s)
   await db
     .insert(mediaStatUsers)

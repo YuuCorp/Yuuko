@@ -9,11 +9,11 @@ import type { YuukoError } from './types'
 export function embedError(err: YuukoError): EmbedBuilder {
   const embed = new EmbedBuilder()
     .setTitle('Error')
-    .addFields({ name: "Tracelog / Message", value: '```' + err.toString() + '```' })
+    .addFields({ name: "Tracelog / Message", value: `\`\`\`${err}\`\`\`` })
     .setColor('Red')
 
   if (err.vars)
-    embed.addFields({ name: "Params", value: '```json\n' + JSON.stringify(err.vars) + '```' })
+    embed.addFields({ name: "Params", value: `\`\`\`${JSON.stringify(err.vars)}\`\`\`` })
 
   if (err.cause)
     embed.addFields({ name: "Cause", value: err.cause })

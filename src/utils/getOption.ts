@@ -15,7 +15,7 @@ export function getStringOption<T extends Record<string, string | unknown> | und
   let returnValue;
 
   if (hookData && key in hookData && hookData[key] != null) {
-    returnValue = hookData[key as string];
+    returnValue = hookData[key];
   } else if (interaction.isChatInputCommand?.()) {
     returnValue = interaction.options.getString(key, required);
   }
@@ -40,7 +40,7 @@ export function getUserOption<T extends Record<string, User | unknown> | undefin
   let returnValue;
 
   if (hookData && key in hookData && hookData[key] != null) {
-    returnValue = hookData[key as string];
+    returnValue = hookData[key];
   } else if (interaction.isChatInputCommand?.()) {
     returnValue = interaction.options.getUser(key, required);
   }
@@ -66,7 +66,7 @@ export function getSubcommandOption<T extends Record<string, string | unknown> |
   let returnValue;
 
   if (hookData && key in hookData && hookData[key] != null) {
-    returnValue = hookData[key as string];
+    returnValue = hookData[key];
   } else if (interaction.isChatInputCommand?.()) {
     returnValue = interaction.options.getSubcommand(required);
   }

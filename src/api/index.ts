@@ -7,7 +7,7 @@ import { env } from "#env";
 import { logger } from "#src/utils/logger";
 
 export async function startApi() {
-  const port = env().API_PORT;
+  const port = env.API_PORT;
 
   await RSA.loadKeys();
 

@@ -1,6 +1,7 @@
 import { z } from "zod";
+import process from "node:process";
 
-const envSchema = z.object({
+export const envSchema = z.object({
     TOKEN: z.string().min(1),
     TRUSTED_USERS: z.string().transform((value) => value.split(',').map(s => s.trim())),
     RSS_LIMIT: z.coerce.number().optional().default(5),
@@ -12,7 +13,6 @@ const envSchema = z.object({
     NODE_ENV: z.literal("docker").or(z.literal("development")).or(z.literal("production")).optional(),
 });
 
-type envSchema = z.infer<typeof envSchema>;
-export const env = () => envSchema.parse(process.env);
-
-export default { env, envSchema };
+export type Env = z.infer<typeof envSchema>;
+export const env = envSchema.parse(process.env);
+export default env;

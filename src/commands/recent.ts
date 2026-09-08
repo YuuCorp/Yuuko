@@ -2,7 +2,7 @@ import { SlashCommandBuilder, AttachmentBuilder } from "discord.js";
 import { mwGetUserID } from "#middleware/userEntry";
 import type { Command } from "#structures/index";
 import { CommandCategories, getStringOption, graphQLRequest, SeriesTitle, YuukoError } from "#utils/index";
-import type { MediaList, MediaType, RecentChartQueryVariables } from "#graphQL/types";
+import { MediaListStatus, type MediaList, type MediaType, type RecentChartQueryVariables } from "#graphQL/types";
 import { ptr, toBuffer } from "bun:ffi";
 import { logger } from "#src/utils/logger";
 
@@ -28,7 +28,7 @@ export default {
 
     const vars: RecentChartQueryVariables = {
       perPage: 9,
-      type: type,
+      type,
     };
 
     if (!userName) {
@@ -65,7 +65,7 @@ export default {
     const json = JSON.stringify(parsedData);
 
     // add a null-terminator?
-    const rawJson = enc.encode(json + "\0");
+    const rawJson = enc.encode(`${json}\0`);
     const jsonPtr = ptr(rawJson);
 
     const imgSizeBuffer = new Uint32Array(1);
@@ -90,19 +90,19 @@ export default {
 function parseStatus(data: Pick<MediaList, "progress" | "status">, mediaType: MediaType) {
   if (!data.status) return "Unknown";
   switch (data.status) {
-    case "CURRENT":
+    case MediaListStatus.Current:
       if (mediaType === "ANIME") return `Watched Episode ${data.progress} of`;
       else return `Read Chapter ${data.progress} of`;
-    case "PLANNING":
+    case MediaListStatus.Planning:
       if (mediaType === "ANIME") return `Planning to Watch`;
       else return `Planning to Read`;
-    case "COMPLETED":
+    case MediaListStatus.Completed:
       return `Completed`;
-    case "PAUSED":
+    case MediaListStatus.Paused:
       return `Paused`;
-    case "DROPPED":
+    case MediaListStatus.Dropped:
       return `Dropped`;
-    case "REPEATING":
+    case MediaListStatus.Repeating:
       if (mediaType === "ANIME") return `Re-watching`;
       else return `Re-reading`;
   }

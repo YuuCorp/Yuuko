@@ -4,7 +4,7 @@ import { Elysia, t } from "elysia";
 import { db, tables } from "#database/db";
 import { getStats } from "#utils/botStats";
 import { srcPath } from "#utils/paths";
-import { LogEntrySchema } from "#src/utils/logger";
+import { LogEntrySchema, type LogEntry } from "#src/utils/logger";
 
 export const infoController = new Elysia({
     prefix: "/info",
@@ -15,6 +15,7 @@ export const infoController = new Elysia({
         ({ set }) => {
             set.headers["content-type"] = "application/json";
             set.status = 200;
+
             return readLogFile();
         },
         {
@@ -65,7 +66,7 @@ export const infoController = new Elysia({
         async ({ set }) => {
             set.headers["content-type"] = "application/json";
             set.status = 200;
-            return await getStats();
+            return getStats();
         },
         {
             detail: {
@@ -82,8 +83,10 @@ export const infoController = new Elysia({
 
     );
 
-function readLogFile() {
+function readLogFile(): LogEntry[] {
     const logPath = srcPath("logging", "logs.json");
+    if (!fs.existsSync(logPath)) return [];
+
     const lines = fs.readFileSync(logPath, "utf-8").split("\n").filter(Boolean);
-    return lines.map((line) => JSON.parse(line));
+    return lines.map((line) => JSON.parse(line) as LogEntry);
 }

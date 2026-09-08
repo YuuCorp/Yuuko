@@ -35,7 +35,7 @@ export default {
     const mediaIDs = [];
 
     if (period) {
-      // @ts-ignore can't think of any other way to get around this
+      // @ts-expect-error can't think of any other way to get around this
       airingIn = ms(period);
       if (!airingIn) throw new YuukoError("Invalid time format. See `/help` for more information.", { vars: { period } });
     }
@@ -59,9 +59,10 @@ export default {
           if (!data.lists[i]?.entries) return;
           if (data.lists[i]?.entries?.length === 0) return;
           // check so the object is not undefined
-          if (data.lists[i]?.entries && data.lists[i]?.entries?.length != 0) mediaIDs.push(...data.lists[i]!.entries!.map((entry) => {
-            if (!entry?.media?.nextAiringEpisode?.airingAt) return;
-            return entry!.media!.id;
+
+          if (data.lists[i]?.entries && data.lists[i]?.entries?.length !== 0) mediaIDs.push(...data.lists[i]!.entries!.flatMap((entry) => {
+            if (!entry?.media?.nextAiringEpisode?.airingAt) return [];
+            return entry.media.id;
           }));
         }
       }
@@ -89,7 +90,7 @@ export default {
 
     // ^ Create pages with 5 airing anime per page and then make them into embeds
     const pageList: EmbedBuilder[] = [];
-    fields.forEach((fieldSet, index) => {
+    fields.forEach((fieldSet) => {
       const embed = new EmbedBuilder();
       embed.setTitle(`Airing between ${day.toDateString()} to ${nextWeek.toDateString()}`);
       embed.setColor("Green");

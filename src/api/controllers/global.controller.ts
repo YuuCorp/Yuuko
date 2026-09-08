@@ -23,7 +23,7 @@ export const api = new Elysia({
       security: [{ BearerAuth: [] }],
     },
     beforeHandle({ set, headers }) {
-      if (!headers.authorization || !env().TRUSTED_USERS.includes(headers.authorization)) {
+      if (!headers.authorization || !env.TRUSTED_USERS.includes(headers.authorization)) {
         set.status = 401;
         return { message: "Unauthorized" };
       }

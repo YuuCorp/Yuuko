@@ -1,14 +1,16 @@
+import type { MaybePromise } from "./command"
+
 interface CheckOptions {
   name: string
   description: string
-  run: () => void
+  run: () => MaybePromise<void>
   optional: boolean
 }
 
 export class Check {
   name: string
   description: string
-  run: () => void
+  run: () => MaybePromise<void>
   optional: boolean
 
   constructor(options: CheckOptions) {

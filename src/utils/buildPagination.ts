@@ -1,5 +1,6 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, ComponentType, EmbedBuilder, InteractionCallbackResponse, Message, type CollectedMessageInteraction, type InteractionReplyOptions, type MessageComponentCollectorOptions } from 'discord.js'
+import { ActionRowBuilder, ButtonBuilder, type ButtonInteraction, ButtonStyle, ComponentType, EmbedBuilder, type InteractionCallbackResponse, Message, type CollectedMessageInteraction, type InteractionReplyOptions, type MessageComponentCollectorOptions } from 'discord.js'
 import type { UsableInteraction } from '#structures/command';
+import { handleAsync } from './asyncHelper';
 
 export async function buildPagination(interaction: UsableInteraction, pageList: EmbedBuilder[], followUpButton?: ButtonBuilder): Promise<ButtonInteraction | null> {
   const FOLLOW_UP_ID = 'followupbtn';
@@ -37,9 +38,10 @@ export async function buildPagination(interaction: UsableInteraction, pageList: 
   if (totalPages === 1 && !followUpButton) return null;
 
   const collector = createButtonCollector(interaction, customIDs, pagination);
+  if (!collector) return null;
 
   return new Promise((resolve) => {
-    collector?.on("collect", async (i) => {
+    collector.on("collect", handleAsync(async (i) => {
       if (!i.isButton()) return;
 
       if (i.customId === FOLLOW_UP_ID) {
@@ -49,9 +51,10 @@ export async function buildPagination(interaction: UsableInteraction, pageList: 
 
         buttonList.map((b) => {
           if (b === followUpButton) b.setDisabled(true)
+          return b;
         })
 
-        interaction.editReply({
+        await interaction.editReply({
           components: [new ActionRowBuilder<ButtonBuilder>().addComponents(buttonList)],
         });
 
@@ -70,18 +73,18 @@ export async function buildPagination(interaction: UsableInteraction, pageList: 
       if (!i.deferred) await i.deferUpdate();
       await i.editReply(createPaginationData(pageList, pageNumber, totalPages, buttonList, followUpButton));
       collector.resetTimer();
-    });
+    }));
 
-    collector?.on("end", (_, reason) => {
+    collector?.on("end", handleAsync(async (_, reason) => {
       const disabledButtons = buttonList.map((b) => b.setDisabled(true));
-      interaction.editReply({
+      await interaction.editReply({
         components: [new ActionRowBuilder<ButtonBuilder>().addComponents(disabledButtons)],
       });
 
       if (reason !== "followup") {
         resolve(null);
       }
-    });
+    }));
   });
 }
 

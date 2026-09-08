@@ -16,7 +16,7 @@ export default {
     if (!interaction.isCommand()) return
     if (!interaction.guild) return
 
-    const uptime = Date.now() - env().UPTIME;
+    const uptime = Date.now() - env.UPTIME;
     const hours = Math.floor(uptime / 3600000)
     const minutes = Math.floor((uptime % 3600000) / 60000)
     const seconds = Math.floor(((uptime % 3600000) % 60000) / 1000)
@@ -31,7 +31,7 @@ export default {
         { name: 'Server Stats', value: `${interaction.guild.memberCount.toString()} members` },
         { name: 'Bot Stats', value: `${registered} registered users \n${servers} servers \n${members} members \nUptime: ${uptimeString}` },
       )
-    interaction.reply({ embeds: [embed] })
+    await interaction.reply({ embeds: [embed] })
 
   },
 } satisfies Command

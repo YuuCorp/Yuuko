@@ -1,6 +1,6 @@
 import { dlopen, suffix, type FFIFunction, type Library } from "bun:ffi";
-import { join } from "path";
-import fs from "fs";
+import { join } from "node:path";
+import fs from "node:fs";
 
 function defineModules<T extends Record<string, Record<string, FFIFunction>>>(defs: T) {
     return defs;

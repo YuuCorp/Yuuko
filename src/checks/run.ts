@@ -1,26 +1,28 @@
 import fs from 'node:fs'
-import { Client, type Check } from "#structures/index";
+import path from 'node:path';
+import type { Check } from "#structures/index";
 import { srcPath } from "#utils/paths";
 import { logger } from "#src/utils/logger";
 
-export async function runChecks(client: Client) {
+export async function runChecks() {
   // Flatten the array of checks
-  const checks: Check[] = (
-    await Promise.all(
-      fs
-        .readdirSync(srcPath("checks"))
-        .filter(file => file.endsWith('.ts') && file !== 'run.ts')
-        .map(async (file) => {
-          const check = await import(srcPath("checks", file))
-          return check.default
-        }),
-    )
-  ).flat()
+  const checksPath = srcPath("checks");
+  const checkFiles = fs.readdirSync(checksPath).filter((file) => file.endsWith(".ts"));
+
+  const checks: Check[] = [];
+
+  for (const file of checkFiles) {
+    const filePath = path.join(checksPath, file);
+    const module = await import(filePath) as { default: Check };
+
+    checks.push(module.default);
+  }
+
   logger.info("Running checks", { type: "check", total: checks.length });
 
   for (const check of checks) {
     try {
-      check.run()
+      await check.run()
       logger.info("Check passed", { type: "check", name: check.name, optional: check.optional });
     }
     catch (e) {
@@ -35,7 +37,7 @@ export async function runChecks(client: Client) {
       else {
         throw new Error(`Critical check "${check.name}" failed
               > Purpose: ${check.description}
-              > Why: ${e}
+              > Why: ${serializeError(e)}
               `)
       }
     }
@@ -44,13 +46,14 @@ export async function runChecks(client: Client) {
   logger.info("Checks passed!");
 }
 
-function serializeError(e: unknown) {
+function serializeError(e: unknown): string {
   if (e instanceof Error) {
-    return {
-      message: e.message,
-      stack: e.stack,
-      name: e.name,
-    };
+    return e.stack ?? e.message;
   }
-  return e;
+
+  if (typeof e === "object" && e !== null) {
+    return JSON.stringify(e);
+  }
+
+  return String(e);
 }

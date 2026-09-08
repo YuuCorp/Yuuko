@@ -1,5 +1,5 @@
 import type { Interaction } from 'discord.js'
-import type { Middleware, Client } from '#structures/index'
+import type { Middleware, Client, MaybePromise } from '#structures/index'
 import type { Maybe, MediaListStatus, ScoreFormat } from '#graphQL/types'
 
 export interface Media {
@@ -32,20 +32,28 @@ export type CacheEntry = {
 
 export interface YuukoComponent {
   name: string
-  run: (interaction: Interaction, args: any, client: Client) => void
+  run: (interaction: Interaction, args: any, client: Client) => MaybePromise<void>
   middlewares?: Middleware[]
 }
 
 export type AlwaysExist<T> = T extends undefined | null ? never : T;
 
-export interface Headers {
-  [key: string]: string
+export interface GraphQLErrorLocation {
+  line: number;
+  column: number;
+}
+
+export interface GraphQLError {
+  message: string;
+  locations?: GraphQLErrorLocation[];
+  path?: (string | number)[];
+  extensions?: Record<string, unknown>;
 }
 
 export interface GraphQLResponse<TData = any> {
   data: TData
-  errors?: any[]
-  headers: any
+  errors?: GraphQLError[]
+  headers: Headers
 }
 
 export type YuukoLog = {

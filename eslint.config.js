@@ -18,5 +18,6 @@ export default antfu({
     rules: {
         "ts/strict-boolean-expressions": "off",
         "ts/no-non-null-asserted-optional-chain": "off",
+        "antfu/no-top-level-await": "off",
     },
 });

@@ -51,7 +51,7 @@ export default {
                     {
                         title: `Successfully wiped your AniList account binding.`,
                         description: `Your Discord-bound AniList account has been wiped from our database.`,
-                        color: 0x00ff00,
+                        color: 0x00FF00,
                         footer: footer(),
                     },
                 ],

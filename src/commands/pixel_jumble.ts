@@ -9,6 +9,7 @@ import { ptr, toBuffer, type Library, type Pointer } from "bun:ffi";
 import type { ModuleSymbols } from "#structures/modules";
 import { createButtonCollector } from "#utils/buildPagination";
 import { getStringOption } from "#utils/getOption";
+import { handleAsync } from "#src/utils";
 
 const name = "pixeljumble";
 const usage = "/pixeljumble";
@@ -70,8 +71,8 @@ export default {
     const urlPtr = ptr(encodedImgUrl);
 
     let pixelationLevel = 7;
-    let originalImgPtr: Pointer | null = null;
-    let pixelatedImgPtr: Pointer | null = null;
+    let originalImgPtr: Pointer | bigint | null = null;
+    let pixelatedImgPtr: Pointer | bigint | null = null;
     let pixelatedImgBufferSize: number | null = null;
 
     originalImgPtr = lib.symbols.GetImage(urlPtr);
@@ -123,11 +124,11 @@ export default {
     let guesses = 0;
     let hintsUsed = 0;
     let forfeit = false;
-    collector?.on("collect", async (i) => {
+    collector?.on("collect", handleAsync(async (i) => {
       if (!i.isButton()) return;
 
       switch (i.customId) {
-        case "guess":
+        case "guess": {
           const modal = new ModalBuilder()
             .setCustomId("pixel_jumble_modal")
             .setTitle("Enter your guess");
@@ -147,12 +148,14 @@ export default {
 
           await i.showModal(modal);
           break;
-        case "hint":
+        }
+
+        case "hint": {
           hintsUsed++;
           pixelationLevel = Math.max(0, pixelationLevel - 1.5);
 
           if (pixelationLevel < 1 || originalImgPtr === null) {
-            i.deferUpdate();
+            await i.deferUpdate();
             break;
           };
 
@@ -184,16 +187,18 @@ export default {
           await interaction.editReply({ files: [attachment], embeds: [embed] })
 
           break;
-        case "forfeit":
+
+
+        } case "forfeit":
           forfeit = true;
           collector.stop();
           break;
       }
 
       collector.resetTimer();
-    })
+    }))
 
-    collector?.on("end", async () => {
+    collector?.on("end", handleAsync(async () => {
       if (pixelatedImgPtr && pixelatedImgBufferSize) {
         lib.symbols.FreeImageBuffer(pixelatedImgPtr, pixelatedImgBufferSize);
         pixelatedImgPtr = null;
@@ -204,12 +209,12 @@ export default {
 
       const game = client.modalData.get("pixelJumbleGames")?.get(interaction.user.id);
       const gameWon = game?.won ?? false;
+      const gameResultText = (gameWon
+        ? "guessed correctly"
+        : `${forfeit ? "gave up" : "failed to guess in time"}`);
+
       const endText =
-        `${hints}\n**${interaction.user.displayName}**` +
-        (gameWon
-          ? " guessed correctly"
-          : `${forfeit ? " gave up" : " failed to guess in time"}`) +
-        `!\nAnswer was **${title}**\nThey took ${game?.guesses ?? 0} guesses and used ${game?.hintsUsed ?? 0} extra hints!`;
+        `${hints}\n**${interaction.user.displayName}** ${gameResultText}!\nAnswer was **${title}**\nThey took ${game?.guesses ?? 0} guesses and used ${game?.hintsUsed ?? 0} extra hints!`;
 
       embed.setDescription(endText);
 
@@ -227,13 +232,11 @@ export default {
         pixelatedImgPtr = null;
         pixelatedImgBufferSize = null;
       }
-    })
-
-
+    }))
   },
 } satisfies Command<{ type: MediaType }>;
 
-function pixelateImage<T extends Library<ModuleSymbols["modules"]>>(lib: T, originalImg: Pointer | null, pixelationLevel: number): [Pointer, number] {
+function pixelateImage<T extends Library<ModuleSymbols["modules"]>>(lib: T, originalImg: Pointer | bigint | null, pixelationLevel: number): [Pointer | bigint, number] {
   if (!originalImg) throw new YuukoError("Original image pointerr is null when trying to pixelate it");
 
   const pixelatedImgBuffer = new Uint32Array(1);
@@ -249,7 +252,7 @@ function pixelateImage<T extends Library<ModuleSymbols["modules"]>>(lib: T, orig
   return [pixelatedImgPtr, pixelatedImgBufferSize];
 }
 
-function getAttachment(imgPtr: Pointer, bufferSize: number) {
+function getAttachment(imgPtr: Pointer | bigint, bufferSize: number) {
   const buffer = toBuffer(imgPtr, 0, bufferSize);
   if (!buffer) throw new YuukoError("Encountered an error whilst trying to create the image buffer.");
   const attachment = new AttachmentBuilder(buffer, { name: "output.png" });

@@ -17,6 +17,7 @@
  * local SQLite db.
  */
 
+import process from "node:process";
 import { spawn } from "node:child_process";
 import dotenvFlow from "dotenv-flow";
 import { eq } from "drizzle-orm";
@@ -24,6 +25,7 @@ import { db } from "#database/db";
 import { aniListUser } from "#database/models";
 import { RSA } from "#utils/rsaEncryption";
 import { graphQLRequest } from "#utils/graphQLRequest";
+import { handleAsync } from "#src/utils";
 
 dotenvFlow.config({ silent: true });
 
@@ -80,10 +82,10 @@ const code = await new Promise<string>((resolve, reject) => {
       }
 
       // Resolve after the response is sent so the server isn't torn down mid-write.
-      queueMicrotask(() => {
+      queueMicrotask(handleAsync(async () => {
         resolve(returnedCode);
-        server.stop();
-      });
+        await server.stop();
+      }));
       return new Response("Linked! You can close this tab.", { status: 200 });
     },
   });

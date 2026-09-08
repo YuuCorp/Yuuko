@@ -1,18 +1,6 @@
-import type { SlashCommandBuilder, APIEmbedField, ApplicationCommandOptionType, CacheType, ChatInputCommandInteraction, Interaction, SlashCommandOptionsOnlyBuilder, SlashCommandSubcommandsOnlyBuilder, ButtonInteraction } from "discord.js";
+import type { SlashCommandBuilder, APIEmbedField, CacheType, ChatInputCommandInteraction, Interaction, SlashCommandOptionsOnlyBuilder, SlashCommandSubcommandsOnlyBuilder, ButtonInteraction } from "discord.js";
 import type { CommandCategories } from "#utils/commandCategories";
 import type { Middleware, Client } from "./index";
-
-export interface CommandOptions {
-  name: string;
-  description: string;
-  usage: string;
-  type: string;
-  run: Function;
-  slash?: SlashCommandBuilder;
-  guildOnly?: boolean;
-  middlewares?: Middleware[];
-  autocomplete?: (interaction: Interaction) => void;
-}
 
 export type MaybePromise<T> = T | Promise<T>;
 
@@ -52,7 +40,7 @@ export interface Command<hookData = undefined> {
   commandType: CommandType;
   guildOnly?: boolean;
   middlewares?: Middleware[];
-  autocomplete?: (interaction: Interaction) => void;
+  autocomplete?: (interaction: Interaction) => MaybePromise<void>;
 
   withBuilder: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder;
   run: <Args = any>(o: RunOptions<Args>, hookData?: hookData) => MaybePromise<void>;

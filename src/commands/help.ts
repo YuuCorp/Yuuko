@@ -1,8 +1,8 @@
 import { EmbedBuilder, SlashCommandBuilder, time } from "discord.js";
-import fs from "fs";
+import fs from "node:fs";
 import { db, tables } from "#database/db";
 import type { Command, CommandType } from "#structures/index";
-import { buildPagination, CommandCategories, srcPath } from "#utils/index";
+import { buildPagination, type CommandCategories, srcPath } from "#utils/index";
 import { desc } from "drizzle-orm";
 
 function generateHelpEmbeds(cmdsArr: string[], category: keyof typeof CommandCategories) {
@@ -50,10 +50,9 @@ export default {
   description,
   withBuilder: new SlashCommandBuilder().setName(name).setDescription(description),
 
-  run: async ({ interaction, client }): Promise<void> => {
+  run: async ({ interaction }): Promise<void> => {
     // Require all files from the commands folder and fetch description
-    const cmds = fs.readdirSync(srcPath("commands")).filter((x) => x.endsWith(".ts") && x != "help.ts");
-    const cmdsDesc = [];
+    const cmds = fs.readdirSync(srcPath("commands")).filter((x) => x.endsWith(".ts") && x !== "help.ts");
     const cmdGroups: Record<CommandType, Partial<Command>[]> = {
       "User": [],
       "Anilist": [],
@@ -61,10 +60,14 @@ export default {
       "Internal": [],
       "Misc": [],
     };
+
     for (const cmd of cmds) {
-      const cmdEntry = (await import(srcPath("commands", cmd))).default as Command;
+      const module = (await import(srcPath("commands", cmd))) as { default: Command };
+      const cmdEntry = module.default;
+
       if (cmdEntry.commandType === "Internal") continue;
       if (!cmdGroups[cmdEntry.commandType]) cmdGroups[cmdEntry.commandType] = [];
+
       cmdGroups[cmdEntry.commandType].push({ usage: cmdEntry.usage, name: cmdEntry.name, description: cmdEntry.description });
     }
     // Send the description to the user
@@ -84,7 +87,7 @@ export default {
     const pageList = [helpInfoEmbed];
     for (const category of Object.keys(cmdGroups)) {
       const _category = category as keyof typeof CommandCategories;
-      const cmdHelpArr = cmdGroups[_category].map((x: any) => `\`$\` **${x.name}** - \`${x.usage || "No parameters required."}\` \n ${x.description} \n`);
+      const cmdHelpArr = cmdGroups[_category].map((x) => `\`$\` **${x.name}** - \`${x.usage || "No parameters required."}\` \n ${x.description} \n`);
       pageList.push(...generateHelpEmbeds(cmdHelpArr, _category));
     }
 

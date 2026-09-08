@@ -53,11 +53,11 @@ export default {
     try {
       // Get the users media lists
       const aniListUser = await getAniListUser(interaction.user.id);
-      if (!aniListUser) return interaction.respond([{ name: "No Anilist account linked", value: "NaN" }]);
+      if (!aniListUser) return await interaction.respond([{ name: "No Anilist account linked", value: "NaN" }]);
 
       const vars = { userId: +aniListUser.aniListId };
       const response = (await graphQLRequest("ListQuery", vars)).data;
-      if (!response.User || !response.User.mediaListOptions) return interaction.respond([{ name: "No lists found for linked account", value: "NaN" }]);
+      if (!response.User || !response.User.mediaListOptions) return await interaction.respond([{ name: "No lists found for linked account", value: "NaN" }]);
 
       let animeLists: {
         name: string;
@@ -74,7 +74,7 @@ export default {
             return { name: `${list} (Anime)`, value: list! };
           });
         if (response.User.mediaListOptions.mangaList?.customLists)
-          mangaLists = response?.User.mediaListOptions!.mangaList.customLists.map((list) => {
+          mangaLists = response?.User.mediaListOptions.mangaList.customLists.map((list) => {
             return { name: `${list} (Manga)`, value: list! };
           });
       }
@@ -160,10 +160,12 @@ export default {
 >;
 
 function getEmojis(messageString: string) {
-  const matchedResults = Array.from(messageString.matchAll(/<\w*:.*?:(\d+)>/gm), (x) => x[1]);
+  const matchedResults = Array.from(messageString.matchAll(/<\w*:.*?:(\d+)>/g), (x) => x[1]);
   const filteredResults = matchedResults.map((x) => `img22(https://cdn.discordapp.com/emojis/${x})`);
+
   for (let i = 0; i < matchedResults.length; i++) {
     messageString = messageString.replace(/<\w*:.*?:(\d+)>/, filteredResults[i] || "");
   }
+
   return messageString;
 }

@@ -1,4 +1,5 @@
 import { Check } from '#structures/index'
+import process from 'node:process';
 
 const tokenCheck = new Check({
   name: 'Token Check',

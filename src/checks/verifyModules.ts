@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'node:fs'
 import { Check } from '#structures/index'
 import { suffix } from "bun:ffi";
 import { srcPath } from '#utils/paths'

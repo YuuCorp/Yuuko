@@ -29,7 +29,7 @@ export type SyncUsers = {
 const CHECK_INTERVAL = 5000;
 
 async function updateSyncedUsers() {
-    if (env().NODE_ENV === "development") return;
+    if (env.NODE_ENV === "development") return;
 
     try {
 

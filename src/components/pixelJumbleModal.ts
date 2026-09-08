@@ -1,6 +1,5 @@
 import { mwRequireAniListToken } from "#middleware/alToken";
 import { YuukoError, type YuukoComponent } from "#utils/types";
-import { MessageFlags } from "discord.js";
 
 export default {
     name: "pixel_jumble_modal",

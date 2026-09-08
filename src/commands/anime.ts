@@ -21,7 +21,7 @@ export default {
     .setDescription(description)
     .addStringOption((option) => option.setName("anime").setDescription("The anime to search for").setRequired(true)),
 
-  run: async ({ interaction, client }, hookData): Promise<void> => {
+  run: async ({ interaction }, hookData): Promise<void> => {
     const vars: AnimeQueryVariables = {};
     let animeIdFound = false;
 
@@ -67,18 +67,20 @@ export default {
       throw new YuukoError("No anime found.", { vars });
     }
 
-    if (!animeIdFound) redis.set(`_animeId-${vars.query}`, data.id);
+    if (!animeIdFound) await redis.set(`_animeId-${vars.query}`, data.id);
     const { mediaListEntry, ...redisData } = data;
-    redis.json.set(`_anime-${redisData.id}`, "$", redisData);
-    redis.expireAt(`_anime-${redisData.id}`, new Date(Date.now() + 604800000));
+    await redis.json.set(`_anime-${redisData.id}`, "$", redisData);
+    await redis.expireAt(`_anime-${redisData.id}`, new Date(Date.now() + 604800000));
     for (const synonym of redisData.synonyms || []) {
       if (!synonym) continue;
-      redis.set(`_animeId-${normalize(synonym)}`, data.id);
+      await redis.set(`_animeId-${normalize(synonym)}`, data.id);
     }
+
     if (redisData.nextAiringEpisode?.airingAt) {
       logger.debug("Adding expiration date", { type: "commandDebug", command: name, seriesId: redisData.id, airingAt: redisData.nextAiringEpisode.airingAt })
-      redis.expireAt(`_anime-${data.id}`, redisData.nextAiringEpisode.airingAt);
+      await redis.expireAt(`_anime-${data.id}`, redisData.nextAiringEpisode.airingAt);
     }
-    return void await handleData({ media: data, headers: headers }, interaction, "ANIME", hookData);
+
+    return void await handleData({ media: data, headers }, interaction, "ANIME", hookData);
   },
 } satisfies Command<{ id?: number, anime?: string }>;

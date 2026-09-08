@@ -14,7 +14,7 @@ export default {
   withBuilder: new SlashCommandBuilder().setName(name).setDescription(description),
 
   run: async ({ interaction, client }): Promise<void> => {
-    interaction.reply(`Ping: ${client.ws.ping} ms.`)
+    await interaction.reply(`Ping: ${client.ws.ping} ms.`)
 
     const commandCooldown = client.cooldowns.get(name);
 

@@ -1,5 +1,5 @@
 import { buildPagination, footer, getStringOption, getSubcommandOption, getUserOption } from "#utils/index";
-import { EmbedBuilder, MessageFlags, SlashCommandBuilder, User } from "discord.js";
+import { EmbedBuilder, MessageFlags, SlashCommandBuilder, type User } from "discord.js";
 import { db, tables } from "#database/db";
 import { eq, sql } from "drizzle-orm";
 import type { Command } from "#structures/index";
@@ -87,7 +87,6 @@ export default {
       if (birthdays.length === 0) return void interaction.reply({ content: "There are no birthdays registered for this server.", flags: MessageFlags.Ephemeral });
       const embeds = [];
       let currentEmbed = new EmbedBuilder().setTitle("Birthdays");
-      let currentEmbedIndex = 0;
       let currentEmbedField = 0;
       let embedDescription = "";
 
@@ -109,7 +108,6 @@ export default {
           currentEmbed.setDescription(embedDescription);
           embeds.push(currentEmbed);
           currentEmbed = new EmbedBuilder().setTitle("Birthdays");
-          currentEmbedIndex++;
           currentEmbedField = 0;
           embedDescription = "";
         } else if (currentEmbedField === birthdays.length) {
@@ -127,7 +125,7 @@ export default {
           {
             title: `Successfully wiped your birthday.`,
             description: `Your birthday has been wiped from our database.`,
-            color: 0x00ff00,
+            color: 0x00FF00,
             footer: footer(),
           },
         ],

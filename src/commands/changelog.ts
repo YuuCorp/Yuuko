@@ -12,7 +12,7 @@ export default {
   description,
   commandType: 'Misc',
   withBuilder: new SlashCommandBuilder().setName(name).setDescription(description),
-  run: async ({ interaction, client }): Promise<void> => {
+  run: async ({ interaction }): Promise<void> => {
     if (!interaction.isCommand())
       return
     // example COMMIT by YuuCorp: Added changelog command

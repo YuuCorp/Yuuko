@@ -13,7 +13,7 @@ const interactionCreate = new YuukoEvent({
 
       if (interaction.isChatInputCommand()) {
         // We run the command based on the interaction
-        const command = client.commands.find((cmd) => cmd.name == interaction.commandName);
+        const command = client.commands.find((cmd) => cmd.name === interaction.commandName);
         if (!command) return;
 
         checkCooldown(client, command, interaction);
@@ -35,17 +35,17 @@ const interactionCreate = new YuukoEvent({
 
         // Check for autocomplete
       } else if (interaction.isAutocomplete()) {
-        const command = client.commands.find((cmd) => cmd.name == interaction.commandName);
+        const command = client.commands.find((cmd) => cmd.name === interaction.commandName);
         if (!command || !interaction) return;
         if (!command.autocomplete) return;
 
-        command.autocomplete(await runMiddlewares(command.middlewares, interaction, client));
+        await command.autocomplete(await runMiddlewares(command.middlewares, interaction, client));
 
         // Check for modal
       } else if (interaction.isModalSubmit()) {
-        const component = client.components.find((comp) => comp.name == interaction.customId);
+        const component = client.components.find((comp) => comp.name === interaction.customId);
         if (!component) return;
-        component.run(await runMiddlewares(component.middlewares, interaction, client), null, client);
+        await component.run(await runMiddlewares(component.middlewares, interaction, client), null, client);
       }
 
     } catch (e: any) {
@@ -69,7 +69,9 @@ const interactionCreate = new YuukoEvent({
       if (!interaction.isChatInputCommand() || !middlewares) return interaction;
       if (middlewares.some((mw) => mw.defer)) await interaction.deferReply();
 
-      await Promise.all(middlewares.map((mw) => mw.run(interaction, client)));
+      for (const mw of middlewares) {
+        await mw.run(interaction, client);
+      }
 
       return interaction;
     }
@@ -84,7 +86,6 @@ const interactionCreate = new YuukoEvent({
       }
       if (commandCooldown.has(interaction.user.id)) {
         const cooldownExpires = commandCooldown.get(interaction.user.id);
-        console.log(cooldownExpires);
         if (!cooldownExpires) return interaction;
         if (cooldownExpires > Date.now()) {
           throw new YuukoError(`User ${interaction.user.tag} is on cooldown for command ${command.name}`, { cause: `Cooldown expires on ${time(Math.ceil(cooldownExpires / 1000), "f")} (${time(Math.ceil(cooldownExpires / 1000), "R")})` });

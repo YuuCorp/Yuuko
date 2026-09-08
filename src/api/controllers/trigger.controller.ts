@@ -1,7 +1,7 @@
-import { execSync, spawnSync } from "child_process";
+import { execSync } from "node:child_process";
+import fs from "node:fs";
 import { Elysia, t } from "elysia";
 import { db, sqlite, tables } from "#database/db";
-import fs from "fs";
 import { srcPath } from "#utils/paths";
 
 export const triggerController = new Elysia({
@@ -11,7 +11,6 @@ export const triggerController = new Elysia({
   .post(
     "/restart",
     async ({ set }) => {
-      const update = spawnSync("sh", ["update.sh"]);
       sqlite.close();
       set.status = 202;
       return { message: "Successfully restarted the bot!" };
@@ -24,7 +23,7 @@ export const triggerController = new Elysia({
       },
       afterHandle() {
         execSync('pm2 restart "Yuuko Production"', { encoding: "utf-8" });
-        setTimeout(() => execSync('pm2 restart "Yuuko Production API"', { encoding: "utf-8" }), 500);
+        setTimeout(execSync, 500, 'pm2 restart "Yuuko Production API"', { encoding: "utf-8" });
       },
       response: {
         202: t.Object({ message: t.String() }),

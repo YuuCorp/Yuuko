@@ -1,3 +1,5 @@
+import { Buffer } from "node:buffer";
+
 /**
  * Decodes a JWT's header and payload from base64 without verifying the
  * signature. Use only for inspection (e.g. checking expiry), never for trust.
@@ -6,8 +8,8 @@
 export function decodeJWT(JWT: string) {
     const splitJWT = JWT.split(".");
     const decodeBase64 = (a: string) => Buffer.from(a, "base64").toString()
-    const header: JWTHeader = JSON.parse(decodeBase64(splitJWT[0]!));
-    const payload: JWTPayload = JSON.parse(decodeBase64(splitJWT[1]!));
+    const header = JSON.parse(decodeBase64(splitJWT[0]!)) as JWTHeader;
+    const payload = JSON.parse(decodeBase64(splitJWT[1]!)) as JWTPayload;
 
     return { header, payload };
 }

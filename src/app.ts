@@ -1,3 +1,4 @@
+import process from "node:process";
 import dotenvFlow from "dotenv-flow";
 import { db, sqlite, tables } from "#database/db";
 import { Client } from "#structures/index";
@@ -23,12 +24,12 @@ process.on("SIGINT", () => {
 async function start(token: string | undefined) {
   await RSA.loadKeys();
   await registerEvents(client);
-  await runChecks(client);
+  await runChecks();
 
-  client.login(token);
+  await client.login(token);
   await updateBotStats(client);
 
-  env().UPTIME = Date.now();
+  env.UPTIME = Date.now();
 }
 
 async function initializeWorkerDB() {
@@ -48,18 +49,19 @@ async function initializeWorkerDB() {
     .where(eq(tables.workerEvents.type, "SYNC"));
 }
 
-await start(env().TOKEN);
+await start(env.TOKEN);
 await initializeWorkerDB();
 
-workerManager.onmessage = async (e) => {
+workerManager.onmessage = async (e: MessageEvent<WorkerResponseUnion>) => {
   if (!e.data.type) return;
-  const data = e.data as WorkerResponseUnion;
+  const data = e.data;
 
   switch (data.type) {
     case 'LOG': {
       logger.log(data.level, data.text);
       break;
     }
+
     case "SYNC": {
       await db.update(tables.workerEvents)
         .set({ updatedAt: sql`current_timestamp` })
@@ -68,5 +70,8 @@ workerManager.onmessage = async (e) => {
       await syncAnilistUsers(data);
       break;
     }
+
+    case "REMINDER":
+      break;
   }
 };

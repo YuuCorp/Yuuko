@@ -40,7 +40,7 @@ export default {
       .setFooter(footer(headers));
 
     // data.description.split("<br>").forEach(line => titleEmbed.addField(line, "", true))
-    interaction.reply({ embeds: [studioEmbed] });
+    await interaction.reply({ embeds: [studioEmbed] });
 
   },
 } satisfies Command<{ query: string }>;

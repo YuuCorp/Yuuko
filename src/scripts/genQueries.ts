@@ -1,7 +1,8 @@
 import fs from 'node:fs'
 import { srcPath } from '#utils/paths'
+import { handleAsync } from '#src/utils';
 
-(async () => {
+(handleAsync(async () => {
   const fileNames = fs.readdirSync('./src/graphQL').filter(x => x.endsWith('.gql'))
 
   const out: Record<string, string> = {};
@@ -14,4 +15,4 @@ import { srcPath } from '#utils/paths'
   await Bun.write('./src/graphQL/types/queries.ts', `export default ${JSON.stringify(out, null, 2)} as const`)
 
   console.log(`Finished generating queries. ${srcPath('graphQL', 'types', 'queries.ts')}`)
-})()
+}))()

@@ -1,5 +1,5 @@
 import { drizzle } from "drizzle-orm/bun-sqlite";
-import { type InferSelectModel } from "drizzle-orm";
+import type { InferSelectModel } from "drizzle-orm";
 import { Database } from "bun:sqlite";
 
 import * as schema from "#models/index";

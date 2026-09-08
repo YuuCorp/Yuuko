@@ -72,7 +72,7 @@ export default {
       // re: yeah, this is cancer
       titleEmbed.setColor(userColor as ColorResolvable);
     }
-    interaction.reply({ embeds: [titleEmbed] });
+    await interaction.reply({ embeds: [titleEmbed] });
 
   },
 } satisfies Command<{ username: string }>;

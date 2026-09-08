@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'node:fs'
 import { RSA } from '#utils/rsaEncryption'
 import { Check } from '#structures/index'
 import { srcPath } from '#utils/paths'

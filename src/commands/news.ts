@@ -51,7 +51,7 @@ export default {
     const embed = new EmbedBuilder().setTitle(rss.feed.title).setColor(0x00AE86)
 
     const clamp = (num: number, min: number, max: number) => Math.min(Math.max(num, min), max)
-    for (let i = 0; i < clamp(env().RSS_LIMIT, 0, rss.items.length); i++) {
+    for (let i = 0; i < clamp(env.RSS_LIMIT, 0, rss.items.length); i++) {
       if (rss.items[i] === undefined) continue
       let content: string = rss.items[i]!.content
       /*
@@ -62,10 +62,10 @@ export default {
       if (content.length > 1024)
         content = `${content.substring(0, 1015)}...`
 
-      if (i != (env().RSS_LIMIT) - 1)
+      if (i !== (env.RSS_LIMIT) - 1)
         embed.addFields({ name: `:newspaper:  ${rss.items[i]!.title}`, value: content })
     }
 
-    interaction.reply({ embeds: [embed] })
+    await interaction.reply({ embeds: [embed] })
   },
 } satisfies Command

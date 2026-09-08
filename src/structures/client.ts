@@ -1,4 +1,4 @@
-import { Collection, Client as DiscordClient, InteractionCollector, type ClientOptions } from "discord.js";
+import { Collection, Client as DiscordClient, type InteractionCollector, type ClientOptions } from "discord.js";
 import type { YuukoComponent } from "#utils/types";
 import type { Command } from "./command";
 import { RSA } from "#utils/rsaEncryption";

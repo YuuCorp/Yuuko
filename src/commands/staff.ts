@@ -47,35 +47,50 @@ export default {
       .setFooter(footer(headers));
 
     const pageList = [staffEmbed];
+
     if (staffMedia?.edges && staffMedia.edges.length > 0) {
-      const media = staffMedia.edges.map((edge) => {
-        if (!edge?.node || !edge?.staffRole) return;
+      const media = staffMedia.edges.flatMap((edge) => {
+        if (!edge?.node || !edge?.staffRole) return [];
+
         return `${edge.staffRole} - [${edge.node.title?.english || edge.node.title?.romaji || edge.node.title?.native}](${edge.node.siteUrl})`;
       });
-      const mediaEmbed = new EmbedBuilder()
-        .setThumbnail(data.image!.large!)
-        .setTitle(`${data.name!.full}'s Media`)
-        .setDescription(media.join("\n"))
-        .setURL(data.siteUrl || "https://anilist.co")
-        .setColor("Green");
-      pageList.push(mediaEmbed);
+
+      if (media.length > 0) {
+        const mediaEmbed = new EmbedBuilder()
+          .setThumbnail(data.image!.large!)
+          .setTitle(`${data.name!.full}'s Media`)
+          .setDescription(media.join("\n"))
+          .setURL(data.siteUrl || "https://anilist.co")
+          .setColor("Green");
+
+        pageList.push(mediaEmbed);
+      }
     }
+
     if (characterMedia?.edges && characterMedia.edges.length > 0) {
-      const media = characterMedia.edges.map((node) => {
-        if (!node?.node || !node?.characters) return;
+      const media = characterMedia.edges.flatMap((node) => {
+        if (!node?.node || !node?.characters) return [];
+
         const work = node.characters.map((character) => {
           return `${character?.name?.full || "Unknown"} - [${SeriesTitle(node.node?.title || undefined)}](${node.node?.siteUrl || "https://anilist.co"})`;
         });
+
         return work;
       });
-      const charEmbed = new EmbedBuilder()
-        .setThumbnail(data.image!.large!)
-        .setTitle(`${data.name!.full}'s Characters`)
-        .setDescription(media.join("\n"))
-        .setURL(data.siteUrl || "https://anilist.co")
-        .setColor("Green");
-      pageList.push(charEmbed);
+
+      if (media.length > 0) {
+
+        const charEmbed = new EmbedBuilder()
+          .setThumbnail(data.image!.large!)
+          .setTitle(`${data.name!.full}'s Characters`)
+          .setDescription(media.join("\n"))
+          .setURL(data.siteUrl || "https://anilist.co")
+          .setColor("Green");
+
+        pageList.push(charEmbed);
+      }
     }
+
     return void await buildPagination(interaction, pageList);
   },
 } satisfies Command<{ query: string }>;

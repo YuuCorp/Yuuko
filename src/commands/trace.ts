@@ -63,6 +63,6 @@ export default {
         { name: "Video", value: `[Link](${response.video})`, inline: true },
       ],
     };
-    AnimeCmd.run({ interaction, client, }, hookdata);
+    await AnimeCmd.run({ interaction, client, }, hookdata);
   },
 } satisfies Command;

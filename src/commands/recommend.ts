@@ -3,7 +3,7 @@ import AnimeCmd from "#commands/anime";
 import { getStringOption, graphQLRequest, SeriesTitle, YuukoError } from "#utils/index";
 import { SlashCommandBuilder } from "discord.js";
 import type { Command } from "#structures/index";
-import type { MediaType } from "#graphQL/types";
+import { MediaType } from "#graphQL/types";
 
 const name = "recommend";
 const usage = "recommend <anime | manga> <anilist user> <genre1, genreN>";
@@ -24,13 +24,13 @@ export default {
   run: async ({ interaction, client }, hookData): Promise<void> => {
     await interaction.deferReply();
 
-    const type = getStringOption(interaction, hookData, "type", true) as MediaType;
+    const type = getStringOption(interaction, hookData, "type", true);
     const aniListUsername = getStringOption(interaction, hookData, "anilistuser", true);
     const genres = getStringOption(interaction, hookData, "genres", true).replaceAll(", ", "");
 
-    const vars = { type, userName: aniListUsername };
+    if (type !== MediaType.Anime && type !== MediaType.Manga) throw new YuukoError(`Please specify either manga, or anime as your content type. (Yours was "${type}")`);
 
-    if (type != "ANIME" && type != "MANGA") throw new YuukoError(`Please specify either manga, or anime as your content type. (Yours was "${type}")`);
+    const vars = { type, userName: aniListUsername };
 
     const excludeIDs: number[] = [];
 
@@ -42,7 +42,7 @@ export default {
     if (!data || !data.lists || data.lists.length < 1) throw new YuukoError("Couldn't find any data from the user specified.", { vars });
 
     // ^ We filter out the Planning list
-    for (const MediaList of data.lists.filter((MediaList) => MediaList!.name != "Planning")) {
+    for (const MediaList of data.lists.filter((MediaList) => MediaList!.name !== "Planning")) {
       if (MediaList && MediaList.entries) MediaList.entries.map((e) => excludeIDs.push(e!.media!.id));
     }
     if (!genres.length) throw new YuukoError("Please specify at least one genre.");
@@ -64,11 +64,11 @@ export default {
     if (!recommendedSeries) throw new YuukoError("Couldn't find any data.", { vars: recommendationVars });
 
     switch (type) {
-      case "ANIME":
-        AnimeCmd.run({ interaction, client }, { anime: SeriesTitle(recommendedSeries.title) });
+      case MediaType.Anime:
+        await AnimeCmd.run({ interaction, client }, { anime: SeriesTitle(recommendedSeries.title) });
         break;
-      case "MANGA":
-        MangaCmd.run({ interaction, client }, { manga: SeriesTitle(recommendedSeries.title) });
+      case MediaType.Manga:
+        await MangaCmd.run({ interaction, client }, { manga: SeriesTitle(recommendedSeries.title) });
         break;
     }
   },

@@ -7,7 +7,7 @@ import { srcPath } from "./paths";
 import { logger } from "#src/utils/logger";
 
 export async function registerCommands(client: Client) {
-  const environment = env().NODE_ENV;
+  const environment = env.NODE_ENV;
   logger.info("Starting bot", { type: "startup", environment })
 
   const commandsPath = srcPath("commands");
@@ -31,10 +31,10 @@ export async function registerCommands(client: Client) {
   logger.info("Loaded slash commands", { type: "startup", total: slashCommands.length })
 
   // ^ Register Slash Commands
-  const rest = new REST({ version: "10" }).setToken(env().TOKEN);
+  const rest = new REST({ version: "10" }).setToken(env.TOKEN);
 
-  const clientId = env().CLIENT_ID;
-  const guildId = env().GUILD_ID;
+  const clientId = env.CLIENT_ID;
+  const guildId = env.GUILD_ID;
   const isProduction = environment === "production" || environment === "docker";
 
   try {

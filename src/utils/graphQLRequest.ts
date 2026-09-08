@@ -47,7 +47,7 @@ import { logger } from "#src/utils/logger";
 
 type Query = keyof typeof Queries
 
-const baseUrl = env().ANILIST_API;
+const baseUrl = env.ANILIST_API;
 
 interface QueryVariables {
   Airing: [AiringQuery, AiringQueryVariables]
@@ -91,9 +91,9 @@ export async function graphQLRequest<QueryKey extends Query>(queryKey: QueryKey,
   try {
     const res = await fetch(url, reqOptions)
     const resJson = await res.json() as GraphQLResponse;
+
     if (!res.ok) {
-      let errorMessage = "";
-      if (resJson.errors) errorMessage = resJson.errors[0].message;
+      const errorMessage = resJson.errors?.[0]?.message ?? "";
       throw new YuukoError(`${res.status} ${errorMessage} ${res.statusText}`, { vars });
     }
 
@@ -107,9 +107,14 @@ export async function graphQLRequest<QueryKey extends Query>(queryKey: QueryKey,
       rateLimitRemaining: parseInt(res.headers.get("x-ratelimit-remaining") ?? ""),
     });
 
-    return { data: data.data, headers: res.headers as Headers };
-  } catch (e: any) {
+    return { data: data.data, headers: res.headers };
+  } catch (e) {
     logger.error(e);
-    throw new YuukoError(e?.message || e, { vars });
+
+    if (e instanceof Error) {
+      throw new YuukoError(e.message, { vars });
+    } else {
+      throw new YuukoError(String(e), { vars });
+    }
   }
 }
