@@ -1,5 +1,5 @@
 # Stage 1: Builder
-FROM node:20-bullseye-slim AS builder
+FROM node:22-bookworm-slim AS builder
 
 # Install prerequisites
 RUN apt-get update && apt-get install -y curl unzip build-essential pkg-config libssl-dev
@@ -27,7 +27,7 @@ RUN mkdir -p ./src/database/sqlite
 RUN if [ ! -f ./src/database/sqlite/*.sqlite ]; then bun db:push; fi
 
 # Stage 2: Release
-FROM node:20-bullseye-slim AS release
+FROM node:22-bookworm-slim AS release
 WORKDIR /usr/src/Yuuko
 
 # Install production dependencies and CA certificates
