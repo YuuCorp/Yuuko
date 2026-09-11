@@ -43,7 +43,7 @@ export async function runChecks() {
     }
   }
 
-  logger.info("Checks passed!");
+  logger.info("Checks passed!", { type: "startup" });
 }
 
 function serializeError(e: unknown): string {

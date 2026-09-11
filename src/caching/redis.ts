@@ -17,7 +17,7 @@ redis.on("error", (err) => {
 });
 
 redis.on("connect", handleAsync(async () => {
-  logger.info(`Connected to ${host}!`);
+  logger.info(`Connected to ${host}!`, { type: "startup" });
   await redis.set("test", "test");
 }));
 
